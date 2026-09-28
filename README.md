@@ -60,6 +60,12 @@ Kredensial ini hanya untuk lokal — jangan dipakai di environment lain.
 `npm run db:setup` idempotent dan aman diulang, jadi tidak perlu tahu apakah `local.db`
 sudah ada atau belum.
 
+> **Database lokal = file SQLite (`file:local.db`).** Repo ini juga punya `compose.yaml`
+> (libsql-server via Docker, port 8080), tapi belum tersambung ke script mana pun:
+> `db:setup` dan `db:auth` hanya mendukung URL `file:`. Kalau `TURSO_DATABASE_URL`
+> diarahkan ke `http://127.0.0.1:8080`, kedua script itu berhenti dengan error dan
+> tabel Better Auth tidak akan pernah dibuat.
+
 ### Mengubah schema
 
 ```sh
