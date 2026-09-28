@@ -1,16 +1,18 @@
 <script lang="ts">
   import type { Component } from 'svelte';
+  import { TrendingUp, TrendingDown, Minus } from '@lucide/svelte';
 
   interface Props {
     title: string;
     value: string | number;
+    /** Baris pendukung di bawah nilai, mis. "Rp 1,2 jt". */
     description?: string;
     icon?: Component<any>;
     trend?: {
       direction: 'up' | 'down' | 'neutral';
       text: string;
     };
-    variant?: 'default' | 'brand' | 'success' | 'warning' | 'danger';
+    variant?: 'default' | 'brand' | 'success' | 'warning' | 'danger' | 'hero';
     href?: string;
   }
 
@@ -23,6 +25,10 @@
     variant = 'default',
     href
   }: Props = $props();
+
+  const trendIcon = $derived(
+    trend?.direction === 'up' ? TrendingUp : trend?.direction === 'down' ? TrendingDown : Minus
+  );
 </script>
 
 <svelte:element
@@ -31,151 +37,138 @@
   class="stat-card variant-{variant}"
   class:is-link={!!href}
 >
-  <div class="stat-top">
-    <span class="stat-title">{title}</span>
-    {#if Icon}
-      <div class="stat-icon-wrap">
-        <Icon size={20} />
-      </div>
-    {/if}
-  </div>
+  <span class="stat-title">{title}</span>
 
-  <div class="stat-middle">
-    <span class="stat-value">{value}</span>
-  </div>
+  <span class="stat-value">{value}</span>
 
   {#if description || trend}
-    <div class="stat-bottom">
+    <span class="stat-foot">
       {#if trend}
+        {@const TrendIcon = trendIcon}
         <span class="stat-trend trend-{trend.direction}">
+          <TrendIcon size={13} />
           {trend.text}
         </span>
       {/if}
       {#if description}
         <span class="stat-description">{description}</span>
       {/if}
-    </div>
+    </span>
+  {/if}
+
+  {#if Icon}
+    <span class="stat-icon" aria-hidden="true"><Icon size={20} /></span>
   {/if}
 </svelte:element>
 
 <style>
   .stat-card {
+    position: relative;
     display: flex;
     flex-direction: column;
-    padding: 1.25rem;
-    background: var(--color-surface-raised);
+    gap: 0.25rem;
+    padding: var(--space-4) var(--space-5);
+    min-width: 0;
+    background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
     text-decoration: none;
     color: inherit;
-    position: relative;
-    overflow: hidden;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   .stat-card.is-link:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--color-brand-300);
-  }
-
-  .stat-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    border-color: var(--color-brand-200);
+    box-shadow: var(--shadow-sm);
   }
 
   .stat-title {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: var(--color-text-secondary);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: var(--tracking-wide);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-
-  .stat-icon-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: var(--radius-md);
-    background: var(--color-brand-50);
-    color: var(--color-brand-700);
-    flex-shrink: 0;
-  }
-
-  .variant-brand .stat-icon-wrap {
-    background: var(--color-brand-100);
-    color: var(--color-brand-800);
-  }
-
-  .variant-success .stat-icon-wrap {
-    background: var(--color-success-bg);
-    color: var(--color-success);
-  }
-
-  .variant-warning .stat-icon-wrap {
-    background: var(--color-warning-bg);
-    color: var(--color-warning);
-  }
-
-  .variant-danger .stat-icon-wrap {
-    background: var(--color-danger-bg);
-    color: var(--color-danger);
-  }
-
-  .stat-middle {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
+    color: var(--color-text-muted);
   }
 
   .stat-value {
-    font-size: 1.75rem;
+    font-size: var(--text-4xl);
     font-weight: 700;
-    color: var(--color-text-primary);
-    line-height: 1.2;
+    line-height: 1.1;
     letter-spacing: -0.02em;
+    color: var(--color-text);
     font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
   }
 
-  .stat-bottom {
+  .stat-foot {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 0.625rem;
-    font-size: 0.75rem;
+    gap: var(--space-2);
     flex-wrap: wrap;
+    min-width: 0;
   }
 
   .stat-description {
-    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.4;
+    color: var(--color-text-muted);
   }
 
   .stat-trend {
-    font-weight: 600;
     display: inline-flex;
     align-items: center;
-    padding: 0.125rem 0.375rem;
-    border-radius: var(--radius-xs);
+    gap: 0.25rem;
+    font-size: var(--text-xs);
+    font-weight: 600;
+  }
+  .trend-up   { color: var(--color-success); }
+  .trend-down { color: var(--color-danger); }
+  .trend-neutral { color: var(--color-text-muted); }
+
+  /* Aksen status: tipis dan hanya di nilai, bukan di seluruh kartu. */
+  .variant-success .stat-value { color: var(--color-success); }
+  .variant-danger  .stat-value { color: var(--color-danger); }
+  .variant-warning .stat-value { color: var(--color-warning); }
+  .variant-brand   .stat-value { color: var(--color-accent); }
+  .variant-warning::before,
+  .variant-danger::before,
+  .variant-success::before,
+  .variant-brand::before {
+    content: '';
+    position: absolute;
+    inset: -1px auto -1px -1px;
+    width: 3px;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  }
+  .variant-warning::before { background: var(--color-warning); }
+  .variant-danger::before  { background: var(--color-danger); }
+  .variant-success::before { background: var(--color-success); }
+  .variant-brand::before   { background: var(--color-accent); }
+
+  /* Ikon hanya untuk stat card di halaman lain yang membutuhkannya. */
+  .stat-icon {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-5);
+    color: var(--color-brand-200);
   }
 
-  .trend-up {
-    background: var(--color-success-bg);
-    color: var(--color-success);
-  }
+    /* Varian hero: kartu menonjol hanya di layar sempit. Di desktop ia
+       identik dengan kartu biasa supaya baris KPI tetap seragam. */
+  @media (max-width: 1023px) {
+    .stat-card { padding: var(--space-4); }
+    .stat-value { font-size: var(--text-3xl); }
 
-  .trend-down {
-    background: var(--color-danger-bg);
-    color: var(--color-danger);
-  }
-
-  .trend-neutral {
-    background: var(--color-surface-overlay);
-    color: var(--color-text-secondary);
+    .variant-hero {
+      background: var(--color-accent);
+      border-color: var(--color-accent);
+      box-shadow: none;
+    }
+    .variant-hero .stat-title { color: color-mix(in oklab, var(--color-accent-contrast) 75%, transparent); }
+    .variant-hero .stat-value,
+    .variant-hero .stat-description { color: var(--color-accent-contrast); }
+    .variant-hero::before { display: none; }
   }
 </style>

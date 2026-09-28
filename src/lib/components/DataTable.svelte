@@ -196,30 +196,30 @@
 
   .search-input {
     width: 100%;
+    min-height: 2.5rem;
     padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    color: var(--color-text-primary);
+    background: var(--color-surface-raised);
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-md);
-    font-size: 0.875rem;
-    font-family: var(--font-sans);
-    background: var(--color-surface-raised);
-    color: var(--color-text-primary);
     outline: none;
-    box-shadow: var(--shadow-xs);
-    transition: all 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
   .search-input:focus {
-    border-color: var(--color-brand-600);
-    box-shadow: 0 0 0 3px oklch(0.40 0.16 255 / 0.12);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 18%, transparent);
   }
 
   .count-badge {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
     font-weight: 500;
     color: var(--color-text-secondary);
     background: var(--color-surface-overlay);
     padding: 0.25rem 0.625rem;
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-sm);
     border: 1px solid var(--color-border);
   }
 
@@ -239,18 +239,18 @@
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
   }
 
   th {
     text-align: left;
-    padding: 0.75rem 1rem;
-    font-weight: 600;
-    font-size: 0.75rem;
+    padding: 0.75rem var(--space-4);
+    font-weight: 700;
+    font-size: var(--text-xs);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: var(--tracking-wide);
     color: var(--color-text-secondary);
-    background: var(--color-surface);
+    background: var(--color-surface-muted);
     border-bottom: 1px solid var(--color-border);
     white-space: nowrap;
     user-select: none;
@@ -287,7 +287,7 @@
   }
 
   td {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem var(--space-4);
     border-bottom: 1px solid var(--color-border);
     color: var(--color-text-primary);
     white-space: nowrap;
@@ -312,13 +312,13 @@
 
   .empty-cell {
     text-align: center;
-    padding: 3rem 1rem !important;
+    padding: var(--space-12) var(--space-4) !important;
     background: var(--color-surface-raised) !important;
   }
 
   .empty-text {
     margin: 0;
     color: var(--color-text-secondary);
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
   }
 </style>

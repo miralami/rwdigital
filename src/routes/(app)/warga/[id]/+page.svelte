@@ -3,14 +3,14 @@
   import Badge from '$lib/components/Badge.svelte';
   import { ArrowLeft, Pencil, UserX } from '@lucide/svelte';
   let { data } = $props<{ data: PageData }>();
-  const d = data.detail;
+  const d = $derived(data.detail);
 </script>
 
 <div class="detail-page">
   <div class="detail-header">
     <a href="/warga" class="back-link">
       <ArrowLeft size={16} />
-      <span>Kembali ke Data Warga</span>
+      <span>Kembali ke data warga</span>
     </a>
     <div class="header-actions">
       <a href="/warga/{d.id}/edit" class="btn btn-secondary">
@@ -26,7 +26,7 @@
     </div>
   </div>
 
-  <div class="info-card">
+  <div class="card info-card">
     <div class="info-header">
       <h1>{d.nama}</h1>
       {#if d.aktif}
@@ -39,222 +39,195 @@
 
     <dl class="info-grid">
       <div class="info-item">
-        <dt>No. KK</dt>
+        <dt class="label-caps">No. KK</dt>
         <dd>{d.noKk}</dd>
       </div>
       <div class="info-item">
-        <dt>RT</dt>
+        <dt class="label-caps">RT</dt>
         <dd>RT {d.nomorRt}</dd>
       </div>
       <div class="info-item">
-        <dt>Alamat KK</dt>
+        <dt class="label-caps">Alamat KK</dt>
         <dd>{d.alamatKk}</dd>
       </div>
       <div class="info-item">
-        <dt>Status Huni</dt>
+        <dt class="label-caps">Status Huni</dt>
         <dd>{d.statusHuni}</dd>
       </div>
       <div class="info-item">
-        <dt>Tempat, Tanggal Lahir</dt>
+        <dt class="label-caps">Tempat, Tanggal Lahir</dt>
         <dd>{d.tempatLahir}, {d.tanggalLahir}</dd>
       </div>
       <div class="info-item">
-        <dt>Jenis Kelamin</dt>
+        <dt class="label-caps">Jenis Kelamin</dt>
         <dd>{d.jenisKelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</dd>
       </div>
       <div class="info-item">
-        <dt>Agama</dt>
+        <dt class="label-caps">Agama</dt>
         <dd>{d.agama}</dd>
       </div>
       <div class="info-item">
-        <dt>Pendidikan</dt>
+        <dt class="label-caps">Pendidikan</dt>
         <dd>{d.pendidikan ?? '—'}</dd>
       </div>
       <div class="info-item">
-        <dt>Pekerjaan</dt>
+        <dt class="label-caps">Pekerjaan</dt>
         <dd>{d.pekerjaan ?? '—'}</dd>
       </div>
       <div class="info-item">
-        <dt>Status Perkawinan</dt>
+        <dt class="label-caps">Status Perkawinan</dt>
         <dd>{d.statusPerkawinan.replace('_', ' ')}</dd>
       </div>
       <div class="info-item">
-        <dt>Status Hubungan KK</dt>
+        <dt class="label-caps">Status Hubungan KK</dt>
         <dd>{d.statusHubunganKk.replace('_', ' ')}</dd>
       </div>
     </dl>
   </div>
 
   <section class="anggota-section">
-    <h2>Anggota Keluarga ({data.anggotaKk.length})</h2>
-    <table class="anggota-table">
-      <thead>
-        <tr>
-          <th>Nama</th>
-          <th>NIK</th>
-          <th>Status Hubungan</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each data.anggotaKk as anggota}
+    <h2>Anggota keluarga ({data.anggotaKk.length})</h2>
+    <div class="card table-wrap">
+      <table class="anggota-table">
+        <thead>
           <tr>
-            <td>{anggota.nama}</td>
-            <td>{anggota.nik}</td>
-            <td>{anggota.statusHubunganKk.replace('_', ' ')}</td>
+            <th class="label-caps">Nama</th>
+            <th class="label-caps">NIK</th>
+            <th class="label-caps">Status Hubungan</th>
           </tr>
-        {/each}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {#each data.anggotaKk as anggota}
+            <tr>
+              <td>{anggota.nama}</td>
+              <td>{anggota.nik}</td>
+              <td>{anggota.statusHubunganKk.replace('_', ' ')}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
   </section>
 </div>
 
 <style>
-
   .detail-page {
     max-width: 48rem;
   }
 
   .detail-header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1.5rem;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
   }
 
   .back-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
-    color: var(--color-text-secondary);
+    gap: var(--space-1);
+    min-height: var(--tap-min);
+    color: var(--color-text-muted);
     text-decoration: none;
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     font-weight: 500;
     transition: color 0.15s ease;
   }
 
   .back-link:hover {
-    color: var(--color-brand-700);
+    color: var(--color-accent);
+  }
+
+  .back-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
   }
 
   .header-actions {
     display: flex;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: var(--space-2);
   }
 
   .info-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-card);
-    margin-bottom: 1.5rem;
+    padding: var(--space-5);
+    margin-bottom: var(--space-6);
   }
 
   .info-header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
   }
 
   h1 {
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
     font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
     margin: 0;
+    overflow-wrap: anywhere;
   }
 
   .nik {
-    color: var(--color-text-secondary);
-    font-size: 0.875rem;
-    margin: 0 0 1.25rem;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    margin: 0 0 var(--space-5);
   }
 
   .info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(14rem, 100%), 1fr));
+    gap: var(--space-4);
     margin: 0;
   }
 
   .info-item dt {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--color-text-secondary);
-    margin-bottom: 0.25rem;
+    margin-bottom: var(--space-1);
   }
 
   .info-item dd {
     margin: 0;
-    font-size: 0.875rem;
-    color: var(--color-text-primary);
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    overflow-wrap: anywhere;
   }
 
   .anggota-section h2 {
-    font-size: 1.125rem;
+    font-size: var(--text-lg);
     font-weight: 600;
-    margin: 0 0 0.75rem;
+    margin: 0 0 var(--space-3);
+  }
+
+  /* Tabel melebar sendiri, halaman tidak pernah scroll horizontal. */
+  .table-wrap {
+    overflow-x: auto;
   }
 
   .anggota-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.875rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
+    font-size: var(--text-sm);
   }
 
   .anggota-table th {
     text-align: left;
-    padding: 0.625rem 0.875rem;
-    font-weight: 600;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--color-text-secondary);
-    background: var(--color-surface-raised);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface-muted);
     border-bottom: 1px solid var(--color-border);
   }
 
   .anggota-table td {
-    padding: 0.625rem 0.875rem;
+    padding: var(--space-3) var(--space-4);
     border-bottom: 1px solid var(--color-border);
+    overflow-wrap: anywhere;
   }
 
   .anggota-table tbody tr:last-child td {
     border-bottom: none;
-  }
-
-  .btn-secondary, .btn-danger {
-    padding: 0.5rem 1rem;
-    border-radius: var(--radius-md);
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.15s;
-  }
-
-  .btn-secondary {
-    background: var(--color-surface);
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-border-strong);
-  }
-
-  .btn-secondary:hover {
-    background: var(--color-surface-raised);
-  }
-
-  .btn-danger {
-    background: var(--color-danger);
-    color: white;
-    border: none;
-  }
-
-  .btn-danger:hover {
-    opacity: 0.9;
   }
 </style>

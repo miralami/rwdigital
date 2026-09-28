@@ -2,6 +2,7 @@
   import DataTable from '$lib/components/DataTable.svelte';
   import PageHeader from '$lib/components/PageHeader.svelte';
   import StatCard from '$lib/components/StatCard.svelte';
+  import { formatRupiah } from '$lib/format';
   import { Plus, Tags, Wallet, ArrowDownRight, ArrowUpRight } from '@lucide/svelte';
   import type { PageData } from './$types';
 
@@ -22,28 +23,21 @@
       key: 'nominal',
       label: 'Nominal',
       class: 'text-right',
-      render: (row: any) => {
-        const formatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(row.nominal);
-        return row.jenis === 'pemasukan'
-          ? `<span style="font-weight: 600; color: var(--color-success)">+${formatted}</span>`
-          : `<span style="font-weight: 600; color: var(--color-danger)">-${formatted}</span>`;
-      }
+      render: (row: any) => row.jenis === 'pemasukan'
+        ? `<span style="font-weight: 600; color: var(--color-success)">+${formatRupiah(row.nominal)}</span>`
+        : `<span style="font-weight: 600; color: var(--color-danger)">-${formatRupiah(row.nominal)}</span>`
     }
   ];
-
-  function formatRupiah(n: number) {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(n);
-  }
 </script>
 
 <PageHeader title="Kas RW" subtitle="Pencatatan pembukuan, arus pemasukan, dan pengeluaran kas lingkungan.">
   <a href="/kas/kategori" class="btn btn-secondary">
     <Tags size={16} />
-    <span>Kelola Kategori</span>
+    <span>Kelola kategori</span>
   </a>
-  <a href="/kas/tambah" class="btn btn-primary">
+  <a href="/kas/tambah" class="btn btn-secondary">
     <Plus size={16} />
-    <span>Tambah Transaksi</span>
+    <span>Tambah transaksi</span>
   </a>
 </PageHeader>
 
@@ -82,8 +76,8 @@
 <style>
   .metrics-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
   }
 </style>

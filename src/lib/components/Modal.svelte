@@ -54,19 +54,18 @@
   .modal-backdrop {
     position: fixed;
     inset: 0;
-    background: oklch(0.1 0.02 250 / 0.5);
-    backdrop-filter: blur(2px);
+    background: oklch(0.15 0.02 262 / 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: var(--z-modal);
-    padding: 1rem;
+    padding: var(--space-4);
   }
 
   .modal-panel {
     background: var(--color-surface-raised);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
     width: 100%;
     max-width: 32rem;
     max-height: 90dvh;
@@ -78,31 +77,31 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.125rem 1.5rem;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
     border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface);
   }
 
   h2 {
-    font-size: 1.125rem;
+    font-size: var(--text-lg);
     font-weight: 600;
     margin: 0;
     color: var(--color-text-primary);
-    letter-spacing: -0.01em;
+    letter-spacing: var(--tracking-tight);
   }
 
   .modal-close {
     background: transparent;
     border: 1px solid transparent;
     color: var(--color-text-secondary);
-    width: 2rem;
-    height: 2rem;
+    width: 2.25rem;
+    height: 2.25rem;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     border-radius: var(--radius-md);
-    transition: all 0.15s ease;
+    transition: color 0.15s ease, background-color 0.15s ease;
   }
 
   .modal-close:hover {
@@ -112,6 +111,6 @@
   }
 
   .modal-body {
-    padding: 1.5rem;
+    padding: var(--space-5);
   }
 </style>

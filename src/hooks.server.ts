@@ -1,11 +1,8 @@
 import { auth } from '$lib/server/auth';
 import { svelteKitHandler } from 'better-auth/svelte-kit';
 import { building } from '$app/environment';
-import { redirect } from '@sveltejs/kit';
+import { enforceAccess } from '$lib/server/guard';
 import type { Handle } from '@sveltejs/kit';
-
-// Routes that require authentication
-const PROTECTED = ['/dashboard', '/warga', '/kas', '/iuran', '/pengumuman'];
 
 export const handle: Handle = async ({ event, resolve }) => {
   // Populate session on every request
@@ -16,11 +13,14 @@ export const handle: Handle = async ({ event, resolve }) => {
   event.locals.user    = session?.user    ?? null;
   event.locals.session = session?.session ?? null;
 
-  // Global auth guard
-  const isProtected = PROTECTED.some(p => event.url.pathname.startsWith(p));
-  if (isProtected && !event.locals.user) {
-    throw redirect(302, '/login');
-  }
+  // Guard global. Klasifikasi rute + role yang boleh akses ada di
+  // `$lib/server/guard` — dipanggil di sini, bukan di tiap route, supaya
+  // `+page.svelte` atau `+page.server.ts` baru ikut terlindungi otomatis.
+  // Rute publik (`/login`, `/api/auth/**`) tidak ada di daftar guard.
+  //
+  // `locals.user` sudah terisi di atas, jadi enforceAccess tidak memanggil
+  // getSession lagi.
+  enforceAccess(event);
 
   return svelteKitHandler({ event, resolve, auth, building });
 };

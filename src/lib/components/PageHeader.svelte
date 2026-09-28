@@ -1,9 +1,11 @@
 <script lang="ts">
+  import type { Snippet } from 'svelte';
+
   interface Props {
     title: string;
     subtitle?: string;
     badge?: string;
-    children?: any;
+    children?: Snippet;
   }
 
   let { title, subtitle, badge, children }: Props = $props();
@@ -33,54 +35,60 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 1.25rem;
-    margin-bottom: 1.75rem;
-    padding-bottom: 1.25rem;
-    border-bottom: 1px solid var(--color-border);
+    gap: var(--space-4);
     flex-wrap: wrap;
+    margin-bottom: var(--space-6);
   }
 
   .page-header-text {
     flex: 1;
-    min-width: 240px;
+    min-width: 0;
   }
 
   .title-row {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: var(--space-2);
     flex-wrap: wrap;
   }
 
   h1 {
-    font-size: 1.625rem;
-    font-weight: 700;
     margin: 0;
-    color: var(--color-text-primary);
-    letter-spacing: -0.025em;
-    line-height: 1.25;
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-text);
   }
 
   .header-badge {
-    font-size: 0.6875rem;
+    padding: 0.125rem 0.5rem;
+    font-size: var(--text-xs);
     font-weight: 600;
-    padding: 0.2rem 0.5rem;
-    background: var(--color-brand-100);
-    color: var(--color-brand-800);
-    border-radius: var(--radius-full);
+    line-height: 1.4;
+    color: var(--color-accent);
+    background-color: var(--color-brand-50);
+    border: 1px solid var(--color-brand-200);
+    border-radius: var(--radius-sm);
   }
 
-  .page-header-text p {
-    margin: 0.375rem 0 0;
-    color: var(--color-text-secondary);
-    font-size: 0.875rem;
-    line-height: 1.4;
+  p {
+    margin: var(--space-1) 0 0;
+    max-width: 62ch;
+    font-size: var(--text-sm);
+    line-height: var(--leading-normal);
+    color: var(--color-text-muted);
   }
 
   .page-header-actions {
     display: flex;
-    gap: 0.625rem;
-    align-items: center;
+    gap: var(--space-2);
     flex-wrap: wrap;
+    align-items: center;
+  }
+
+  @media (max-width: 640px) {
+    h1 { font-size: var(--text-xl); }
+    .page-header-actions { width: 100%; }
   }
 </style>

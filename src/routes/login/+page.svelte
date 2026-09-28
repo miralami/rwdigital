@@ -17,7 +17,9 @@
     if (result.error) {
       error = result.error.message ?? 'Login gagal. Periksa kembali email dan kata sandi Anda.';
     } else {
-      goto('/dashboard');
+      // Ke '/' supaya server yang memutuskan landing page (portal warga atau
+      // dashboard) dari role. Tidak ada pembacaan session di client.
+      goto('/', { invalidateAll: true });
     }
     loading = false;
   }

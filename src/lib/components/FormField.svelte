@@ -6,6 +6,8 @@
     placeholder?: string;
     required?: boolean;
     error?: string;
+    /** Petunjuk pendek di bawah field (opsional). */
+    hint?: string;
     value?: any;
     oninput?: (e: Event) => void;
     onchange?: (e: Event) => void;
@@ -20,6 +22,7 @@
     placeholder,
     required = false,
     error,
+    hint,
     value = $bindable(),
     oninput,
     onchange,
@@ -46,11 +49,13 @@
       {oninput}
       {onchange}
       aria-invalid={!!error}
-      aria-describedby={error ? `${name}-error` : undefined}
+      aria-describedby={error ? `${name}-error` : hint ? `${name}-hint` : undefined}
     />
   {/if}
   {#if error}
     <p class="field-error" id="{name}-error" role="alert">{error}</p>
+  {:else if hint}
+    <p class="field-hint" id="{name}-hint">{hint}</p>
   {/if}
 </div>
 
@@ -59,58 +64,63 @@
     display: flex;
     flex-direction: column;
     gap: 0.375rem;
-    margin-bottom: 1.125rem;
+    margin-bottom: var(--space-5);
   }
 
   label {
-    font-size: 0.8125rem;
+    font-size: var(--text-sm);
     font-weight: 600;
-    color: var(--color-text-primary);
-    letter-spacing: -0.01em;
+    color: var(--color-text);
   }
 
   .required {
     color: var(--color-danger);
-    margin-left: 0.15rem;
+    margin-left: 0.125rem;
   }
 
-  /* svelte-ignore css_unused_selector */
-  input, select, textarea {
-    padding: 0.5625rem 0.75rem;
+  /* :global() karena control juga bisa datang dari `children` (select/textarea). */
+  :global(input), :global(select), :global(textarea) {
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.5rem var(--space-3);
+    font-family: inherit;
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    color: var(--color-text);
+    background-color: var(--color-surface);
     border: 1px solid var(--color-border-strong);
     border-radius: var(--radius-md);
-    font-size: 0.875rem;
-    font-family: var(--font-sans);
-    background: var(--color-surface-raised);
-    color: var(--color-text-primary);
     outline: none;
-    box-shadow: var(--shadow-xs);
-    transition: border-color 0.15s, box-shadow 0.15s;
-    width: 100%;
-    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  input:focus, select:focus, textarea:focus {
-    border-color: var(--color-brand-600);
-    box-shadow: 0 0 0 3px oklch(0.40 0.16 255 / 0.12);
+  :global(input:focus), :global(select:focus), :global(textarea:focus) {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-accent) 18%, transparent);
   }
 
-  .has-error input,
-  .has-error select,
-  .has-error textarea {
+  .has-error :global(input),
+  .has-error :global(select),
+  .has-error :global(textarea) {
     border-color: var(--color-danger);
   }
 
-  .has-error input:focus,
-  .has-error select:focus,
-  .has-error textarea:focus {
-    box-shadow: 0 0 0 3px oklch(0.56 0.20 25 / 0.15);
+  .has-error :global(input:focus),
+  .has-error :global(select:focus),
+  .has-error :global(textarea:focus) {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-danger) 18%, transparent);
+  }
+
+  .field-hint {
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
   }
 
   .field-error {
-    font-size: 0.75rem;
+    margin: 0;
+    font-size: var(--text-xs);
     font-weight: 500;
     color: var(--color-danger);
-    margin: 0.125rem 0 0;
   }
 </style>

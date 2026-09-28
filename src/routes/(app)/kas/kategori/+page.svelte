@@ -1,238 +1,195 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import Badge from '$lib/components/Badge.svelte';
+  import { ArrowLeft } from '@lucide/svelte';
   let { data } = $props<{ data: PageData }>();
 </script>
 
 <div class="page-container">
   <div class="page-header">
     <div>
-      <h1>Kategori Kas</h1>
+      <h1>Kategori kas</h1>
       <p class="subtitle">Kelola kategori pemasukan dan pengeluaran.</p>
     </div>
-    <a href="/kas" class="btn-secondary">← Kembali</a>
+    <a href="/kas" class="btn btn-secondary">
+      <ArrowLeft size={16} />
+      <span>Kembali</span>
+    </a>
   </div>
 
   <div class="content-grid">
-    <div class="list-card">
-      <h2>Daftar Kategori</h2>
+    <div class="card panel">
+      <h2>Daftar kategori</h2>
       {#if data.semuaKategori.length === 0}
         <p class="empty">Belum ada kategori.</p>
       {:else}
-        <table class="kategori-table">
-          <thead>
-            <tr>
-              <th>Nama</th>
-              <th>Jenis</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each data.semuaKategori as kat}
+        <div class="table-wrap">
+          <table class="kategori-table">
+            <thead>
               <tr>
-                <td>{kat.nama}</td>
-                <td>
-                  {#if kat.jenis === 'pemasukan'}
-                    <Badge variant="success">Pemasukan</Badge>
-                  {:else}
-                    <Badge variant="danger">Pengeluaran</Badge>
-                  {/if}
-                </td>
-                <td>
-                  <form method="POST" action="?/hapus">
-                    <input type="hidden" name="id" value={kat.id} />
-                    <button type="submit" class="btn-hapus">Hapus</button>
-                  </form>
-                </td>
+                <th class="label-caps">Nama</th>
+                <th class="label-caps">Jenis</th>
+                <th><span class="sr-only">Aksi</span></th>
               </tr>
-            {/each}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {#each data.semuaKategori as kat}
+                <tr>
+                  <td>{kat.nama}</td>
+                  <td>
+                    {#if kat.jenis === 'pemasukan'}
+                      <Badge variant="success">Pemasukan</Badge>
+                    {:else}
+                      <Badge variant="danger">Pengeluaran</Badge>
+                    {/if}
+                  </td>
+                  <td class="cell-aksi">
+                    <form method="POST" action="?/hapus">
+                      <input type="hidden" name="id" value={kat.id} />
+                      <button type="submit" class="btn btn-ghost btn-hapus">Hapus</button>
+                    </form>
+                  </td>
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        </div>
       {/if}
     </div>
 
-    <div class="form-card">
-      <h2>Tambah Kategori</h2>
+    <div class="card panel">
+      <h2>Tambah kategori</h2>
       <form method="POST" action="?/tambah">
         <div class="field">
-          <label for="nama">Nama Kategori <span class="required">*</span></label>
-          <input id="nama" name="nama" type="text" placeholder="mis. Iuran Keamanan" required />
+          <label for="nama">Nama kategori <span class="required">*</span></label>
+          <input id="nama" name="nama" class="input-base" type="text" placeholder="mis. Iuran Keamanan" required />
         </div>
         <div class="field">
           <label for="jenis">Jenis <span class="required">*</span></label>
-          <select id="jenis" name="jenis" required>
+          <select id="jenis" name="jenis" class="input-base" required>
             <option value="pemasukan">Pemasukan</option>
             <option value="pengeluaran">Pengeluaran</option>
           </select>
         </div>
-        <button type="submit" class="btn-primary">Tambah</button>
+        <button type="submit" class="btn btn-primary">Tambah</button>
       </form>
     </div>
   </div>
 </div>
 
 <style>
-
   .page-container {
     max-width: 48rem;
   }
 
   .page-header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 1.5rem;
+    gap: var(--space-3);
+    margin-bottom: var(--space-6);
   }
 
   h1 {
-    font-size: 1.5rem;
+    font-size: var(--text-2xl);
     font-weight: 700;
-    margin: 0 0 0.25rem;
+    line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight);
+    color: var(--color-text);
+    margin: 0 0 var(--space-1);
   }
 
   .subtitle {
-    color: var(--color-text-secondary);
-    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
     margin: 0;
   }
 
   .content-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 48rem) {
     .content-grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 
-  .list-card, .form-card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-card);
+  .panel {
+    padding: var(--space-5);
+    min-width: 0;
   }
 
   h2 {
-    font-size: 1rem;
+    font-size: var(--text-base);
     font-weight: 600;
-    margin: 0 0 1rem;
+    margin: 0 0 var(--space-4);
   }
 
   .empty {
-    color: var(--color-text-secondary);
-    font-size: 0.875rem;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
     text-align: center;
-    padding: 2rem 0;
+    padding: var(--space-8) 0;
+  }
+
+  /* Tabel melebar sendiri, halaman tidak pernah scroll horizontal. */
+  .table-wrap {
+    overflow-x: auto;
   }
 
   .kategori-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
   }
 
   .kategori-table th {
     text-align: left;
-    padding: 0.5rem 0.75rem;
-    font-weight: 600;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--color-text-secondary);
+    padding: var(--space-2) var(--space-3);
     border-bottom: 1px solid var(--color-border);
   }
 
   .kategori-table td {
-    padding: 0.625rem 0.75rem;
+    padding: var(--space-2) var(--space-3);
     border-bottom: 1px solid var(--color-border);
+    overflow-wrap: anywhere;
   }
 
   .kategori-table tbody tr:last-child td {
     border-bottom: none;
   }
 
+  .cell-aksi {
+    text-align: right;
+  }
+
+  .btn-hapus {
+    min-height: var(--tap-min);
+    color: var(--color-danger);
+  }
+
+  .btn-hapus:hover {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+  }
+
   .field {
     display: flex;
     flex-direction: column;
-    gap: 0.375rem;
-    margin-bottom: 1rem;
+    gap: var(--space-1);
+    margin-bottom: var(--space-4);
   }
 
   label {
-    font-size: 0.875rem;
+    font-size: var(--text-sm);
     font-weight: 500;
   }
 
   .required {
     color: var(--color-danger);
-  }
-
-  input, select {
-    padding: 0.625rem 0.75rem;
-    border: 1px solid var(--color-border-strong);
-    border-radius: var(--radius-md);
-    font-size: 0.875rem;
-    font-family: var(--font-sans);
-    background: var(--color-surface);
-    color: var(--color-text-primary);
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  input:focus, select:focus {
-    border-color: var(--color-brand-500);
-    box-shadow: 0 0 0 3px oklch(from var(--color-brand-500) l c h / 0.15);
-  }
-
-  .btn-primary, .btn-secondary {
-    padding: 0.625rem 1.25rem;
-    border-radius: var(--radius-md);
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background 0.15s;
-    display: inline-block;
-  }
-
-  .btn-primary {
-    background: var(--color-brand-600);
-    color: var(--color-text-inverse);
-    border: none;
-  }
-
-  .btn-primary:hover {
-    background: var(--color-brand-700);
-  }
-
-  .btn-secondary {
-    background: var(--color-surface);
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-border-strong);
-  }
-
-  .btn-secondary:hover {
-    background: var(--color-surface-raised);
-  }
-
-  .btn-hapus {
-    background: none;
-    border: none;
-    color: var(--color-danger);
-    font-size: 0.875rem;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: var(--radius-sm);
-    transition: background 0.15s;
-  }
-
-  .btn-hapus:hover {
-    background: oklch(from var(--color-danger) l c h / 0.1);
   }
 </style>

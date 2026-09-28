@@ -1,511 +1,236 @@
 <script lang="ts">
-  import PageHeader from '$lib/components/PageHeader.svelte';
+  import { browser } from '$app/environment';
+  import { Plus, UserPlus, ArrowDown, ArrowUp, CircleAlert, Megaphone, CircleCheckBig } from '@lucide/svelte';
+  import Button from '$lib/components/Button.svelte';
+  import Card from '$lib/components/Card.svelte';
   import StatCard from '$lib/components/StatCard.svelte';
+  import ListRow from '$lib/components/ListRow.svelte';
+  import EmptyState from '$lib/components/EmptyState.svelte';
   import Badge from '$lib/components/Badge.svelte';
   import {
-    Users,
-    Wallet,
-    Receipt,
-    Megaphone,
-    ArrowUpRight,
-    ArrowDownRight,
-    PlusCircle,
-    Calendar,
-    ChevronRight,
-    Building
-  } from '@lucide/svelte';
+    formatRupiah,
+    formatRupiahPendekTanda,
+    formatRupiahTanda,
+    formatRelatif,
+    formatTanggal
+  } from '$lib/format';
   import type { PageData } from './$types';
 
   let { data } = $props<{ data: PageData }>();
 
-  function formatRupiah(amount: number): string {
-    return new Intl.NumberFormat('id-ID', {
-      style: 'currency',
-      currency: 'IDR',
-      minimumFractionDigits: 0
-    }).format(amount);
-  }
+  // Tanggal relatif butuh "sekarang". Dipanggil setelah mount supaya hasil
+  // render server dan browser identik (tidak ada hydration mismatch).
+  let now = $state<Date | null>(null);
+  $effect(() => {
+    if (browser) now = new Date();
+  });
 
-  function formatDate(dateStr: string): string {
-    try {
-      const d = new Date(dateStr);
-      return new Intl.DateTimeFormat('id-ID', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      }).format(d);
-    } catch {
-      return dateStr;
-    }
-  }
-
-  const todayStr = new Intl.DateTimeFormat('id-ID', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  }).format(new Date());
-
-  const kategoriBadgeMap: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'brand' }> = {
+  const kategori: Record<string, { label: string; variant: 'default' | 'success' | 'warning' | 'danger' | 'info' | 'brand' }> = {
     umum: { label: 'Umum', variant: 'default' },
     kegiatan: { label: 'Kegiatan', variant: 'brand' },
     keuangan: { label: 'Keuangan', variant: 'success' },
     darurat: { label: 'Darurat', variant: 'danger' }
   };
+
+  const tunggakan = $derived(data.stats.belumBayarCount > 0);
+  const adaPerhatian = $derived(tunggakan || data.pengumumanTerbaru.length > 0);
+  const pengumumanTerakhir = $derived(data.pengumumanTerbaru[0]?.createdAt);
+
+  function tanggalRelatif(nilai: string | number | Date): string {
+    return now ? formatRelatif(nilai, now) : formatTanggal(nilai);
+  }
 </script>
 
-<div class="dashboard-page">
-  <!-- Top Welcome Banner -->
-  <div class="welcome-banner">
-    <div class="welcome-main">
-      <div class="date-chip">
-        <Calendar size={14} />
-        <span>{todayStr}</span>
+<div class="dashboard">
+  <h1 class="sr-only">Beranda RW Digital</h1>
+
+  <!-- KPI: 4 sel. Di mobile sel saldo jadi hero dan sel pengumuman disembunyikan
+       (datanya sudah tampil di panel "Perlu perhatian"). -->
+  <section class="kpi-grid" aria-label="Ringkasan kas, warga, iuran, dan pengumuman">
+    <div class="kpi-cell kpi-cell-hero">
+      <StatCard
+        title="Saldo kas"
+        value={formatRupiah(data.stats.saldoKas)}
+        description="Pemasukan {formatRupiah(data.stats.totalPemasukan)}"
+        variant="hero"
+        href="/kas"
+      />
+    </div>
+
+    <div class="kpi-cell kpi-cell-actions">
+      <div class="cell-actions">
+        <Button href="/kas/tambah" variant="primary" size="lg" icon={Plus} class="cell-action-primary">Catat kas</Button>
+        <Button href="/warga" variant="secondary" size="lg" icon={UserPlus}>Warga</Button>
       </div>
-      <h1 class="welcome-title">
-        Selamat Datang, {data.user?.name ?? 'Pengurus'}
-      </h1>
-      <p class="welcome-desc">
-        Ringkasan administrasi, kependudukan, dan arus kas lingkungan RW hari ini.
-      </p>
     </div>
 
-    <div class="quick-actions">
-      <a href="/warga/tambah" class="btn btn-secondary action-btn">
-        <PlusCircle size={16} />
-        <span>Tambah Warga</span>
-      </a>
-      <a href="/kas/tambah" class="btn btn-primary action-btn">
-        <PlusCircle size={16} />
-        <span>Catat Kas</span>
-      </a>
+    <div class="kpi-cell">
+      <StatCard
+        title="Total warga"
+        value={data.stats.totalWarga}
+        description="{data.stats.totalKk} KK di {data.stats.totalRt} RT"
+        href="/warga"
+      />
     </div>
-  </div>
 
-  <!-- KPI Metrics Grid -->
-  <section class="metrics-grid" aria-label="Statistik Utama">
-    <StatCard
-      title="Saldo Kas RW"
-      value={formatRupiah(data.stats.saldoKas)}
-      description="Pemasukan: {formatRupiah(data.stats.totalPemasukan)}"
-      icon={Wallet}
-      variant="brand"
-      href="/kas"
-    />
+    <div class="kpi-cell">
+      <StatCard
+        title="Tagihan belum bayar"
+        value={data.stats.belumBayarCount}
+        description="Total {formatRupiah(data.stats.totalTagihanPending)}"
+        variant={tunggakan ? 'warning' : 'success'}
+        href="/iuran"
+      />
+    </div>
 
-    <StatCard
-      title="Total Warga"
-      value={data.stats.totalWarga}
-      description="{data.stats.totalKk} KK terdaftar di {data.stats.totalRt} RT"
-      icon={Users}
-      variant="default"
-      href="/warga"
-    />
-
-    <StatCard
-      title="Tagihan Iuran Belum Bayar"
-      value={data.stats.belumBayarCount}
-      description="Tertunda: {formatRupiah(data.stats.totalTagihanPending)}"
-      icon={Receipt}
-      variant={data.stats.belumBayarCount > 0 ? 'warning' : 'success'}
-      href="/iuran"
-    />
-
-    <StatCard
-      title="Pengumuman Aktif"
-      value={data.pengumumanTerbaru.length}
-      description="Warta dan informasi warga terkini"
-      icon={Megaphone}
-      variant="default"
-      href="/pengumuman"
-    />
+    <div class="kpi-cell kpi-cell-extra">
+      <StatCard
+        title="Pengumuman aktif"
+        value={data.pengumumanTerbaru.length}
+        description={pengumumanTerakhir ? `Terbit ${tanggalRelatif(pengumumanTerakhir)}` : 'Belum ada pengumuman'}
+        href="/pengumuman"
+      />
+    </div>
   </section>
 
-  <!-- Two-Column Operational Panels -->
-  <div class="panels-grid">
-    <!-- Left: Transaksi Kas Terakhir -->
-    <div class="panel-card">
-      <div class="panel-header">
-        <div class="panel-header-title">
-          <div class="panel-icon-wrap kas-icon">
-            <Wallet size={16} />
-          </div>
-          <div>
-            <h2>Arus Kas Terbaru</h2>
-            <p>Catatan pemasukan & pengeluaran kas terkini</p>
-          </div>
+  <div class="dash-cols">
+    <Card title="Arus kas terbaru" actionHref="/kas" actionLabel="Lihat semua" padded={false}>
+      {#if data.transaksiTerbaru.length > 0}
+        <div class="row-list">
+          {#each data.transaksiTerbaru as tx (tx.id)}
+            <ListRow
+              href="/kas"
+              title={tx.keterangan}
+              meta={tanggalRelatif(tx.tanggal)}
+              value={formatRupiahTanda(tx.nominal, tx.jenis)}
+              valueShort={formatRupiahPendekTanda(tx.nominal, tx.jenis)}
+              icon={tx.jenis === 'pemasukan' ? ArrowDown : ArrowUp}
+              tone={tx.jenis === 'pemasukan' ? 'success' : 'danger'}
+            />
+          {/each}
         </div>
-        <a href="/kas" class="panel-action-link">
-          <span>Lihat Semua</span>
-          <ChevronRight size={14} />
-        </a>
-      </div>
+      {:else}
+        <EmptyState
+          compact
+          message="Catat transaksi kas pertama"
+          description="Setiap pemasukan atau pengeluaran langsung memperbarui saldo kas."
+        >
+          <Button href="/kas/tambah" variant="primary" icon={Plus}>Catat kas</Button>
+        </EmptyState>
+      {/if}
+    </Card>
 
-      <div class="panel-content">
-        {#if data.transaksiTerbaru.length > 0}
-          <div class="tx-list">
-            {#each data.transaksiTerbaru as tx}
-              <div class="tx-item">
-                <div class="tx-icon {tx.jenis}">
-                  {#if tx.jenis === 'pemasukan'}
-                    <ArrowDownRight size={16} />
-                  {:else}
-                    <ArrowUpRight size={16} />
-                  {/if}
-                </div>
-                <div class="tx-info">
-                  <span class="tx-keterangan">{tx.keterangan}</span>
-                  <span class="tx-date">{formatDate(tx.tanggal)}</span>
-                </div>
-                <div class="tx-amount {tx.jenis}">
-                  {tx.jenis === 'pemasukan' ? '+' : '-'} {formatRupiah(tx.nominal)}
-                </div>
-              </div>
+    <Card title="Perlu perhatian" padded={false}>
+      {#if adaPerhatian}
+        <div class="row-list">
+          {#if tunggakan}
+            <p class="group-label label-caps">Iuran menunggak</p>
+            <ListRow
+              href="/iuran"
+              title="{data.stats.belumBayarCount} tagihan belum dibayar"
+              meta="Total {formatRupiah(data.stats.totalTagihanPending)}"
+              icon={CircleAlert}
+              tone="warning"
+            />
+          {/if}
+
+          {#if data.pengumumanTerbaru.length > 0}
+            <p class="group-label label-caps">Pengumuman aktif</p>
+            {#each data.pengumumanTerbaru as info (info.id)}
+              {@const badge = kategori[info.kategori] ?? { label: info.kategori, variant: 'default' as const }}
+              <ListRow
+                href="/pengumuman"
+                title={info.judul}
+                meta={tanggalRelatif(info.createdAt)}
+                icon={Megaphone}
+              >
+                <Badge variant={badge.variant}>{badge.label}</Badge>
+              </ListRow>
             {/each}
-          </div>
-        {:else}
-          <div class="panel-empty">
-            <p>Belum ada catatan transaksi kas.</p>
-            <a href="/kas/tambah" class="btn btn-secondary btn-sm">Mulai Catat Kas</a>
-          </div>
-        {/if}
-      </div>
-    </div>
-
-    <!-- Right: Pengumuman Terbaru -->
-    <div class="panel-card">
-      <div class="panel-header">
-        <div class="panel-header-title">
-          <div class="panel-icon-wrap info-icon">
-            <Megaphone size={16} />
-          </div>
-          <div>
-            <h2>Pengumuman Terkini</h2>
-            <p>Warta informasi penting untuk warga</p>
-          </div>
+          {/if}
         </div>
-        <a href="/pengumuman" class="panel-action-link">
-          <span>Lihat Semua</span>
-          <ChevronRight size={14} />
-        </a>
-      </div>
-
-      <div class="panel-content">
-        {#if data.pengumumanTerbaru.length > 0}
-          <div class="news-list">
-            {#each data.pengumumanTerbaru as info}
-              {@const badge = kategoriBadgeMap[info.kategori] ?? { label: info.kategori, variant: 'default' }}
-              <div class="news-item">
-                <div class="news-header">
-                  <Badge variant={badge.variant} dot>{badge.label}</Badge>
-                  <span class="news-date">{formatDate(info.createdAt)}</span>
-                </div>
-                <h3 class="news-title">{info.judul}</h3>
-              </div>
-            {/each}
-          </div>
-        {:else}
-          <div class="panel-empty">
-            <p>Belum ada pengumuman publik yang aktif.</p>
-            <a href="/pengumuman/tambah" class="btn btn-secondary btn-sm">Buat Pengumuman</a>
-          </div>
-        {/if}
-      </div>
-    </div>
+      {:else}
+        <EmptyState
+          compact
+          icon={CircleCheckBig}
+          message="Tidak ada yang perlu ditindaklanjuti"
+          description="Iuran lunas dan tidak ada pengumuman yang menunggu."
+        >
+          <Button href="/pengumuman/tambah" variant="primary" icon={Megaphone}>Buat pengumuman</Button>
+        </EmptyState>
+      {/if}
+    </Card>
   </div>
 </div>
 
 <style>
-  .dashboard-page {
+  .dashboard {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: var(--space-5);
   }
 
-  /* ─── Top Banner ─── */
-  .welcome-banner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
-    padding: 1.5rem 1.75rem;
-    background: linear-gradient(135deg, var(--color-surface-raised) 0%, var(--color-surface-overlay) 100%);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-sm);
-    flex-wrap: wrap;
-  }
-
-  .welcome-main {
-    flex: 1;
-    min-width: 260px;
-  }
-
-  .date-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--color-brand-800);
-    background: var(--color-brand-50);
-    padding: 0.2rem 0.6rem;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--color-brand-200);
-    margin-bottom: 0.5rem;
-  }
-
-  .welcome-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--color-text-primary);
-    margin: 0;
-    letter-spacing: -0.02em;
-    line-height: 1.3;
-  }
-
-  .welcome-desc {
-    margin: 0.25rem 0 0;
-    font-size: 0.875rem;
-    color: var(--color-text-secondary);
-  }
-
-  .quick-actions {
-    display: flex;
-    gap: 0.625rem;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .action-btn {
-    font-size: 0.8125rem;
-    padding: 0.5rem 0.875rem;
-  }
-
-  /* ─── Metrics Grid ─── */
-  .metrics-grid {
+  /* ─── KPI ─── */
+  .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
   }
 
-  /* ─── Two-Column Panels ─── */
-  .panels-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-  }
-
-  .panel-card {
-    background: var(--color-surface-raised);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-card);
+  .kpi-cell {
     display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    min-width: 0;
   }
-
-  .panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.125rem 1.25rem;
-    border-bottom: 1px solid var(--color-border);
-    background: var(--color-surface);
-  }
-
-  .panel-header-title {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .panel-icon-wrap {
-    width: 2rem;
-    height: 2rem;
-    border-radius: var(--radius-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .kas-icon {
-    background: var(--color-brand-50);
-    color: var(--color-brand-700);
-  }
-
-  .info-icon {
-    background: var(--color-info-bg);
-    color: var(--color-info);
-  }
-
-  .panel-header-title h2 {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    margin: 0;
-    color: var(--color-text-primary);
-    line-height: 1.2;
-  }
-
-  .panel-header-title p {
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
-    margin: 0.125rem 0 0;
-  }
-
-  .panel-action-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--color-brand-700);
-    text-decoration: none;
-    transition: color 0.15s ease;
-  }
-
-  .panel-action-link:hover {
-    color: var(--color-brand-900);
-  }
-
-  .panel-content {
-    padding: 0.75rem 1.25rem;
-    flex: 1;
-  }
-
-  /* Transactions list */
-  .tx-list {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .tx-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .tx-item:last-child {
-    border-bottom: none;
-  }
-
-  .tx-icon {
-    width: 2rem;
-    height: 2rem;
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .tx-icon.pemasukan {
-    background: var(--color-success-bg);
-    color: var(--color-success);
-  }
-
-  .tx-icon.pengeluaran {
-    background: var(--color-danger-bg);
-    color: var(--color-danger);
-  }
-
-  .tx-info {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+  .kpi-cell > :global(.stat-card) {
+    flex: 1 1 auto;
     min-width: 0;
   }
 
-  .tx-keterangan {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--color-text-primary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  /* Aksi utama mobile: melingkar di bawah hero, melebar 2 kolom. */
+  .kpi-cell-actions {
+    grid-column: 1 / -1;
+    display: none;
   }
 
-  .tx-date {
-    font-size: 0.6875rem;
-    color: var(--color-text-secondary);
+  .cell-actions {
+    display: flex;
+    gap: var(--space-2);
+    width: 100%;
+  }
+  .cell-actions :global(.cell-action-primary) { flex: 1 1 auto; }
+  .cell-actions :global(.btn) { flex: 0 0 auto; }
+
+  .kpi-cell-extra { display: none; }
+
+  /* ─── Dua kolom ─── */
+  .dash-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    align-items: start;
   }
 
-  .tx-amount {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    text-align: right;
-  }
-
-  .tx-amount.pemasukan {
-    color: var(--color-success);
-  }
-
-  .tx-amount.pengeluaran {
-    color: var(--color-danger);
-  }
-
-  /* News list */
-  .news-list {
+  .row-list {
     display: flex;
     flex-direction: column;
+    padding: var(--space-1);
   }
 
-  .news-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--color-border);
+  .group-label {
+    margin: var(--space-3) var(--space-3) var(--space-1);
   }
 
-  .news-item:last-child {
-    border-bottom: none;
-  }
-
-  .news-header {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .news-date {
-    font-size: 0.6875rem;
-    color: var(--color-text-secondary);
-  }
-
-  .news-title {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--color-text-primary);
-    margin: 0;
-    line-height: 1.35;
-  }
-
-  .panel-empty {
-    padding: 2.5rem 1rem;
-    text-align: center;
-    color: var(--color-text-secondary);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.875rem;
-  }
-
-  .btn-sm {
-    font-size: 0.75rem;
-    padding: 0.375rem 0.75rem;
-  }
-
-  /* ─── Responsive ─── */
-  @media (max-width: 900px) {
-    .panels-grid {
-      grid-template-columns: 1fr;
+  @media (min-width: 1024px) {
+    .kpi-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--space-4);
     }
+    .kpi-cell-extra { display: flex; }
+    .dash-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
+  }
+
+  @media (max-width: 1023px) {
+    .kpi-cell-hero { grid-column: 1 / -1; }
+    .kpi-cell-actions { display: flex; }
   }
 </style>

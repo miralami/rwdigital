@@ -26,9 +26,9 @@
 </script>
 
 <PageHeader title="Manajemen Warga" subtitle="Data kependudukan warga, KK, dan wilayah RT.">
-  <a href="/warga/tambah" class="btn btn-primary">
+  <a href="/warga/tambah" class="btn btn-secondary">
     <Plus size={16} />
-    <span>Tambah Warga</span>
+    <span>Tambah warga</span>
   </a>
 </PageHeader>
 

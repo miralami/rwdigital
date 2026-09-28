@@ -1,6 +1,2 @@
-<script lang="ts">
-  import { goto } from '$app/navigation';
-  import { onMount } from 'svelte';
-
-  onMount(() => goto('/dashboard', { replaceState: true }));
-</script>
+<!-- Halaman akar tidak pernah dirender: `+page.server.ts` selalu melempar
+     redirect ke login, portal warga, atau dashboard sesuai role. -->
