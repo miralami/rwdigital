@@ -41,21 +41,43 @@ Klasifikasi rute dan role yang boleh mengaksesnya berada di [`src/lib/server/gua
 
 ## Menjalankan
 
+Prasyarat: **Node.js >= 22.6** (dibutuhkan oleh `node:sqlite` di `scripts/db-setup.mts`).
+
+Jalankan berurutan dari atas ke bawah — `npm run dev` harus setelah `db:setup`, kalau tidak
+halaman akan gagal dengan `no such table: user`.
+
 ```sh
 npm install
-cp .env.example .env      # default: file:local.db
+cp .env.example .env          # default: file:local.db, tidak butuh akun Turso
+npm run db:setup               # tabel domain (drizzle/*.sql) + tabel Better Auth, satu pass
+npx tsx scripts/seed.ts        # user admin + RW + kategori kas
 npm run dev
 ```
 
-### Setup database (sekali saja)
+Lalu buka http://localhost:5173 dan masuk dengan `admin@rw.id` / `admin123`.
+Kredensial ini hanya untuk lokal — jangan dipakai di environment lain.
+
+`npm run db:setup` idempotent dan aman diulang, jadi tidak perlu tahu apakah `local.db`
+sudah ada atau belum.
+
+### Mengubah schema
 
 ```sh
-node scripts/db-auth.mts            # tabel Better Auth (user, session, ...)
-npx drizzle-kit push                # tabel domain + generate migration
-npx tsx scripts/seed.ts             # user admin + RW + kategori kas
+npx drizzle-kit generate   # generates SQL baru di drizzle/
+npm run db:setup           # terapkan ke local.db (aman, idempotent)
 ```
 
-Seed mencetak kredensial admin lokal: `admin@rw.id` / `admin123`. Jangan dipakai di environment lain.
+> **Jangan menjalankan `npx drizzle-kit push` pada `local.db` hasil bootstrap di atas.**
+> Tabel Better Auth (`user`, `session`, `account`, `verification`) bukan bagian dari
+> `src/lib/server/db/schema.ts`, jadi drizzle-kit akan menganggapnya tabel asing dan
+> meminta jawaban interaktif — di terminal Windows jalur ini bisa crash, dan jawaban
+> yang biasanya dipilih akan menghapus tabel auth (akibatnya `no such table: user`).
+> `npx drizzle-kit migrate` hanya untuk database Turso remote/production.
+
+`db:setup` melewati tabel yang sudah ada, jadi `local.db` hasil bootstrap lama tidak
+diperbarui otomatis. Kalau perubahan schema terasa tidak berefek, hapus `local.db`
+lalu jalankan `npm run db:setup` dan `npx tsx scripts/seed.ts` ulang — `local.db`
+cuma artefak dev, tidak ada data produksi di dalamnya.
 
 ### Perintah
 
@@ -64,10 +86,10 @@ Seed mencetak kredensial admin lokal: `admin@rw.id` / `admin123`. Jangan dipakai
 | `npm run dev` | Dev server |
 | `npm run build` | Build production |
 | `npm run check` | svelte-check (type + a11y) |
-| `node scripts/db-auth.mts` | Terapkan `scripts/auth-schema.sql` |
-| `npx drizzle-kit push` | Push schema (dev) |
+| `npm run db:setup` | Bootstrap `local.db`: tabel domain + Better Auth |
+| `npm run db:auth` | Terapkan `scripts/auth-schema.sql` saja |
 | `npx drizzle-kit generate` | Generate migration SQL |
-| `npx drizzle-kit migrate` | Jalankan migration (production) |
+| `npx drizzle-kit migrate` | Jalankan migration (Turso production) |
 | `npx tsx scripts/seed.ts` | Seed data awal |
 
 ### Self-check

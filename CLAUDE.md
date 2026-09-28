@@ -37,12 +37,19 @@ npm run dev
 # Type check
 npm run check
 
-# DB schema push (dev — tanpa migrasi)
-npx drizzle-kit push
+# Bootstrap DB lokal (domain + Better Auth, idempotent)
+npm run db:setup
 
-# DB generate + migrate (production)
+# Generate SQL migrasi baru, lalu terapkan ke local.db
 npx drizzle-kit generate
+npm run db:setup
+
+# Jalankan migrasi (Turso remote/production)
 npx drizzle-kit migrate
+
+# PENTING: jangan `npx drizzle-kit push` pada local.db — tabel Better Auth
+# (user/session/account/verification) bukan bagian dari schema Drizzle, jadi
+# drizzle-kit meminta jawaban interaktif dan bisa crash di Windows.
 
 # Build production
 npm run build
