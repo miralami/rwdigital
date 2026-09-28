@@ -15,9 +15,26 @@
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
+		"drizzle-kit": "^0.31.11",
 		"svelte": "^5.56.1",
 		"svelte-check": "^4.6.0",
 		"typescript": "^6.0.3",
 		"vite": "^8.0.16"
+	},
+	"dependencies": {
+		"@libsql/client": "^0.18.0",
+		"@libsql/kysely-libsql": "^0.4.1",
+		"@lucide/svelte": "^1.48.0",
+		"@tailwindcss/vite": "^4.3.3",
+		"better-auth": "^1.7.6",
+		"drizzle-orm": "^0.45.3",
+		"sveltekit-superforms": "^2.30.2",
+		"tailwindcss": "^4.3.3",
+		"zod": "^4.6.5"
+	},
+	"allowScripts": {
+		"esbuild@0.28.2": true,
+		"esbuild@0.25.12": true,
+		"esbuild@0.18.20": true
 	}
 }
