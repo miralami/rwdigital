@@ -7,9 +7,14 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
+		"db:setup": "node scripts/db-setup.mts",
+		"db:auth": "node scripts/db-auth.mts",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+	},
+	"engines": {
+		"node": ">=22.6"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^7.0.1",

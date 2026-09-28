@@ -151,7 +151,7 @@ async function seed() {
 		}
 	} catch (e) {
 		console.error(`   Gagal membuat RW: ${e}`);
-		console.error('   Pastikan tabel domain sudah dibuat dengan: npx drizzle-kit push');
+		console.error('   Pastikan tabel sudah dibuat dengan: npm run db:setup');
 		throw e;
 	}
 
