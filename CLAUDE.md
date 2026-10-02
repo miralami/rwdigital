@@ -8,12 +8,12 @@ Sistem Informasi RW — aplikasi capstone untuk digitalisasi administrasi tingka
 
 ## Aturan Utama
 
-1. **Jangan menambah fitur baru di luar scope yang sudah confirmed** (lihat `PROJECT.md` § Status Fitur) tanpa konfirmasi eksplisit dari pengguna. Scope proyek ini sengaja dibatasi ketat berdasarkan hasil wawancara mitra, bukan daftar "fitur yang keren untuk RW pada umumnya".
-2. **Fitur "Surat-Menyurat" masih berstatus pending** — jangan build out modul ini secara penuh sebelum flow-nya terkonfirmasi (siapa approve, tanda tangan digital atau manual, volume, dst.) dan tercatat di `PROJECT.md`.
+1. **Jangan menambah fitur baru di luar scope yang sudah confirmed** (lihat `PROJECT.md` § Status Fitur) tanpa konfirmasi eksplisit dari pengguna. Scope proyek ini dibatasi ketat berdasarkan analisis regulasi (UU Desa 6/2014, Permendagri 18/2018) dan plausibility, bukan daftar "fitur yang keren untuk RW pada umumnya".
+2. **Fitur "Surat-Menyurat" adalah out of scope** — bukan tupoksi resmi RW menurut regulasi nasional. Jangan build modul ini tanpa konfirmasi eksplisit dari pengguna.
 3. **Istilah domain tetap pakai Bahasa Indonesia** di kode (nama entity, field DB, variabel domain) — `warga`, `kk`, `rt`, `rw`, `iuran`, `kas`, `pengurus`, dst. Jangan diterjemahkan ke Inggris (`resident`, `dues`, dll.), supaya istilah di kode konsisten dengan istilah yang dipakai mitra dan dokumen akademik capstone.
 4. **Data yang disimpan bersifat sensitif** — NIK, No. KK, alamat, dan data keuangan warga adalah PII dan data finansial. Fitur apa pun yang menyentuh data ini harus mempertimbangkan validasi input dan kontrol akses berbasis role sejak awal, walau ini masih tahap MVP/capstone.
-5. Kalau diminta menambah fitur dari daftar "Fitur Dikesampingkan dari MVP" di `PROJECT.md` (CCTV, dashboard statistik, manajemen pengurus, inventaris, agenda, pengaduan warga), **konfirmasi dulu ke pengguna** sebelum mengerjakan.
-6. Kalau ragu apakah sesuatu termasuk scope MVP, cek tabel prioritas di `PROJECT.md` (🔴 Core / 🟠 Penting / 🟡 Opsional) sebelum mengerjakan, dan tanyakan jika masih ambigu.
+5. Kalau diminta menambah fitur dari daftar "Fitur Dikesampingkan dari MVP" di `PROJECT.md` (CCTV, manajemen pengurus, inventaris), **konfirmasi dulu ke pengguna** sebelum mengerjakan.
+6. Kalau ragu apakah sesuatu termasuk scope MVP, cek tabel prioritas di `PROJECT.md` (Core MVP / High Priority / Medium) sebelum mengerjakan, dan tanyakan jika masih ambigu.
 
 ## Tech Stack
 
@@ -101,7 +101,7 @@ drizzle.config.ts          ← Drizzle kit config
 - **Bendahara** — akses modul keuangan & iuran
 - **Warga** — akses terbatas: lihat info RW, ajukan surat, bayar iuran (jika QRIS aktif)
 
-> Sesuaikan role ini kalau hasil wawancara mitra menunjukkan struktur pengurus yang berbeda.
+> Role ini berdasarkan asumsi struktur RW umum — sesuaikan jika nanti ada klarifikasi dari mitra.
 
 ## Cara Kerja yang Diharapkan
 
@@ -112,5 +112,5 @@ drizzle.config.ts          ← Drizzle kit config
 ## Referensi
 
 - `PROJECT.md` — konteks produk, scope fitur, dan status tiap modul
-- `draft.md` — current laporan
-- `Checklist-Fitur-Sistem-Informasi-RW.md` - current checklist of features that is not fixed yet
+- `docs/laporan/draft.md` — laporan capstone
+- `docs/checklist.md` — checklist fitur untuk presentasi ke RW

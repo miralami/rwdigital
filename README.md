@@ -13,9 +13,12 @@ Fitur dalam proyek ini berasal dari hasil wawancara/observasi ke mitra, bukan da
 | Iuran (jenis, tagihan per periode, pembayaran) | `/iuran` | Confirmed |
 | Pengumuman | `/pengumuman` | Confirmed |
 | Portal warga (mobile-first) | `/portal` | Confirmed |
-| Surat-menyurat | — | Pending konfirmasi mitra |
+| Aspirasi & Pengaduan | — | Phase 2 |
+| Notifikasi | — | Phase 2 |
+| Agenda & Kegiatan | — | Phase 3 |
+| Dashboard Statistik | — | Phase 3 |
 
-Sengaja di luar scope MVP: CCTV, dashboard statistik, manajemen pengurus, inventaris, agenda, pengaduan warga.
+Lihat [`PROJECT.md`](PROJECT.md) untuk feature set lengkap dan prioritas.
 
 ## Role
 

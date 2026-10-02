@@ -146,18 +146,18 @@ Dokumen ini adalah **katalog kebutuhan**, bukan daftar "akan kami buat semua". T
 
 | Prioritas | Modul |
 |---|---|
-| 🔴 Core | A. Manajemen Kependudukan |
-| 🔴 Core | B. Surat-Menyurat |
-| 🔴 Core | C. Keuangan / Kas RW |
-| 🟠 Penting | D. Iuran Warga |
-| 🟠 Penting | E. Pengumuman & Informasi |
-| 🟠 Penting | F. Pengaduan Warga |
-| 🟡 Opsional | G. Kegiatan & Agenda |
-| 🟡 Opsional | H. Fasilitas & Inventaris |
-| 🟡 Opsional | I. Manajemen Pengurus |
-| 🟡 Opsional | J. Keamanan Lingkungan (CCTV) |
-| 🟢 Pengembangan | K. Dashboard Statistik |
-| 🟢 Pengembangan | Notifikasi WhatsApp (bagian dari E) |
+| Core MVP | A. Manajemen Kependudukan |
+| Core MVP | C. Keuangan / Kas RW |
+| Core MVP | D. Iuran Warga |
+| Core MVP | E. Pengumuman & Informasi |
+| High (Phase 2) | F. Pengaduan Warga |
+| High (Phase 2) | Notifikasi WhatsApp (bagian dari E) |
+| Medium (Phase 3) | G. Kegiatan & Agenda |
+| Medium (Phase 3) | K. Dashboard Statistik |
+| Out of Scope | B. Surat-Menyurat |
+| Out of Scope | H. Fasilitas & Inventaris |
+| Out of Scope | I. Manajemen Pengurus |
+| Out of Scope | J. Keamanan Lingkungan (CCTV) |
 
 **Catatan penting saat presentasi ke RW:**
 - Sampaikan dokumen ini sebagai **pilihan kebutuhan**, bukan komitmen untuk membangun semuanya.
