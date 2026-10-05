@@ -109,6 +109,13 @@ drizzle.config.ts          ← Drizzle kit config
 - Kalau task menyentuh scope fitur (menambah field, mengubah alur, menambah modul), cek dulu apakah itu selaras dengan `PROJECT.md`. Kalau tidak selaras atau tidak disebutkan di sana, tanyakan ke pengguna alih-alih berasumsi.
 - Jangan generate data dummy yang terlihat seperti data warga sungguhan (nama, NIK, dll.) dengan format yang bisa disalahartikan sebagai data asli — gunakan penanda jelas seperti "Contoh Warga 1" untuk seed/test data.
 
+## Dokumen Word / SharePoint
+
+- Draft laporan: `docs/laporan/draft.md` — kalau diminta "tulis ke Word/SharePoint", isinya ditransfer ke proposal di SharePoint, **bukan** generate `.docx` lokal.
+- Lokasi folder kerja capstone: `C:\Users\Sena\OneDrive\Kuliah\Semester 7\Capstone`
+- Dokumen proposal: `Capstone.docx` di SharePoint Telkom, diakses lewat shortcut `Capstone.docx.url` di folder tersebut (URL dibaca dari shortcut, jangan hardcode).
+- Selalu pakai skill **`capstone-word`** (`C:\Users\Sena\.agents\skills\capstone-word\SKILL.md` + `word-helper.ps1`, Word COM) untuk membaca/mengedit dokumennya — aturan keras & struktur heading ada di skill itu.
+
 ## Referensi
 
 - `PROJECT.md` — konteks produk, scope fitur, dan status tiap modul
