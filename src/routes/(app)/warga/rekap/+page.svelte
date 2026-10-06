@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { ArrowLeft, Download, Users, Home, UserCheck, Calendar } from '@lucide/svelte';
+  import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+  import Download from '@lucide/svelte/icons/download';
+  import Users from '@lucide/svelte/icons/users';
+  import Home from '@lucide/svelte/icons/home';
+  import UserCheck from '@lucide/svelte/icons/user-check';
+  import Calendar from '@lucide/svelte/icons/calendar';
   import PageHeader from '$lib/components/PageHeader.svelte';
   import Card from '$lib/components/Card.svelte';
   import StatCard from '$lib/components/StatCard.svelte';

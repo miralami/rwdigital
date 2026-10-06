@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Printer, ArrowLeft } from '@lucide/svelte';
+  import Printer from '@lucide/svelte/icons/printer';
+  import ArrowLeft from '@lucide/svelte/icons/arrow-left';
   import { formatTanggalPanjang } from '$lib/format';
   import type { PageData } from './$types';
 

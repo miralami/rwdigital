@@ -3,7 +3,11 @@
   import Badge from '$lib/components/Badge.svelte';
   import Button from '$lib/components/Button.svelte';
   import Modal from '$lib/components/Modal.svelte';
-  import { ArrowLeft, Pencil, UserX, UserCheck, KeyRound } from '@lucide/svelte';
+  import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+  import Pencil from '@lucide/svelte/icons/pencil';
+  import UserX from '@lucide/svelte/icons/user-x';
+  import UserCheck from '@lucide/svelte/icons/user-check';
+  import KeyRound from '@lucide/svelte/icons/key-round';
   import { formatTanggal } from '$lib/format';
   let { data } = $props<{ data: PageData }>();
   const d = $derived(data.detail);

@@ -3,7 +3,11 @@
   import Badge from '$lib/components/Badge.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import PageHeader from '$lib/components/PageHeader.svelte';
-  import { Plus, Eye, EyeOff, Pencil, Trash2 } from '@lucide/svelte';
+  import Plus from '@lucide/svelte/icons/plus';
+  import Eye from '@lucide/svelte/icons/eye';
+  import EyeOff from '@lucide/svelte/icons/eye-off';
+  import Pencil from '@lucide/svelte/icons/pencil';
+  import Trash2 from '@lucide/svelte/icons/trash-2';
   let { data } = $props<{ data: PageData }>();
 
   let filterKategori = $state<string>('semua');

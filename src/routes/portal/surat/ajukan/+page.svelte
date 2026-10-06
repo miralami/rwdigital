@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { ArrowLeft, Send } from '@lucide/svelte';
+  import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+  import Send from '@lucide/svelte/icons/send';
   import Card from '$lib/components/Card.svelte';
   import FormField from '$lib/components/FormField.svelte';
   import Button from '$lib/components/Button.svelte';

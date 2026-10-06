@@ -1,4 +1,11 @@
-import { House, Users, Wallet, Receipt, Ellipsis, Megaphone, User, FileText } from '@lucide/svelte';
+import House from '@lucide/svelte/icons/house';
+import Users from '@lucide/svelte/icons/users';
+import Wallet from '@lucide/svelte/icons/wallet';
+import Receipt from '@lucide/svelte/icons/receipt';
+import Ellipsis from '@lucide/svelte/icons/ellipsis';
+import Megaphone from '@lucide/svelte/icons/megaphone';
+import User from '@lucide/svelte/icons/user';
+import FileText from '@lucide/svelte/icons/file-text';
 import type { Component } from 'svelte';
 
 export interface NavItem {

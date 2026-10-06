@@ -4,7 +4,14 @@
   import StatCard from '$lib/components/StatCard.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import { formatRupiah, formatTanggal } from '$lib/format';
-  import { Plus, Tags, Wallet, ArrowDownRight, ArrowUpRight, Download, FileText, Ban } from '@lucide/svelte';
+  import Plus from '@lucide/svelte/icons/plus';
+  import Tags from '@lucide/svelte/icons/tags';
+  import Wallet from '@lucide/svelte/icons/wallet';
+  import ArrowDownRight from '@lucide/svelte/icons/arrow-down-right';
+  import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
+  import Download from '@lucide/svelte/icons/download';
+  import FileText from '@lucide/svelte/icons/file-text';
+  import Ban from '@lucide/svelte/icons/ban';
   import type { PageData } from './$types';
 
   let { data } = $props<{ data: PageData }>();

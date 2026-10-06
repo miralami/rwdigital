@@ -4,7 +4,8 @@
   import { browser } from '$app/environment';
   import { goto } from '$app/navigation';
   import { signOut } from '$lib/auth-client';
-  import { UserPlus, Plus } from '@lucide/svelte';
+  import UserPlus from '@lucide/svelte/icons/user-plus';
+  import Plus from '@lucide/svelte/icons/plus';
   import Sidebar from '$lib/components/Sidebar.svelte';
   import BottomNav from '$lib/components/BottomNav.svelte';
   import ProfileBlock from '$lib/components/ProfileBlock.svelte';

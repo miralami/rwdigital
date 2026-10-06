@@ -2,7 +2,9 @@
   import { goto } from '$app/navigation';
   import DataTable from '$lib/components/DataTable.svelte';
   import PageHeader from '$lib/components/PageHeader.svelte';
-  import { Plus, Upload, BarChart3 } from '@lucide/svelte';
+  import Plus from '@lucide/svelte/icons/plus';
+  import Upload from '@lucide/svelte/icons/upload';
+  import BarChart3 from '@lucide/svelte/icons/bar-chart-3';
   import { maskNik, maskNoKk } from '$lib/format';
   import type { PageData } from './$types';
 

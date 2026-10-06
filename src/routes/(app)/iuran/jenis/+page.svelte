@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import Badge from '$lib/components/Badge.svelte';
-  import { ArrowLeft } from '@lucide/svelte';
+  import ArrowLeft from '@lucide/svelte/icons/arrow-left';
   import { formatRupiah } from '$lib/format';
   let { data } = $props<{ data: PageData }>();
 </script>

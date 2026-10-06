@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import Badge from '$lib/components/Badge.svelte';
-  import { ArrowLeft, CircleCheckBig } from '@lucide/svelte';
+  import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+  import CircleCheckBig from '@lucide/svelte/icons/circle-check-big';
   import { formatRupiah } from '$lib/format';
   let { data } = $props<{ data: PageData }>();
   const d = $derived(data.detail);

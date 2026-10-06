@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { ArrowLeft, Check, FileCheck, X, FileText, Download } from '@lucide/svelte';
+  import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+  import Check from '@lucide/svelte/icons/check';
+  import FileCheck from '@lucide/svelte/icons/file-check';
+  import X from '@lucide/svelte/icons/x';
+  import FileText from '@lucide/svelte/icons/file-text';
+  import Download from '@lucide/svelte/icons/download';
   import Badge from '$lib/components/Badge.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import { formatTanggal } from '$lib/format';

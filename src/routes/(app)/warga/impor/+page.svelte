@@ -1,5 +1,9 @@
 <script lang="ts">
-  import { ArrowLeft, Upload, FileSpreadsheet, CheckCircle2, AlertCircle } from '@lucide/svelte';
+  import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+  import Upload from '@lucide/svelte/icons/upload';
+  import FileSpreadsheet from '@lucide/svelte/icons/file-spreadsheet';
+  import CheckCircle2 from '@lucide/svelte/icons/check-circle-2';
+  import AlertCircle from '@lucide/svelte/icons/alert-circle';
   import Card from '$lib/components/Card.svelte';
   import Button from '$lib/components/Button.svelte';
   import type { ActionData } from './$types';

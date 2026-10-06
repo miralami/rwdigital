@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { LogOut } from '@lucide/svelte';
+  import LogOut from '@lucide/svelte/icons/log-out';
   import { formatRole, inisial } from '$lib/format';
 
   interface Props {

@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { Component } from 'svelte';
-  import { TrendingUp, TrendingDown, Minus } from '@lucide/svelte';
+  import TrendingUp from '@lucide/svelte/icons/trending-up';
+  import TrendingDown from '@lucide/svelte/icons/trending-down';
+  import Minus from '@lucide/svelte/icons/minus';
 
   interface Props {
     title: string;

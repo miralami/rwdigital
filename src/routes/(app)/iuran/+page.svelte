@@ -2,7 +2,9 @@
   import { goto } from '$app/navigation';
   import DataTable from '$lib/components/DataTable.svelte';
   import PageHeader from '$lib/components/PageHeader.svelte';
-  import { Settings2, FilePlus2, Download } from '@lucide/svelte';
+  import Settings2 from '@lucide/svelte/icons/settings-2';
+  import FilePlus2 from '@lucide/svelte/icons/file-plus-2';
+  import Download from '@lucide/svelte/icons/download';
   import { maskNoKk } from '$lib/format';
   import type { PageData } from './$types';
 
@@ -66,6 +68,10 @@
 
 <PageHeader title="Iuran Warga" subtitle="Distribusi tagihan, pemantauan status, dan rekonsiliasi pembayaran iuran.">
   <div class="header-actions">
+    <a href="/iuran/rekap" class="btn btn-secondary">
+      <Download size={16} />
+      <span>Rekap Iuran</span>
+    </a>
     <button class="btn btn-secondary" onclick={eksporCsv}>
       <Download size={16} />
       <span>Ekspor CSV</span>

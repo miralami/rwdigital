@@ -1,5 +1,10 @@
 <script lang="ts">
-  import { QrCode, Info, Megaphone, CircleCheckBig, FileText, Plus } from '@lucide/svelte';
+  import QrCode from '@lucide/svelte/icons/qr-code';
+  import Info from '@lucide/svelte/icons/info';
+  import Megaphone from '@lucide/svelte/icons/megaphone';
+  import CircleCheckBig from '@lucide/svelte/icons/circle-check-big';
+  import FileText from '@lucide/svelte/icons/file-text';
+  import Plus from '@lucide/svelte/icons/plus';
   import Card from '$lib/components/Card.svelte';
   import ListRow from '$lib/components/ListRow.svelte';
   import Button from '$lib/components/Button.svelte';
