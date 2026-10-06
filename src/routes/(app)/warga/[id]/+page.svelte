@@ -1,9 +1,15 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import Badge from '$lib/components/Badge.svelte';
-  import { ArrowLeft, Pencil, UserX } from '@lucide/svelte';
+  import Button from '$lib/components/Button.svelte';
+  import Modal from '$lib/components/Modal.svelte';
+  import { ArrowLeft, Pencil, UserX, UserCheck, KeyRound } from '@lucide/svelte';
+  import { formatTanggal } from '$lib/format';
   let { data } = $props<{ data: PageData }>();
   const d = $derived(data.detail);
+
+  let showModalNonaktif = $state(false);
+  let showModalBuatAkun = $state(false);
 </script>
 
 <div class="detail-page">
@@ -17,25 +23,65 @@
         <Pencil size={15} />
         <span>Edit</span>
       </a>
-      <form method="POST" action="?/nonaktifkan">
-        <button type="submit" class="btn btn-danger">
+
+      {#if !data.userAccount}
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick={() => (showModalBuatAkun = true)}
+        >
+          <KeyRound size={15} />
+          <span>Buat Akun Portal</span>
+        </button>
+      {/if}
+
+      {#if d.aktif}
+        <button
+          type="button"
+          class="btn btn-danger"
+          onclick={() => (showModalNonaktif = true)}
+        >
           <UserX size={15} />
           <span>Nonaktifkan</span>
         </button>
-      </form>
+      {:else}
+        <form method="POST" action="?/aktifkan">
+          <button type="submit" class="btn btn-secondary">
+            <UserCheck size={15} />
+            <span>Aktifkan Kembali</span>
+          </button>
+        </form>
+      {/if}
     </div>
   </div>
 
+  {#if !d.aktif}
+    <div class="alert-nonaktif">
+      <strong>Data Nonaktif:</strong> Dinonaktifkan pada {d.tanggalNonaktif ?? '—'}.
+      Alasan: {d.alasanNonaktif ?? 'Tidak ada keterangan'}.
+    </div>
+  {/if}
+
   <div class="card info-card">
     <div class="info-header">
-      <h1>{d.nama}</h1>
-      {#if d.aktif}
-        <Badge variant="success">Aktif</Badge>
-      {:else}
-        <Badge variant="default">Nonaktif</Badge>
-      {/if}
+      <div>
+        <h1>{d.nama}</h1>
+        <p class="nik">NIK: {d.nik}</p>
+      </div>
+      <div class="badges">
+        {#if d.aktif}
+          <Badge variant="success">Aktif</Badge>
+        {:else}
+          <Badge variant="default">Nonaktif</Badge>
+        {/if}
+
+        {#if data.userAccount}
+          <Badge variant="brand">Akun: {data.userAccount.email}</Badge>
+        {:else}
+          <Badge variant="warning">Belum Punya Akun</Badge>
+        {/if}
+      </div>
     </div>
-    <p class="nik">NIK: {d.nik}</p>
 
     <dl class="info-grid">
       <div class="info-item">
@@ -108,6 +154,138 @@
       </table>
     </div>
   </section>
+
+  <!-- Riwayat Perubahan Data (SF-KP-02 & SF-KP-05) -->
+  <section class="riwayat-section">
+    <h2>Riwayat Perubahan Data ({data.riwayat.length})</h2>
+    {#if data.riwayat.length > 0}
+      <div class="card table-wrap">
+        <table class="anggota-table">
+          <thead>
+            <tr>
+              <th class="label-caps">Waktu</th>
+              <th class="label-caps">Pengubah</th>
+              <th class="label-caps">Alasan Perubahan</th>
+              <th class="label-caps">Ringkasan</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each data.riwayat as r}
+              <tr>
+                <td>{formatTanggal(r.tanggal)}</td>
+                <td>{r.diubahOleh}</td>
+                <td class="font-medium">{r.alasan}</td>
+                <td class="text-muted">{r.ringkasan ?? '—'}</td>
+              </tr>
+            {/each}
+          </tbody>
+        </table>
+      </div>
+    {:else}
+      <div class="card empty-card">
+        <p class="text-muted">Belum ada riwayat perubahan data pada warga ini.</p>
+      </div>
+    {/if}
+  </section>
+
+  <!-- Modal Nonaktifkan Warga -->
+  <Modal
+    open={showModalNonaktif}
+    title="Nonaktifkan Data Warga"
+    onClose={() => (showModalNonaktif = false)}
+  >
+    <form method="POST" action="?/nonaktifkan" class="form-modal">
+      <p class="modal-desc">
+        Data warga akan dinonaktifkan tanpa dihapus permanen dari basis data.
+      </p>
+
+      <div class="form-group">
+        <label for="tanggal" class="label-caps">Tanggal Nonaktif</label>
+        <input
+          id="tanggal"
+          name="tanggal"
+          type="date"
+          required
+          value={new Date().toISOString().slice(0, 10)}
+          class="form-input"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="alasan" class="label-caps">Alasan Nonaktif</label>
+        <select id="alasan" name="alasan" required class="form-input">
+          <option value="Pindah Domisili">Pindah Domisili</option>
+          <option value="Meninggal Dunia">Meninggal Dunia</option>
+          <option value="Pindah KK">Pindah KK</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick={() => (showModalNonaktif = false)}
+        >
+          Batal
+        </button>
+        <button type="submit" class="btn btn-danger">
+          Konfirmasi Nonaktifkan
+        </button>
+      </div>
+    </form>
+  </Modal>
+
+  <!-- Modal Buat Akun Warga -->
+  <Modal
+    open={showModalBuatAkun}
+    title="Buat Akun Portal Warga"
+    onClose={() => (showModalBuatAkun = false)}
+  >
+    <form method="POST" action="?/buatAkun" class="form-modal">
+      <p class="modal-desc">
+        Buat akun autentikasi untuk warga ini agar dapat mengakses portal warga secara mandiri.
+      </p>
+
+      <div class="form-group">
+        <label for="email" class="label-caps">Email Akun (Opsional)</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          placeholder={`${d.nik}@warga.rw`}
+          class="form-input"
+        />
+        <span class="field-hint">Kosongkan untuk menggunakan default ({d.nik}@warga.rw)</span>
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="label-caps">Kata Sandi Awal</label>
+        <input
+          id="password"
+          name="password"
+          type="text"
+          required
+          value="warga123"
+          class="form-input"
+        />
+        <span class="field-hint">Berikan kata sandi ini kepada warga untuk masuk pertama kali.</span>
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick={() => (showModalBuatAkun = false)}
+        >
+          Batal
+        </button>
+        <button type="submit" class="btn btn-secondary">
+          Buat Akun Sekarang
+        </button>
+      </div>
+    </form>
+  </Modal>
 </div>
 
 <style>
@@ -229,5 +407,61 @@
 
   .anggota-table tbody tr:last-child td {
     border-bottom: none;
+  }
+
+  .alert-nonaktif {
+    margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    background: oklch(0.95 0.05 25);
+    color: oklch(0.4 0.15 25);
+    border: 1px solid oklch(0.85 0.1 25);
+    font-size: var(--text-sm);
+  }
+
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .form-modal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .modal-desc {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .form-input {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: var(--text-sm);
+  }
+
+  .field-hint {
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
   }
 </style>

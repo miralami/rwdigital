@@ -1,68 +1,131 @@
+import { db } from '$lib/server/db';
+import { warga, kk, rt, tagihan, jenisIuran, pembayaran, pengumuman, surat } from '$lib/server/db/schema';
+import { eq, desc } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
-/**
- * ── DATA CONTOH ──────────────────────────────────────────────────────────────
- * Halaman ini masih berjalan di atas placeholder. Tabel `warga` belum punya
- * kolom `userId`, jadi akun yang login belum bisa dipetakan ke tagihan atau
- * pembayarannya sendiri — menambah kolom itu di luar scope ronde ini.
- *
- * Semua nilai di bawah WAJIB dibaca sebagai contoh:
- *  - tidak ada NIK / No. KK / nama warga fiktif yang bisa disalahartikan,
- *  - isi pengumuman dan riwayat diberi awalan "Contoh:",
- *  - `contoh: true` dibaca UI untuk menandai data ini secara terlihat.
- *
- * Nominal sengaja dibuat bulat (50.000) supaya jelas bukan transaksi nyata.
- * Ganti sumbernya dengan query `tagihan` + `pembayaran` yang di-join lewat `kk`
- * begitu pemetaan user tersedia.
- * ─────────────────────────────────────────────────────────────────────────────
- */
-
-type StatusIuran = 'belum_bayar' | 'lunas';
-
 export const load: PageServerLoad = async ({ locals }) => {
-  const sekarang = new Date();
-  const tahun = sekarang.getFullYear();
-  const bulan = sekarang.getMonth();
+  const userId = locals.user?.id;
 
-  const namaBulan = (offset: number) =>
-    new Date(tahun, bulan + offset, 1).toLocaleDateString('id-ID', {
-      month: 'long',
-      year: 'numeric'
-    });
+  const [linkedWarga] = userId
+    ? await db
+        .select({
+          id: warga.id,
+          nama: warga.nama,
+          nik: warga.nik,
+          kkId: warga.kkId,
+          noKk: kk.noKk,
+          nomorRt: rt.nomor,
+          alamat: kk.alamat
+        })
+        .from(warga)
+        .innerJoin(kk, eq(warga.kkId, kk.id))
+        .innerJoin(rt, eq(kk.rtId, rt.id))
+        .where(eq(warga.userId, userId))
+    : [];
 
-  /** Tanggal lokal → "YYYY-MM-DD", tanpa pergeseran zona waktu. */
-  const tanggal = (offsetBulan: number, hari: number) => {
-    const d = new Date(tahun, bulan + offsetBulan, hari);
-    const bulanStr = String(d.getMonth() + 1).padStart(2, '0');
-    return `${d.getFullYear()}-${bulanStr}-${String(hari).padStart(2, '0')}`;
-  };
+  // Pengumuman aktif dari DB
+  const rawPengumuman = await db
+    .select({
+      id: pengumuman.id,
+      judul: pengumuman.judul,
+      isi: pengumuman.isi,
+      kategori: pengumuman.kategori,
+      createdAt: pengumuman.createdAt
+    })
+    .from(pengumuman)
+    .where(eq(pengumuman.ditampilkan, true))
+    .orderBy(desc(pengumuman.createdAt))
+    .limit(5);
+
+  const listPengumuman = rawPengumuman.map(p => ({
+    id: String(p.id),
+    judul: p.judul,
+    tanggal: p.createdAt
+  }));
+
+  if (!linkedWarga) {
+    // Akun belum terhubung ke data warga (misal pengurus sedang preview atau akun baru)
+    return {
+      namaPengguna: locals.user?.name ?? null,
+      terhubung: false,
+      warga: null,
+      iuran: null,
+      pengumuman: listPengumuman,
+      riwayatPembayaran: [],
+      daftarSurat: []
+    };
+  }
+
+  // Tagihan milik KK warga
+  const semuaTagihan = await db
+    .select({
+      id: tagihan.id,
+      periode: tagihan.periode,
+      nominal: tagihan.nominal,
+      status: tagihan.status,
+      namaJenis: jenisIuran.nama
+    })
+    .from(tagihan)
+    .innerJoin(jenisIuran, eq(tagihan.jenisIuranId, jenisIuran.id))
+    .where(eq(tagihan.kkId, linkedWarga.kkId))
+    .orderBy(desc(tagihan.periode));
+
+  const tagihanPending = semuaTagihan.find(t => t.status === 'belum_bayar') ?? semuaTagihan[0] ?? null;
+
+  // Riwayat pembayaran KK warga
+  const rawRiwayat = await db
+    .select({
+      id: pembayaran.id,
+      jumlah: pembayaran.jumlah,
+      dibayarPada: pembayaran.dibayarPada,
+      metodeBayar: pembayaran.metodeBayar,
+      namaJenis: jenisIuran.nama,
+      periode: tagihan.periode
+    })
+    .from(pembayaran)
+    .innerJoin(tagihan, eq(pembayaran.tagihanId, tagihan.id))
+    .innerJoin(jenisIuran, eq(tagihan.jenisIuranId, jenisIuran.id))
+    .where(eq(tagihan.kkId, linkedWarga.kkId))
+    .orderBy(desc(pembayaran.dibayarPada))
+    .limit(5);
+
+  const riwayatPembayaran = rawRiwayat.map(r => ({
+    id: String(r.id),
+    keterangan: `${r.namaJenis} (${r.periode})`,
+    nominal: r.jumlah,
+    tanggal: r.dibayarPada
+  }));
+
+  // Surat yang diajukan warga
+  const daftarSurat = await db
+    .select({
+      id: surat.id,
+      nomorSurat: surat.nomorSurat,
+      jenis: surat.jenis,
+      keperluan: surat.keperluan,
+      status: surat.status,
+      tanggalTerbit: surat.tanggalTerbit,
+      catatanPengurus: surat.catatanPengurus,
+      createdAt: surat.createdAt
+    })
+    .from(surat)
+    .where(eq(surat.wargaId, linkedWarga.id))
+    .orderBy(desc(surat.createdAt));
 
   return {
-    // Data nyata: hanya untuk sapaan di header.
-    namaPengguna: locals.user?.name ?? null,
-
-    // Penanda placeholder, dibaca UI supaya pengguna tidak salah paham.
-    contoh: true,
-    catatanContoh: 'Data contoh untuk tampilan portal. Belum terhubung ke data warga.',
-
-    iuran: {
-      bulan: namaBulan(0),
-      nominal: 50_000,
-      status: 'belum_bayar' as StatusIuran,
-      jatuhTempo: tanggal(0, 10),
-      dibayarPada: null as string | null
-    },
-
-    pengumuman: [
-      { id: 'contoh-1', judul: 'Contoh: jadwal ronda malam', tanggal: tanggal(0, 12) },
-      { id: 'contoh-2', judul: 'Contoh: jadwal kerja bakti bulan ini', tanggal: tanggal(0, 8) },
-      { id: 'contoh-3', judul: 'Contoh: pengumuman iuran bulan ini', tanggal: tanggal(-1, 20) }
-    ],
-
-    riwayatPembayaran: [
-      { id: 'contoh-a', keterangan: `Contoh: iuran ${namaBulan(-1)}`, nominal: 50_000, tanggal: tanggal(-1, 10) },
-      { id: 'contoh-b', keterangan: `Contoh: iuran ${namaBulan(-2)}`, nominal: 50_000, tanggal: tanggal(-2, 10) },
-      { id: 'contoh-c', keterangan: `Contoh: iuran ${namaBulan(-3)}`, nominal: 50_000, tanggal: tanggal(-3, 10) }
-    ]
+    namaPengguna: locals.user?.name ?? linkedWarga.nama,
+    terhubung: true,
+    warga: linkedWarga,
+    iuran: tagihanPending
+      ? {
+          bulan: tagihanPending.periode,
+          nominal: tagihanPending.nominal,
+          status: tagihanPending.status as 'belum_bayar' | 'lunas',
+          namaJenis: tagihanPending.namaJenis
+        }
+      : null,
+    pengumuman: listPengumuman,
+    riwayatPembayaran,
+    daftarSurat
   };
 };

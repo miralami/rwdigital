@@ -116,3 +116,19 @@ export function formatRole(role?: string | null): string {
 export function inisial(nama?: string | null): string {
   return (nama ?? '').trim().charAt(0).toUpperCase() || '?';
 }
+
+/**
+ * Penyamaran data identitas sensitif (PII) sesuai standar NFRA-10 & UU PDP.
+ * Contoh 16 digit: "3275012345670001" -> "3275••••••••0001"
+ */
+export function maskNik(nik?: string | null): string {
+  if (!nik) return '—';
+  const clean = nik.trim();
+  if (clean.length < 8) return '••••••••';
+  return `${clean.slice(0, 4)}••••••••${clean.slice(-4)}`;
+}
+
+export function maskNoKk(noKk?: string | null): string {
+  return maskNik(noKk);
+}
+

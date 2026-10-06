@@ -19,37 +19,37 @@ Dalam ketiadaan wawancara, regulasi resmi menjadi dasar utama penentuan scope �
 
 > Feature set ini ditetapkan tanpa wawancara mitra (tidak memungkinkan), berdasarkan analisis regulasi resmi (UU Desa 6/2014, Permendagri 18/2018) dan plausibility untuk implementasi capstone.
 
-### Core MVP (Confirmed)
+### Core MVP (Confirmed — Berdasarkan draftrevised.md)
 
-| # | Fitur | Dasar Hukum | Status |
+| # | Fitur | Dasar Hukum / Regulasi | Status |
 |---|---|---|---|
-| 1 | Manajemen Kependudukan | Facilitative duty — RW bantu pendataan warga (Permendagri 18/2018) | Sudah ada |
-| 2 | Kas RW | Dana swadaya masyarakat diakui | Sudah ada |
-| 3 | Iuran | Dana swadaya masyarakat | Sudah ada |
-| 4 | Pengumuman | Distribusi informasi = fungsi resmi | Sudah ada |
+| 1 | Manajemen Kependudukan | Facilitative duty — RW bantu pendataan warga (Permendagri 18/2018) | Sudah ada (perlu penyempurnaan) |
+| 2 | Surat-Menyurat | Pelayanan administrasi warga (SF-SR-01..07) | Dalam perancangan / scaffolding |
+| 3 | Kas RW | Dana swadaya masyarakat diakui | Sudah ada (perlu penyempurnaan) |
+| 4 | Iuran | Dana swadaya masyarakat | Sudah ada (perlu penyempurnaan) |
+| 5 | Pengumuman | Distribusi informasi = fungsi resmi | Sudah ada (perlu penyempurnaan) |
 
 ### High Priority (Phase 2)
 
 | # | Fitur | Dasar Hukum | Status |
 |---|---|---|---|
-| 5 | Aspirasi & Pengaduan | Fungsi resmi — Permendagri 18/2018 mewajibkan RT/RW tampilkan & salurkan aspirasi | Belum ada |
-| 6 | Notifikasi | Pendukung fungsi distribusi informasi | Belum ada |
+| 6 | Aspirasi & Pengaduan | Fungsi resmi — Permendagri 18/2018 | Belum ada |
+| 7 | Notifikasi | Pendukung fungsi distribusi informasi | Belum ada |
 
 ### Medium (Phase 3)
 
 | # | Fitur | Dasar Hukum | Status |
 |---|---|---|---|
-| 7 | Agenda & Kegiatan | Musyawarah = fungsi resmi | Belum ada |
-| 8 | Dashboard Statistik | Analisis data internal | Belum ada |
+| 8 | Agenda & Kegiatan | Musyawarah = fungsi resmi | Belum ada |
+| 9 | Dashboard Statistik | Analisis data internal | Belum ada |
 
 ### Out of Scope
 
 | Fitur | Alasan |
 |---|---|
-| Surat-Menyurat | Bukan tupoksi resmi — de facto practice, diatur Perdes/Perbup lokal. Kompleksitas approval flow tinggi. |
 | CCTV | Bukan fungsi RW |
 | Inventaris | Bukan fungsi inti |
-| Manajemen Pengurus | Bisa disederhanakan via role-based access |
+| Manajemen Pengurus Kompleks | Cukup disederhanakan via role-based access |
 
 ### Referensi Hukum
 - UU No. 6 Tahun 2014 tentang Desa
@@ -77,17 +77,21 @@ Jangan build fitur-fitur ini tanpa konfirmasi eksplisit dari pengguna — lihat 
 | **Warga** | Individu, terhubung ke satu KK |
 | **Iuran** | Tagihan periodik ke warga/KK (nominal, periode, jenis) |
 | **Transaksi Kas** | Pemasukan/pengeluaran kas RW, terhubung ke kategori |
-| **Surat** | Pengajuan & penerbitan surat (domisili, usaha, dll.) — *out of scope (bukan tupoksi resmi)* |
+| **Surat** | Pengajuan & penerbitan surat (SKCK, SKTM, domisili, dll.) — SF-SR-01..07 |
 | **Pengumuman** | Informasi yang disebarkan ke warga |
 
-## Aktor / Role
+## Aktor / Role & Manajemen Akun
 
-- **Admin RW** — akses penuh ke semua modul
-- **Pengurus RT** — kelola data warga di wilayahnya, ajukan surat atas nama warga
-- **Bendahara** — kelola keuangan & iuran
-- **Warga** — lihat info RW, ajukan surat, bayar iuran
+- **Admin RW** — akses penuh ke semua modul, pembuatan/penugasan akun staf dan warga (mencegah pendaftaran NIK fiktif/ganda)
+- **Pengurus RT** — kelola data warga di wilayahnya, verifikasi pengajuan surat warga
+- **Bendahara** — kelola keuangan kas & iuran
+- **Warga** — lihat info RW, ajukan surat, pantau tagihan & riwayat iuran pribadi
 
-> Role ini berdasarkan asumsi struktur RW umum — sesuaikan jika nanti ada klarifikasi dari mitra.
+> **Kebijakan Pendaftaran Akun**: Akun warga dibuat langsung oleh Admin RW (bukan registrasi publik mandiri) untuk menjamin validitas NIK dan mencegah penyalahgunaan identitas.
+
+## Penyimpanan Berkas
+
+Berkas bukti transaksi kas dan dokumen persyaratan surat disimpan di direktori lokal server (`static/uploads/` atau folder upload lokal yang aman).
 
 ## Data Sensitif
 

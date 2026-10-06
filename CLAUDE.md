@@ -8,10 +8,12 @@ Sistem Informasi RW — aplikasi capstone untuk digitalisasi administrasi tingka
 
 ## Aturan Utama
 
-1. **Jangan menambah fitur baru di luar scope yang sudah confirmed** (lihat `PROJECT.md` § Status Fitur) tanpa konfirmasi eksplisit dari pengguna. Scope proyek ini dibatasi ketat berdasarkan analisis regulasi (UU Desa 6/2014, Permendagri 18/2018) dan plausibility, bukan daftar "fitur yang keren untuk RW pada umumnya".
-2. **Fitur "Surat-Menyurat" adalah out of scope** — bukan tupoksi resmi RW menurut regulasi nasional. Jangan build modul ini tanpa konfirmasi eksplisit dari pengguna.
-3. **Istilah domain tetap pakai Bahasa Indonesia** di kode (nama entity, field DB, variabel domain) — `warga`, `kk`, `rt`, `rw`, `iuran`, `kas`, `pengurus`, dst. Jangan diterjemahkan ke Inggris (`resident`, `dues`, dll.), supaya istilah di kode konsisten dengan istilah yang dipakai mitra dan dokumen akademik capstone.
-4. **Data yang disimpan bersifat sensitif** — NIK, No. KK, alamat, dan data keuangan warga adalah PII dan data finansial. Fitur apa pun yang menyentuh data ini harus mempertimbangkan validasi input dan kontrol akses berbasis role sejak awal, walau ini masih tahap MVP/capstone.
+1. **Scope proyek mengacu pada `draftrevised.md` dan `PROJECT.md`**. Scope mencakup 5 modul Core: Kependudukan, Surat-Menyurat, Kas RW, Iuran Warga, dan Pengumuman/Informasi.
+2. **Fitur "Surat-Menyurat" masuk dalam Core MVP** sesuai spesifikasi SF-SR-01 s/d SF-SR-07 pada `draftrevised.md` (pengajuan surat, unggah berkas, verifikasi pengurus, persetujuan/penerbitan admin RW, unduh slip/PDF).
+3. **Pendaftaran akun warga dilakukan terpusat oleh Admin RW** (bukan pendaftaran mandiri/publik), untuk mencegah warga mendaftar menggunakan NIK milik orang lain.
+4. **Penyimpanan berkas** (bukti kas, dokumen syarat surat) disimpan di direktori lokal server.
+5. **Istilah domain tetap pakai Bahasa Indonesia** di kode (nama entity, field DB, variabel domain) — `warga`, `kk`, `rt`, `rw`, `surat`, `iuran`, `kas`, `pengurus`, dst. Jangan diterjemahkan ke Inggris (`resident`, `dues`, dll.), supaya istilah di kode konsisten dengan istilah yang dipakai mitra dan dokumen akademik capstone.
+6. **Data yang disimpan bersifat sensitif** — NIK, No. KK, alamat, dan data keuangan warga adalah PII dan data finansial. Terapkan data masking pada tampilan tabel (`3275••••••••0001`), validasi input Zod 16 digit, dan kontrol akses berbasis role.
 5. Kalau diminta menambah fitur dari daftar "Fitur Dikesampingkan dari MVP" di `PROJECT.md` (CCTV, manajemen pengurus, inventaris), **konfirmasi dulu ke pengguna** sebelum mengerjakan.
 6. Kalau ragu apakah sesuatu termasuk scope MVP, cek tabel prioritas di `PROJECT.md` (Core MVP / High Priority / Medium) sebelum mengerjakan, dan tanyakan jika masih ambigu.
 

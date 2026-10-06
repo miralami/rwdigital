@@ -20,11 +20,11 @@ export const load: PageServerLoad = async ({ locals }) => {
     .select({ total: sql<number>`count(*)` })
     .from(rt);
 
-  // 2. Kas Summary
+  // 2. Kas Summary (hanya transaksi yang tidak dibatalkan)
   const [kasSummary] = await db
     .select({
-      totalPemasukan: sql<number>`COALESCE(SUM(CASE WHEN ${transaksiKas.jenis} = 'pemasukan' THEN ${transaksiKas.nominal} ELSE 0 END), 0)`,
-      totalPengeluaran: sql<number>`COALESCE(SUM(CASE WHEN ${transaksiKas.jenis} = 'pengeluaran' THEN ${transaksiKas.nominal} ELSE 0 END), 0)`
+      totalPemasukan: sql<number>`COALESCE(SUM(CASE WHEN ${transaksiKas.jenis} = 'pemasukan' AND ${transaksiKas.dibatalkan} = false THEN ${transaksiKas.nominal} ELSE 0 END), 0)`,
+      totalPengeluaran: sql<number>`COALESCE(SUM(CASE WHEN ${transaksiKas.jenis} = 'pengeluaran' AND ${transaksiKas.dibatalkan} = false THEN ${transaksiKas.nominal} ELSE 0 END), 0)`
     })
     .from(transaksiKas);
 

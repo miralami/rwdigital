@@ -22,6 +22,17 @@
       <textarea id="isi" name="isi" class="input-base" rows="6" placeholder="Tulis isi pengumuman di sini..." required></textarea>
     </div>
 
+    <div class="field-row">
+      <div class="field">
+        <label for="tanggalMulai">Tanggal Mulai Tayang (Opsional)</label>
+        <input id="tanggalMulai" name="tanggalMulai" class="input-base" type="date" />
+      </div>
+      <div class="field">
+        <label for="tanggalSelesai">Tanggal Berakhir Tayang (Opsional)</label>
+        <input id="tanggalSelesai" name="tanggalSelesai" class="input-base" type="date" />
+      </div>
+    </div>
+
     <div class="field-checkbox">
       <label class="checkbox-label">
         <input type="checkbox" name="ditampilkan" checked />

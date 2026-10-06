@@ -8,6 +8,8 @@ const pengumumanSchema = z.object({
   judul: z.string().min(1, 'Judul wajib diisi'),
   isi: z.string().min(1, 'Isi wajib diisi'),
   kategori: z.enum(['umum', 'kegiatan', 'keuangan', 'darurat']),
+  tanggalMulai: z.string().optional(),
+  tanggalSelesai: z.string().optional(),
   ditampilkan: z.boolean()
 });
 
@@ -23,6 +25,8 @@ export const actions: Actions = {
       judul: formData.get('judul'),
       isi: formData.get('isi'),
       kategori: formData.get('kategori') ?? 'umum',
+      tanggalMulai: formData.get('tanggalMulai') || undefined,
+      tanggalSelesai: formData.get('tanggalSelesai') || undefined,
       ditampilkan: formData.get('ditampilkan') === 'on'
     });
 
@@ -35,7 +39,7 @@ export const actions: Actions = {
     await db.insert(pengumuman).values({
       ...result.data,
       rwId: rwData.id,
-      dibuatOleh: locals.user?.id ?? 'system'
+      dibuatOleh: locals.user?.name ?? locals.user?.id ?? 'Pengurus'
     });
 
     redirect(303, '/pengumuman');

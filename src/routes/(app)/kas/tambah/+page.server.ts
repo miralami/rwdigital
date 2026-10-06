@@ -4,6 +4,7 @@ import { superForm } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
+import { saveUploadedFile } from '$lib/server/storage';
 import type { PageServerLoad, Actions } from './$types';
 
 const transaksiSchema = z.object({
@@ -38,11 +39,20 @@ export const actions: Actions = {
     }
 
     const [rwData] = await db.select().from(rw).limit(1);
+    const buktiFile = formData.get('buktiFile') as File | null;
+    let buktiPath: string | null = null;
+
+    if (buktiFile && buktiFile.size > 0) {
+      buktiPath = await saveUploadedFile(buktiFile, 'kas');
+    }
+
+    const operator = locals.user?.name ?? locals.user?.id ?? 'Bendahara';
 
     await db.insert(transaksiKas).values({
       ...result.data,
       kategoriId: result.data.kategoriId || null,
-      dicatatOleh: locals.user?.id ?? 'system',
+      bukti: buktiPath,
+      dicatatOleh: operator,
       rwId: rwData.id
     });
 

@@ -2,7 +2,8 @@
   import { goto } from '$app/navigation';
   import DataTable from '$lib/components/DataTable.svelte';
   import PageHeader from '$lib/components/PageHeader.svelte';
-  import { Settings2, FilePlus2 } from '@lucide/svelte';
+  import { Settings2, FilePlus2, Download } from '@lucide/svelte';
+  import { maskNoKk } from '$lib/format';
   import type { PageData } from './$types';
 
   let { data } = $props<{ data: PageData }>();
@@ -20,7 +21,7 @@
   });
 
   const columns = [
-    { key: 'noKk', label: 'No. KK' },
+    { key: 'noKk', label: 'No. KK', render: (row: any) => maskNoKk(row.noKk) },
     { key: 'alamatKk', label: 'Alamat' },
     { key: 'namaJenisIuran', label: 'Jenis Iuran' },
     { key: 'periode', label: 'Periode' },
@@ -28,7 +29,7 @@
       key: 'nominal',
       label: 'Nominal',
       class: 'text-right',
-      render: (row: any) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(row.nominal)
+      render: (row: any) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(row.nominal)
     },
     {
       key: 'status',
@@ -44,17 +45,40 @@
   function handleRowClick(row: any) {
     goto(`/iuran/${row.id}/bayar`);
   }
+
+  function eksporCsv() {
+    let csv = 'Rekapitulasi Tagihan Iuran Warga RW\n\n';
+    csv += 'No. KK,Alamat,Jenis Iuran,Periode,Nominal,Status\n';
+    for (const t of filtered) {
+      csv += `"${t.noKk}","${t.alamatKk}","${t.namaJenisIuran}","${t.periode}",${t.nominal},"${t.status}"\n`;
+    }
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `rekap_iuran_${activeTab}_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 </script>
 
 <PageHeader title="Iuran Warga" subtitle="Distribusi tagihan, pemantauan status, dan rekonsiliasi pembayaran iuran.">
-  <a href="/iuran/jenis" class="btn btn-secondary">
-    <Settings2 size={16} />
-    <span>Kelola jenis</span>
-  </a>
-  <a href="/iuran/generate" class="btn btn-secondary">
-    <FilePlus2 size={16} />
-    <span>Generate tagihan</span>
-  </a>
+  <div class="header-actions">
+    <button class="btn btn-secondary" onclick={eksporCsv}>
+      <Download size={16} />
+      <span>Ekspor CSV</span>
+    </button>
+    <a href="/iuran/jenis" class="btn btn-secondary">
+      <Settings2 size={16} />
+      <span>Kelola jenis</span>
+    </a>
+    <a href="/iuran/generate" class="btn btn-secondary">
+      <FilePlus2 size={16} />
+      <span>Generate tagihan</span>
+    </a>
+  </div>
 </PageHeader>
 
 <div class="tabs-bar">
@@ -97,6 +121,13 @@
 />
 
 <style>
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
   .tabs-bar {
     margin-bottom: var(--space-5);
   }

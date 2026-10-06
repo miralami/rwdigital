@@ -6,6 +6,15 @@
   import { Plus, Eye, EyeOff, Pencil, Trash2 } from '@lucide/svelte';
   let { data } = $props<{ data: PageData }>();
 
+  let filterKategori = $state<string>('semua');
+
+  const filteredPengumuman = $derived(
+    data.semuaPengumuman.filter((p: any) => {
+      if (filterKategori !== 'semua' && p.kategori !== filterKategori) return false;
+      return true;
+    })
+  );
+
   function getKategoriVariant(kategori: string): 'default' | 'success' | 'warning' | 'danger' | 'info' | 'brand' {
     const map: Record<string, any> = {
       umum: 'default',
@@ -32,8 +41,21 @@
   </a>
 </PageHeader>
 
-{#if data.semuaPengumuman.length === 0}
-  <EmptyState message="Belum ada pengumuman" description="Buat pengumuman pertama untuk disiarkan kepada warga.">
+<div class="filters-card">
+  <div class="filter-group">
+    <label for="filter-kategori" class="label-caps">Filter Kategori:</label>
+    <select id="filter-kategori" bind:value={filterKategori} class="filter-select">
+      <option value="semua">Semua Kategori</option>
+      <option value="umum">Umum</option>
+      <option value="kegiatan">Kegiatan</option>
+      <option value="keuangan">Keuangan</option>
+      <option value="darurat">Darurat</option>
+    </select>
+  </div>
+</div>
+
+{#if filteredPengumuman.length === 0}
+  <EmptyState message="Belum ada pengumuman" description="Tidak ada pengumuman untuk kriteria yang dipilih.">
     <a href="/pengumuman/tambah" class="btn btn-secondary">
       <Plus size={16} />
       <span>Buat pengumuman</span>
@@ -41,7 +63,7 @@
   </EmptyState>
 {:else}
   <div class="pengumuman-list">
-    {#each data.semuaPengumuman as p}
+    {#each filteredPengumuman as p}
       <article class="card pengumuman-card" class:is-hidden={!p.ditampilkan}>
         <div class="card-header">
           <div class="card-meta">
@@ -96,6 +118,32 @@
 {/if}
 
 <style>
+  .filters-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .filter-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .filter-select {
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    font-size: var(--text-sm);
+  }
+
   .pengumuman-list {
     display: flex;
     flex-direction: column;
