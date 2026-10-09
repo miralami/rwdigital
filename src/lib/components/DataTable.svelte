@@ -1,6 +1,9 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { Search, ArrowUpDown, ArrowUp, ArrowDown } from '@lucide/svelte';
+  import Search from '@lucide/svelte/icons/search';
+  import ArrowUpDown from '@lucide/svelte/icons/arrow-up-down';
+  import ArrowUp from '@lucide/svelte/icons/arrow-up';
+  import ArrowDown from '@lucide/svelte/icons/arrow-down';
 
   export interface Column {
     key: string;

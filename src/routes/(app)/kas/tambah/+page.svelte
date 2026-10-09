@@ -7,7 +7,7 @@
   <h1>Tambah transaksi</h1>
   <p class="subtitle">Catat pemasukan atau pengeluaran kas RW.</p>
 
-  <form method="POST" class="card form-card">
+  <form method="POST" enctype="multipart/form-data" class="card form-card">
     <div class="field">
       <label for="jenis">Jenis transaksi <span class="required">*</span></label>
       <select id="jenis" name="jenis" class="input-base" required>
@@ -39,6 +39,12 @@
     <div class="field">
       <label for="keterangan">Keterangan <span class="required">*</span></label>
       <input id="keterangan" name="keterangan" class="input-base" type="text" placeholder="Deskripsi transaksi" required />
+    </div>
+
+    <div class="field">
+      <label for="buktiFile">Berkas Bukti Transaksi (Opsional)</label>
+      <input id="buktiFile" name="buktiFile" class="input-base" type="file" accept="image/*,.pdf" />
+      <span class="field-hint">Foto nota, kuitansi, atau bukti transfer (SF-KS-03).</span>
     </div>
 
     <div class="form-actions">

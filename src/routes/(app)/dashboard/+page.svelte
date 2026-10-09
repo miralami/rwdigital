@@ -1,6 +1,12 @@
 <script lang="ts">
   import { browser } from '$app/environment';
-  import { Plus, UserPlus, ArrowDown, ArrowUp, CircleAlert, Megaphone, CircleCheckBig } from '@lucide/svelte';
+  import Plus from '@lucide/svelte/icons/plus';
+  import UserPlus from '@lucide/svelte/icons/user-plus';
+  import ArrowDown from '@lucide/svelte/icons/arrow-down';
+  import ArrowUp from '@lucide/svelte/icons/arrow-up';
+  import CircleAlert from '@lucide/svelte/icons/circle-alert';
+  import Megaphone from '@lucide/svelte/icons/megaphone';
+  import CircleCheckBig from '@lucide/svelte/icons/circle-check-big';
   import Button from '$lib/components/Button.svelte';
   import Card from '$lib/components/Card.svelte';
   import StatCard from '$lib/components/StatCard.svelte';

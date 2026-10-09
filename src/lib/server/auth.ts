@@ -2,6 +2,7 @@ import { betterAuth } from 'better-auth';
 import { admin } from 'better-auth/plugins';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
 import { getRequestEvent } from '$app/server';
+import { dev } from '$app/environment';
 import { LibsqlDialect } from '@libsql/kysely-libsql';
 import { env } from '$env/dynamic/private';
 import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from '$env/static/private';
@@ -14,10 +15,11 @@ const trustedOrigins = [
 const forwardedHosts = trustedOrigins.map((origin) => new URL(origin).host);
 
 export const auth = betterAuth({
+  secret: env.BETTER_AUTH_SECRET || 'rahasia-capstone-rwdigital-super-secret-key-12345',
   baseURL: {
     allowedHosts: ['localhost:5173', '127.0.0.1:5173', ...forwardedHosts],
     protocol: 'auto',
-    fallback: 'http://localhost:5173'
+    fallback: env.BETTER_AUTH_URL || 'http://localhost:5173'
   },
   trustedOrigins: [
     'http://localhost:5173',
@@ -33,6 +35,18 @@ export const auth = betterAuth({
     type: 'sqlite'
   },
   emailAndPassword: { enabled: true },
+  session: {
+    expiresIn: 60 * 60, // 60 menit (target NFRA-09)
+    updateAge: 15 * 60
+  },
+  rateLimit: {
+    // Batas produksi tetap 10 request / 60 detik. Di dev dilebihkan karena
+    // HMR + DevTools menembak endpoint auth berulang kali dan sering kena
+    // 429 padahal bukan percobaan brute-force.
+    enabled: !dev,
+    window: 60,
+    max: dev ? 1000 : 10
+  },
   plugins: [
     admin({
       // Role mapping for RW system

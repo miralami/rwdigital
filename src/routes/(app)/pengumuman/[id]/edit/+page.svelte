@@ -28,6 +28,17 @@
       <textarea id="isi" name="isi" class="input-base" rows="6" required>{p.isi}</textarea>
     </div>
 
+    <div class="field-row">
+      <div class="field">
+        <label for="tanggalMulai">Tanggal Mulai Tayang</label>
+        <input id="tanggalMulai" name="tanggalMulai" class="input-base" type="date" value={p.tanggalMulai ?? ''} />
+      </div>
+      <div class="field">
+        <label for="tanggalSelesai">Tanggal Berakhir Tayang</label>
+        <input id="tanggalSelesai" name="tanggalSelesai" class="input-base" type="date" value={p.tanggalSelesai ?? ''} />
+      </div>
+    </div>
+
     <div class="field-checkbox">
       <label class="checkbox-label">
         <input type="checkbox" name="ditampilkan" checked={p.ditampilkan} />

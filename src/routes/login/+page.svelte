@@ -1,7 +1,12 @@
 <script lang="ts">
   import { signIn } from '$lib/auth-client';
   import { goto } from '$app/navigation';
-  import { Building2, Mail, Lock, AlertCircle, ArrowRight, Loader2 } from '@lucide/svelte';
+  import Building2 from '@lucide/svelte/icons/building-2';
+  import Mail from '@lucide/svelte/icons/mail';
+  import Lock from '@lucide/svelte/icons/lock';
+  import AlertCircle from '@lucide/svelte/icons/alert-circle';
+  import ArrowRight from '@lucide/svelte/icons/arrow-right';
+  import Loader2 from '@lucide/svelte/icons/loader-2';
 
   let email    = $state('');
   let password = $state('');

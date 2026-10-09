@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { X } from '@lucide/svelte';
+  import X from '@lucide/svelte/icons/x';
 
   interface Props {
     open: boolean;

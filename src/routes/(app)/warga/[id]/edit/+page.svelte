@@ -91,6 +91,19 @@
       </div>
     </div>
 
+    <div class="field">
+      <label for="alasan">Alasan Perubahan Data <span class="required">*</span></label>
+      <input
+        id="alasan"
+        name="alasan"
+        class="input-base"
+        type="text"
+        placeholder="Contoh: Perbaikan ejaan nama / pembaruan status pekerjaan"
+        required
+      />
+      <span class="field-hint">Wajib dicatat untuk jejak audit kependudukan (SF-KP-02).</span>
+    </div>
+
     <div class="form-actions">
       <a href="/warga/{w.id}" class="btn btn-secondary">Batal</a>
       <button type="submit" class="btn btn-primary">Simpan perubahan</button>

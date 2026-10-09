@@ -8,12 +8,14 @@ Sistem Informasi RW — aplikasi capstone untuk digitalisasi administrasi tingka
 
 ## Aturan Utama
 
-1. **Jangan menambah fitur baru di luar scope yang sudah confirmed** (lihat `PROJECT.md` § Status Fitur) tanpa konfirmasi eksplisit dari pengguna. Scope proyek ini sengaja dibatasi ketat berdasarkan hasil wawancara mitra, bukan daftar "fitur yang keren untuk RW pada umumnya".
-2. **Fitur "Surat-Menyurat" masih berstatus pending** — jangan build out modul ini secara penuh sebelum flow-nya terkonfirmasi (siapa approve, tanda tangan digital atau manual, volume, dst.) dan tercatat di `PROJECT.md`.
-3. **Istilah domain tetap pakai Bahasa Indonesia** di kode (nama entity, field DB, variabel domain) — `warga`, `kk`, `rt`, `rw`, `iuran`, `kas`, `pengurus`, dst. Jangan diterjemahkan ke Inggris (`resident`, `dues`, dll.), supaya istilah di kode konsisten dengan istilah yang dipakai mitra dan dokumen akademik capstone.
-4. **Data yang disimpan bersifat sensitif** — NIK, No. KK, alamat, dan data keuangan warga adalah PII dan data finansial. Fitur apa pun yang menyentuh data ini harus mempertimbangkan validasi input dan kontrol akses berbasis role sejak awal, walau ini masih tahap MVP/capstone.
-5. Kalau diminta menambah fitur dari daftar "Fitur Dikesampingkan dari MVP" di `PROJECT.md` (CCTV, dashboard statistik, manajemen pengurus, inventaris, agenda, pengaduan warga), **konfirmasi dulu ke pengguna** sebelum mengerjakan.
-6. Kalau ragu apakah sesuatu termasuk scope MVP, cek tabel prioritas di `PROJECT.md` (🔴 Core / 🟠 Penting / 🟡 Opsional) sebelum mengerjakan, dan tanyakan jika masih ambigu.
+1. **Scope proyek mengacu pada `draftrevised.md` dan `PROJECT.md`**. Scope mencakup 5 modul Core: Kependudukan, Surat-Menyurat, Kas RW, Iuran Warga, dan Pengumuman/Informasi.
+2. **Fitur "Surat-Menyurat" masuk dalam Core MVP** sesuai spesifikasi SF-SR-01 s/d SF-SR-07 pada `draftrevised.md` (pengajuan surat, unggah berkas, verifikasi pengurus, persetujuan/penerbitan admin RW, unduh slip/PDF).
+3. **Pendaftaran akun warga dilakukan terpusat oleh Admin RW** (bukan pendaftaran mandiri/publik), untuk mencegah warga mendaftar menggunakan NIK milik orang lain.
+4. **Penyimpanan berkas** (bukti kas, dokumen syarat surat) disimpan di direktori lokal server.
+5. **Istilah domain tetap pakai Bahasa Indonesia** di kode (nama entity, field DB, variabel domain) — `warga`, `kk`, `rt`, `rw`, `surat`, `iuran`, `kas`, `pengurus`, dst. Jangan diterjemahkan ke Inggris (`resident`, `dues`, dll.), supaya istilah di kode konsisten dengan istilah yang dipakai mitra dan dokumen akademik capstone.
+6. **Data yang disimpan bersifat sensitif** — NIK, No. KK, alamat, dan data keuangan warga adalah PII dan data finansial. Terapkan data masking pada tampilan tabel (`3275••••••••0001`), validasi input Zod 16 digit, dan kontrol akses berbasis role.
+5. Kalau diminta menambah fitur dari daftar "Fitur Dikesampingkan dari MVP" di `PROJECT.md` (CCTV, manajemen pengurus, inventaris), **konfirmasi dulu ke pengguna** sebelum mengerjakan.
+6. Kalau ragu apakah sesuatu termasuk scope MVP, cek tabel prioritas di `PROJECT.md` (Core MVP / High Priority / Medium) sebelum mengerjakan, dan tanyakan jika masih ambigu.
 
 ## Tech Stack
 
@@ -101,7 +103,7 @@ drizzle.config.ts          ← Drizzle kit config
 - **Bendahara** — akses modul keuangan & iuran
 - **Warga** — akses terbatas: lihat info RW, ajukan surat, bayar iuran (jika QRIS aktif)
 
-> Sesuaikan role ini kalau hasil wawancara mitra menunjukkan struktur pengurus yang berbeda.
+> Role ini berdasarkan asumsi struktur RW umum — sesuaikan jika nanti ada klarifikasi dari mitra.
 
 ## Cara Kerja yang Diharapkan
 
@@ -109,8 +111,15 @@ drizzle.config.ts          ← Drizzle kit config
 - Kalau task menyentuh scope fitur (menambah field, mengubah alur, menambah modul), cek dulu apakah itu selaras dengan `PROJECT.md`. Kalau tidak selaras atau tidak disebutkan di sana, tanyakan ke pengguna alih-alih berasumsi.
 - Jangan generate data dummy yang terlihat seperti data warga sungguhan (nama, NIK, dll.) dengan format yang bisa disalahartikan sebagai data asli — gunakan penanda jelas seperti "Contoh Warga 1" untuk seed/test data.
 
+## Dokumen Word / SharePoint
+
+- Draft laporan: `docs/laporan/draft.md` — kalau diminta "tulis ke Word/SharePoint", isinya ditransfer ke proposal di SharePoint, **bukan** generate `.docx` lokal.
+- Lokasi folder kerja capstone: `C:\Users\Sena\OneDrive\Kuliah\Semester 7\Capstone`
+- Dokumen proposal: `Capstone.docx` di SharePoint Telkom, diakses lewat shortcut `Capstone.docx.url` di folder tersebut (URL dibaca dari shortcut, jangan hardcode).
+- Selalu pakai skill **`capstone-word`** (`C:\Users\Sena\.agents\skills\capstone-word\SKILL.md` + `word-helper.ps1`, Word COM) untuk membaca/mengedit dokumennya — aturan keras & struktur heading ada di skill itu.
+
 ## Referensi
 
 - `PROJECT.md` — konteks produk, scope fitur, dan status tiap modul
-- `draft.md` — current laporan
-- `Checklist-Fitur-Sistem-Informasi-RW.md` - current checklist of features that is not fixed yet
+- `docs/laporan/draft.md` — laporan capstone
+- `docs/checklist.md` — checklist fitur untuk presentasi ke RW

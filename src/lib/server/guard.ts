@@ -40,8 +40,8 @@ export type RouteGroup = {
   allowed: readonly Role[];
 };
 
-/** Surface manajemen: dashboard, data warga, kas, iuran, pengumuman. */
-export const ADMIN_ROUTES = ['/dashboard', '/warga', '/kas', '/iuran', '/pengumuman'] as const;
+/** Surface manajemen: dashboard, data warga, kas, iuran, pengumuman, surat. */
+export const ADMIN_ROUTES = ['/dashboard', '/warga', '/kas', '/iuran', '/pengumuman', '/surat'] as const;
 
 /** Portal warga. Staff boleh masuk juga supaya bisa preview. */
 export const WARGA_ROUTES = [WARGA_PORTAL] as const;
