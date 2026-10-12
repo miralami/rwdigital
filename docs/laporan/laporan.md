@@ -431,19 +431,19 @@ NFRA-06	Pengguna tanpa sesi yang mengakses rute terlindungi diarahkan ke halaman
 NFRA-07	engguna warga hanya dapat melihat data iuran dan pembayaran miliknya sendiri, bukan data warga lain	Must
 NFRA-08	Pembuatan akun dan penetapan peran hanya dilakukan oleh admin_rw. Peran bawaan akun baru adalah warga (least privilege)	Must
 NFRA-09	Sesi pengguna berakhir otomatis setelah periode tidak aktif yang ditetapkan (target awal 60 menit, disesuaikan setelah wawancara)	Should
-NFRA-10	NIK dan No. KK disamarkan pada tampilan daftar. Nilai utuh hanya ditampilkan pada halaman detail untuk peran yang berwenang (admin_rw dan pengurus_rt wilayahnya). Contoh: 3275••••••••0001	Should
+NFRA-10	NIK dan No. KK disamarkan pada tampilan daftar. Nilai utuh hanya ditampilkan pada halaman detail untuk peran yang berwenang (admin_rw dan pengurus_rt wilayahnya). Peran bendahara hanya dapat melihat nilai yang disamarkan. Contoh: 3275••••••••0001	Should
 
 3.	Matriks Role-Based Access Control (RBAC)
 
 Tabel 5 Matriks Role-Based Access Control (RBAC)
 Modul / Sumber Daya	admin_rw	pengurus_rt	bendahara	warga
 Warga & KK	C, R, U, D	C, R, U,R*	R	N/A
-RT & RW	R, U	R,R	R	N/A
+RT & RW	R, U	R	R	N/A
 Pengumuman	C, R, U, D	R	R	R
 Iuran	C, R, U, D	R	C, R, U, D	R*
 Kas	C, R, U, D	R	C, R, U, D	N/A
 Pengurus	C, R, U, D	R	R	N/A
-Surat	C, R, U, D	C, R, U,R*	R
+Surat	C, R, U, D	C, R, U*	R
 	C, R*
 
 Keterangan:

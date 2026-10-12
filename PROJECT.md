@@ -1,5 +1,9 @@
 # PROJECT.md — Sistem Informasi RW
 
+> **Otoritas tertinggi proyek: `docs/laporan/laporan.md`.** Dokumen ini (dan `plan.md`,
+> `docs/checklist.md`) adalah dokumen pendukung yang diselaraskan ke laporan.
+> Status pengerjaan aktual per modul: `docs/kanban/backlog.md`.
+
 ## Ringkasan
 
 Aplikasi digitalisasi administrasi tingkat RW (Rukun Warga), dikembangkan sebagai capstone project bersama mitra RW nyata. Tujuannya membantu pengurus RW mengelola data kependudukan, keuangan kas, iuran warga, informasi/pengumuman, dan (berpotensi) surat-menyurat — secara terpusat, menggantikan proses yang saat ini tersebar di WhatsApp, dokumen fisik, dan spreadsheet terpisah per RT.
@@ -19,29 +23,33 @@ Dalam ketiadaan wawancara, regulasi resmi menjadi dasar utama penentuan scope �
 
 > Feature set ini ditetapkan tanpa wawancara mitra (tidak memungkinkan), berdasarkan analisis regulasi resmi (UU Desa 6/2014, Permendagri 18/2018) dan plausibility untuk implementasi capstone.
 
-### Core MVP (Confirmed — Berdasarkan draftrevised.md)
+### Core MVP (Confirmed — Berdasarkan laporan.md)
 
 | # | Fitur | Dasar Hukum / Regulasi | Status |
 |---|---|---|---|
 | 1 | Manajemen Kependudukan | Facilitative duty — RW bantu pendataan warga (Permendagri 18/2018) | Sudah ada (perlu penyempurnaan) |
 | 2 | Surat-Menyurat | Pelayanan administrasi warga (SF-SR-01..07) | Dalam perancangan / scaffolding |
 | 3 | Kas RW | Dana swadaya masyarakat diakui | Sudah ada (perlu penyempurnaan) |
-| 4 | Iuran | Dana swadaya masyarakat | Sudah ada (perlu penyempurnaan) |
-| 5 | Pengumuman | Distribusi informasi = fungsi resmi | Sudah ada (perlu penyempurnaan) |
+| 4 | Kas RT | Dana swadaya masyarakat per RT (uang sosial, kematian, dll.) | Baru — tambahan MVP |
+| 5 | Iuran | Dana swadaya masyarakat | Sudah ada (perlu penyempurnaan) |
+| 6 | Pengumuman & Event | Distribusi informasi = fungsi resmi | Perluasan: event time-based + attachment |
+| 7 | Landing Page & Dashboard Statistik | Analisis data internal + profil RW publik | Baru — MVP |
 
 ### High Priority (Phase 2)
 
 | # | Fitur | Dasar Hukum | Status |
 |---|---|---|---|
-| 6 | Aspirasi & Pengaduan | Fungsi resmi — Permendagri 18/2018 | Belum ada |
-| 7 | Notifikasi | Pendukung fungsi distribusi informasi | Belum ada |
+| 8 | Aspirasi & Pengaduan | Fungsi resmi — Permendagri 18/2018 | Belum ada |
+| 9 | Notifikasi | Pendukung fungsi distribusi informasi | Belum ada |
+| 10 | Angka Kelahiran / Produktif / Pensiun (Computed Stats) | Turunan data kependudukan | Belum ada |
+| 11 | Statistik Event (Kehadiran) | Analisis data internal | Belum ada |
 
 ### Medium (Phase 3)
 
 | # | Fitur | Dasar Hukum | Status |
 |---|---|---|---|
-| 8 | Agenda & Kegiatan | Musyawarah = fungsi resmi | Belum ada |
-| 9 | Dashboard Statistik | Analisis data internal | Belum ada |
+| 12 | Agenda & Kegiatan | Musyawarah = fungsi resmi | Belum ada |
+| 13 | Dashboard Statistik Lanjutan (Trend, Prediksi) | Analisis data internal | Belum ada |
 
 ### Out of Scope
 
@@ -63,7 +71,8 @@ Modul-modul berikut **sengaja tidak masuk scope** dan tidak ada rencana pengerja
 - Manajemen CCTV / Keamanan Lingkungan
 - Manajemen Pengurus (struktur organisasi, hak akses granular)
 - Fasilitas & Inventaris RW
-- Dashboard statistik (sudah diprioritaskan sebagai Phase 3 — lihat tabel di atas)
+- Absensi / Check-in Event (belum ada urgensi)
+- CMS untuk Landing Page (konten statis cukup)
 
 Jangan build fitur-fitur ini tanpa konfirmasi eksplisit dari pengguna — lihat `CLAUDE.md` § Aturan Utama.
 
@@ -76,9 +85,11 @@ Jangan build fitur-fitur ini tanpa konfirmasi eksplisit dari pengguna — lihat 
 | **KK (Kartu Keluarga)** | Unit keluarga, terhubung ke satu RT |
 | **Warga** | Individu, terhubung ke satu KK |
 | **Iuran** | Tagihan periodik ke warga/KK (nominal, periode, jenis) |
-| **Transaksi Kas** | Pemasukan/pengeluaran kas RW, terhubung ke kategori |
+| **Transaksi Kas RW** | Pemasukan/pengeluaran kas tingkat RW, terhubung ke kategori |
+| **Transaksi Kas RT** | Pemasukan/pengeluaran kas tingkat RT (uang sosial, kematian, dll.), terpisah per RT |
 | **Surat** | Pengajuan & penerbitan surat (SKCK, SKTM, domisili, dll.) — SF-SR-01..07 |
 | **Pengumuman** | Informasi yang disebarkan ke warga |
+| **Event** | Kegiatan berbasis waktu (jadwal, attachment notulen, statistik kehadiran) |
 
 ## Aktor / Role & Manajemen Akun
 
@@ -119,21 +130,22 @@ Data eksternal (mis. statistik penetrasi internet nasional, adopsi QRIS nasional
 - [x] Finalisasi scope MVP berdasarkan regulasi
 - [x] Penentuan tech stack & arsitektur
 - [x] Desain database
-- [ ] Implementasi
+- [ ] Implementasi — sedang berjalan (status per modul: `docs/kanban/backlog.md`)
 - [ ] Pengujian dengan mitra
 
 ## Referensi
 
 - `CLAUDE.md` — panduan kerja untuk Claude Code di repo ini
-- `docs/laporan/draft.md` — draft laporan capstone
+- `docs/laporan/laporan.md` — laporan capstone (otoritas tertinggi)
+- `docs/kanban/backlog.md` — status pengerjaan aktual per modul
 - `docs/checklist.md` — checklist fitur untuk presentasi ke RW
 
 ## Tech Stack
 
-> ⚠️ Belum ditentukan dalam percakapan sejauh ini — lengkapi begitu stack sudah diputuskan.
-
-- Backend: `[TODO]`
-- Frontend: `[TODO]`
-- Database: `[TODO]`
-- Payment gateway / QRIS provider: `[TODO]`
-- Hosting: `[TODO]`
+- **Bahasa & Framework**: SvelteKit 2 + Svelte 5 (TypeScript, runes mode)
+- **CSS**: Tailwind CSS v4 via `@tailwindcss/vite` — design tokens di `src/app.css` (@theme)
+- **Database**: SQLite via Turso/libsql (`file:local.db` lokal, `libsql://...` production)
+- **ORM / Query Layer**: Drizzle ORM (`drizzle-orm/libsql`) + drizzle-kit migrations
+- **Autentikasi**: Better Auth dengan `admin` plugin — roles: `admin_rw`, `pengurus_rt`, `bendahara`, `warga`
+- **Payment Gateway / QRIS Provider**: `[TODO — konfirmasi mitra dulu]`
+- **Hosting/Deployment**: `[TODO]`
