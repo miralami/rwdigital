@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pratinjau Landing Page — 3 Opsi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="design-tokens.css" />
+  <style>
+    .wrap { max-width: 68rem; margin-inline: auto; padding: var(--space-12) var(--space-5) var(--space-16); }
+    .intro { max-width: 46rem; margin-bottom: var(--space-10); }
+    .intro h1 { font-size: var(--text-display); line-height: var(--leading-display); letter-spacing: -0.025em; font-weight: 800; margin: 0; }
+    .intro p { font-size: var(--text-lg); color: var(--color-text-muted); margin: var(--space-4) 0 0; }
+    .note { margin-top: var(--space-5); font-size: var(--text-sm); color: var(--color-text-muted); background: var(--color-surface-muted); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); }
+    .grid { display: grid; gap: var(--space-5); grid-template-columns: 1fr; }
+    @media (min-width: 56rem) { .grid { grid-template-columns: repeat(3, 1fr); } }
+    .opt { display: flex; flex-direction: column; overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+    .opt:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--color-brand-200); }
+    .opt .thumb { height: 9.5rem; border-bottom: 1px solid var(--color-border); }
+    .opt .body { padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); flex: 1; }
+    .opt h2 { font-size: var(--text-xl); margin: 0; letter-spacing: var(--tracking-tight); }
+    .opt .rec { font-size: var(--text-xs); font-weight: 700; letter-spacing: var(--tracking-wide); text-transform: uppercase; color: var(--color-success); }
+    .opt p { margin: 0; font-size: var(--text-sm); color: var(--color-text-muted); }
+    .opt ul { margin: 0; padding-left: var(--space-5); font-size: var(--text-sm); color: var(--color-text-muted); display: flex; flex-direction: column; gap: var(--space-1); }
+    .opt .go { margin-top: auto; padding-top: var(--space-2); font-size: var(--text-sm); font-weight: 700; color: var(--color-accent); display: inline-flex; align-items: center; gap: var(--space-1); }
+    /* thumbnails: mini wireframes */
+    .tw { padding: var(--space-3); height: 100%; display: flex; flex-direction: column; gap: 5px; }
+    .tw .bar { height: 10px; border-radius: 3px; background: var(--color-border); }
+    .tw .bar.navy { background: var(--color-brand-700); }
+    .tw .bar.tall { height: 26px; background: var(--color-brand-900); border-radius: 4px; }
+    .tw .row { display: flex; gap: 5px; }
+    .tw .row > * { flex: 1; }
+    .tw .box { height: 22px; border-radius: 4px; background: var(--color-surface-muted); border: 1px solid var(--color-border); }
+    .tw .stats { display: flex; gap: 5px; }
+    .tw .stats > * { flex: 1; height: 30px; border-radius: 4px; background: var(--color-brand-100); border: 1px solid var(--color-brand-200); }
+    .tw-diff { background: linear-gradient(150deg, var(--color-brand-900), var(--color-brand-700)); }
+    .tw-diff .bar { background: color-mix(in oklab, #fff 30%, transparent); }
+    .tw-diff .box { background: color-mix(in oklab, #fff 12%, transparent); border-color: transparent; }
+    .tw-diff .stats > * { background: color-mix(in oklab, #fff 16%, transparent); border-color: transparent; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="intro">
+      <p class="eyebrow">RW Digital · Pratinjau desain</p>
+      <h1>Tiga arah untuk landing page RW 06</h1>
+      <p>Semua opsi memakai design system yang sama — navy brand, Plus Jakarta Sans, komponen <code>.btn</code>/<code>.card</code>/<code>.badge</code>. Yang beda hanya struktur, penekanan, dan tipografi. Konten masih contoh (placeholder rapi); modul Pengumuman nanti dibaca dari tabel <code>pengumuman</code>.</p>
+      <p class="note"><strong>Cara lihat:</strong> buka salah satu halaman lalu perkecil/perbesar jendela. Karena tidak ada foto asli, semua area foto memakai pola placeholder bergaris supaya terlihat jujur, bukan gradient palsu.</p>
+    </header>
+
+    <div class="grid">
+      <a class="opt card" href="option-a.html">
+        <div class="thumb tw">
+          <div class="bar navy" style="width:40%"></div>
+          <div class="bar tall"></div>
+          <div class="stats"><span></span><span></span><span></span></div>
+          <div class="row"><span class="box"></span><span class="box"></span></div>
+          <div class="bar" style="width:70%"></div>
+          <div class="bar" style="width:52%"></div>
+        </div>
+        <div class="body">
+          <p class="rec">★ Direkomendasikan</p>
+          <h2>A · Portal Resmi</h2>
+          <p>Content-first, mengikuti standar INA Digital & GOV.UK. Struktur paling lengkap dan paling "portal kelurahan".</p>
+          <ul>
+            <li>Hero 2 kolom + Layanan Cepat</li>
+            <li>Pengumuman &amp; Agenda</li>
+            <li>Sambutan Ketua RW</li>
+            <li>Bagan pengurus berkonektor benar</li>
+          </ul>
+          <span class="go">Buka pratinjau →</span>
+        </div>
+      </a>
+
+      <a class="opt card" href="option-b.html">
+        <div class="thumb tw tw-diff">
+          <div class="bar" style="width:34%"></div>
+          <div class="stats" style="flex:1"><span style="height:auto"></span><span style="height:auto"></span></div>
+          <div class="row"><span class="box"></span><span class="box"></span><span class="box"></span></div>
+          <div class="bar" style="width:60%"></div>
+        </div>
+        <div class="body">
+          <h2>B · Wajah Lingkungan</h2>
+          <p>Hero foto penuh + galeri. Paling hangat dan paling berkesan — tapi butuh foto asli kegiatan/prestasi.</p>
+          <ul>
+            <li>Hero fotografi full-bleed</li>
+            <li>Kegiatan &amp; galeri foto</li>
+            <li>Pengurus sebagai kartu wajah</li>
+            <li>Storytelling profil</li>
+          </ul>
+          <span class="go">Buka pratinjau →</span>
+        </div>
+      </a>
+
+      <a class="opt card" href="option-c.html">
+        <div class="thumb tw">
+          <div class="bar navy" style="width:46%"></div>
+          <div class="bar" style="width:80%"></div>
+          <div class="stats"><span></span><span></span><span></span><span></span></div>
+          <div class="bar navy" style="width:100%;height:26px"></div>
+          <div class="row"><span class="box"></span><span class="box"></span></div>
+        </div>
+        <div class="body">
+          <h2>C · Papan Data</h2>
+          <p>Transparansi sebagai bintang utama, gaya <code>data.go.id</code>/BPS. Statistik jadi centerpiece, profil dipadatkan.</p>
+          <ul>
+            <li>Hero ringkas, tanpa art</li>
+            <li>Bilah angka besar + chart penuh</li>
+            <li>Tabel per-RT</li>
+            <li>Profil/prestasi dipadatkan</li>
+          </ul>
+          <span class="go">Buka pratinjau →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

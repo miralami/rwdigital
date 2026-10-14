@@ -1,0 +1,334 @@
+/* ============================================================================
+   RW Digital — landing preview tokens
+   Mirror of src/app.css so the three mockups render with the REAL design
+   system (same navy ramp, radii, shadows, spacing, Plus Jakarta Sans).
+   Nothing here is new brand — the only additions are the display type tier
+   marked "PROPOSED", which Option A/C would add to @theme in app.css.
+   ========================================================================== */
+
+:root {
+  /* ─── semantic tokens (from app.css) ─── */
+  --color-bg:            oklch(0.972 0.004 250);
+  --color-surface:       oklch(1 0 0);
+  --color-surface-muted: oklch(0.958 0.005 250);
+  --color-border:        oklch(0.905 0.006 250);
+  --color-border-strong: oklch(0.755 0.012 250);
+  --color-text:          oklch(0.24 0.03 262);
+  --color-text-muted:    oklch(0.44 0.02 262);
+  --color-text-disabled: oklch(0.58 0.015 262);
+  --color-accent:        oklch(0.33 0.09 262);
+  --color-accent-hover:  oklch(0.27 0.08 262);
+  --color-accent-contrast: oklch(1 0 0);
+
+  --color-success:    oklch(0.47 0.13 152);
+  --color-success-bg: oklch(0.95 0.05 152);
+  --color-warning:    oklch(0.52 0.12 70);
+  --color-warning-bg: oklch(0.96 0.06 85);
+  --color-danger:     oklch(0.52 0.19 25);
+  --color-danger-bg:  oklch(0.96 0.04 25);
+  --color-info:       oklch(0.47 0.12 240);
+  --color-info-bg:    oklch(0.96 0.03 240);
+
+  /* ─── navy brand ramp ─── */
+  --color-brand-50:  oklch(0.975 0.015 255);
+  --color-brand-100: oklch(0.94 0.03 255);
+  --color-brand-200: oklch(0.88 0.055 255);
+  --color-brand-300: oklch(0.78 0.095 255);
+  --color-brand-400: oklch(0.65 0.13 255);
+  --color-brand-500: oklch(0.52 0.16 255);
+  --color-brand-600: oklch(0.40 0.16 255);
+  --color-brand-700: oklch(0.32 0.13 255);
+  --color-brand-800: oklch(0.24 0.09 255);
+  --color-brand-900: oklch(0.18 0.06 255);
+  --color-brand-950: oklch(0.13 0.04 255);
+
+  /* ─── radii ─── */
+  --radius-xs:   0.25rem;
+  --radius-sm:   0.375rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1.25rem;
+  --radius-full: 9999px;
+
+  /* ─── elevation ─── */
+  --shadow-xs:    0 1px 2px 0 oklch(0.20 0.02 262 / 0.05);
+  --shadow-sm:    0 1px 3px 0 oklch(0.20 0.02 262 / 0.06), 0 1px 2px -1px oklch(0.20 0.02 262 / 0.04);
+  --shadow-card:  0 1px 2px 0 oklch(0.20 0.02 262 / 0.05), 0 1px 3px -1px oklch(0.20 0.02 262 / 0.04);
+  --shadow-lg:    0 8px 24px -8px oklch(0.20 0.02 262 / 0.16), 0 2px 6px -2px oklch(0.20 0.02 262 / 0.08);
+  --shadow-modal: 0 24px 48px -12px oklch(0.20 0.02 262 / 0.25);
+
+  /* ─── fonts ─── */
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* ─── existing type scale ─── */
+  --text-2xs:  0.6875rem;
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.25rem;
+  --text-2xl:  1.5rem;
+  --text-3xl:  1.75rem;
+  --text-4xl:  2rem;
+  --text-5xl:  2.5rem;
+
+  /* ─── PROPOSED display tier (INA Digital-informed) ───
+     Display 40–52 / H2 28–36 / lead 18 / body 16. */
+  --text-display: clamp(2.5rem, 5.2vw, 3.25rem);
+  --text-title:   clamp(1.75rem, 3vw, 2.25rem);
+  --leading-display: 1.08;
+
+  --leading-tight:  1.2;
+  --leading-snug:   1.35;
+  --leading-normal: 1.55;
+
+  --tracking-tight: -0.015em;
+  --tracking-wide:  0.06em;
+
+  /* ─── spacing ─── */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+
+  --content-max: 80rem;
+  --header-height: 4.5rem;
+}
+
+/* ─── base ─── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  font-family: var(--font-sans);
+  font-size: 100%;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-height) + var(--space-4));
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--text-base);      /* PROPOSED: public body = 16px, not 14 */
+  line-height: var(--leading-normal);
+}
+
+a { color: inherit; }
+img { max-width: 100%; display: block; }
+:where(a, button, input, summary):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+::selection { background-color: var(--color-brand-100); }
+
+/* ─── layout helpers ─── */
+.container {
+  width: 100%;
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding-inline: var(--space-5);
+}
+@media (min-width: 48rem) { .container { padding-inline: var(--space-6); } }
+
+/* Section rhythm — .section is the default; .section-tight compresses;
+   full-bleed bands use .section-band. (PROPOSED: variation, not one padding.) */
+.section { padding-block: var(--space-12); }
+.section-tight { padding-block: var(--space-10); }
+.section-band {
+  background-color: var(--color-surface-muted);
+  border-block: 1px solid var(--color-border);
+}
+.section-inverse {
+  background: var(--color-brand-950);
+  color: #fff;
+}
+@media (min-width: 64rem) {
+  .section { padding-block: var(--space-16); }
+  .section-tight { padding-block: var(--space-12); }
+}
+
+/* Section heading block */
+.eyebrow {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-2);
+}
+.eyebrow-light { color: color-mix(in oklab, #fff 70%, transparent); }
+
+.section-head { max-width: 44rem; margin-bottom: var(--space-8); }
+.section-head h2 {
+  margin: 0;
+  font-size: var(--text-title);
+  font-weight: 800;
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+.section-head .sub {
+  margin: var(--space-3) 0 0;
+  font-size: var(--text-lg);
+  color: var(--color-text-muted);
+  line-height: var(--leading-normal);
+}
+
+.lead {
+  font-size: var(--text-lg);
+  line-height: var(--leading-normal);
+  color: color-mix(in oklab, #fff 86%, transparent);
+}
+
+/* ─── buttons (from app.css) ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 2.5rem;
+  padding: 0.5rem var(--space-4);
+  font: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+.btn svg { flex-shrink: 0; }
+.btn-sm { min-height: 2.125rem; padding: 0.3125rem var(--space-3); font-size: var(--text-xs); }
+.btn-lg { min-height: 2.75rem; padding: 0.625rem var(--space-5); font-size: var(--text-base); }
+.btn-block { width: 100%; }
+.btn-primary { background: var(--color-accent); color: var(--color-accent-contrast); border-color: var(--color-accent); }
+.btn-primary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
+.btn-secondary { background: var(--color-surface); color: var(--color-text); border-color: var(--color-border-strong); }
+.btn-secondary:hover { background: var(--color-surface-muted); }
+.btn-ghost { background: transparent; color: var(--color-text-muted); }
+.btn-ghost:hover { background: var(--color-surface-muted); color: var(--color-text); }
+/* on dark */
+.btn-onlight { background: #fff; color: var(--color-brand-900); border-color: #fff; }
+.btn-onlight:hover { background: color-mix(in oklab, #fff 88%, var(--color-brand-200)); }
+.btn-outline-light { background: transparent; color: #fff; border-color: color-mix(in oklab, #fff 45%, transparent); }
+.btn-outline-light:hover { background: color-mix(in oklab, #fff 14%, transparent); border-color: #fff; }
+
+/* ─── card / badge (from app.css) ─── */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.badge.variant-default { background: var(--color-surface-muted); color: var(--color-text); border-color: var(--color-border); }
+.badge.variant-success { background: var(--color-success-bg); color: var(--color-success); border-color: color-mix(in oklab, var(--color-success) 30%, transparent); }
+.badge.variant-warning { background: var(--color-warning-bg); color: var(--color-warning); border-color: color-mix(in oklab, var(--color-warning) 35%, transparent); }
+.badge.variant-danger  { background: var(--color-danger-bg);  color: var(--color-danger);  border-color: color-mix(in oklab, var(--color-danger) 30%, transparent); }
+.badge.variant-info    { background: var(--color-info-bg);    color: var(--color-info);    border-color: color-mix(in oklab, var(--color-info) 30%, transparent); }
+.badge.variant-brand   { background: var(--color-brand-50);   color: var(--color-brand-800);border-color: var(--color-brand-200); }
+
+.badge-dot { width: .375rem; height: .375rem; border-radius: var(--radius-full); background: currentColor; flex-shrink: 0; }
+
+/* image / photo placeholder — honest, neutral, no fake gradient */
+.ph {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    repeating-linear-gradient(135deg, color-mix(in oklab, var(--color-brand-100) 55%, transparent) 0 14px, transparent 14px 28px),
+    var(--color-brand-50);
+  color: var(--color-brand-600);
+  border: 1px solid var(--color-brand-100);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.ph-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-brand-700);
+  background: color-mix(in oklab, #fff 82%, transparent);
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+}
+.ph-dark {
+  background:
+    repeating-linear-gradient(135deg, color-mix(in oklab, #fff 8%, transparent) 0 16px, transparent 16px 32px),
+    linear-gradient(150deg, var(--color-brand-900), var(--color-brand-800));
+  border-color: color-mix(in oklab, #fff 12%, transparent);
+}
+.ph-dark .ph-label { background: color-mix(in oklab, #000 30%, transparent); color: #fff; }
+
+/* avatar — clean initials placeholder for pengurus (no fake faces, no em-dash) */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-full);
+  background: var(--color-brand-100);
+  color: var(--color-brand-700);
+  font-weight: 700;
+  font-size: var(--text-lg);
+  border: 1px solid var(--color-brand-200);
+  flex-shrink: 0;
+}
+.avatar-lg { width: 7rem; height: 7rem; font-size: var(--text-3xl); }
+.avatar-sm { width: 2.25rem; height: 2.25rem; font-size: var(--text-sm); }
+
+/* ─── preview chrome (not part of the design system) ─── */
+.preview-bar {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-5);
+  background: oklch(0.16 0.03 262);
+  color: #fff;
+  font-size: var(--text-xs);
+}
+.preview-bar strong { font-weight: 700; letter-spacing: var(--tracking-wide); text-transform: uppercase; opacity: .7; }
+.preview-bar a {
+  color: #fff;
+  text-decoration: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-full);
+  border: 1px solid color-mix(in oklab, #fff 25%, transparent);
+}
+.preview-bar a:hover { background: color-mix(in oklab, #fff 14%, transparent); }
+.preview-bar a.active { background: #fff; color: var(--color-brand-900); border-color: #fff; font-weight: 700; }
+.preview-bar .spacer { margin-left: auto; }
