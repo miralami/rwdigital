@@ -13,19 +13,19 @@ Bukti = path kode/route/skema yang bisa diverifikasi (atau `—` bila belum ada)
 
 | Epic | Nama | PIC | Done | In Progress | Backlog | Won't |
 |---|---|---|---|---|---|---|
-| `EPIC-0` | Fondasi & Infrastruktur | Afif | 5 | 1 | 0 | 0 |
-| `EPIC-1` | Publik, Landing Page & Profil RW | Afif | 0 | 0 | 2 | 0 |
+| `EPIC-0` | Fondasi & Infrastruktur | Afif | 6 | 0 | 0 | 0 |
+| `EPIC-1` | Publik, Landing Page & Profil RW | Afif | 2 | 0 | 0 | 0 |
 | `EPIC-2` | Informasi, Event & Humas | Alizha | 1 | 1 | 3 | 1 |
 | `EPIC-3` | Kependudukan & Dashboard Internal | Josua | 5 | 3 | 1 | 0 |
 | `EPIC-4` | Keuangan & Kas RT | Safira | 5 | 2 | 1 | 1 |
 | `EPIC-5` | Surat-Menyurat | Zidan | 5 | 1 | 2 | 0 |
 | — | Grey-out lintas epic | — | — | — | — | 4 |
-| **Total** | | | **21** | **8** | **9** | **6** |
+| **Total** | | | **24** | **7** | **7** | **6** |
 
 > Total kartu: **38** kartu fungsional + **6** grey-out = **44** item papan (+ 6 Epic = **50** item di board).
 
-> Angka `In Progress` = 8 dari limit papan 10, **tetapi** ada pelanggaran WIP per orang (Josua = 3).
-> Rekonsiliasi ada di `board.md` §4.
+> Angka `In Progress` = 7 dari limit papan 10, **tetapi** ada pelanggaran WIP per orang (Josua = 3).
+> Rekonsiliasi ada di `board.md` §3.
 
 ---
 
@@ -40,31 +40,34 @@ PIC: Afif (`miralami`) · Epic ini tidak muncul di laporan sebagai modul, tapi m
 | FND-03 | Autentikasi (Better Auth) + RBAC 4 peran + route guard *fail-closed* | — | must | **Done** | `src/lib/server/auth.ts`, `guard.ts`, `permissions.ts` |
 | FND-04 | Pustaka komponen UI bersama (Button, Card, DataTable, Modal, Sheet, StatCard, …) | — | must | **Done** | `src/lib/components/` (14 komponen) |
 | FND-05 | Dokumentasi & panduan kerja proyek | — | should | **Done** | `CLAUDE.md`, `PROJECT.md`, `README.md`, `docs/` |
-| FND-06 | **Membangun papan Kanban + mengisi backlog (rekonstruksi as-is)** | — | must | **In Progress** | `docs/kanban/*` (sedang dikerjakan) |
+| FND-06 | **Membangun papan Kanban + mengisi backlog (rekonstruksi as-is)** | — | must | **Done** | `docs/kanban/*` (backlog, board, workflow) + papan *Capstone - Gr30* (50 item) |
 
 ---
 
 ## EPIC-1 — Modul Publik, Landing Page & Profil RW
 
-PIC: Afif (`miralami`) · **Belum ada kode sama sekali.** Route `/` saat ini hanya me-redirect ke login/portal/dashboard.
+PIC: Afif (`miralami`) · **Selesai 15 Okt 2026.** Landing page publik ada di
+`src/routes/+page.svelte` (data di `+page.server.ts`), diakses tanpa login. Pengumuman & agenda
+dibaca dari tabel `pengumuman` (`ditampilkan=true`); tanggal diformat di server agar tidak ada
+*hydration mismatch*.
 
 | Kode | Kartu | SF | MoSCoW | Status | Bukti |
 |---|---|---|---|---|---|
-| LP-01 | Landing Page Publik (statis): profil RW (visi, misi, sejarah singkat), SOTK/bagan pengurus, seksi prestasi + galeri foto | *belum ada kode SF* | must | **Backlog** | — |
-| LP-02 | Visualisasi statistik publik: grafik distribusi penduduk per RT, komposisi usia (produktif vs lansia/pensiun), indikator ringkas (kelahiran baru, total warga, rasio produktif) | turunan `SF-KP-07` | must | **Backlog** | — |
+| LP-01 | Landing Page Publik (statis): profil RW (visi, misi, sejarah singkat), SOTK/bagan pengurus, seksi prestasi + galeri foto | *belum ada kode SF* | must | **Done** | `src/routes/+page.svelte`, `+page.server.ts` (commit `1234ab0`) |
+| LP-02 | Visualisasi statistik publik: grafik distribusi penduduk per RT, komposisi usia (produktif vs lansia/pensiun), indikator ringkas (kelahiran baru, total warga, rasio produktif) | turunan `SF-KP-07` | must | **Done** | `src/routes/+page.svelte`, `src/lib/components/BarChart.svelte`, `DonutChart.svelte` (commit `1234ab0`) |
 
 **Catatan:** kode SF untuk kedua kartu ini belum ada di `laporan.md` §3.3.4 → lihat `temuan-inkonsistensi.md` (F3).
 
 **Acceptance criteria ringkas — LP-01**
-- [ ] Halaman publik dapat diakses **tanpa login**.
-- [ ] Memuat visi, misi, sejarah, SOTK/bagan pengurus, prestasi + galeri.
-- [ ] Konten **statis** (tanpa CMS dinamis — sesuai grey-out `W-02`).
+- [x] Halaman publik dapat diakses **tanpa login**.
+- [x] Memuat visi, misi, sejarah, SOTK/bagan pengurus, prestasi. *(galeri foto belum ada — belum ada foto asli; area foto memakai placeholder jujur)*
+- [x] Tanpa CMS baru — profil/visi/misi/sejarah/SOTK/prestasi tetap statis. *Catatan deviasi: pengumuman & agenda dibaca dari modul eksisting (tabel `pengumuman`), bukan konten statis.*
 
 **Acceptance criteria ringkas — LP-02**
-- [ ] Grafik distribusi penduduk per RT.
-- [ ] Grafik komposisi usia (produktif vs lansia/pensiun).
-- [ ] Indikator ringkas: kelahiran baru, total warga, rasio produktif.
-- [ ] Grafik ringan (Chart.js atau SVG native) dan benar saat data kosong.
+- [x] Grafik distribusi penduduk per RT. (`src/lib/components/BarChart.svelte`)
+- [x] Grafik komposisi usia (produktif vs lansia/pensiun). (`src/lib/components/DonutChart.svelte`)
+- [x] Indikator ringkas: kelahiran baru, total warga, rasio produktif.
+- [x] Grafik ringan (SVG native) dan benar saat data kosong.
 
 ---
 
@@ -190,12 +193,13 @@ PIC: Zidan (`elfarizidan`) · **Status scope perlu ditegaskan** (lihat `temuan-i
 
 ## Kartu Terverifikasi "Tidak Ada" (bukti ketiadaan)
 
-Hasil pencarian kode (grep) untuk memastikan status `Backlog` bukan tebakan:
+Hasil pencarian kode (grep) untuk memastikan status `Backlog` bukan tebakan
+(**audit per 12 Okt 2026**, saat kartu masih `Backlog`; LP-01/LP-02 kini sudah diimplementasikan):
 
 | Kata kunci dicari | Hasil | Implikasi |
 |---|---|---|
 | `kas_rt` / `kasRt` / `transaksiKasRt` | tidak ditemukan | KU-01 benar-benar belum ada |
-| `prestasi` / `sotk` / `visi` / `misi` / `sejarah` | tidak ditemukan | LP-01 benar-benar belum ada |
+| `prestasi` / `sotk` / `visi` / `misi` / `sejarah` | tidak ditemukan *(saat audit)* | LP-01 belum ada saat audit — **kini sudah ada** di `src/routes/+page.svelte` |
 | `lokasi` (sebagai field event) | tidak ditemukan | EV-01 belum lengkap |
 | `produktif` | tidak ditemukan | KP-01 bucket belum sesuai spesifikasi |
 | `tandaTangan` / `signature` (logika) | tidak ditemukan | SR-03b belum ada |

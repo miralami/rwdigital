@@ -5,11 +5,15 @@
 > GitHub Project yang sudah terpasang** beserta **peta kartu ↔ nomor issue** (`gh` CLI belum
 > terpasang, jadi papan diisi lewat GraphQL — lihat §5).
 
-Terakhir disusun: 12 Okt 2026
+Terakhir disusun: 12 Okt 2026 · Diperbarui: 15 Okt 2026 (lihat §5.1)
 
 ---
 
-## 1. Snapshot Papan — Kondisi As-Is (apa adanya, sebelum rekonsiliasi)
+## 1. Snapshot Papan — Kondisi As-Is per 12 Okt 2026 (baseline, sebelum rekonsiliasi)
+
+> ⚠️ **Snapshot historis, bukan kondisi terkini.** Angka/kolom di bawah menggambarkan papan
+> saat baseline 12 Okt 2026 (dipakai laporan Bab IV). Kondisi terkini ada di §5 (**distribusi
+> aktual**); pergerakan kartu sejak baseline ada di §5.1.
 
 ```
 ┌──────────────────┬────────────────────┬────────────────────┬───────────────────────┬──────────────────────┐
@@ -34,7 +38,7 @@ Terakhir disusun: 12 Okt 2026
 
 ---
 
-## 2. Rekap Status
+## 2. Rekap Status (per 12 Okt 2026)
 
 | Kolom | Jumlah | Kartu |
 |---|---|---|
@@ -109,7 +113,10 @@ Papan **sudah dibuat dan terisi** (bukan lagi panduan manual).
 | Opsi Status | `Todo`=`b3059e5f` · `In Progress`=`df686dea` · `Done`=`cd8eab33` · `Won't`=`31d91e7d` |
 | Total item | **50** (6 Epic + 38 kartu + 6 grey-out) |
 
-Distribusi aktual: **Done 21 · In Progress 8 · Todo 15 · Won't 6**.
+Distribusi aktual: **Done 25 · In Progress 7 · Todo 12 · Won't 6** (per 15 Okt 2026).
+
+> Snapshot 12 Okt 2026: Done 21 · In Progress 8 · Todo 15 · Won't 6. Selisih sepenuhnya berasal
+> dari pergerakan kartu Track Afif (`miralami`) — LP-01, LP-02, EPIC-1 & FND-06 (lihat §5.1).
 
 Update dilakukan lewat GraphQL (MCP GitHub belum punya tool Projects v2, `gh` belum terpasang); helper:
 skill `github-projects` → `C:\Users\Sena\.agents\skills\github-projects\ghproject.ps1`.
@@ -141,6 +148,29 @@ Epic issue: EPIC-0 **#8** · EPIC-1 **#13** · EPIC-2 **#9** · EPIC-3 **#11** �
 
 > Setelah ini status papan tinggal dijaga: setiap kartu bergerak hanya lewat PR (lihat
 > `workflow.md` §3 & §8).
+
+### 5.1 Riwayat Pergerakan Papan (mutasi nyata)
+
+**15 Okt 2026** — menyelesaikan Track **EPIC-1** (Publik, Landing Page & Profil RW), PIC Afif
+(`miralami`):
+
+| Kartu | Issue | Dari | Ke | Bukti |
+|---|---|---|---|---|
+| LP-01 Landing Page Publik | #20 | Todo | **Done** (closed) | commit `1234ab0` — `src/routes/+page.svelte`, `+page.server.ts` |
+| LP-02 Visualisasi Statistik Publik | #19 | Todo | **Done** (closed) | commit `1234ab0` — `src/lib/components/BarChart.svelte`, `DonutChart.svelte` |
+| EPIC-1 Modul Publik, Landing Page & Profil RW | #13 | Todo | **Done** (closed) | seluruh kartu EPIC-1 selesai |
+
+Catatan deviasi:
+- LP-01 tidak lagi murni "statis": **pengumuman & agenda dibaca dari tabel `pengumuman`**
+  (`ditampilkan=true`), dan angka statistik ikut dinamis. Profil/visi/misi/sejarah/SOTK/prestasi
+  tetap statis (tanpa CMS baru).
+- **Galeri foto belum ada** (belum ada foto asli) → area foto memakai *placeholder* jujur, siap
+  ditukar saat foto tersedia.
+
+**Sinkronisasi lain (Track Afif):** kartu **FND-06** (#21, Membangun papan Kanban) sudah berstatus
+**Done** di papan — dicatat di sini agar dokumen konsisten dengan board.
+
+Rincian bukti per kartu ada di komentar masing-masing issue (#13, #19, #20, #21).
 
 ---
 
