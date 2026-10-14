@@ -69,6 +69,14 @@
   --text-4xl:  2rem;
   --text-5xl:  2.5rem;
 
+  /* Display tier — dipakai HANYA oleh permukaan publik/marketing (landing
+     page). Halaman aplikasi tetap memakai skala di atas supaya kepadatan
+     informasi tidak berubah. Diinformsikan INA Digital Design System:
+     display ~40–52px, judul bagian ~28–36px. */
+  --text-display: clamp(2.5rem, 5.2vw, 3.25rem);
+  --text-title:   clamp(1.75rem, 3vw, 2.25rem);
+  --leading-display: 1.08;
+
   --leading-tight:   1.2;
   --leading-snug:    1.35;
   --leading-normal:  1.55;
@@ -133,6 +141,7 @@
     --space-10: 2.5rem;
     --space-12: 3rem;
     --space-16: 4rem;
+    --space-20: 5rem;
 
     --tap-min: 2.75rem; /* 44px minimum touch target */
   }
