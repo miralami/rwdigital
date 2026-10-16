@@ -8,6 +8,15 @@
   import EyeOff from '@lucide/svelte/icons/eye-off';
   import Pencil from '@lucide/svelte/icons/pencil';
   import Trash2 from '@lucide/svelte/icons/trash-2';
+  import CalendarDays from '@lucide/svelte/icons/calendar-days';
+  import MapPin from '@lucide/svelte/icons/map-pin';
+  import {
+    statusEvent,
+    labelStatusEvent,
+    badgeVariantStatusEvent,
+    formatRentangTanggal
+  } from '$lib/format';
+
   let { data } = $props<{ data: PageData }>();
 
   let filterKategori = $state<string>('semua');
@@ -72,6 +81,14 @@
         <div class="card-header">
           <div class="card-meta">
             <Badge variant={getKategoriVariant(p.kategori)} dot>{p.kategori}</Badge>
+            {#if p.tanggalMulaiEvent}
+              {@const status = statusEvent(p.tanggalMulaiEvent, p.tanggalSelesaiEvent)}
+              {#if status}
+                <Badge variant={badgeVariantStatusEvent(status)}>
+                  {labelStatusEvent(status)}
+                </Badge>
+              {/if}
+            {/if}
             {#if !p.ditampilkan}
               <span class="draft-badge">Disembunyikan</span>
             {/if}
@@ -116,6 +133,22 @@
         </div>
         <h2 class="card-title">{p.judul}</h2>
         <p class="card-content">{p.isi}</p>
+        {#if p.tanggalMulaiEvent || p.lokasi}
+          <div class="event-meta">
+            {#if p.tanggalMulaiEvent}
+              <div class="event-meta-item">
+                <CalendarDays size={14} />
+                <span>{formatRentangTanggal(p.tanggalMulaiEvent, p.tanggalSelesaiEvent)}</span>
+              </div>
+            {/if}
+            {#if p.lokasi}
+              <div class="event-meta-item">
+                <MapPin size={14} />
+                <span>{p.lokasi}</span>
+              </div>
+            {/if}
+          </div>
+        {/if}
       </article>
     {/each}
   </div>
@@ -249,5 +282,24 @@
     margin: 0;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+  }
+
+  .event-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+
+  .event-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--color-text-muted);
+    font-weight: 500;
   }
 </style>

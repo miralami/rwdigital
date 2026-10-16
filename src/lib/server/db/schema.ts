@@ -83,11 +83,14 @@ export const pengumuman = sqliteTable('pengumuman', {
   kategori:      text('kategori', {
     enum: ['umum', 'kegiatan', 'keuangan', 'darurat']
   }).notNull().default('umum'),
-  tanggalMulai:  text('tanggal_mulai'),
-  tanggalSelesai:text('tanggal_selesai'),
-  ditampilkan:   integer('ditampilkan', { mode: 'boolean' }).notNull().default(true),
-  rwId:          integer('rw_id').notNull().references(() => rw.id),
-  dibuatOleh:    text('dibuat_oleh').notNull(), // user id from better-auth
+  tanggalMulai:        text('tanggal_mulai'),
+  tanggalSelesai:      text('tanggal_selesai'),
+  tanggalMulaiEvent:   text('tanggal_mulai_event'),
+  tanggalSelesaiEvent: text('tanggal_selesai_event'),
+  lokasi:              text('lokasi'),
+  ditampilkan:         integer('ditampilkan', { mode: 'boolean' }).notNull().default(true),
+  rwId:                integer('rw_id').notNull().references(() => rw.id),
+  dibuatOleh:          text('dibuat_oleh').notNull(), // user id from better-auth
   ...timestamps
 });
 
