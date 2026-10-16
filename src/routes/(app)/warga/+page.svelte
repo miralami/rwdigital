@@ -5,6 +5,7 @@
   import Plus from '@lucide/svelte/icons/plus';
   import Upload from '@lucide/svelte/icons/upload';
   import BarChart3 from '@lucide/svelte/icons/bar-chart-3';
+  import ClipboardEdit from '@lucide/svelte/icons/clipboard-edit';
   import { maskNik, maskNoKk } from '$lib/format';
   import type { PageData } from './$types';
 
@@ -47,6 +48,10 @@
     <a href="/warga/rekap" class="btn btn-secondary">
       <BarChart3 size={16} />
       <span>Rekap Demografis</span>
+    </a>
+    <a href="/warga/pembaruan" class="btn btn-secondary">
+      <ClipboardEdit size={16} />
+      <span>Permintaan Pembaruan</span>
     </a>
     <a href="/warga/impor" class="btn btn-secondary">
       <Upload size={16} />

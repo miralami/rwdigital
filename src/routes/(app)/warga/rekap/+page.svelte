@@ -4,10 +4,11 @@
   import Users from '@lucide/svelte/icons/users';
   import Home from '@lucide/svelte/icons/home';
   import UserCheck from '@lucide/svelte/icons/user-check';
-  import Calendar from '@lucide/svelte/icons/calendar';
+  import Baby from '@lucide/svelte/icons/baby';
   import PageHeader from '$lib/components/PageHeader.svelte';
   import Card from '$lib/components/Card.svelte';
   import StatCard from '$lib/components/StatCard.svelte';
+  import DonutChart from '$lib/components/DonutChart.svelte';
   import type { PageData } from './$types';
 
   let { data } = $props<{ data: PageData }>();
@@ -33,11 +34,11 @@
 
     csv += '\nKelompok Rentang Usia,Jumlah Warga,Persentase\n';
     const totalU = data.usia.total || 1;
-    csv += `Balita (0-5 thn),${data.usia.balita},${Math.round((data.usia.balita / totalU) * 100)}%\n`;
-    csv += `Anak-anak (6-12 thn),${data.usia.anak},${Math.round((data.usia.anak / totalU) * 100)}%\n`;
-    csv += `Remaja (13-17 thn),${data.usia.remaja},${Math.round((data.usia.remaja / totalU) * 100)}%\n`;
-    csv += `Dewasa (18-59 thn),${data.usia.dewasa},${Math.round((data.usia.dewasa / totalU) * 100)}%\n`;
-    csv += `Lansia (60+ thn),${data.usia.lansia},${Math.round((data.usia.lansia / totalU) * 100)}%\n`;
+    csv += `Balita (0–4 thn),${data.usia.balita},${Math.round((data.usia.balita / totalU) * 100)}%\n`;
+    csv += `Usia Sekolah (5–14 thn),${data.usia.usiaSekolah},${Math.round((data.usia.usiaSekolah / totalU) * 100)}%\n`;
+    csv += `Produktif (15–64 thn),${data.usia.produktif},${Math.round((data.usia.produktif / totalU) * 100)}%\n`;
+    csv += `Lansia (≥65 thn),${data.usia.lansia},${Math.round((data.usia.lansia / totalU) * 100)}%\n`;
+    csv += `\nAngka Kelahiran Baru (12 bln terakhir),${data.kelahiranBaru}\n`;
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -47,6 +48,18 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  // Segmen donat demografi usia
+  const usiaSegments = $derived([
+    { label: 'Balita (0–4)',        value: data.usia.balita,       color: 'var(--color-brand-400)' },
+    { label: 'Sekolah (5–14)',      value: data.usia.usiaSekolah,  color: 'var(--color-brand-600)' },
+    { label: 'Produktif (15–64)',   value: data.usia.produktif,    color: 'var(--color-success)' },
+    { label: 'Lansia (≥65)',        value: data.usia.lansia,       color: 'var(--color-warning)' }
+  ]);
+
+  function pctUsia(n: number) {
+    return data.usia.total ? Math.round((n / data.usia.total) * 100) : 0;
   }
 </script>
 
@@ -89,7 +102,24 @@
       value={data.gender.perempuan}
       icon={UserCheck}
     />
+    <StatCard
+      title="Kelahiran Baru (12 bln)"
+      value={data.kelahiranBaru}
+      icon={Baby}
+      description="Warga dengan tanggal lahir dalam 365 hari terakhir"
+    />
   </div>
+
+  <!-- Grafik demografi usia -->
+  <Card title="Grafik Komposisi Kelompok Usia">
+    <DonutChart
+      segments={usiaSegments}
+      centerValue={data.usia.total}
+      centerLabel="Total jiwa"
+      unit="jiwa"
+      emptyMessage="Belum ada data warga aktif."
+    />
+  </Card>
 
   <div class="sections-grid">
     <!-- Sebaran RT -->
@@ -116,7 +146,7 @@
       </div>
     </Card>
 
-    <!-- Rentang Usia -->
+    <!-- Rentang Usia (bucket baru KP-01) -->
     <Card title="Distribusi Kelompok Usia Warga">
       <div class="table-wrap">
         <table class="rekap-table">
@@ -129,29 +159,29 @@
           </thead>
           <tbody>
             <tr>
-              <td>Balita (0 – 5 tahun)</td>
+              <td>Balita <span class="range-label">(0 – 4 tahun)</span></td>
               <td class="text-right">{data.usia.balita}</td>
-              <td class="text-right">{data.usia.total ? Math.round((data.usia.balita / data.usia.total) * 100) : 0}%</td>
+              <td class="text-right">{pctUsia(data.usia.balita)}%</td>
             </tr>
             <tr>
-              <td>Anak-anak (6 – 12 tahun)</td>
-              <td class="text-right">{data.usia.anak}</td>
-              <td class="text-right">{data.usia.total ? Math.round((data.usia.anak / data.usia.total) * 100) : 0}%</td>
+              <td>Usia Sekolah <span class="range-label">(5 – 14 tahun)</span></td>
+              <td class="text-right">{data.usia.usiaSekolah}</td>
+              <td class="text-right">{pctUsia(data.usia.usiaSekolah)}%</td>
             </tr>
             <tr>
-              <td>Remaja (13 – 17 tahun)</td>
-              <td class="text-right">{data.usia.remaja}</td>
-              <td class="text-right">{data.usia.total ? Math.round((data.usia.remaja / data.usia.total) * 100) : 0}%</td>
+              <td class="font-medium">Produktif <span class="range-label">(15 – 64 tahun)</span></td>
+              <td class="text-right font-medium">{data.usia.produktif}</td>
+              <td class="text-right font-medium">{pctUsia(data.usia.produktif)}%</td>
             </tr>
             <tr>
-              <td>Dewasa (18 – 59 tahun)</td>
-              <td class="text-right font-medium">{data.usia.dewasa}</td>
-              <td class="text-right font-medium">{data.usia.total ? Math.round((data.usia.dewasa / data.usia.total) * 100) : 0}%</td>
-            </tr>
-            <tr>
-              <td>Lansia (60+ tahun)</td>
+              <td>Lansia / Pensiun <span class="range-label">(≥ 65 tahun)</span></td>
               <td class="text-right">{data.usia.lansia}</td>
-              <td class="text-right">{data.usia.total ? Math.round((data.usia.lansia / data.usia.total) * 100) : 0}%</td>
+              <td class="text-right">{pctUsia(data.usia.lansia)}%</td>
+            </tr>
+            <tr class="row-total">
+              <td class="font-medium">Total Warga Aktif</td>
+              <td class="text-right font-medium">{data.usia.total}</td>
+              <td class="text-right">100%</td>
             </tr>
           </tbody>
         </table>
@@ -242,7 +272,19 @@
     border-bottom: 1px solid var(--color-border);
   }
 
+  .row-total td {
+    background: var(--color-surface-muted);
+    border-top: 2px solid var(--color-border);
+    border-bottom: none;
+  }
+
   .text-right {
     text-align: right;
+  }
+
+  .range-label {
+    font-weight: 400;
+    color: var(--color-text-muted);
+    font-size: var(--text-xs);
   }
 </style>

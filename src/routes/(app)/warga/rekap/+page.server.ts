@@ -38,27 +38,52 @@ export const load: PageServerLoad = async () => {
     })
     .from(kk);
 
-  // 4. Perhitungan Rentang Usia
+  // 4. Perhitungan Rentang Usia (KP-01)
   const semuaTglLahir = await db
     .select({ tanggalLahir: warga.tanggalLahir })
     .from(warga)
     .where(eq(warga.aktif, true));
 
-  const sekarangTahun = new Date().getFullYear();
-  let balita = 0; // 0-5
-  let anak = 0; // 6-12
-  let remaja = 0; // 13-17
-  let dewasa = 0; // 18-59
-  let lansia = 0; // 60+
+  const sekarang = new Date();
+
+  /**
+   * Hitung usia tepat dalam tahun penuh berdasarkan tanggal lahir lengkap.
+   * Memperhitungkan bulan & hari supaya batas usia 14/15 dan 64/65 akurat.
+   */
+  function hitungUsia(tanggalLahirStr: string): number {
+    const tgl = new Date(tanggalLahirStr);
+    if (isNaN(tgl.getTime())) return 30; // fallback aman
+    let usia = sekarang.getFullYear() - tgl.getFullYear();
+    const belumUlangTahun =
+      sekarang.getMonth() < tgl.getMonth() ||
+      (sekarang.getMonth() === tgl.getMonth() && sekarang.getDate() < tgl.getDate());
+    if (belumUlangTahun) usia--;
+    return Math.max(0, usia);
+  }
+
+  // Bucket sesuai spesifikasi KP-01:
+  //   Balita       : 0 – 4  tahun
+  //   Usia Sekolah : 5 – 14 tahun  (usia 15 masuk Produktif)
+  //   Produktif    : 15 – 64 tahun  (usia 65 masuk Lansia)
+  //   Lansia       : ≥ 65 tahun
+  let balita = 0;
+  let usiaSekolah = 0;
+  let produktif = 0;
+  let lansia = 0;
+  let kelahiranBaru = 0; // lahir dalam 365 hari terakhir (angka kelahiran baru)
+
+  const setahunLalu = new Date(sekarang);
+  setahunLalu.setFullYear(setahunLalu.getFullYear() - 1);
 
   for (const w of semuaTglLahir) {
-    const thn = new Date(w.tanggalLahir).getFullYear();
-    const usia = Number.isNaN(thn) ? 30 : Math.max(0, sekarangTahun - thn);
+    const tgl = new Date(w.tanggalLahir);
+    const usia = hitungUsia(w.tanggalLahir);
 
-    if (usia <= 5) balita++;
-    else if (usia <= 12) anak++;
-    else if (usia <= 17) remaja++;
-    else if (usia <= 59) dewasa++;
+    if (!isNaN(tgl.getTime()) && tgl >= setahunLalu) kelahiranBaru++;
+
+    if (usia <= 4) balita++;
+    else if (usia <= 14) usiaSekolah++;
+    else if (usia <= 64) produktif++;
     else lansia++;
   }
 
@@ -66,6 +91,7 @@ export const load: PageServerLoad = async () => {
     rekapRt,
     gender: rekapGender[0] ?? { lakiLaki: 0, perempuan: 0, total: 0 },
     huni: rekapHuni[0] ?? { tetap: 0, kontrak: 0, kos: 0, totalKk: 0 },
-    usia: { balita, anak, remaja, dewasa, lansia, total: semuaTglLahir.length }
+    usia: { balita, usiaSekolah, produktif, lansia, total: semuaTglLahir.length },
+    kelahiranBaru
   };
 };
