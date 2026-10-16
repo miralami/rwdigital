@@ -12,10 +12,19 @@ export const load: PageServerLoad = async ({ locals }) => {
           id: warga.id,
           nama: warga.nama,
           nik: warga.nik,
+          tempatLahir: warga.tempatLahir,
+          tanggalLahir: warga.tanggalLahir,
+          jenisKelamin: warga.jenisKelamin,
+          agama: warga.agama,
+          pendidikan: warga.pendidikan,
+          pekerjaan: warga.pekerjaan,
+          statusPerkawinan: warga.statusPerkawinan,
+          statusHubunganKk: warga.statusHubunganKk,
           kkId: warga.kkId,
           noKk: kk.noKk,
           nomorRt: rt.nomor,
-          alamat: kk.alamat
+          alamat: kk.alamat,
+          statusHuni: kk.statusHuni
         })
         .from(warga)
         .innerJoin(kk, eq(warga.kkId, kk.id))
@@ -44,17 +53,32 @@ export const load: PageServerLoad = async ({ locals }) => {
   }));
 
   if (!linkedWarga) {
-    // Akun belum terhubung ke data warga (misal pengurus sedang preview atau akun baru)
     return {
       namaPengguna: locals.user?.name ?? null,
       terhubung: false,
       warga: null,
+      anggotaKk: [],
       iuran: null,
       pengumuman: listPengumuman,
       riwayatPembayaran: [],
       daftarSurat: []
     };
   }
+
+  // Anggota KK (KP-04): seluruh warga dalam satu KK
+  const anggotaKk = await db
+    .select({
+      id: warga.id,
+      nama: warga.nama,
+      nik: warga.nik,
+      tanggalLahir: warga.tanggalLahir,
+      jenisKelamin: warga.jenisKelamin,
+      statusHubunganKk: warga.statusHubunganKk,
+      aktif: warga.aktif
+    })
+    .from(warga)
+    .where(eq(warga.kkId, linkedWarga.kkId))
+    .orderBy(warga.statusHubunganKk, warga.nama);
 
   // Tagihan milik KK warga
   const semuaTagihan = await db
@@ -116,6 +140,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     namaPengguna: locals.user?.name ?? linkedWarga.nama,
     terhubung: true,
     warga: linkedWarga,
+    anggotaKk,
     iuran: tagihanPending
       ? {
           bulan: tagihanPending.periode,
