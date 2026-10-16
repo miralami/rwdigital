@@ -69,9 +69,14 @@ function jalankan(sql, dari) {
 	try {
 		db.exec(sql);
 	} catch (e) {
+		const msg = e instanceof Error ? e.message : String(e);
+		if (msg.toLowerCase().includes('duplicate column name')) {
+			console.log(`   lewati (kolom sudah ada)`);
+			return;
+		}
 		console.error(`Gagal menjalankan statement dari ${dari}:`);
 		console.error(sql);
-		console.error(e instanceof Error ? e.message : String(e));
+		console.error(msg);
 		process.exit(1);
 	}
 }
