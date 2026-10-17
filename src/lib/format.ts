@@ -132,3 +132,86 @@ export function maskNoKk(noKk?: string | null): string {
   return maskNik(noKk);
 }
 
+export type StatusEvent = 'akan_datang' | 'berlangsung' | 'selesai';
+
+function parseBatasTanggal(dateStr: string, akhirHari: boolean): Date | null {
+  const clean = dateStr.trim();
+  if (!clean) return null;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+    const [y, m, d] = clean.split('-').map(Number);
+    return akhirHari
+      ? new Date(y, m - 1, d, 23, 59, 59, 999)
+      : new Date(y, m - 1, d, 0, 0, 0, 0);
+  }
+  const d = new Date(clean);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Menghitung status event secara dinamis berdasarkan waktu sekarang:
+ * - 'akan_datang': sekarang sebelum tanggalMulaiEvent
+ * - 'berlangsung': sekarang di antara tanggalMulaiEvent dan tanggalSelesaiEvent
+ * - 'selesai': sekarang setelah tanggalSelesaiEvent
+ * - null: jika tanggalMulaiEvent kosong/null
+ *
+ * Jika tanggalSelesaiEvent kosong, dianggap berlangsung satu hari penuh.
+ */
+export function statusEvent(
+  mulai?: string | null,
+  selesai?: string | null,
+  now?: Date | null
+): StatusEvent | null {
+  if (!mulai || !mulai.trim()) return null;
+
+  const tglMulai = parseBatasTanggal(mulai, false);
+  if (!tglMulai) return null;
+
+  const tglSelesai = selesai && selesai.trim()
+    ? parseBatasTanggal(selesai, true)
+    : parseBatasTanggal(mulai, true);
+
+  if (!tglSelesai) return null;
+
+  const waktuSekarang = (now instanceof Date ? now : new Date()).getTime();
+
+  if (waktuSekarang < tglMulai.getTime()) {
+    return 'akan_datang';
+  }
+  if (waktuSekarang > tglSelesai.getTime()) {
+    return 'selesai';
+  }
+  return 'berlangsung';
+}
+
+export function labelStatusEvent(status: StatusEvent): string {
+  switch (status) {
+    case 'akan_datang':
+      return 'Akan Datang';
+    case 'berlangsung':
+      return 'Berlangsung';
+    case 'selesai':
+      return 'Selesai';
+  }
+}
+
+export function badgeVariantStatusEvent(status: StatusEvent): 'info' | 'success' | 'default' {
+  switch (status) {
+    case 'akan_datang':
+      return 'info';
+    case 'berlangsung':
+      return 'success';
+    case 'selesai':
+      return 'default';
+  }
+}
+
+export function formatRentangTanggal(mulai?: string | null, selesai?: string | null): string {
+  if (!mulai || !mulai.trim()) return '';
+  const strMulai = formatTanggal(mulai);
+  if (!selesai || !selesai.trim() || selesai === mulai) {
+    return strMulai;
+  }
+  const strSelesai = formatTanggal(selesai);
+  return `${strMulai} – ${strSelesai}`;
+}
+
