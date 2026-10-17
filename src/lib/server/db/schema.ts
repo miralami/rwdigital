@@ -169,3 +169,24 @@ export const surat = sqliteTable('surat', {
   wargaId:          integer('warga_id').notNull().references(() => warga.id),
   ...timestamps
 });
+
+// ─── Permintaan Pembaruan Data Warga (SF-KP-08) ──────────────────────────────
+// Warga mengajukan perubahan data diri; pengurus menyetujui/menolak sebelum
+// perubahan diterapkan ke tabel warga. Status flow:
+//   diajukan → diverifikasi → disetujui | ditolak
+export const permintaanPembaruan = sqliteTable('permintaan_pembaruan', {
+  id:             integer('id').primaryKey({ autoIncrement: true }),
+  wargaId:        integer('warga_id').notNull().references(() => warga.id),
+  // Snapshot perubahan yang diajukan (JSON stringified)
+  dataLama:       text('data_lama').notNull(),    // JSON snapshot data sebelum
+  dataBaru:       text('data_baru').notNull(),    // JSON data yang diusulkan warga
+  catatan:        text('catatan'),                // Penjelasan alasan perubahan
+  status:         text('status', {
+    enum: ['diajukan', 'diverifikasi', 'disetujui', 'ditolak']
+  }).notNull().default('diajukan'),
+  catatanPengurus:text('catatan_pengurus'),       // Alasan tolak / catatan verifikasi
+  ditinjauOleh:   text('ditinjau_oleh'),          // user id pengurus yang meninjau
+  tanggalTinjau:  text('tanggal_tinjau'),         // ISO datetime saat ditinjau
+  diajukanOleh:   text('diajukan_oleh').notNull(), // user id warga pengaju
+  ...timestamps
+});

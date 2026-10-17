@@ -65,6 +65,44 @@ export const load: PageServerLoad = async ({ locals }) => {
     .orderBy(desc(transaksiKas.tanggal), desc(transaksiKas.id))
     .limit(5);
 
+  // 6. Demografi ringkas untuk grafik dashboard (KP-03)
+  // Hitung bucket usia dari semua warga aktif
+  const semuaTglLahir = await db
+    .select({ tanggalLahir: warga.tanggalLahir })
+    .from(warga)
+    .where(eq(warga.aktif, true));
+
+  const sekarang = new Date();
+
+  function hitungUsia(tglStr: string): number {
+    const tgl = new Date(tglStr);
+    if (isNaN(tgl.getTime())) return 30;
+    let usia = sekarang.getFullYear() - tgl.getFullYear();
+    const belumUlangTahun =
+      sekarang.getMonth() < tgl.getMonth() ||
+      (sekarang.getMonth() === tgl.getMonth() && sekarang.getDate() < tgl.getDate());
+    if (belumUlangTahun) usia--;
+    return Math.max(0, usia);
+  }
+
+  let demografiBalita = 0;
+  let demografiSekolah = 0;
+  let demografiProduktif = 0;
+  let demografiLansia = 0;
+  let kelahiranBaru = 0;
+  const setahunLalu = new Date(sekarang);
+  setahunLalu.setFullYear(setahunLalu.getFullYear() - 1);
+
+  for (const w of semuaTglLahir) {
+    const tgl = new Date(w.tanggalLahir);
+    const usia = hitungUsia(w.tanggalLahir);
+    if (!isNaN(tgl.getTime()) && tgl >= setahunLalu) kelahiranBaru++;
+    if (usia <= 4) demografiBalita++;
+    else if (usia <= 14) demografiSekolah++;
+    else if (usia <= 64) demografiProduktif++;
+    else demografiLansia++;
+  }
+
   return {
     user: locals.user,
     stats: {
@@ -80,6 +118,14 @@ export const load: PageServerLoad = async ({ locals }) => {
       totalTagihanPending: tagihanSummary?.totalTagihanPending ?? 0
     },
     pengumumanTerbaru,
-    transaksiTerbaru
+    transaksiTerbaru,
+    demografi: {
+      balita: demografiBalita,
+      sekolah: demografiSekolah,
+      produktif: demografiProduktif,
+      lansia: demografiLansia,
+      kelahiranBaru,
+      total: semuaTglLahir.length
+    }
   };
 };

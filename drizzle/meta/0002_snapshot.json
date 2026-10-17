@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "38932cc2-4ed3-4ce1-b8f7-b26690766198",
+  "id": "b05cff17-aac2-4548-911e-715fd9c04bef",
   "prevId": "fa95eb75-0d27-4041-ae0e-ade28754090f",
   "tables": {
     "jenis_iuran": {
@@ -366,27 +366,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "tanggal_mulai_event": {
-          "name": "tanggal_mulai_event",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "tanggal_selesai_event": {
-          "name": "tanggal_selesai_event",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "lokasi": {
-          "name": "lokasi",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "ditampilkan": {
           "name": "ditampilkan",
           "type": "integer",
@@ -434,6 +413,117 @@
           "tableTo": "rw",
           "columnsFrom": [
             "rw_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "permintaan_pembaruan": {
+      "name": "permintaan_pembaruan",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "warga_id": {
+          "name": "warga_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "data_lama": {
+          "name": "data_lama",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "data_baru": {
+          "name": "data_baru",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "catatan": {
+          "name": "catatan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'diajukan'"
+        },
+        "catatan_pengurus": {
+          "name": "catatan_pengurus",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "ditinjau_oleh": {
+          "name": "ditinjau_oleh",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tanggal_tinjau": {
+          "name": "tanggal_tinjau",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "diajukan_oleh": {
+          "name": "diajukan_oleh",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(current_timestamp)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(current_timestamp)"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "permintaan_pembaruan_warga_id_warga_id_fk": {
+          "name": "permintaan_pembaruan_warga_id_warga_id_fk",
+          "tableFrom": "permintaan_pembaruan",
+          "tableTo": "warga",
+          "columnsFrom": [
+            "warga_id"
           ],
           "columnsTo": [
             "id"
