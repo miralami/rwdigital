@@ -4,6 +4,7 @@ import { db } from '$lib/server/db';
 import { warga, kk, rt, pengumuman } from '$lib/server/db/schema';
 import { and, asc, desc, eq, gte, isNotNull, sql } from 'drizzle-orm';
 import { landingPathFor } from '$lib/server/guard';
+import { hitungBucketUsia } from '$lib/server/usia';
 import type { AgendaPublik, PengumumanPublik, StatistikPublik } from '$lib/types';
 
 const BULAN_SINGKAT = [
@@ -68,31 +69,24 @@ export const load: PageServerLoad = async ({ locals }) => {
     .groupBy(rt.id, rt.nomor)
     .orderBy(rt.nomor);
 
-  // 3. Komposisi usia & kelahiran baru (dihitung dari tanggal lahir warga aktif)
+  // 3. Komposisi usia & kelahiran baru — pakai util bersama (365 hari terakhir)
+  //    agar angka di landing konsisten dengan halaman rekap & dashboard internal.
   const wargaAktif = await db
     .select({ tanggalLahir: warga.tanggalLahir })
     .from(warga)
     .where(eq(warga.aktif, true));
 
-  const tahunIni = new Date().getFullYear();
-  let anak = 0; // 0–14 tahun
-  let produktif = 0; // 15–64 tahun
-  let lansia = 0; // 65+ tahun
-  let kelahiranBaru = 0; // lahir pada tahun berjalan
+  const bucketUsia = hitungBucketUsia(wargaAktif);
 
-  for (const w of wargaAktif) {
-    const thn = new Date(w.tanggalLahir).getFullYear();
-    const usia = Number.isNaN(thn) ? 30 : Math.max(0, tahunIni - thn);
-
-    if (usia <= 14) anak++;
-    else if (usia <= 64) produktif++;
-    else lansia++;
-
-    if (thn === tahunIni) kelahiranBaru++;
-  }
+  // Landing page memakai label "anak" (0–14) yang menggabungkan balita + sekolah
+  // untuk tampilan publik yang lebih ringkas.
+  const anak = bucketUsia.balita + bucketUsia.usiaSekolah;
+  const { produktif, lansia, kelahiranBaru } = bucketUsia;
 
   const totalUsia = anak + produktif + lansia;
   const rasioProduktif = totalUsia > 0 ? Math.round((produktif / totalUsia) * 100) : 0;
+
+  const tahunIni = new Date().getFullYear();
 
   const statistik: StatistikPublik = {
     totalWarga: wargaAgg?.totalAktif ?? 0,

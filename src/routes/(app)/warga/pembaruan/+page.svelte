@@ -9,7 +9,7 @@
   import Badge from '$lib/components/Badge.svelte';
   import Card from '$lib/components/Card.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
-  import { formatTanggal } from '$lib/format';
+  import { formatTanggal, maskNik } from '$lib/format';
   import type { PageData, ActionData } from './$types';
 
   let { data, form } = $props<{ data: PageData; form: ActionData }>();
@@ -59,11 +59,6 @@
     } catch {
       return [];
     }
-  }
-
-  function maskNik(nik: string): string {
-    if (!nik || nik.length < 8) return nik;
-    return nik.slice(0, 4) + '••••••••' + nik.slice(-4);
   }
 </script>
 

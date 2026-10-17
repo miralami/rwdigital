@@ -1,4 +1,5 @@
 import {
+  index,
   integer,
   real,
   sqliteTable,
@@ -173,7 +174,7 @@ export const surat = sqliteTable('surat', {
 //   diajukan → diverifikasi → disetujui | ditolak
 export const permintaanPembaruan = sqliteTable('permintaan_pembaruan', {
   id:             integer('id').primaryKey({ autoIncrement: true }),
-  wargaId:        integer('warga_id').notNull().references(() => warga.id),
+  wargaId:        integer('warga_id').notNull().references(() => warga.id, { onDelete: 'cascade' }),
   // Snapshot perubahan yang diajukan (JSON stringified)
   dataLama:       text('data_lama').notNull(),    // JSON snapshot data sebelum
   dataBaru:       text('data_baru').notNull(),    // JSON data yang diusulkan warga
@@ -186,4 +187,6 @@ export const permintaanPembaruan = sqliteTable('permintaan_pembaruan', {
   tanggalTinjau:  text('tanggal_tinjau'),         // ISO datetime saat ditinjau
   diajukanOleh:   text('diajukan_oleh').notNull(), // user id warga pengaju
   ...timestamps
-});
+}, (table) => [
+  index('permintaan_pembaruan_warga_id_idx').on(table.wargaId)
+]);

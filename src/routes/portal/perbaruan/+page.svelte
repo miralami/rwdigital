@@ -56,6 +56,13 @@
       <span>Akun Anda belum terhubung ke data warga. Hubungi Admin RW untuk penautan akun.</span>
     </div>
   {:else if w}
+    <!-- Peringatan jika masih ada permintaan aktif (#5 review) -->
+    {#if data.adaPermintaanAktif && !form?.success}
+      <div class="warn-banner">
+        <Clock size={16} />
+        <span>Anda masih memiliki permintaan yang sedang diproses. Formulir dinonaktifkan sementara.</span>
+      </div>
+    {/if}
     <!-- Form pengajuan pembaruan -->
     <Card title="Data yang Ingin Diperbarui">
       {#if form?.success}
@@ -138,7 +145,7 @@
         </div>
 
         <div class="form-actions">
-          <Button type="submit" variant="primary" disabled={submitting}>
+          <Button type="submit" variant="primary" disabled={submitting || data.adaPermintaanAktif}>
             {submitting ? 'Mengirim…' : 'Ajukan Perubahan'}
           </Button>
           <Button href="/portal" variant="secondary">Batal</Button>
@@ -244,6 +251,23 @@
     color: var(--color-text);
   }
   .info-banner :global(svg) {
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+    color: var(--color-warning);
+  }
+
+  .warn-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--color-warning);
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--color-warning) 10%, transparent);
+    font-size: var(--text-sm);
+    color: var(--color-text);
+  }
+  .warn-banner :global(svg) {
     flex-shrink: 0;
     margin-top: 0.125rem;
     color: var(--color-warning);
