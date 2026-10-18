@@ -5,7 +5,7 @@
 > GitHub Project yang sudah terpasang** beserta **peta kartu ↔ nomor issue** (`gh` CLI belum
 > terpasang, jadi papan diisi lewat GraphQL — lihat §5).
 
-Terakhir disusun: 12 Okt 2026 · Diperbarui: 18 Okt 2026 (lihat §5.1)
+Terakhir disusun: 12 Okt 2026 · Diperbarui: 19 Okt 2026 (lihat §5.1)
 
 ---
 
@@ -113,7 +113,7 @@ Papan **sudah dibuat dan terisi** (bukan lagi panduan manual).
 | Opsi Status | `Todo`=`b3059e5f` · `In Progress`=`df686dea` · `Done`=`cd8eab33` · `Won't`=`31d91e7d` |
 | Total item | **50** (6 Epic + 38 kartu + 6 grey-out) |
 
-Distribusi aktual: **Done 31 · In Progress 3 · Todo 10 · Won't 6** (per 18 Okt 2026).
+Distribusi aktual: **Done 32 · In Progress 3 · Todo 9 · Won't 6** (per 19 Okt 2026).
 
 > Snapshot 12 Okt 2026: Done 21 · In Progress 8 · Todo 15 · Won't 6. Selisih sepenuhnya berasal
 > dari pergerakan kartu Track Afif (`miralami`) — LP-01, LP-02, EPIC-1 & FND-06 (lihat §5.1).
@@ -191,6 +191,21 @@ Catatan deviasi / penyelarasan:
   (index `permintaan_pembaruan_warga_id_idx` + FK `on_delete cascade`); entri `_journal.json`
   sempat tertinggal dan diperbaiki di commit `67c88ba`.
 - Distribusi papan setelah sinkronisasi: **Done 31 · In Progress 3 · Todo 10 · Won't 6**
+  (sisa In Progress: KU-02 #42, KU-03 #40, SR-01 #49).
+
+**19 Okt 2026** — penutupan **EPIC-0** (Fondasi & Infrastruktur), PIC Afif (`miralami`) +
+penyelarasan kartu EPIC-2 (`EV-01`):
+
+| Kartu | Issue | Dari | Ke | Bukti |
+|---|---|---|---|---|
+| EPIC-0 Fondasi & Infrastruktur | #8 | Todo | **Done** (closed) | seluruh 6 kartu FND-01..06 selesai |
+| EV-01 Pengumuman time-based | #22 | In Progress | **Done** (closed) | PR #60 (merge `7093798`) — tanggal, lokasi, status otomatis |
+
+Catatan:
+- EPIC-0 #8 ditutup mengikuti pola EPIC-1 #13 & EPIC-3 #11 (Epic ditutup bila seluruh kartunya `Done`).
+- `backlog.md` disinkronkan: EPIC-2 (Done 2) & EPIC-3 (Done 9, seluruh kartu tuntas) — ringkasan
+  "as-is" di §1/§2 dokumen ini tetap **historis** (baseline 12 Okt).
+- Distribusi papan setelah pembaruan: **Done 32 · In Progress 3 · Todo 9 · Won't 6**
   (sisa In Progress: KU-02 #42, KU-03 #40, SR-01 #49).
 
 ---

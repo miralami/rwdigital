@@ -30,7 +30,7 @@
 | 3.3 Spesifikasi — UI/UX & flow | Shaffira | Turunin dari mockup dashboard admin/warga |
 | 3.3 Spesifikasi — keamanan & akses | Alizha | Role & access control spec |
 | 3.4 Batasan Asumsi | Afif + Zidan | Nempel ke 3.1 supaya konsisten |
-| 3.5 Mekanisme Perancangan | Zidan | Metodologi desain/dev, co-lead pas |
+| 3.5 Mekanisme Perancangan | **Afif** (diambil alih 19 Okt; isi sudah ada di `laporan.md`) | Metodologi Kanban = domain PIC metodologi. Lihat `pembagian-tugas.md` |
 
 ## Koordinasi
 

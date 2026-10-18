@@ -15,17 +15,17 @@ Bukti = path kode/route/skema yang bisa diverifikasi (atau `—` bila belum ada)
 |---|---|---|---|---|---|---|
 | `EPIC-0` | Fondasi & Infrastruktur | Afif | 6 | 0 | 0 | 0 |
 | `EPIC-1` | Publik, Landing Page & Profil RW | Afif | 2 | 0 | 0 | 0 |
-| `EPIC-2` | Informasi, Event & Humas | Alizha | 1 | 1 | 3 | 1 |
-| `EPIC-3` | Kependudukan & Dashboard Internal | Josua | 5 | 3 | 1 | 0 |
+| `EPIC-2` | Informasi, Event & Humas | Alizha | 2 | 0 | 3 | 1 |
+| `EPIC-3` | Kependudukan & Dashboard Internal | Josua | 9 | 0 | 0 | 0 |
 | `EPIC-4` | Keuangan & Kas RT | Safira | 5 | 2 | 1 | 1 |
 | `EPIC-5` | Surat-Menyurat | Zidan | 5 | 1 | 2 | 0 |
 | — | Grey-out lintas epic | — | — | — | — | 4 |
-| **Total** | | | **24** | **7** | **7** | **6** |
+| **Total** | | | **29** | **3** | **6** | **6** |
 
 > Total kartu: **38** kartu fungsional + **6** grey-out = **44** item papan (+ 6 Epic = **50** item di board).
 
-> Angka `In Progress` = 7 dari limit papan 10, **tetapi** ada pelanggaran WIP per orang (Josua = 3).
-> Rekonsiliasi ada di `board.md` §3.
+> Angka `In Progress` = 3 dari limit papan 10 (**KU-02, KU-03, SR-01**). Pelanggaran WIP per orang
+> sudah direkonsiliasi — lihat `board.md` §3.
 
 ---
 
@@ -78,7 +78,7 @@ PIC: Alizha (`alizha13`)
 | Kode | Kartu | SF | MoSCoW | Status | Bukti |
 |---|---|---|---|---|---|
 | EV-A | *(back-fill)* CRUD pengumuman: tambah, edit, arsipkan, daftar terurut | `SF-PG-02`, `SF-PG-03` | must | **Done** | `(app)/pengumuman/+page.server.ts`, `tambah/`, `[id]/edit/` |
-| EV-01 | Refactor pengumuman → model **time-based**: field tanggal mulai, tanggal selesai, **lokasi**; status otomatis (Akan Datang / Berlangsung / Selesai) | `SF-PG-01` | must | **In Progress** | `tanggalMulai`/`tanggalSelesai` sudah ada di skema; **`lokasi` & status otomatis belum** |
+| EV-01 | Refactor pengumuman → model **time-based**: field tanggal mulai, tanggal selesai, **lokasi**; status otomatis (Akan Datang / Berlangsung / Selesai) | `SF-PG-01` | must | **Done** | `tanggalMulai`/`tanggalSelesai`/`lokasi` di skema; status otomatis di UI — PR #60 (merge `7093798`), issue #22 |
 | EV-02 | Attachment berkas notulen/dokumen (PDF/gambar) pada postingan event + akses unduh | *belum ada kode SF* | should | **Backlog** | — |
 | EV-03 | Saring & cari pengumuman (kategori + rentang tanggal) | `SF-PG-04` | should | **Backlog** | `load()` masih `select all` tanpa filter |
 | EV-BUG-01 | **Defect:** aksi `hapus` melakukan `DELETE` permanen, melanggar `SF-PG-02` (harus arsip, bukan hapus) | `SF-PG-02` | must | **Backlog** | `(app)/pengumuman/+page.server.ts` baris 16–23 |
@@ -86,10 +86,10 @@ PIC: Alizha (`alizha13`)
 > Grey-out terkait: **absensi/kehadiran event** (`W-01`) — dinonaktifkan, tidak dikerjakan.
 
 **Acceptance criteria ringkas — EV-01**
-- [ ] Ada field `lokasi` pada postingan event.
-- [ ] Status dihitung otomatis dari waktu server: sebelum `tanggalMulai` = "Akan Datang", di antara = "Berlangsung", setelah `tanggalSelesai` = "Selesai".
-- [ ] Pengumuman tanpa tanggal diperlakukan sebagai "umum" (selalu tampil).
-- [ ] Test: 3 kondisi batas (sebelum/selama/sesudah) terverifikasi.
+- [x] Ada field `lokasi` pada postingan event.
+- [x] Status dihitung otomatis dari waktu server: sebelum `tanggalMulai` = "Akan Datang", di antara = "Berlangsung", setelah `tanggalSelesai` = "Selesai".
+- [x] Pengumuman tanpa tanggal diperlakukan sebagai "umum" (selalu tampil).
+- [x] Test: 3 kondisi batas (sebelum/selama/sesudah) terverifikasi.
 
 ---
 
@@ -104,21 +104,23 @@ PIC: Josua (`josuasahat`)
 | KP-C | *(back-fill)* Nonaktifkan warga (tanggal + alasan) tanpa hapus permanen | `SF-KP-03` | must | **Done** | `warga.alasanNonaktif`, `tanggalNonaktif` |
 | KP-D | *(back-fill)* Masking NIK & No. KK pada daftar | `SF-KP-05` | must | **Done** | `src/lib/format.ts` → `maskNik`, `maskNoKk` |
 | KP-02 | Impor massal data warga (CSV) + validasi per baris + pelaporan error | `SF-KP-06` | must | **Done** | `(app)/warga/impor/+page.server.ts` (parser + error list) |
-| KP-01 | Perhitungan demografis otomatis **sesuai spesifikasi**: Balita, Usia Sekolah, Produktif (15–64), Pensiun/Lansia (≥65), angka kelahiran baru | `SF-KP-07` | must | **In Progress** | `warga/rekap` sudah menghitung usia, **tetapi** bucket belum sesuai (0–5/6–12/13–17/18–59/60+) & belum ada angka kelahiran |
-| KP-03 | Dashboard pengurus internal: saldo kas total, total penduduk, grafik demografi | `SF-KS-04` + `SF-KP-07` | must | **In Progress** | `dashboard/+page.server.ts` (widget saldo & total warga **sudah**); grafik demografi **belum** |
-| KP-04 | Portal warga (profil individu): periksa data KK & anggota keluarga terdaftar | `SF-IU-05` | should | **In Progress** | `portal/+page.server.ts` |
-| KP-05 | Pengajuan pembaruan data kependudukan oleh warga + alur persetujuan | `SF-KP-08` | should | **Backlog** | — |
+| KP-01 | Perhitungan demografis otomatis **sesuai spesifikasi**: Balita, Usia Sekolah, Produktif (15–64), Pensiun/Lansia (≥65), angka kelahiran baru | `SF-KP-07` | must | **Done** | `src/lib/server/usia.ts`; bucket sesuai + angka kelahiran — PR #61 (merge `8009f72`), issue #33 |
+| KP-03 | Dashboard pengurus internal: saldo kas total, total penduduk, grafik demografi | `SF-KS-04` + `SF-KP-07` | must | **Done** | `dashboard/+page.server.ts` + grafik demografi — PR #61, issue #32 |
+| KP-04 | Portal warga (profil individu): periksa data KK & anggota keluarga terdaftar | `SF-IU-05` | should | **Done** | `portal/` (KK & anggota) — PR #61, issue #34 |
+| KP-05 | Pengajuan pembaruan data kependudukan oleh warga + alur persetujuan | `SF-KP-08` | should | **Done** | `portal/perbaruan/*` state machine + validasi Zod — PR #61, issue #35 |
 
 **Acceptance criteria ringkas — KP-01**
-- [ ] Bucket persis: Balita, Usia Sekolah, Produktif (15–64), Pensiun/Lansia (≥65).
-- [ ] Metrik angka kelahiran baru (periode terpilih).
-- [ ] Rekap per RT + ekspor CSV (sudah ada, cukup disesuaikan).
-- [ ] Uji batas usia 14/15 dan 64/65.
+- [x] Bucket persis: Balita, Usia Sekolah, Produktif (15–64), Pensiun/Lansia (≥65).
+- [x] Metrik angka kelahiran baru (periode terpilih).
+- [x] Rekap per RT + ekspor CSV (sudah ada, cukup disesuaikan).
+- [x] Uji batas usia 14/15 dan 64/65.
+> Bukti: PR #61 (merge `8009f72`) — lihat `src/lib/server/usia.ts`.
 
 **Acceptance criteria ringkas — KP-03**
-- [ ] Widget saldo kas total & total penduduk (sudah).
-- [ ] Grafik ringkas demografi internal (perlu).
-- [ ] Hanya peran internal yang dapat mengakses.
+- [x] Widget saldo kas total & total penduduk (sudah).
+- [x] Grafik ringkas demografi internal (perlu).
+- [x] Hanya peran internal yang dapat mengakses.
+> Bukti: PR #61 — lihat `dashboard/+page.server.ts`.
 
 ---
 

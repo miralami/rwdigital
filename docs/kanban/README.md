@@ -28,9 +28,12 @@ Revisi laporan (untuk dipindahkan ke `laporan.md`): `docs/laporan/laporanRevisi.
 > Seluruh kartu **`Done` (as-is)** di-assign ke **Afif (`miralami`)** karena kode eksisting
 > dikerjakan Afif; ini murni *back-fill* histori. Grey-out `W-01..W-06` dibiarkan tanpa assignee.
 
-## Status papan (terpasang)
+## Status papan (terpasang, per 19 Okt 2026)
 
-`Done` 21 · `In Progress` 8 · `Todo` 15 · `Won't` 6 (**total 50 item**)
+`Done` 32 · `In Progress` 3 · `Todo` 9 · `Won't` 6 (**total 50 item**)
+
+> Snapshot awal saat papan dipasang (12 Okt): `Done` 21 · `In Progress` 8 · `Todo` 15 · `Won't` 6.
+> Riwayat perpindahan ada di `board.md` §5.1.
 
 ## Urutan langkah
 
