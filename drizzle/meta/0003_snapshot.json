@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "a91ad6a7-9255-46f1-b936-6deabaff7541",
+  "id": "38e9633c-7310-4326-b7e7-ce2951632a67",
   "prevId": "b05cff17-aac2-4548-911e-715fd9c04bef",
   "tables": {
     "jenis_iuran": {
@@ -366,6 +366,27 @@
           "notNull": false,
           "autoincrement": false
         },
+        "tanggal_mulai_event": {
+          "name": "tanggal_mulai_event",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tanggal_selesai_event": {
+          "name": "tanggal_selesai_event",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "lokasi": {
+          "name": "lokasi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "ditampilkan": {
           "name": "ditampilkan",
           "type": "integer",
@@ -516,15 +537,7 @@
           "default": "(current_timestamp)"
         }
       },
-      "indexes": {
-        "permintaan_pembaruan_warga_id_idx": {
-          "name": "permintaan_pembaruan_warga_id_idx",
-          "columns": [
-            "warga_id"
-          ],
-          "isUnique": false
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "permintaan_pembaruan_warga_id_warga_id_fk": {
           "name": "permintaan_pembaruan_warga_id_warga_id_fk",
@@ -536,7 +549,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
+          "onDelete": "no action",
           "onUpdate": "no action"
         }
       },
