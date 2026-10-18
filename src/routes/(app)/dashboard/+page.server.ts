@@ -1,6 +1,7 @@
 import { db } from '$lib/server/db';
 import { warga, kk, rt, transaksiKas, tagihan, pengumuman } from '$lib/server/db/schema';
 import { eq, sql, desc } from 'drizzle-orm';
+import { hitungBucketUsia } from '$lib/server/usia';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -66,42 +67,13 @@ export const load: PageServerLoad = async ({ locals }) => {
     .limit(5);
 
   // 6. Demografi ringkas untuk grafik dashboard (KP-03)
-  // Hitung bucket usia dari semua warga aktif
+  // Pakai util bersama agar bucket tidak bercabang antara rekap, dashboard & landing.
   const semuaTglLahir = await db
     .select({ tanggalLahir: warga.tanggalLahir })
     .from(warga)
     .where(eq(warga.aktif, true));
 
-  const sekarang = new Date();
-
-  function hitungUsia(tglStr: string): number {
-    const tgl = new Date(tglStr);
-    if (isNaN(tgl.getTime())) return 30;
-    let usia = sekarang.getFullYear() - tgl.getFullYear();
-    const belumUlangTahun =
-      sekarang.getMonth() < tgl.getMonth() ||
-      (sekarang.getMonth() === tgl.getMonth() && sekarang.getDate() < tgl.getDate());
-    if (belumUlangTahun) usia--;
-    return Math.max(0, usia);
-  }
-
-  let demografiBalita = 0;
-  let demografiSekolah = 0;
-  let demografiProduktif = 0;
-  let demografiLansia = 0;
-  let kelahiranBaru = 0;
-  const setahunLalu = new Date(sekarang);
-  setahunLalu.setFullYear(setahunLalu.getFullYear() - 1);
-
-  for (const w of semuaTglLahir) {
-    const tgl = new Date(w.tanggalLahir);
-    const usia = hitungUsia(w.tanggalLahir);
-    if (!isNaN(tgl.getTime()) && tgl >= setahunLalu) kelahiranBaru++;
-    if (usia <= 4) demografiBalita++;
-    else if (usia <= 14) demografiSekolah++;
-    else if (usia <= 64) demografiProduktif++;
-    else demografiLansia++;
-  }
+  const demografi = hitungBucketUsia(semuaTglLahir);
 
   return {
     user: locals.user,
@@ -120,12 +92,12 @@ export const load: PageServerLoad = async ({ locals }) => {
     pengumumanTerbaru,
     transaksiTerbaru,
     demografi: {
-      balita: demografiBalita,
-      sekolah: demografiSekolah,
-      produktif: demografiProduktif,
-      lansia: demografiLansia,
-      kelahiranBaru,
-      total: semuaTglLahir.length
+      balita: demografi.balita,
+      sekolah: demografi.usiaSekolah,
+      produktif: demografi.produktif,
+      lansia: demografi.lansia,
+      kelahiranBaru: demografi.kelahiranBaru,
+      total: demografi.total
     }
   };
 };

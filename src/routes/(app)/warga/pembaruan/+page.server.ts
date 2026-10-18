@@ -5,6 +5,19 @@ import { fail } from '@sveltejs/kit';
 import { requireRole, STAFF_ROLES } from '$lib/server/guard';
 import type { Actions, PageServerLoad } from './$types';
 
+/**
+ * Transisi yang diizinkan — state machine untuk permintaan pembaruan data.
+ *
+ * Hanya permintaan berstatus diajukan/diverifikasi yang boleh ditinjau.
+ * Permintaan yang sudah disetujui atau ditolak tidak boleh diubah lagi
+ * untuk mencegah overwrite data warga yang sudah final.
+ */
+const TRANSISI_VALID: Record<string, readonly string[]> = {
+  verifikasi: ['diajukan'],
+  setujui:    ['diajukan', 'diverifikasi'],
+  tolak:      ['diajukan', 'diverifikasi']
+};
+
 export const load: PageServerLoad = async ({ locals, url }) => {
   requireRole({ locals, url }, STAFF_ROLES);
 
@@ -56,15 +69,31 @@ export const actions: Actions = {
 
     if (!req) return fail(404, { error: 'Permintaan tidak ditemukan.' });
 
+    // ── State machine guard (#1) ─────────────────────────────────────────────
+    // Hanya izinkan transisi dari status yang valid agar permintaan yang sudah
+    // final (disetujui/ditolak) tidak bisa ditinjau ulang dan menulis ulang data warga.
+    const statusDiizinkan = TRANSISI_VALID[aksi] ?? [];
+    if (!statusDiizinkan.includes(req.status)) {
+      return fail(409, {
+        error: `Permintaan berstatus "${req.status}" tidak dapat di-${aksi}. Hanya status ${statusDiizinkan.join(' atau ')} yang dapat ditindaklanjuti.`
+      });
+    }
+
     const statusBaru =
       aksi === 'verifikasi' ? 'diverifikasi' :
       aksi === 'setujui' ? 'disetujui' : 'ditolak';
 
     // Jika disetujui → terapkan perubahan ke tabel warga
     if (statusBaru === 'disetujui') {
-      const dataBaru: Record<string, string> = JSON.parse(req.dataBaru);
+      // ── try/catch untuk JSON malformed (#6) ─────────────────────────────
+      let dataBaru: Record<string, string>;
+      try {
+        dataBaru = JSON.parse(req.dataBaru);
+      } catch {
+        return fail(400, { error: 'Data permintaan korup (JSON tidak valid). Hubungi admin.' });
+      }
 
-      // Map field dari permintaan ke kolom warga
+      // Map field dari permintaan ke kolom warga (whitelist eksplisit)
       const fieldMap: Record<string, string> = {
         nama: 'nama',
         tempatLahir: 'tempatLahir',
