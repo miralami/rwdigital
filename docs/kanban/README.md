@@ -35,6 +35,12 @@ Revisi laporan (untuk dipindahkan ke `laporan.md`): `docs/laporan/laporanRevisi.
 > Snapshot awal saat papan dipasang (12 Okt): `Done` 21 · `In Progress` 8 · `Todo` 15 · `Won't` 6.
 > Riwayat perpindahan ada di `board.md` §5.1.
 
+## Kebijakan Issue
+
+Repositori ini **tidak memakai fitur GitHub Issue untuk diskusi/tugas lepas**. Setiap Issue = **satu
+kartu Kanban** (terhubung ke Project *Capstone - Gr30*). Issue yang bukan kartu papan tidak dibuat; bila
+ada yang tertinggal, ditutup/dibuang. Konvensi judul kartu: `[T<layer>][moscow] <KODE> - <ringkas>`.
+
 ## Urutan langkah
 
 1. ~~Review + setujui `laporanRevisi.md`.~~ (menunggu persetujuan)
