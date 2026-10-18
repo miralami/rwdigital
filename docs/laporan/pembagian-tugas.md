@@ -59,9 +59,9 @@ Papan: **Done 32 · In Progress 3 · Todo 9 · Won't 6**. Sisa kartu fungsional 
 | **4.1 Proses Perancangan** | **Afif** | usul, sesuai keputusan 19 Okt |
 | **4.2 Hasil Rancangan** | **PIC modul** → dirapikan **Afif** | screenshot per halaman |
 | **4.3 Verifikasi Hasil Rancangan** | **PIC modul** → dirapikan **Afif** | tabel test case per modul |
-| **5.1 Biaya · 5.2 Kelayakan · 5.3 Rencana Implementasi** | ❓ **belum ada PIC** | usul: **Safira** (PIC laporan) |
-| **6.1 Validasi · 6.2 Evaluasi** | ❓ **belum ada PIC** | usul: **Zidan** (PIC narasumber) + Afif (instrumen SUS) |
-| **7.1 Kesimpulan · 7.2 Saran** | ❓ **belum ada PIC** | usul: **Zidan** (koordinator) + Afif |
+| **5.1 Biaya · 5.2 Kelayakan · 5.3 Rencana Implementasi** | **Safira** | diputuskan 19 Okt |
+| **6.1 Validasi · 6.2 Evaluasi** | **Zidan** | diputuskan 19 Okt (instrumen SUS bisa dibantu Afif) |
+| **7.1 Kesimpulan · 7.2 Saran** | **Zidan** | diputuskan 19 Okt |
 
 ---
 
@@ -84,13 +84,12 @@ ERD global, dan menyeragamkan.**
 
 ## 4. Yang Masih Kabur / Perlu Keputusan
 
-1. **Safira merangkap 3 hal:** PIC Epic-4 (keuangan) + teori/spesifikasi UI/UX + **PIC laporan**. Perlu
-   dipastikan mana yang benar-benar ia pegang (bisa jadi UI/UX dialihkan).
+1. **Safira merangkap 3 hal:** PIC Epic-4 (keuangan) + teori/spesifikasi UI/UX + **PIC laporan + Bab V**.
+   Perlu dipastikan mana yang benar-benar ia pegang (bisa jadi UI/UX dialihkan).
 2. **Josua & Afif tanpa kartu kode** → cocok diberi porsi tulisan/artefak lebih banyak (Bab IV diagram,
-   Bab V/VI, penyelarasan).
-3. **Bab V, VI, VII belum ada PIC** di `pembagian.md` — harus segera diputuskan (usul di §2).
-4. **§3.5 awalnya di-assign ke Zidan**, sekarang Afif — `pembagian.md` perlu diperbarui agar tidak
-   konflik dokumen.
+   penyelarasan). Josua bisa mulai dari diagram + Bab IV modul Kependudukan.
+3. **~~Bab V, VI, VII belum ada PIC~~** → ✅ diputuskan 19 Okt: Bab V = Safira, Bab VI–VII = Zidan.
+4. **§3.5 awalnya di-assign ke Zidan**, sekarang Afif — `pembagian.md` sudah diperbarui.
 5. **Kolom `Review / Verification` belum pernah dipakai** (F5). Dengan keputusan "semua PR lewat Afif",
    kolom ini harus mulai diisi supaya alur Kanban konsisten.
 
@@ -102,7 +101,7 @@ ERD global, dan menyeragamkan.**
 |---|---|---|
 | Afif | 0 | §3.5, §4.1, ERD global, template diagram, gate PR, Bab I 1.1–1.3, 3.1/3.4 |
 | Zidan | 3 (SR) | 1.4–1.5, 2.2 SW eng, closing Bab I, §6.1, §7, koordinasi mitra |
-| Safira | 3 (KU) | 2.2 & 3.3 UI/UX, PIC laporan, usul Bab V |
+| Safira | 3 (KU) | 2.2 & 3.3 UI/UX, PIC laporan, **Bab V** |
 | Alizha | 3 (EV) | 2.2 & 3.3 keamanan, 3.2 standar keteknikan |
 | Josua | 0 | 2.1, 2.2 data, 3.3 kependudukan & keuangan, usul diagram EPIC-3 |
 
