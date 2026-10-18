@@ -1,3 +1,5 @@
+> ARSIP (19 Okt 2026) - digantikan oleh ../laporan/afifscope.md + ../laporan/pembagian-tugas.md. Lihat README.md di folder ini.
+
 # Plan Pengerjaan Afif — Laporan Capstone SI-RW
 
 > ⚠️ **Usang (19 Okt 2026).** Banyak TODO di sini sudah selesai dan penugasan §3.5 sudah berubah.
@@ -20,7 +22,7 @@
 - [ ] Isi ringkasan masalah di paragraf penutup
 - [ ] Isi daftar fitur confirmed di paragraf closing
 - [ ] Hapus paragraf catatan internal ("PLACEHOLDER DOANG...") di baris 86
-- [x] Review konsistensi: surat-menyurat disebut di draft tapi out of scope di PROJECT.md — **SELESAI**: surat-menyurat ditetapkan **masuk scope** (Core MVP). Lihat `docs/laporan/laporanRevisi.md` §3.1 dan `docs/kanban/temuan-inkonsistensi.md` F1.
+- [x] Review konsistensi: surat-menyurat disebut di draft tapi out of scope di PROJECT.md — **SELESAI**: surat-menyurat ditetapkan **masuk scope** (Core MVP). Lihat `docs/arsip/laporanRevisi.md` §3.1 dan `docs/kanban/temuan-inkonsistensi.md` F1.
 
 **Sumber data:** Wawancara mitra (jika memungkinkan), observasi lapangan, atau gunakan plausibility analysis + regulasi sebagai pengganti (lihat PROJECT.md § Metodologi).
 

@@ -1,7 +1,7 @@
 # Daftar Pustaka — Sistem Informasi RW (SI-RW) Metodologi Kanban
 
 Status: disusun 5 Oktober 2026. Dua bagian: **(A)** referensi yang sudah dicantumkan
-di draft `draftUPDATED.md` (sudah diverifikasi ke sumber aslinya), **(B)** referensi
+di draft `docs/laporan/laporan.md` (sudah diverifikasi ke sumber aslinya), **(B)** referensi
 tambahan yang disarankan. Bagian **(C)** memuat daftar sitasi di draft yang **tidak
 bisa ditemukan** dan harus diganti. Bagian **(D)** memuat koreksi isi yang wajib
 dibuat di draft karena sitasinya saat ini tidak mendukung klaimnya.

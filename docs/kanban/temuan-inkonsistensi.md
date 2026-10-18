@@ -19,7 +19,7 @@ Disusun: 12 Okt 2026 · Dasar: pembacaan `laporan.md` + verifikasi kode di `src/
 | F4 | Model iuran: tagihan murni (§3.3.4) vs rekapitulasi (Track 4/KU-02) | 🟠 Sedang | Selaraskan definisi SF-IU |
 | F5 | Kanban diklaim jalan di §2.2.3.1, realitanya belum (Review kosong) | 🔴 Tinggi | Jalankan + catat rekonstruksi di Bab IV |
 | F6 | Defect kode: hard-delete pengumuman; aksi surat tanpa cek peran | 🟡 Rendah | Jadikan kartu `type:bug` |
-| F7 | Dokumen sekitar usang (plan.md, checklist.md, planAfif.md) | 🟠 Sedang | Diselaraskan ke laporan.md |
+| F7 | Dokumen sekitar usang (plan.md, checklist.md, docs/arsip/planAfif.md) | 🟠 Sedang | Diselaraskan ke laporan.md |
 
 ---
 
@@ -69,7 +69,7 @@ Modul Publik/Landing Page. Tapi `§3.3.4` tidak memuat `SF-LP-*`; hanya tersirat
 - `§3.3.4` `SF-IU-02` = "Buat Tagihan Iuran" (massal per KK); `SF-IU-06` = "Rekap Pembayaran Iuran".
 - **Track 4 / KU-02** = "Penyesuaian fokus modul iuran dari sistem tagihan murni menjadi model
   **rekapitulasi penerimaan** iuran wajib RT."
-- `docs/List feature fix.md`: *"Lebih ke rekap, bukan tagihan based."*
+- `docs/arsip/List feature fix.md`: *"Lebih ke rekap, bukan tagihan based."*
 
 **Resolusi:** tetap pada kerangka `SF-IU`, tapi definisikan ulang fokusnya: `SF-IU-02` menjadi
 *rekapitulasi penerimaan iuran wajib*, bukan penagihan. Kartu `KU-02` menautkan `SF-IU-06`.
@@ -107,9 +107,9 @@ Ini sekaligus memberi isi nyata untuk Bab IV yang saat ini masih kosong.
 |---|---|---|
 | `plan.md` | Mengklaim impor warga, rekap, surat, kategori, void **belum ada** — padahal **sudah ada** | Beri catatan "usang" + tunjuk ke `backlog.md` sebagai status aktual |
 | `docs/checklist.md` | Ringkasan prioritas menaruh **Surat-Menyurat = Out of Scope** | Selaraskan → masuk scope (F1) |
-| `docs/laporan/planAfif.md` | Catatan lama "surat-menyurat out of scope di PROJECT.md" (sudah tak relevan) | Tandai usang |
+| `docs/arsip/planAfif.md` | Catatan lama "surat-menyurat out of scope di PROJECT.md" (sudah tak relevan) | Tandai usang |
 | `PROJECT.md` | Status proyek masih "Implementasi: belum" | Perbarui status + tegaskan `laporan.md` = otoritas |
-| `docs/List feature fix.md` | Model iuran (rekap) belum tertaut ke SF | Tautkan ke F4 |
+| `docs/arsip/List feature fix.md` | Model iuran (rekap) belum tertaut ke SF | Tautkan ke F4 |
 
 ---
 

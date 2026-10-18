@@ -215,4 +215,4 @@ Catatan:
 - `docs/kanban/workflow.md` — aturan operasional
 - `docs/kanban/backlog.md` — daftar kartu & bukti
 - `docs/kanban/temuan-inkonsistensi.md` — temuan penyelarasan
-- `docs/laporan/laporanRevisi.md` — sisipan untuk `laporan.md`
+- `docs/arsip/laporanRevisi.md` — sisipan untuk `laporan.md`

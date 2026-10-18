@@ -1,6 +1,6 @@
 # Daftar Pustaka
 
-Referensi untuk seluruh sitasi yang sudah muncul di `docs/laporan/draftUPDATED.md`.
+Referensi untuk seluruh sitasi yang sudah muncul di `docs/laporan/laporan.md`.
 Gaya **APA 7th edition** — urutan alfabetis, tanpa nomor, hanging indent.
 Semua URL dan nomor artikel sudah diverifikasi ke sumber aslinya pada 5 Oktober 2026.
 

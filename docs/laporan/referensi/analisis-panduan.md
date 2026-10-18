@@ -84,7 +84,7 @@ Bab I (1.1–1.5), Bab II (2.1–2.3), Bab III (3.1–3.4). Isi §3.5 ada **satu
 > **Koreksi (19 Okt 2026):** §3.5 versi Kanban **sudah lengkap di `docs/laporan/laporan.md`**
 > (baris 509–585, lengkap Tabel 11–13 & mitra RW 06). Yang kosong adalah **docx**-nya.
 > Jadi gap = memindahkan `laporan.md` §3.5 → docx + **membuat flowchart** yang belum ada.
-> Lihat `docs/laporan/draft-3.5-mekanisme.md`.
+> Lihat `docs/laporan/bab3-5-mekanisme.md`.
 
 ### 3.3 Implikasi
 
@@ -98,7 +98,7 @@ Bab I (1.1–1.5), Bab II (2.1–2.3), Bab III (3.1–3.4). Isi §3.5 ada **satu
 
 ## 4. Referensi
 
-- `docs/laporan/laporanRevisi.md` — draft §3.5.1 & Bab IV §4.1 versi Kanban
+- `docs/arsip/laporanRevisi.md` — draft §3.5.1 & Bab IV §4.1 versi Kanban
 - `docs/kanban/workflow.md` — aturan Kanban aktual
-- `docs/laporan/pembagian.md` — pembagian sub-bab per orang
+- `docs/arsip/pembagian.md` — pembagian sub-bab per orang
 - `docs/laporan/afifscope.md` — scope kerja Afif

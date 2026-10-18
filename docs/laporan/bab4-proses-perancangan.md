@@ -4,7 +4,7 @@
 > `Capstone_Kelompok_30.docx`). PIC: **Afif**. Struktur mengikuti **§3.5.1** (6 tahap Kanban) sesuai
 > panduan Capstone. Gambar di-*generate* via prompt di `diagram-prompts.md`.
 >
-> Menggantikan versi lama di `laporanRevisi.md` (angkanya masih 12 Okt: `Done 21`.
+> Menggantikan versi lama di `../arsip/laporanRevisi.md` (angkanya masih 12 Okt: `Done 21`.
 > Versi ini memakai data **19 Okt: Done 29 kartu**).
 > Tanda `[[ISI: ...]]` = menunggu data/screenshot dari PIC modul. Disusun: 19 Okt 2026.
 

@@ -8,8 +8,8 @@ Sistem Informasi RW — aplikasi capstone untuk digitalisasi administrasi tingka
 
 ## Aturan Utama
 
-1. **Scope proyek mengacu pada `draftrevised.md` dan `PROJECT.md`**. Scope mencakup 5 modul Core: Kependudukan, Surat-Menyurat, Kas RW, Iuran Warga, dan Pengumuman/Informasi.
-2. **Fitur "Surat-Menyurat" masuk dalam Core MVP** sesuai spesifikasi SF-SR-01 s/d SF-SR-07 pada `draftrevised.md` (pengajuan surat, unggah berkas, verifikasi pengurus, persetujuan/penerbitan admin RW, unduh slip/PDF).
+1. **Scope proyek mengacu pada `docs/laporan/laporan.md` dan `PROJECT.md`**. Scope mencakup 5 modul Core: Kependudukan, Surat-Menyurat, Kas RW, Iuran Warga, dan Pengumuman/Informasi.
+2. **Fitur "Surat-Menyurat" masuk dalam Core MVP** sesuai spesifikasi SF-SR-01 s/d SF-SR-07 pada `docs/laporan/laporan.md` (pengajuan surat, unggah berkas, verifikasi pengurus, persetujuan/penerbitan admin RW, unduh slip/PDF).
 3. **Pendaftaran akun warga dilakukan terpusat oleh Admin RW** (bukan pendaftaran mandiri/publik), untuk mencegah warga mendaftar menggunakan NIK milik orang lain.
 4. **Penyimpanan berkas** (bukti kas, dokumen syarat surat) disimpan di direktori lokal server.
 5. **Istilah domain tetap pakai Bahasa Indonesia** di kode (nama entity, field DB, variabel domain) — `warga`, `kk`, `rt`, `rw`, `surat`, `iuran`, `kas`, `pengurus`, dst. Jangan diterjemahkan ke Inggris (`resident`, `dues`, dll.), supaya istilah di kode konsisten dengan istilah yang dipakai mitra dan dokumen akademik capstone.
@@ -113,7 +113,7 @@ drizzle.config.ts          ← Drizzle kit config
 
 ## Dokumen Word / SharePoint
 
-- Draft laporan: `docs/laporan/draft.md` — kalau diminta "tulis ke Word/SharePoint", isinya ditransfer ke proposal di SharePoint, **bukan** generate `.docx` lokal.
+- Draft laporan: `docs/laporan/laporan.md` — kalau diminta "tulis ke Word/SharePoint", isinya ditransfer ke proposal di SharePoint, **bukan** generate `.docx` lokal.
 - Lokasi folder kerja capstone: `C:\Users\Sena\OneDrive\Kuliah\Semester 7\Capstone`
 - Dokumen proposal: `Capstone.docx` di SharePoint Telkom, diakses lewat shortcut `Capstone.docx.url` di folder tersebut (URL dibaca dari shortcut, jangan hardcode).
 - Selalu pakai skill **`capstone-word`** (`C:\Users\Sena\.agents\skills\capstone-word\SKILL.md` + `word-helper.ps1`, Word COM) untuk membaca/mengedit dokumennya — aturan keras & struktur heading ada di skill itu.
@@ -121,5 +121,5 @@ drizzle.config.ts          ← Drizzle kit config
 ## Referensi
 
 - `PROJECT.md` — konteks produk, scope fitur, dan status tiap modul
-- `docs/laporan/draft.md` — laporan capstone
+- `docs/laporan/laporan.md` — laporan capstone
 - `docs/checklist.md` — checklist fitur untuk presentasi ke RW

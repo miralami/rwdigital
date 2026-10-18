@@ -71,7 +71,7 @@ UI/UX → Keamanan → Modul → Integrasi → Pengujian" (tanpa menyebut Kanban
 
 Papan Kanban berdiri **setelah** sebagian modul berkembang (sebagian kartu di-*back-fill* dengan bukti
 kode). Ini perlu dinyatakan apa adanya di narasi/Bab IV §4.1 — jangan mengarang tanggal pengerjaan.
-Draf penyelarasan ada di `docs/laporan/laporanRevisi.md`.
+Draf penyelarasan ada di `docs/arsip/laporanRevisi.md`.
 
 ---
 

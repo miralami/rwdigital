@@ -1,12 +1,12 @@
 # afifscope.md — Scope Kerja Afif Nur Sena (`miralami`)
 
 > Daftar **semua** yang dikerjakan Afif dalam capstone SI-RW, plus batas scope dan hal yang
-> **bukan** tanggung jawabnya. Dasar: `docs/laporan/pembagian.md`, `docs/laporan/planAfif.md`,
-> papan GitHub Projects *Capstone - Gr30*, riwayat commit/PR, dan `docs/laporan/analisis-panduan.md`.
+> **bukan** tanggung jawabnya. Dasar: `docs/arsip/pembagian.md`, `docs/arsip/planAfif.md`,
+> papan GitHub Projects *Capstone - Gr30*, riwayat commit/PR, dan `docs/laporan/referensi/analisis-panduan.md`.
 >
 > **Status: DIKONFIRMASI Afif — 19 Okt 2026.** Keputusan scope ada di §9. Disusun: 19 Okt 2026.
 >
-> **File terkait:** `bab4-proses-perancangan.md` (§4.1 siap port) · `draft-3.5-mekanisme.md` (§3.5) ·
+> **File terkait:** `bab4-proses-perancangan.md` (§4.1 siap port) · `bab3-5-mekanisme.md` (§3.5) ·
 > `diagram-prompts.md` (prompt diagram) · `pembagian-tugas.md` (pembagian semua orang). Indeks: `README.md`.
 
 ---
@@ -46,7 +46,7 @@ pustaka UI, dokumentasi.
 - `7375226` — pin DB lokal + catatan compose.yaml tidak terpakai
 - `1234ab0` / `9cacc5e` — landing page publik + statistik (LP-01/LP-02)
 - `57c953b` — pratinjau desain landing page (Opsi A/B/C) — *kompetensi UI/UX*
-- `17da42b`, `17928ee`, `3b21a44` — papan Kanban, `laporanRevisi.md`, sinkronisasi EPIC-1/EPIC-3
+- `17da42b`, `17928ee`, `3b21a44` — papan Kanban, `../arsip/laporanRevisi.md`, sinkronisasi EPIC-1/EPIC-3
 - `7e34167` — CODEOWNERS (wajib review maintainer)
 - `67c88ba` — perbaikan `_journal.json` migrasi Drizzle
 - **Aksi maintainer:** merge PR #59, #60, #61 (reviewer/penggabung `main`)
@@ -91,7 +91,7 @@ pustaka UI, dokumentasi.
 
 ## 5. Scope C — Penulisan Laporan (sub-bab)
 
-Dari `pembagian.md` + panduan:
+Dari `../arsip/pembagian.md` + panduan:
 
 | Sub-bab | PIC | Status |
 |---|---|---|
@@ -103,7 +103,7 @@ Dari `pembagian.md` + panduan:
 | Closing Bab III | **Afif + Zidan** | 🚧 |
 | **§3.5 Mekanisme Perancangan (3.5.1–3.5.5)** | **Afif** — diambil alih 19 Okt | 🚧 **porting dari `laporan.md` §3.5** (tabel 11–13 sudah siap) + tambah **flowchart** |
 | **§2.2.x Teori metodologi/Kanban** | **Afif** | ❌ TODO |
-| **Bab IV §4.1 Proses Perancangan (Kanban)** | **Afif** | 🚧 (draft di `laporanRevisi.md`) |
+| **Bab IV §4.1 Proses Perancangan (Kanban)** | **Afif** | 🚧 (draft di `../arsip/laporanRevisi.md`) |
 | Bab IV §4.2 / §4.3 | **PIC modul** → dikumpulkan & distandarkan **Afif** | ❌ TODO |
 
 ---
@@ -145,8 +145,8 @@ Dari `pembagian.md` + panduan:
 
 1. **§3.5.1–3.5.5 (proposal)** — ** bukan tulis dari nol**: isi sudah lengkap di `laporan.md` §3.5
    (Tabel 11–13). Sisa: **buat flowchart §3.5.1** + rapikan penomoran tabel/judul → pindah ke docx.
-2. ~~**Rapikan papan**: tutup `EPIC-0` #8; update `backlog.md`/`board.md` (EV-01 sudah Done).~~ ✅ **selesai 19 Okt**
-3. **Bab IV §4.1** (proses Kanban) — draft ada di `laporanRevisi.md`, sesuaikan ke §3.5.1.
+2. ~~**Rapikan papan**: tutup `EPIC-0` #8; update `docs/kanban/backlog.md`/`docs/kanban/board.md` (EV-01 sudah Done).~~ ✅ **selesai 19 Okt**
+3. **Bab IV §4.1** (proses Kanban) — draft ada di `../arsip/laporanRevisi.md`, sesuaikan ke §3.5.1.
 4. **Sediakan template & standar diagram** → teruskan ke PIC modul.
 5. **Aktifkan alur PR/review** (Afif = reviewer wajib) supaya kolom `Review/Verification` terpakai.
 6. **Kumpulkan & seragamkan §4.2/§4.3 + diagram** dari PIC modul saat modul tuntas.

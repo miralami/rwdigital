@@ -1,3 +1,5 @@
+> ARSIP (19 Okt 2026) - digantikan oleh ../laporan/laporan.md (bab 3.5) + ../laporan/bab4-proses-perancangan.md. Lihat README.md di folder ini.
+
 # Laporan Revisi — Bagian yang Diperbarui
 
 > **Cara pakai:** file ini adalah *holding area* revisi. Setiap potongan diberi penanda:
@@ -298,7 +300,7 @@ time* kartu hasil rekonstruksi) disajikan pada lampiran papan.
 | `docs/kanban/backlog.md` | Daftar 38 kartu + 6 grey-out + bukti kode |
 | `docs/kanban/board.md` | Snapshot papan, audit WIP, metrik, kondisi papan terpasang + peta kartu ↔ issue |
 | `docs/kanban/temuan-inkonsistensi.md` | Temuan F1–F7 dan arah penyelesaian |
-| `PROJECT.md`, `plan.md`, `docs/checklist.md`, `docs/laporan/planAfif.md` | Diselaraskan dengan `laporan.md` |
+| `PROJECT.md`, `plan.md`, `docs/checklist.md`, `docs/arsip/planAfif.md` | Diselaraskan dengan `laporan.md` |
 
 ---
 

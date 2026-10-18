@@ -3,7 +3,7 @@
 > **Tujuan:** memperjelas "siapa mengerjakan apa". Ada 3 lapis yang harus cocok:
 > **(1)** kartu Kanban (kode) · **(2)** sub-bab laporan · **(3)** artefak per modul (diagram + Bab IV).
 >
-> Sumber: `pembagian.md`, `docs/kanban/board.md`, GitHub `miralami/rwdigital`.
+> Sumber: `../arsip/pembagian.md`, `docs/kanban/board.md`, GitHub `miralami/rwdigital`.
 > Status per 19 Okt 2026. Kolom **"Usul"** = rancangan penulis (silakan dikoreksi tim).
 
 ---
@@ -39,7 +39,7 @@ Papan: **Done 32 · In Progress 3 · Todo 9 · Won't 6**. Sisa kartu fungsional 
 
 ---
 
-## 2. Lapis 2 — Sub-bab Laporan (dari `pembagian.md` + tambahan)
+## 2. Lapis 2 — Sub-bab Laporan (dari `../arsip/pembagian.md` + tambahan)
 
 | Sub-bab | PIC resmi | Catatan |
 |---|---|---|
@@ -89,7 +89,7 @@ ERD global, dan menyeragamkan.**
 2. **Josua & Afif tanpa kartu kode** → cocok diberi porsi tulisan/artefak lebih banyak (Bab IV diagram,
    penyelarasan). Josua bisa mulai dari diagram + Bab IV modul Kependudukan.
 3. **~~Bab V, VI, VII belum ada PIC~~** → ✅ diputuskan 19 Okt: Bab V = Safira, Bab VI–VII = Zidan.
-4. **§3.5 awalnya di-assign ke Zidan**, sekarang Afif — `pembagian.md` sudah diperbarui.
+4. **§3.5 awalnya di-assign ke Zidan**, sekarang Afif — `../arsip/pembagian.md` sudah diperbarui.
 5. **Kolom `Review / Verification` belum pernah dipakai** (F5). Dengan keputusan "semua PR lewat Afif",
    kolom ini harus mulai diisi supaya alur Kanban konsisten.
 

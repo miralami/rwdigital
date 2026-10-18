@@ -11,7 +11,7 @@ Titik masuk penerapan Kanban untuk proyek SI-RW.
 | `board.md` | Snapshot papan, audit WIP, metrik awal, kondisi papan terpasang + peta kartu ↔ issue |
 | `temuan-inkonsistensi.md` | Temuan F1–F7 & arah penyelesaian |
 
-Revisi laporan (untuk dipindahkan ke `laporan.md`): `docs/laporan/laporanRevisi.md`.
+Revisi laporan (untuk dipindahkan ke `laporan.md`): `docs/arsip/laporanRevisi.md`.
 
 ## Epic ↔ PIC
 
@@ -43,7 +43,7 @@ ada yang tertinggal, ditutup/dibuang. Konvensi judul kartu: `[T<layer>][moscow] 
 
 ## Urutan langkah
 
-1. ~~Review + setujui `laporanRevisi.md`.~~ (menunggu persetujuan)
+1. ~~Review + setujui `docs/arsip/laporanRevisi.md`.~~ (menunggu persetujuan)
 2. Pindahkan potongan `[GANTI]`/`[SISIP]`/`[BARU]` ke `docs/laporan/laporan.md`.
 3. ~~Bangun GitHub Project + Issues.~~ ✅ Papan **Capstone - Gr30** sudah terisi (lihat `board.md` §5).
 4. Jalankan irama mingguan; isi metrik aliran di Bab IV.
