@@ -7,6 +7,9 @@
 >
 > Nomor halaman/baris mengacu ke `docs/laporan/laporan.md` pada 12 Okt 2026.
 > Otoritas tetap `laporan.md`; file ini hanya usulan perubahan yang belum dimasukkan.
+>
+> ⚠️ **Per 19 Okt 2026 angkanya sudah usang** (mis. Bab IV memakai `Done 21`; kini `Done 29`).
+> Versi **Bab IV §4.1 terbaru** ada di `bab4-proses-perancangan.md`. Navigasi: `README.md`.
 
 ---
 

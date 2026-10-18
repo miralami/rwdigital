@@ -5,6 +5,9 @@
 > papan GitHub Projects *Capstone - Gr30*, riwayat commit/PR, dan `docs/laporan/analisis-panduan.md`.
 >
 > **Status: DIKONFIRMASI Afif — 19 Okt 2026.** Keputusan scope ada di §9. Disusun: 19 Okt 2026.
+>
+> **File terkait:** `bab4-proses-perancangan.md` (§4.1 siap port) · `draft-3.5-mekanisme.md` (§3.5) ·
+> `diagram-prompts.md` (prompt diagram) · `pembagian-tugas.md` (pembagian semua orang). Indeks: `README.md`.
 
 ---
 
@@ -132,8 +135,7 @@ Dari `pembagian.md` + panduan:
 ## 7. Bukan Scope Afif (batas)
 
 - Implementasi kartu fitur modul: `KP-*` (Josua), `EV-*` (Alizha), `KU-*` (Safira), `SR-*` (Zidan).
-- Kelengkapan Bab V (biaya/kelayakan), Bab VI (validasi/evaluasi), Bab VII — **bukan** domain metodologi;
-  perlu dibagi eksplisit (kemungkinan Safira sebagai PIC laporan).
+- Bab V (biaya/kelayakan) = **Safira**; Bab VI–VII = **Zidan** — rincian di `pembagian-tugas.md`.
 - Data mitra / narasumber / koordinasi eksternal (Zidan).
 - Penulisan sub-bab teori spesifik: UI/UX (Shaffira), keamanan (Alizha), data (Josua), SW eng (Zidan).
 

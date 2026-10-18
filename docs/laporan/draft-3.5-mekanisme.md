@@ -29,6 +29,8 @@ UU 6/2014 · Permendagri 18/2018 · **Perwali Bekasi 58/2020** · UU PDP 27/2022
 
 ### 2.1 Flowchart §3.5.1 (WAJIB — satu-satunya gap isi)
 
+**Prompt Visual Paradigm AI siap tempel:** `diagram-prompts.md` §1.
+
 Panduan meminta **diagram alir** di 3.5.1. Belum ada di mana pun. Gambar ini perlu dibuat sebagai
 **gambar** di Word (caption `Gambar 3.1`), bukan blok kode. Draf mermaid di bawah bisa diekspor
 (mermaid.live / draw.io) lalu disisipkan:
