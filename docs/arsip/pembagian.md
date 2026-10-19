@@ -1,5 +1,3 @@
-> ARSIP (19 Okt 2026) - digantikan oleh ../laporan/pembagian-tugas.md. Lihat README.md di folder ini.
-
 # Pembagian Kerja Laporan
 
 ## Bab I — Pendahuluan

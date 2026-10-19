@@ -39,7 +39,9 @@ Papan: **Done 32 · In Progress 3 · Todo 9 · Won't 6**. Sisa kartu fungsional 
 
 ---
 
-## 2. Lapis 2 — Sub-bab Laporan (dari `../arsip/pembagian.md` + tambahan)
+## 2. Lapis 2 — Sub-bab Laporan
+
+> **Alasan pemilihan tiap PIC** (versi awal) tersimpan di `../arsip/pembagian.md`.
 
 | Sub-bab | PIC resmi | Catatan |
 |---|---|---|

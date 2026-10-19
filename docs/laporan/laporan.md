@@ -49,7 +49,7 @@ BAB II  TINJAUAN PUSTAKA	16
 2.3.2.	Autentikasi dan Manajemen Sesi	24
 2.3.3.	Role-Based Access Control	24
 2.3.4.	Keamanan Aplikasi Web	24
-BAB III  SPESIFIKASI DAN MEKAINSME PERANCANGAN	26
+BAB III  SPESIFIKASI DAN MEKANISME PERANCANGAN	26
 3.1.	Batasan Realistis	26
 3.2.	Standar Keteknikan	27
 3.2.1.	Regulasi Penyelenggaraan Lembaga Kemasyarakatan dan Kependudukan	27
@@ -66,15 +66,13 @@ BAB III  SPESIFIKASI DAN MEKAINSME PERANCANGAN	26
 3.5.3.	Mekanisme Verifikasi dan Validasi	43
 3.5.3.1.	Mekanisme Verifikasi	43
 3.5.3.2.	Mekanisme Validasi	44
-3.5.4.	Jadwal Pelaksanaan Perancangan (Penyesuaian Penomoran)	44
-3.5.5.	Identifikasi Komponen Sistem Terintegrasi (Format Standar 5 Unsur)	45
+3.5.4.	Jadwal Pelaksanaan Perancangan	44
+3.5.5.	Identifikasi Komponen Sistem Terintegrasi	45
 BAB IV  HASIL PERANCANGAN	48
-5.	48
 4.1.	Proses Perancangan	48
 4.2.	Hasil Perancangan	48
-4.3.	Verisfikasi Hasil Rancangan	48
+4.3.	Verifikasi Hasil Rancangan	48
 BAB V  ANALISIS BIAYA & KELAYAKAN PERANCANGAN	48
-6.	48
 5.1.	Identifikasi Biaya Terkait Rancangan	48
 5.2.	Analisis Kelayakan Perancangan	48
 5.3.	Rencana Implementasi Hasil Rancangan	48
@@ -87,7 +85,7 @@ Daftar Pustaka	49
 
 
  Daftar Gambar
-Gambar 1Fishbone diagram	9
+Gambar 1 Fishbone diagram	9
 Gambar 2 Body of knowledge	18
 Gambar 3 Alur Pengajuan Surat oleh Warga	34
 Gambar 4 Alur Pembayaran Iuran melalui QRIS	35
@@ -96,18 +94,20 @@ Gambar 6 Alur Pengelolaan Keuangan Kas RW	36
 
 
  Daftar Tabel
-Tabel 1 Perbandingan alternatif solusi	14
-Tabel 2 Realisasi sistem dengan standar regulasi	30
-Tabel 3 Persyaratan Keamanan Data dan Aplikasi	37
-Tabel 4 Persyaratan Akses dan Sesi	38
-Tabel 5 Matriks Role-Based Access Control (RBAC)	39
-Tabel 6 Spesifikasi Fungsional Admin RW	39
-Tabel 7 Spesifikasi Fungsional Warga	40
-Tabel 8 Spesifikasi Fungsional Bendahara	41
-Tabel 9 Spesifikasi Fungsional Admin RW	42
-Tabel 10 Mekanisme pengumpulan data	44
-Tabel 11 Aktivitas perancangan	46
-Tabel 12 Pemetaan komparatif unsur sistem terintegrasi as-is dan to-be	47
+Tabel 1 Perbandingan alternatif solusi
+Tabel 2 Realisasi sistem dengan standar regulasi
+Tabel 3 Persyaratan Keamanan Data dan Aplikasi
+Tabel 4 Persyaratan Akses dan Sesi
+Tabel 5 Matriks Role-Based Access Control (RBAC)
+Tabel 6 Spesifikasi Fungsional Modul Kependudukan
+Tabel 7 Spesifikasi Fungsional Modul Surat-Menyurat
+Tabel 8 Spesifikasi Fungsional Modul Keuangan (Kas RW)
+Tabel 9 Spesifikasi Fungsional Modul Iuran Warga
+Tabel 10 Spesifikasi Fungsional Modul Pengumuman dan Informasi
+Tabel 11 Mekanisme pengumpulan data
+Tabel 12 Aktivitas perancangan
+Tabel 13 Pemetaan komparatif unsur sistem terintegrasi as-is dan to-be
+(Nomor halaman menyesuaikan pembaruan daftar di Word.)
 
   
 BAB I 
@@ -123,7 +123,7 @@ Oleh karena itu, capstone project ini mengusulkan pengembangan Sistem Informasi 
 1.2.1.	Root Cause Analysis Fishbone Diagram
 Root Cause Analysis dilakukan untuk mengidentifikasi faktor-faktor yang menjadi penyebab dari permasalahan pengelolaan administrasi di RW 06. Analisis ini menggunakan Fishbone Diagram atau Cause-and-Effect Diagram untuk mengelompokkan berbagai faktor penyebab berdasarkan kategori tertentu sehingga hubungan antara penyebab dan permasalahan utama dapat dianalisis secara sistematis. Fishbone Diagram menempatkan permasalahan sebagai akibat (effect) pada bagian kepala diagram, sedangkan faktor-faktor penyebab ditempatkan sebagai cabang yang mengarah kepada permasalahan tersebut. Pengelompokan penyebab melalui Fishbone Diagram dapat membantu proses identifikasi akar permasalahan secara lebih terstruktur (Cheng et al., 2018).
  
-Gambar 1Fishbone diagram
+Gambar 1 Fishbone diagram
 Pada perancangan ini, permasalahan utama (effect) yang dianalisis adalah inefisiensi pengelolaan administrasi, kerentanan kehilangan dan inkonsistensi data kependudukan dan keuangan, serta diseminasi informasi lingkungan yang tidak terstruktur pada RW 06. Berdasarkan hasil analisis Fishbone Diagram, faktor penyebab dikelompokkan ke dalam aspek SDM/Manusia (Man), Metode (Method), Mesin/Perangkat (Machine), Material/Dokumen (Material), Manajemen (Management), dan Lingkungan (Environment).
 1.	Man/SDM:
 Faktor manusia berkaitan dengan pihak yang terlibat dalam proses pengelolaan administrasi dan kemampuan dalam menggunakan teknologi. Faktor yang ditemukan meliputi:
@@ -274,7 +274,7 @@ Penerapan metode Kanban pada proyek ini diwujudkan melalui platform GitHub Proje
 5.	Done: Fitur yang telah lulus verifikasi, disetujui, dan berhasil digabungkan (merged) ke cabang utama (main branch).
 Integrasi GitHub Projects memungkinkan pembaruan status tugas secara otomatis ketika Pull Request dibuat atau digabungkan, memastikan transparansi dan kemudahan pelacakan progres tim secara real-time.
 2.2.3.2.	Prioritisasi Kebutuhan dengan Metode MoSCoW
-Metode MoSCoW adalah teknik analisis untuk mengklasifikasikan kebutuhan sistem ke dalam empat kategori urgensi (Clegg & Barker, 1994): - Must Have (M): Kebutuhan mandatori yang wajib diselesaikan agar produk MVP dapat beroperasi. Tanpa komponen ini, sistem tidak layak diluncurkan (misal: pendataan warga, autentikasi peran, pencatatan kas RW). - Should Have (S): Kebutuhan penting bernilai guna tinggi yang tidak bersifat kritis pada peluncuran perdana (misal: ekspor laporan berformat CSV/PDF, filter rentang tanggal, pembatasan upaya login). - Could Have (C): Kebutuhan tambahan atau nilai tambah yang dikerjakan apabila terdapat ketersediaan waktu dan sumber daya (misal: integrasi gerbang pembayaran QRIS otomatis). - Won’t Have / Would like (W): Fitur yang disepakati untuk dikesampingkan dari ruang lingkup proyek saat ini (misal: integrasi kamera pengawas/CCTV dan inventaris sarana prasarana fisik).
+Metode MoSCoW adalah teknik analisis untuk mengklasifikasikan kebutuhan sistem ke dalam empat kategori urgensi (Clegg & Barker, 1994): - Must Have (M): Kebutuhan mandatori yang wajib diselesaikan agar produk MVP dapat beroperasi. Tanpa komponen ini, sistem tidak layak diluncurkan (misal: pendataan warga, autentikasi peran, pencatatan kas RW). - Should Have (S): Kebutuhan penting bernilai guna tinggi yang tidak bersifat kritis pada peluncuran perdana (misal: ekspor laporan berformat CSV, filter rentang tanggal, pembatasan upaya login). - Could Have (C): Kebutuhan tambahan atau nilai tambah yang dikerjakan apabila terdapat ketersediaan waktu dan sumber daya (misal: integrasi gerbang pembayaran QRIS otomatis). - Won’t Have / Would like (W): Fitur yang disepakati untuk dikesampingkan dari ruang lingkup proyek saat ini (misal: integrasi kamera pengawas/CCTV dan inventaris sarana prasarana fisik).
 2.2.4.	Teori Data dan Kependudukan
 Data dan Kependudukan memaparkan teori yang mendasari modul pengelolaan data warga sebagai sumber informasi utama sistem. Secara konseptual, data kependudukan dikelola sebagai aset organisasi yang kualitasnya meliputi keakuratan, kelengkapan, konsistensi, dan aksesibilitas dijaga melalui mekanisme validasi isian serta pemanfaatan basis data terpusat. Untuk mendukung hal tersebut, perancangan sistem menggunakan Sistem Manajemen Basis Data (DBMS) relasional dengan pendekatan Entity Relationship Model (ERD) dan normalisasi guna mencegah redundansi. Basis data ini menstrukturkan entitas kewilayahan secara hierarkis, yakni dari tingkat RW, RT, Kartu Keluarga (KK), hingga warga, dengan pengamanan integritas data melalui kunci primer dan perekaman riwayat perubahan.
 2.2.5.	Teori UI/UX & Interaksi
@@ -311,19 +311,19 @@ Sebagai landasan keamanan aplikasi web secara menyeluruh, perancangan sistem men
 
 
  BAB III 
-SPESIFIKASI DAN MEKAINSME PERANCANGAN
+SPESIFIKASI DAN MEKANISME PERANCANGAN
 3.1.	Batasan Realistis
 Perancangan dan implementasi Sistem Informasi RW ini dibatasi oleh beberapa batasan realistis sebagai berikut:
 1)	Batasan waktu
 Pengerjaan proyek ini dilakukan dalam satu semester sesuai kurikulum program studi, sehingga waktu yang tersedia untuk analisis, perancangan, implementasi, dan pengujian bersifat terbatas. Tidak seluruh fitur yang diidentifikasi dalam analisis kebutuhan dapat diselesaikan dalam periode ini.
 2)	Batasan aksesibilitas mitra. 
-Mitra RW tidak dapat diwawancarai secara intensif dalam rentang waktu capstone ini, sehingga validasi kebutuhan fitur mengacu pada analisis regulasi resmi (UU No. 6 Tahun 2014, Permendagri No. 18 Tahun 2018) dan evaluasi plausibility sebagai pengganti data primer dari wawancara.
+Mitra RW (pengurus RW 06) dilibatkan melalui wawancara dan observasi dengan intensitas terbatas dalam rentang waktu capstone ini, sehingga validasi kebutuhan fitur dilengkapi analisis regulasi resmi (UU No. 6 Tahun 2014, Permendagri No. 18 Tahun 2018) dan evaluasi plausibility sebagai triangulasi.
 3)	Batasan teknologi
 Sistem menggunakan SQLite sebagai basis data dengan pendekatan single-file yang tidak dirancang untuk skala distributed atau beban konkurensi tinggi. Belum tersedia infrastruktur server produksi yang bersifat permanen untuk deployment publik.
 4)	Batasan anggaran
 Tidak tersedia anggaran untuk layanan hosting berbayar atau akses payment gateway production, sehingga fitur pembayaran digital (QRIS) masih berada dalam tahap perancangan dan belum diintegrasikan secara penuh ke dalam sistem.
 5)	Batasan scope fitur
-Hanya fitur Core MVP yang dikerjakan dalam proyek ini, yaitu manajemen data kependudukan, kas RW, iuran warga, dan pengumuman/informasi. Fitur-fitur di luar scope — termasuk surat-menyurat, manajemen CCTV, inventaris, dan manajemen pengurus — tidak termasuk dalam cakupan pengerjaan.
+Hanya fitur Core MVP yang dikerjakan dalam proyek ini, yaitu manajemen data kependudukan, kas RW dan kas RT, iuran warga, pengumuman/informasi, surat-menyurat, serta landing page dan dashboard statistik. Fitur-fitur di luar scope — termasuk manajemen CCTV, inventaris fisik, manajemen pengurus yang kompleks, CMS dinamis landing page, absensi/check-in event, dan integrasi payment gateway produksi — tidak termasuk dalam cakupan pengerjaan.
 6)	Batasan pengujian
 Pengujian sistem dilakukan secara terbatas pada lingkungan kelompok capstone dan mitra, bukan deployment publik skala penuh. Hasil pengujian tidak dapat sepenuhnya merepresentasikan kondisi penggunaan nyata di lapangan.
 3.2.	Standar Keteknikan
@@ -356,8 +356,8 @@ OWASP Top 10 (2021)	A03 Injection & XSS	Parameterized queries Drizzle ORM, Zod s
 
 3.3.	Spesifikasi Rancangan
 3.3.1.	Spesifikasi Kependudukan & Keuangan
-Modul kependudukan menjadi sumber data warga yang terpusat bagi pengurus RW, pengurus RT, dan warga RW 06, sekaligus mendukung fitur lain seperti surat-menyurat dan iuran. Strukturnya mengikuti hierarki RW, RT, kartu keluarga (KK), dan warga menurut Peraturan Wali Kota Bekasi Nomor 58 Tahun 2020, yaitu satu RT terdiri atas 30 sampai 100 KK (Pasal 10 ayat (1)) dan satu RW terdiri atas 5 sampai 25 RT (Pasal 14), sehingga sistem harus mampu menampung sedikitnya 2.500 KK. Data warga yang wajib diisi meliputi NIK, nama, tanggal lahir, nomor KK, alamat, RT, dan status tinggal. NIK dan nomor KK harus terdiri atas 16 digit dan tidak boleh duplikat, sedangkan usia dihitung otomatis dari tanggal lahir. Data tidak dihapus permanen, melainkan dinonaktifkan, dan setiap perubahan serta peristiwa kependudukan dicatat dalam riwayat. Data awal dapat diimpor dari berkas CSV atau XLSX, warga dapat mengajukan pembaruan data yang berlaku setelah disetujui pengurus, dan akses dibatasi menurut peran.
-Modul keuangan mencakup pengelolaan kas RW dan iuran warga. Peraturan yang sama menyebutkan bahwa pembiayaan RT dan RW dapat bersumber dari swadaya masyarakat dan bantuan yang sah (Pasal 30 ayat (1)), serta mewajibkan pengelolaan keuangan yang tertib, transparan, dan akuntabel (Pasal 31). Karena itu, setiap transaksi kas dicatat lengkap beserta kategori dan pencatatnya, saldo dihitung otomatis, dan koreksi dilakukan melalui pembatalan dengan alasan, bukan penghapusan. Hanya bendahara yang berhak mengubah data kas, dan laporan keuangan per periode dapat diunduh dalam format PDF dan XLSX. Tagihan iuran diterbitkan bagi KK aktif, dan pembayaran tunai otomatis tercatat sebagai pemasukan kas tanpa input ganda. Pembayaran nontunai melalui QRIS dirancang dengan syarat disetujui mitra dan tersedia penyedia jasa pembayaran. Warga dapat melihat riwayat iuran KK sendiri, dan sistem tidak menyediakan tagihan untuk pengurusan dokumen kependudukan sesuai Undang-Undang Nomor 24 Tahun 2013 Pasal 79A.
+Modul kependudukan menjadi sumber data warga yang terpusat bagi pengurus RW, pengurus RT, dan warga RW 06, sekaligus mendukung fitur lain seperti surat-menyurat dan iuran. Strukturnya mengikuti hierarki RW, RT, kartu keluarga (KK), dan warga menurut Peraturan Wali Kota Bekasi Nomor 58 Tahun 2020, yaitu satu RT terdiri atas 30 sampai 100 KK (Pasal 10 ayat (1)) dan satu RW terdiri atas 5 sampai 25 RT (Pasal 14), sehingga sistem harus mampu menampung sedikitnya 2.500 KK. Data warga yang wajib diisi meliputi NIK, nama, tanggal lahir, nomor KK, alamat, RT, dan status tinggal. NIK dan nomor KK harus terdiri atas 16 digit dan tidak boleh duplikat, sedangkan usia dihitung otomatis dari tanggal lahir. Data tidak dihapus permanen, melainkan dinonaktifkan, dan setiap perubahan serta peristiwa kependudukan dicatat dalam riwayat. Data awal dapat diimpor dari berkas CSV, warga dapat mengajukan pembaruan data yang berlaku setelah disetujui pengurus, dan akses dibatasi menurut peran.
+Modul keuangan mencakup pengelolaan kas RW dan iuran warga. Peraturan yang sama menyebutkan bahwa pembiayaan RT dan RW dapat bersumber dari swadaya masyarakat dan bantuan yang sah (Pasal 30 ayat (1)), serta mewajibkan pengelolaan keuangan yang tertib, transparan, dan akuntabel (Pasal 31). Karena itu, setiap transaksi kas dicatat lengkap beserta kategori dan pencatatnya, saldo dihitung otomatis, dan koreksi dilakukan melalui pembatalan dengan alasan, bukan penghapusan. Bendahara dan admin RW berhak mengubah data kas, dan laporan keuangan per periode dapat diunduh dalam format CSV. Tagihan iuran diterbitkan bagi KK aktif, dan pembayaran tunai otomatis tercatat sebagai pemasukan kas tanpa input ganda. Pembayaran nontunai melalui QRIS dirancang dengan syarat disetujui mitra dan tersedia penyedia jasa pembayaran. Warga dapat melihat riwayat iuran KK sendiri, dan sistem tidak menyediakan tagihan untuk pengurusan dokumen kependudukan sesuai Undang-Undang Nomor 24 Tahun 2013 Pasal 79A.
 3.3.2.	Spesifikasi UI/UX & Flow
 1)	Spesifikasi Antarmuka (User Interface Specification)
 a.	Platform dan Responsivitas
@@ -458,7 +458,7 @@ SF-KP-02	Ubah Data Warga	Pengurus dapat memperbarui data warga yang sudah ada di
 SF-KP-03	Nonaktifkan Data Warga	Pengurus dapat menonaktifkan data warga (pindah, meninggal) tanpa penghapusan permanen. Status warga diperbarui beserta tanggal dan alasan.	admin_rw, pengurus_rt
 SF-KP-04	Cari dan Saring Data Warga	Pengguna dapat mencari warga berdasarkan nama, NIK, nomor KK, atau RT. Hasil pencarian ditampilkan dalam waktu maksimal 3 detik pada volume 10.000 data.	admin_rw, pengurus_rt, bendahara
 SF-KP-05	Lihat Profil Warga	Pengguna dapat melihat detail data warga termasuk riwayat perubahan data. NIK dan nomor KK disamarkan pada tampilan daftar dan hanya ditampilkan utuh pada halaman detail untuk peran yang berwenang.	admin_rw, pengurus_rt
-SF-KP-06	Impor Data Warga	Admin dapat mengunggah data warga massal melalui berkas CSV atau XLSX. Sistem memvalidasi setiap baris dan melaporkan baris yang tidak valid tanpa menghentikan proses impor keseluruhan.	admin_rw
+SF-KP-06	Impor Data Warga	Admin dapat mengunggah data warga massal melalui berkas CSV. Sistem memvalidasi setiap baris dan melaporkan baris yang tidak valid tanpa menghentikan proses impor keseluruhan.	admin_rw
 SF-KP-07	Rekap Demografis	Sistem menghasilkan laporan rekapitulasi demografis warga (jumlah per RT, status tinggal, rentang usia) yang dapat diekspor ke format CSV.	admin_rw
 SF-KP-08	Pengajuan Pembaruan Data oleh Warga	Warga dapat mengajukan pembaruan data kependudukan melalui sistem. Pengajuan berstatus Diajukan, Diverifikasi, Disetujui, atau Ditolak, dan harus disetujui pengurus sebelum perubahan diterapkan.	warga
 
@@ -478,7 +478,7 @@ SF-KS-01	Catat Pemasukan	Bendahara dapat mencatat transaksi pemasukan kas RW mel
 SF-KS-02	Catat Pengeluaran	Bendahara dapat mencatat transaksi pengeluaran kas RW meliputi kategori pengeluaran, nominal, tanggal, bukti transaksi, dan keterangan. Sistem memperbarui saldo kas secara otomatis.	admin_rw, bendahara
 SF-KS-03	Unggah Bukti Transaksi	Bendahara dapat mengunggah berkas bukti transaksi (foto kuitansi, nota) untuk setiap entri transaksi.	admin_rw, bendahara
 SF-KS-04	Lihat Saldo Kas	Pengguna yang berwenang dapat melihat saldo kas RW terkini beserta ringkasan transaksi terakhir pada dasbor.	admin_rw, bendahara
-SF-KS-05	Laporan Keuangan Per Periode	Sistem menghasilkan laporan keuangan berisi ringkasan pemasukan, pengeluaran, dan saldo berdasarkan periode yang dipilih (bulanan, tahunan). Laporan dapat diekspor ke format CSV atau PDF.	admin_rw, bendahara
+SF-KS-05	Laporan Keuangan Per Periode	Sistem menghasilkan laporan keuangan berisi ringkasan pemasukan, pengeluaran, dan saldo berdasarkan periode yang dipilih (bulanan, tahunan). Laporan dapat diekspor ke format CSV.	admin_rw, bendahara
 SF-KS-06	Audit Trail Transaksi	Setiap transaksi mencatat identitas pengguna yang mencatat dan waktu pencatatan. Riwayat transaksi tidak dapat dihapus, hanya dapat dilakukan koreksi dengan mencatat alasan.	admin_rw
 
 Tabel 9 Spesifikasi Fungsional Modul Iuran Warga
@@ -503,7 +503,7 @@ Struktur organisasi RW yang menjadi acuan adalah struktur umum yang terdiri atas
 2.	Asumsi tentang literasi digital pengguna. 
 Pengurus RW (admin, bendahara, ketua RT) diasumsikan memiliki literasi digital dasar yang memadai untuk mengoperasikan sistem berbasis web melalui browser. Warga diasumsikan memiliki perangkat smartphone dengan akses internet yang memungkinkan penggunaan portal warga secara mandiri.
 3.	Asumsi tentang dasar regulasi. 
-Tupoksi RW yang digunakan sebagai acuan penetapan fitur mengacu pada Permendagri No. 18 Tahun 2018 yang berlaku secara nasional. Diasumsikan tidak terdapat peraturan desa (Perdes), peraturan bupati (Perbup), atau peraturan wali kota (Perwali) pada wilayah mitra yang mengubah tupoksi RW secara substantif.
+Tupoksi RW yang digunakan sebagai acuan penetapan fitur mengacu pada Permendagri No. 18 Tahun 2018 yang berlaku secara nasional. Selain Peraturan Wali Kota Bekasi Nomor 58 Tahun 2020 yang telah diidentifikasi, diasumsikan tidak terdapat peraturan desa (Perdes), peraturan bupati (Perbup), atau peraturan wali kota (Perwali) lain pada wilayah mitra yang mengubah tupoksi RW secara substantif.
 4.	Asumsi tentang kapasitas teknologi. 
 SQLite dengan pendekatan penyimpanan single-file diasumsikan cukup untuk menangani volume data pada skala RW yang mencakup ratusan hingga ribuan record warga, transaksi kas, dan catatan iuran. QRIS diasumsikan secara prinsip tersedia dan dapat diintegrasikan melalui payment gateway pihak ketiga, meskipun provider spesifik dan mekanisme teknis integrasi belum dikonfirmasi pada tahap ini.
 3.5.	 Mekanisme Perancangan
@@ -539,7 +539,7 @@ Validasi dilakukan untuk memastikan sistem yang dibangun sesuai dengan kebutuhan
 2. Pengujian Penerimaan Pengguna (User Acceptance Testing / UAT): Pengguna representatif dari setiap kelompok peran (admin_rw, pengurus_rt, bendahara, dan warga) melakukan pengujian dengan menjalankan skenario tugas operasional nyata. Hasil pengujian dievaluasi menggunakan instrumen kuisioner System Usability Scale (SUS) untuk menilai kemudahan penggunaan dan efisiensi sistem. 
 3. Pemeriksaan Kepatuhan Regulasi: Spesifikasi dan implementasi sistem diperiksa kembali terhadap ketentuan perundang-undangan (UU PDP No. 27/2022, UU Adminduk No. 24/2013, dan Permendagri No. 18/2018) guna menjamin pengelolaan data warga mematuhi kewajiban hukum yang berlaku.
 
-3.5.4.	Jadwal Pelaksanaan Perancangan (Penyesuaian Penomoran)
+3.5.4.	Jadwal Pelaksanaan Perancangan
 Perancangan Sistem Informasi RW dilaksanakan dalam kurun waktu satu semester akademik (estimasi 16 minggu) sesuai kurikulum program studi. Alur pelaksanaan diselaraskan dengan tahapan sistematika perancangan berbasis Kanban sebagaimana disajikan pada Tabel 12:
 Tabel 12 Aktivitas perancangan
 Tahap	Aktivitas Perancangan	Target Minggu	Output / Artefak
@@ -555,7 +555,7 @@ Tahap	Aktivitas Perancangan	Target Minggu	Output / Artefak
 10	Verifikasi pengujian Black Box & Validasi UAT bersama mitra RW 06	Minggu 14–15	Berita Acara UAT & Hasil Kuesioner SUS
 11	Perbaikan pasca-UAT (bug fixing) & finalisasi dokumentasi laporan capstone	Minggu 16	Purwarupa final & Dokumen Laporan Capstone
 
-3.5.5.	Identifikasi Komponen Sistem Terintegrasi (Format Standar 5 Unsur)
+3.5.5.	Identifikasi Komponen Sistem Terintegrasi
 Sebagai landasan perancangan sistem terpadu, dilakukan pemetaan komparatif terhadap 5 (lima) unsur sistem terintegrasi (Manusia, Material, Mesin/Peralatan, Informasi, dan Energi) antara kondisi sistem manual saat ini (As-Is) dengan rancangan Sistem Informasi RW yang diusulkan (To-Be), sebagaimana dijabarkan pada Tabel 13:
 Tabel 13 Pemetaan komparatif unsur sistem terintegrasi as-is dan to-be
 Unsur Komponen	Kondisi Sistem Saat Ini (As-Is)	Rancangan Sistem Informasi RW (To-Be)	Manfaat Integrasi
@@ -589,7 +589,7 @@ HASIL PERANCANGAN
 5.	
 4.1.	Proses Perancangan
 4.2.	Hasil Perancangan
-4.3.	Verisfikasi Hasil Rancangan
+4.3.	Verifikasi Hasil Rancangan
 BAB V 
 ANALISIS BIAYA & KELAYAKAN PERANCANGAN
 6.	

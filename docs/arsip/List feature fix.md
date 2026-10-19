@@ -1,5 +1,3 @@
-> ARSIP - sebagian usulan sudah menjadi kartu EV-BUG-01 / SR-BUG-01. Lihat README.md di folder ini.
-
 * Butuh landing page \& company profile
 
   * Grafik distribusi

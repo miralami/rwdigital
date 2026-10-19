@@ -4,8 +4,8 @@
 > `Capstone_Kelompok_30.docx`). PIC: **Afif**. Struktur mengikuti **§3.5.1** (6 tahap Kanban) sesuai
 > panduan Capstone. Gambar di-*generate* via prompt di `diagram-prompts.md`.
 >
-> Menggantikan versi lama di `../arsip/laporanRevisi.md` (angkanya masih 12 Okt: `Done 21`.
-> Versi ini memakai data **19 Okt: Done 29 kartu**).
+> Menggantikan versi lama di `../arsip/laporanRevisi.md` (angkanya masih 12 Okt: `Done 21`).
+> Versi ini memakai data **19 Okt: Done 29 kartu**.
 > Tanda `[[ISI: ...]]` = menunggu data/screenshot dari PIC modul. Disusun: 19 Okt 2026.
 
 ---
@@ -145,7 +145,7 @@ modul (**#59, #60, #61**) ditinjau dan digabungkan ke `main`, termasuk perbaikan
 | `LP-01` Landing Page Publik | #20 | `1234ab0` |
 | `LP-02` Visualisasi Statistik Publik | #19 | `9cacc5e` |
 | `FND-06` Papan Kanban + Backlog | #21 | `17da42b`, `3b21a44` |
-| `EV-01` Pengumuman *time-based* | #22 | PR #60 (`7093798`) |
+| `EV-01` Pengumuman *time-based* | #22 | PR #60 (`c1487b5`) |
 | `KP-01` Rekap Demografis | #33 | PR #61 (`8009f72`) |
 | `KP-02` Impor Massal CSV | #31 | PR #61 |
 | `KP-03` Dashboard Pengurus | #32 | PR #61 |
@@ -174,7 +174,7 @@ kode (rute, tabel skema, *server action*, riwayat commit); **(2)** klasifikasi m
 
 Contoh: modul surat-menyurat dinyatakan `Done` untuk `SF-SR-01`–`SF-SR-07` karena tersedia berkas
 `portal/surat/ajukan/`, `(app)/surat/[id]/`, `(app)/surat/[id]/cetak/`, dan tabel `surat`; sedangkan
-Kas RT (`SF-KS-07`) berstatus `Backlog` karena belum ada tabel maupun rute terkait.
+Kas RT (`KU-01`, belum ada kode SF) berstatus `Backlog` karena belum ada tabel maupun rute terkait.
 
 **Batas kejujuran:** tanggal pengerjaan kartu hasil rekonstruksi **tidak dikarang**; bila tidak tercatat,
 ditulis `n/a`.
@@ -187,7 +187,7 @@ Metrik aliran dicatat sebagai dasar perbaikan berkesinambungan.
 
 | Metrik | Nilai | Catatan |
 |---|---|---|
-| Throughput kumulatif | 29 kartu `Done` | termasuk 24 kartu rekonstruksi *as-is* |
+| Throughput kumulatif | 29 kartu `Done` | termasuk 21 kartu rekonstruksi *as-is* (baseline papan 12 Okt) |
 | WIP saat ini | 3 kartu (batas 10) | KU-02, KU-03, SR-01 |
 | Pelanggaran WIP awal | 1 orang memegang 3 kartu | direkonsiliasi → WIP turun 8 → 3 |
 | Kolom `Review / Verification` | belum pernah terisi (F5) | diperbaiki lewat disiplin PR |

@@ -1,5 +1,3 @@
-> ARSIP (19 Okt 2026) - digantikan oleh ../laporan/afifscope.md + ../laporan/pembagian-tugas.md. Lihat README.md di folder ini.
-
 # Plan Pengerjaan Afif — Laporan Capstone SI-RW
 
 > ⚠️ **Usang (19 Okt 2026).** Banyak TODO di sini sudah selesai dan penugasan §3.5 sudah berubah.

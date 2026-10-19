@@ -6,20 +6,21 @@
 > nyata di repo — bukan dengan mengubah `laporan.md` diam-diam.
 
 Disusun: 12 Okt 2026 · Dasar: pembacaan `laporan.md` + verifikasi kode di `src/`
+· **Status resolusi diperbarui: 19 Okt 2026** (lihat kolom Status di tabel ringkasan)
 
 ---
 
 ## Ringkasan Temuan
 
-| # | Temuan | Tingkat | Arah penyelesaian |
-|---|---|---|---|
-| F1 | Surat-menyurat: di-*include* di §3.3.4 tapi di-*exclude* di §3.1 | 🔴 Tinggi | Masuk scope (kode & track sudah ada) |
-| F2 | Kas RT tidak punya kode SF padahal jadi MVP & Track 4 | 🔴 Tinggi | Tambah kode SF baru |
-| F3 | Landing Page & statistik publik tidak punya kode SF padahal Track 1 | 🟠 Sedang | Tambah kode SF baru |
-| F4 | Model iuran: tagihan murni (§3.3.4) vs rekapitulasi (Track 4/KU-02) | 🟠 Sedang | Selaraskan definisi SF-IU |
-| F5 | Kanban diklaim jalan di §2.2.3.1, realitanya belum (Review kosong) | 🔴 Tinggi | Jalankan + catat rekonstruksi di Bab IV |
-| F6 | Defect kode: hard-delete pengumuman; aksi surat tanpa cek peran | 🟡 Rendah | Jadikan kartu `type:bug` |
-| F7 | Dokumen sekitar usang (plan.md, checklist.md, docs/arsip/planAfif.md) | 🟠 Sedang | Diselaraskan ke laporan.md |
+| # | Temuan | Tingkat | Arah penyelesaian | Status (19 Okt 2026) |
+|---|---|---|---|---|
+| F1 | Surat-menyurat: di-*include* di §3.3.4 tapi di-*exclude* di §3.1 | 🔴 Tinggi | Masuk scope (kode & track sudah ada) | ✅ **selesai** — §3.1 dikoreksi |
+| F2 | Kas RT tidak punya kode SF padahal jadi MVP & Track 4 | 🔴 Tinggi | Track via kartu `KU-01` | 🟡 kartu `KU-01`, kode SF **belum** ditambah |
+| F3 | Landing Page & statistik publik tidak punya kode SF padahal Track 1 | 🟠 Sedang | Track via kartu `LP-01`/`LP-02` | 🟡 kartu ada, kode SF **belum** ditambah |
+| F4 | Model iuran: tagihan murni (§3.3.4) vs rekapitulasi (Track 4/KU-02) | 🟠 Sedang | Selaraskan definisi SF-IU | 🟡 terpetakan di `KU-02` |
+| F5 | Kanban diklaim jalan di §2.2.3.1, realitanya belum (Review kosong) | 🔴 Tinggi | Jalankan + catat rekonstruksi di Bab IV | ✅ papan dibangun, rekonstruksi dicatat di Bab IV §4.1 |
+| F6 | Defect kode: hard-delete pengumuman; aksi surat tanpa cek peran | 🟡 Rendah | Jadikan kartu `type:bug` | ✅ kartu `EV-BUG-01` & `SR-BUG-01` dibuat |
+| F7 | Dokumen sekitar usang (plan.md, checklist.md, docs/arsip/planAfif.md) | 🟠 Sedang | Diselaraskan ke laporan.md | 🟡 sebagian diselaraskan |
 
 ---
 
@@ -27,7 +28,7 @@ Disusun: 12 Okt 2026 · Dasar: pembacaan `laporan.md` + verifikasi kode di `src/
 
 **Bukti:**
 - `laporan.md` §3.3.4 memuat `SF-SR-01` s.d. `SF-SR-07` secara lengkap.
-- `laporan.md` §3.1 (batas realistis) menyatakan *"Fitur-fitur di luar scope — **termasuk surat-menyurat**
+- *(sebelum koreksi)* `laporan.md` §3.1 (batas realistis) menyatakan *"Fitur-fitur di luar scope — **termasuk surat-menyurat**
   … tidak termasuk dalam cakupan pengerjaan."*
 - **Kode sudah terbangun:** `(app)/surat/`, `(app)/surat/[id]/`, `(app)/surat/[id]/cetak/`,
   `portal/surat/ajukan/`, `portal/surat/[id]/cetak/`, tabel `surat`.
@@ -35,9 +36,12 @@ Disusun: 12 Okt 2026 · Dasar: pembacaan `laporan.md` + verifikasi kode di `src/
 - `docs/checklist.md` (ringkasan prioritas) juga menaruh Surat-Menyurat = *Out of Scope*; `plan.md`
   justru menaruhnya sebagai Core MVP.
 
-**Resolusi:** surat-menyurat **masuk scope** (`must`). §3.1 baris 326 perlu dikoreksi (hapus
+**Resolusi:** surat-menyurat **masuk scope** (`must`). §3.1 perlu dikoreksi (hapus
 "termasuk surat-menyurat" dari daftar di luar scope). Ini konsisten dengan pekerjaan nyata dan
 dengan daftar SF paling spesifik.
+
+**Status: ✅ SELESAI (19 Okt 2026).** §3.1 `laporan.md` sudah tidak lagi mencantumkan surat-menyurat
+sebagai di luar scope; surat-menyurat kini masuk daftar Core MVP.
 
 ---
 
@@ -47,8 +51,11 @@ dengan daftar SF paling spesifik.
 `PROJECT.md` MVP #4 = "Kas RT — Baru", dan **Track 4 / KU-01** = pemisahan kas RT. Grep `kas_rt`
 tidak menemukan apa pun → belum dibangun.
 
-**Resolusi:** tambahkan kode SF baru di §3.3.4, mis. **`SF-KS-07` Pemisahan Kas RT** dan
-**`SF-KS-08` Rekap Kas per RT**, lalu petakan ke kartu `KU-01`/`KU-03`.
+**Resolusi:** scope Kas RT & rekap iuran tetap **diakui sebagai MVP** (Core MVP #4). Keputusan tim
+(19 Okt 2026): **belum menambah kode SF baru** ke §3.3.4; pekerjaan dilacak lewat kartu **`KU-01`**
+(Pemisahan Kas RT) dan `KU-02`/`KU-03`. Kode SF ditambahkan saat modul benar-benar dibangun.
+
+**Status: 🟡 berjalan** — `KU-01` masih `Backlog`; tabel/rute `kas_rt` belum ada di kode.
 
 ---
 
@@ -58,8 +65,11 @@ tidak menemukan apa pun → belum dibangun.
 Modul Publik/Landing Page. Tapi `§3.3.4` tidak memuat `SF-LP-*`; hanya tersirat di `SF-KP-07`
 (rekap demografis). Grep `visi/misi/sotk/prestasi` → kosong → belum dibangun.
 
-**Resolusi:** tambahkan kode SF baru, mis. **`SF-LP-01` Landing Page Publik** dan
-**`SF-LP-02` Visualisasi Statistik Publik**, petakan ke `LP-01`/`LP-02`.
+**Resolusi:** Landing Page & statistik publik **masuk Core MVP**. Keputusan tim (19 Okt 2026):
+**belum menambah kode SF baru** ke §3.3.4; pekerjaan dilacak lewat kartu **`LP-01`** (Landing Page
+Publik) & **`LP-02`** (Visualisasi Statistik Publik).
+
+**Status: 🟡 berjalan** — `visi/misi/sotk/prestasi` belum ada di kode.
 
 ---
 
@@ -88,6 +98,10 @@ Tidak ada perubahan kode pada tahap ini (murni penyelarasan spesifikasi).
 **jujur menuliskannya** di Bab IV §4.1: papan dibangun retroaktif, tanggal back-fill tidak dikarang.
 Ini sekaligus memberi isi nyata untuk Bab IV yang saat ini masih kosong.
 
+**Status: ✅ SELESAI (19 Okt 2026).** Papan sudah dibangun (lihat `board.md`: **50 kartu** —
+Done 32 · In Progress 3 · Todo 9 · Won't 6). Rekonstruksi *as-is* + *back-fill* dicatat apa adanya
+di Bab IV §4.1 (`bab4-proses-perancangan.md`), tanpa mengarang tanggal pengerjaan.
+
 ---
 
 ## F6 — Defect kode (bahan kartu Bug)
@@ -98,6 +112,9 @@ Ini sekaligus memberi isi nyata untuk Bab IV yang saat ini masih kosong.
 | Aksi surat tanpa cek peran + fallback `'system'` | `(app)/surat/[id]/+page.server.ts` baris 55 & 70 | Potensi celah otorisasi/jejak audit palsu | `SR-BUG-01` |
 
 > Tidak diperbaiki sekarang (perintah: jangan sentuh kode). Dicatat sebagai kartu `type:bug` untuk papan.
+
+**Status: ✅ SELESAI (19 Okt 2026)** — kartu `EV-BUG-01` & `SR-BUG-01` sudah ada di papan; kode
+**belum** diubah (sesuai arahan "jangan sentuh kode").
 
 ---
 

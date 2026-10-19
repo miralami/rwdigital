@@ -1,5 +1,3 @@
-> ARSIP (19 Okt 2026) - digantikan oleh ../laporan/laporan.md (bab 3.5) + ../laporan/bab4-proses-perancangan.md. Lihat README.md di folder ini.
-
 # Laporan Revisi — Bagian yang Diperbarui
 
 > **Cara pakai:** file ini adalah *holding area* revisi. Setiap potongan diberi penanda:

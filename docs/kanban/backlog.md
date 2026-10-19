@@ -36,7 +36,7 @@ PIC: Afif (`miralami`) · Epic ini tidak muncul di laporan sebagai modul, tapi m
 | Kode | Kartu | SF | MoSCoW | Status | Bukti |
 |---|---|---|---|---|---|
 | FND-01 | Scaffold repo: SvelteKit 2 + Svelte 5 (runes) + TypeScript + Tailwind v4 | — | must | **Done** | `package.json`, `vite.config.ts`, `src/app.css`, PR #1 |
-| FND-02 | Skema basis data + Drizzle ORM + SQLite (`local.db`) + migrasi | — | must | **Done** | `src/lib/server/db/schema.ts` (12 tabel), `drizzle/` |
+| FND-02 | Skema basis data + Drizzle ORM + SQLite (`local.db`) + migrasi | — | must | **Done** | `src/lib/server/db/schema.ts` (13 tabel), `drizzle/` |
 | FND-03 | Autentikasi (Better Auth) + RBAC 4 peran + route guard *fail-closed* | — | must | **Done** | `src/lib/server/auth.ts`, `guard.ts`, `permissions.ts` |
 | FND-04 | Pustaka komponen UI bersama (Button, Card, DataTable, Modal, Sheet, StatCard, …) | — | must | **Done** | `src/lib/components/` (14 komponen) |
 | FND-05 | Dokumentasi & panduan kerja proyek | — | should | **Done** | `CLAUDE.md`, `PROJECT.md`, `README.md`, `docs/` |
@@ -78,7 +78,7 @@ PIC: Alizha (`alizha13`)
 | Kode | Kartu | SF | MoSCoW | Status | Bukti |
 |---|---|---|---|---|---|
 | EV-A | *(back-fill)* CRUD pengumuman: tambah, edit, arsipkan, daftar terurut | `SF-PG-02`, `SF-PG-03` | must | **Done** | `(app)/pengumuman/+page.server.ts`, `tambah/`, `[id]/edit/` |
-| EV-01 | Refactor pengumuman → model **time-based**: field tanggal mulai, tanggal selesai, **lokasi**; status otomatis (Akan Datang / Berlangsung / Selesai) | `SF-PG-01` | must | **Done** | `tanggalMulai`/`tanggalSelesai`/`lokasi` di skema; status otomatis di UI — PR #60 (merge `7093798`), issue #22 |
+| EV-01 | Refactor pengumuman → model **time-based**: field tanggal mulai, tanggal selesai, **lokasi**; status otomatis (Akan Datang / Berlangsung / Selesai) | `SF-PG-01` | must | **Done** | `tanggalMulai`/`tanggalSelesai`/`lokasi` di skema; status otomatis di UI — PR #60 (merge `c1487b5`), issue #22 |
 | EV-02 | Attachment berkas notulen/dokumen (PDF/gambar) pada postingan event + akses unduh | *belum ada kode SF* | should | **Backlog** | — |
 | EV-03 | Saring & cari pengumuman (kategori + rentang tanggal) | `SF-PG-04` | should | **Backlog** | `load()` masih `select all` tanpa filter |
 | EV-BUG-01 | **Defect:** aksi `hapus` melakukan `DELETE` permanen, melanggar `SF-PG-02` (harus arsip, bukan hapus) | `SF-PG-02` | must | **Backlog** | `(app)/pengumuman/+page.server.ts` baris 16–23 |

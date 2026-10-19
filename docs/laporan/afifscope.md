@@ -116,7 +116,7 @@ Dari `../arsip/pembagian.md` + panduan:
 
 | Artefak | Keterangan | PIC |
 |---|---|---|
-| **ERD global** (semua entitas) | sudah dirancang di `schema.ts` (12 tabel) | **Afif** |
+| **ERD global** (semua entitas) | sudah dirancang di `schema.ts` (13 tabel) | **Afif** |
 | **Template & standar diagram** (penomoran `Gambar 3.x`, gaya) | dipakai seragam semua PIC | **Afif** |
 | **Use Case Diagram** per modul | aktor: admin_rw, pengurus_rt, bendahara, warga | **PIC modul** |
 | **Activity/Flowchart** per alur kritis (pengajuan surat, pembayaran iuran, input kas, dll.) | contoh laporan punya "Alur Pengajuan & Persetujuan Surat" (Gambar 3.1) dst. | **PIC modul** |
@@ -143,9 +143,9 @@ Dari `../arsip/pembagian.md` + panduan:
 
 ## 8. Urutan Pengerjaan (dikonfirmasi: semua dikerjakan)
 
-1. **§3.5.1–3.5.5 (proposal)** — ** bukan tulis dari nol**: isi sudah lengkap di `laporan.md` §3.5
-   (Tabel 11–13). Sisa: **buat flowchart §3.5.1** + rapikan penomoran tabel/judul → pindah ke docx.
-2. ~~**Rapikan papan**: tutup `EPIC-0` #8; update `docs/kanban/backlog.md`/`docs/kanban/board.md` (EV-01 sudah Done).~~ ✅ **selesai 19 Okt**
+1. **§3.5.1–3.5.5 (proposal)** — **bukan tulis dari nol**: isi sudah lengkap di `laporan.md` §3.5
+   **dan sudah ada di docx** (Tabel 11–13). Sisa: **buat gambar *flowchart* §3.5.1**.
+2. ~~**Rapikan papan**: tutup `EPIC-0` #8; update `backlog.md`/`board.md` (EV-01 sudah Done).~~ ✅ **selesai 19 Okt**
 3. **Bab IV §4.1** (proses Kanban) — draft ada di `../arsip/laporanRevisi.md`, sesuaikan ke §3.5.1.
 4. **Sediakan template & standar diagram** → teruskan ke PIC modul.
 5. **Aktifkan alur PR/review** (Afif = reviewer wajib) supaya kolom `Review/Verification` terpakai.

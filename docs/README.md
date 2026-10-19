@@ -1,7 +1,7 @@
 # Indeks `docs/` — Peta Dokumen Proyek SI-RW
 
 > **Mulai dari sini.** Navigasi cepat seluruh dokumentasi.
-> Status pengerjaan fitur: [`kanban/backlog.md`](kanban/backlog.md) · Isi laporan (otoritas): [`laporan/laporan.md`](laporan/laporan.md).
+> Status pengerjaan fitur: `kanban/backlog.md` · Isi laporan (otoritas): `laporan/laporan.md`.
 
 ## Struktur
 
@@ -23,7 +23,8 @@ docs/
 │   ├── diagram-prompts.md        prompt Visual Paradigm AI
 │   ├── afifscope.md              scope kerja Afif
 │   ├── pembagian-tugas.md        pembagian tugas semua orang
-│   └── referensi/                analisis-panduan · bibliography · daftar-pustaka · contohlaporan
+│   ├── referensi/                analisis-panduan · bibliography · daftar-pustaka · contohlaporan
+│   └── (arsip pindah ke docs/arsip/)
 ├── arsip/                        dokumen usang (laporanRevisi, planAfif, pembagian, List feature fix)
 └── design-preview/               pratinjau desain landing page (Opsi A/B/C)
 ```
@@ -32,15 +33,15 @@ docs/
 
 | Pertanyaan | Jawaban ada di |
 |---|---|
-| Fitur apa saja & statusnya? | [`kanban/backlog.md`](kanban/backlog.md) |
-| Siapa mengerjakan apa? | [`laporan/pembagian-tugas.md`](laporan/pembagian-tugas.md) |
-| Aturan Kanban (kolom, WIP, DoR/DoD)? | [`kanban/workflow.md`](kanban/workflow.md) |
-| Isi bab laporan? | [`laporan/laporan.md`](laporan/laporan.md) |
-| Bab IV sudah ditulis? | [`laporan/bab4-proses-perancangan.md`](laporan/bab4-proses-perancangan.md) |
-| Prompt bikin diagram? | [`laporan/diagram-prompts.md`](laporan/diagram-prompts.md) |
-| Inkonsistensi yang ditemukan? | [`kanban/temuan-inkonsistensi.md`](kanban/temuan-inkonsistensi.md) |
-| Daftar pustaka? | [`laporan/referensi/bibliography.md`](laporan/referensi/bibliography.md) |
-| Dokumen lama yang sudah tidak dipakai? | [`arsip/`](arsip/README.md) |
+| Fitur apa saja & statusnya? | `kanban/backlog.md` |
+| Siapa mengerjakan apa? | `laporan/pembagian-tugas.md` |
+| Aturan Kanban (kolom, WIP, DoR/DoD)? | `kanban/workflow.md` |
+| Isi bab laporan? | `laporan/laporan.md` |
+| Bab IV sudah ditulis? | `laporan/bab4-proses-perancangan.md` |
+| Prompt bikin diagram? | `laporan/diagram-prompts.md` |
+| Inkonsistensi yang ditemukan? | `kanban/temuan-inkonsistensi.md` |
+| Daftar pustaka? | `laporan/referensi/bibliography.md` |
+| Dokumen lama yang sudah tidak dipakai? | `arsip/` |
 
 ## Dokumen di root repo (di luar `docs/`)
 

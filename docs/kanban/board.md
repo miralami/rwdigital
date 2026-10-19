@@ -199,7 +199,7 @@ penyelarasan kartu EPIC-2 (`EV-01`):
 | Kartu | Issue | Dari | Ke | Bukti |
 |---|---|---|---|---|
 | EPIC-0 Fondasi & Infrastruktur | #8 | Todo | **Done** (closed) | seluruh 6 kartu FND-01..06 selesai |
-| EV-01 Pengumuman time-based | #22 | In Progress | **Done** (closed) | PR #60 (merge `7093798`) — tanggal, lokasi, status otomatis |
+| EV-01 Pengumuman time-based | #22 | In Progress | **Done** (closed) | PR #60 (merge `c1487b5`) — tanggal, lokasi, status otomatis |
 
 Catatan:
 - EPIC-0 #8 ditutup mengikuti pola EPIC-1 #13 & EPIC-3 #11 (Epic ditutup bila seluruh kartunya `Done`).
