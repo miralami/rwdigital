@@ -5,8 +5,19 @@ import { admin } from 'better-auth/plugins';
 import { LibsqlDialect } from '@libsql/kysely-libsql';
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
+import { eq } from 'drizzle-orm';
 import { ac, roles } from '../src/lib/permissions';
-import { rw, kategoriKas } from '../src/lib/server/db/schema';
+import {
+	rw,
+	rt,
+	kk,
+	warga,
+	kategoriKas,
+	transaksiKas,
+	transaksiKasRt,
+	jenisIuran,
+	tagihan
+} from '../src/lib/server/db/schema';
 
 // ─── Load .env ────────────────────────────────────────────────────────────────
 const envPath = resolve(process.cwd(), '.env');
@@ -31,8 +42,7 @@ if (existsSync(envPath)) {
 const TURSO_DATABASE_URL = process.env.TURSO_DATABASE_URL ?? 'file:local.db';
 const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN ?? '';
 
-// ─── Auth instance (same config as src/lib/server/auth.ts) ────────────────────
-// Note: sveltekitCookies plugin omitted — requires SvelteKit request context.
+// ─── Auth instance ────────────────────────────────────────────────────────────
 const auth = betterAuth({
 	database: {
 		dialect: new LibsqlDialect({
@@ -52,12 +62,24 @@ const auth = betterAuth({
 	]
 });
 
-// ─── DB client (same config as src/lib/server/db/index.ts) ────────────────────
+// ─── DB client ────────────────────────────────────────────────────────────────
 const client = createClient({
 	url: TURSO_DATABASE_URL,
 	authToken: TURSO_AUTH_TOKEN
 });
-const db = drizzle(client, { schema: { rw, kategoriKas } });
+const db = drizzle(client, {
+	schema: {
+		rw,
+		rt,
+		kk,
+		warga,
+		kategoriKas,
+		transaksiKas,
+		transaksiKasRt,
+		jenisIuran,
+		tagihan
+	}
+});
 
 // ─── Seed config ─────────────────────────────────────────────────────────────
 const ADMIN_EMAIL = 'admin@rw.id';
@@ -111,8 +133,6 @@ async function seed() {
 		});
 		console.log('   Role admin_rw berhasil diatur.');
 	} catch (e) {
-		console.error(`   Gagal mengatur role via API: ${e}`);
-		console.log('   Mencoba update langsung ke database...');
 		try {
 			await client.execute({
 				sql: 'UPDATE user SET role = ? WHERE id = ?',
@@ -126,7 +146,6 @@ async function seed() {
 
 	// 3. Create default RW record
 	console.log('3. Membuat data RW default...');
-
 	let rwId: number;
 
 	try {
@@ -139,44 +158,239 @@ async function seed() {
 			const [insertedRw] = await db
 				.insert(rw)
 				.values({
-					nama: 'RW 01',
-					alamat: 'Jl. Contoh No. 1',
-					kelurahan: 'Kelurahan Contoh',
-					kecamatan: 'Kecamatan Contoh',
-					kota: 'Kota Contoh'
+					nama: 'RW 05 Sukamaju',
+					alamat: 'Jl. Merpati Putih No. 12',
+					kelurahan: 'Kelurahan Sukamaju',
+					kecamatan: 'Kecamatan Cilodong',
+					kota: 'Kota Depok'
 				})
 				.returning();
 			rwId = insertedRw.id;
-			console.log(`   RW default dibuat: RW 01 (id: ${rwId})`);
+			console.log(`   RW default dibuat: RW 05 (id: ${rwId})`);
 		}
 	} catch (e) {
 		console.error(`   Gagal membuat RW: ${e}`);
-		console.error('   Pastikan tabel sudah dibuat dengan: npm run db:setup');
 		throw e;
 	}
 
-	// 4. Create default kategori kas
-	console.log('4. Membuat kategori kas default...');
+	// 4. Create RT records (RT 01 s/d RT 04)
+	console.log('4. Membuat data RT (RT 01 - RT 04)...');
+	const rtMap = new Map<number, number>(); // nomor RT -> id RT
+	const existingRts = await db.select().from(rt).where(eq(rt.rwId, rwId));
 
-	try {
-		const existingKategori = await db.select().from(kategoriKas).limit(1);
-
-		if (existingKategori.length > 0) {
-			console.log('   Kategori kas sudah ada, skip.');
-		} else {
-			await db.insert(kategoriKas).values([
-				{ nama: 'Iuran', jenis: 'pemasukan', rwId },
-				{ nama: 'Donasi', jenis: 'pemasukan', rwId },
-				{ nama: 'Lainnya', jenis: 'pemasukan', rwId },
-				{ nama: 'Operasional', jenis: 'pengeluaran', rwId },
-				{ nama: 'Kegiatan', jenis: 'pengeluaran', rwId },
-				{ nama: 'Lainnya', jenis: 'pengeluaran', rwId }
-			]);
-			console.log('   Kategori kas default dibuat (6 kategori).');
+	if (existingRts.length === 0) {
+		for (const nomor of [1, 2, 3, 4]) {
+			const [insertedRt] = await db.insert(rt).values({ nomor, rwId }).returning();
+			rtMap.set(nomor, insertedRt.id);
 		}
-	} catch (e) {
-		console.error(`   Gagal membuat kategori kas: ${e}`);
-		throw e;
+		console.log('   4 RT berhasil dibuat.');
+	} else {
+		for (const r of existingRts) {
+			rtMap.set(r.nomor, r.id);
+		}
+		console.log(`   ${existingRts.length} RT sudah ada.`);
+	}
+
+	// 5. Create default kategori kas (pos pengeluaran & pos penerimaan)
+	console.log('5. Membuat kategori kas & pos anggaran...');
+	const existingKategori = await db.select().from(kategoriKas).where(eq(kategoriKas.rwId, rwId));
+
+	if (existingKategori.length === 0) {
+		await db.insert(kategoriKas).values([
+			{ nama: 'Iuran Wajib RT', jenis: 'pemasukan', scope: 'rt', rwId },
+			{ nama: 'Kas Sosial Kematian', jenis: 'pemasukan', scope: 'rt', rwId },
+			{ nama: 'Donasi & Sumbangan', jenis: 'pemasukan', scope: 'semua', rwId },
+			{ nama: 'Iuran Kebersihan & Sampah', jenis: 'pemasukan', scope: 'rt', rwId },
+			{ nama: 'Operasional RW', jenis: 'pengeluaran', scope: 'rw', rwId },
+			{ nama: 'Santunan Kematian RT', jenis: 'pengeluaran', scope: 'rt', rwId },
+			{ nama: 'Operasional RT', jenis: 'pengeluaran', scope: 'rt', rwId },
+			{ nama: 'Pemeliharaan Sarana / Tenda', jenis: 'pengeluaran', scope: 'semua', rwId },
+			{ nama: 'Kegiatan Warga / PHBI', jenis: 'pengeluaran', scope: 'semua', rwId }
+		]);
+		console.log('   Kategori kas lengkap berhasil dibuat.');
+	} else {
+		console.log(`   ${existingKategori.length} kategori kas sudah ada.`);
+	}
+
+	// 6. Create sample KK & Warga
+	console.log('6. Mengecek data KK & Warga...');
+	const existingKk = await db.select().from(kk).limit(1);
+
+	if (existingKk.length === 0 && rtMap.size > 0) {
+		const sampleKkData = [
+			{ noKk: '3276010101000001', alamat: 'Jl. Merpati No. 1', rtNomor: 1, nama: 'Bambang Supriyanto', nik: '3276010101800001' },
+			{ noKk: '3276010101000002', alamat: 'Jl. Merpati No. 3', rtNomor: 1, nama: 'Agus Setiawan', nik: '3276010101850002' },
+			{ noKk: '3276010101000003', alamat: 'Jl. Merpati No. 5', rtNomor: 1, nama: 'Hendra Gunawan', nik: '3276010101880003' },
+			{ noKk: '3276010101000004', alamat: 'Jl. Kutilang No. 2', rtNomor: 2, nama: 'Siti Rahmawati', nik: '3276010101900004' },
+			{ noKk: '3276010101000005', alamat: 'Jl. Kutilang No. 4', rtNomor: 2, nama: 'Eko Prasetyo', nik: '3276010101820005' },
+			{ noKk: '3276010101000006', alamat: 'Jl. Kenari No. 7', rtNomor: 3, nama: 'Dedi Kurniawan', nik: '3276010101790006' },
+			{ noKk: '3276010101000007', alamat: 'Jl. Kenari No. 9', rtNomor: 3, nama: 'Wahyudi Santoso', nik: '3276010101860007' },
+			{ noKk: '3276010101000008', alamat: 'Jl. Cendrawasih No. 12', rtNomor: 4, nama: 'Ahmad Fauzi', nik: '3276010101910008' }
+		];
+
+		const kkIds: number[] = [];
+		for (const item of sampleKkData) {
+			const rtIdVal = rtMap.get(item.rtNomor)!;
+			const [insertedKk] = await db
+				.insert(kk)
+				.values({
+					noKk: item.noKk,
+					alamat: item.alamat,
+					rtId: rtIdVal,
+					statusHuni: 'tetap'
+				})
+				.returning();
+
+			kkIds.push(insertedKk.id);
+
+			await db.insert(warga).values({
+				nik: item.nik,
+				nama: item.nama,
+				tempatLahir: 'Depok',
+				tanggalLahir: '1985-05-15',
+				jenisKelamin: 'L',
+				agama: 'Islam',
+				pendidikan: 'S1',
+				pekerjaan: 'Karyawan Swasta',
+				statusPerkawinan: 'kawin',
+				statusHubunganKk: 'kepala_keluarga',
+				kkId: insertedKk.id,
+				aktif: true
+			});
+		}
+		console.log(`   ${sampleKkData.length} KK & Warga sampel berhasil dibuat.`);
+
+		// 7. Create sample Jenis Iuran & Tagihan untuk rekapitulasi iuran RT
+		console.log('7. Membuat jenis iuran & tagihan sampel...');
+		const [iuranWajib] = await db
+			.insert(jenisIuran)
+			.values({
+				nama: 'Iuran Wajib Warga RT',
+				nominal: 50000,
+				periode: 'bulanan',
+				aktif: true,
+				rwId
+			})
+			.returning();
+
+		// Buat tagihan periode 2026-10
+		for (let i = 0; i < kkIds.length; i++) {
+			const status = i % 2 === 0 ? 'lunas' : 'belum_bayar';
+			await db.insert(tagihan).values({
+				kkId: kkIds[i],
+				jenisIuranId: iuranWajib.id,
+				periode: '2026-10',
+				nominal: 50000,
+				status
+			});
+		}
+		console.log('   Tagihan sampel iuran RT dibuat.');
+	} else {
+		console.log('   Data KK sudah ada.');
+	}
+
+	// 8. Sample Transaksi Kas RW
+	console.log('8. Mengecek transaksi Kas RW...');
+	const existingKasRw = await db.select().from(transaksiKas).limit(1);
+	if (existingKasRw.length === 0) {
+		await db.insert(transaksiKas).values([
+			{
+				jenis: 'pemasukan',
+				nominal: 3500000,
+				keterangan: 'Bantuan Dana Operasional RW dari Kelurahan',
+				tanggal: '2026-10-01',
+				dicatatOleh: 'Bendahara RW',
+				rwId
+			},
+			{
+				jenis: 'pengeluaran',
+				nominal: 750000,
+				keterangan: 'Pengadaan ATK & Surat-Menyurat Sekretariat RW',
+				tanggal: '2026-10-05',
+				dicatatOleh: 'Bendahara RW',
+				rwId
+			},
+			{
+				jenis: 'pengeluaran',
+				nominal: 500000,
+				keterangan: 'Konsumsi Rapat Pleno Koordinasi Pengurus RT/RW',
+				tanggal: '2026-10-12',
+				dicatatOleh: 'Bendahara RW',
+				rwId
+			}
+		]);
+		console.log('   Transaksi Kas RW sampel berhasil dibuat.');
+	} else {
+		console.log('   Transaksi Kas RW sudah ada.');
+	}
+
+	// 9. Sample Transaksi Kas RT (KU-01: Kas Mandiri per RT)
+	console.log('9. Mengecek transaksi Kas RT mandiri...');
+	const existingKasRt = await db.select().from(transaksiKasRt).limit(1);
+	if (existingKasRt.length === 0 && rtMap.size > 0) {
+		const rt1 = rtMap.get(1)!;
+		const rt2 = rtMap.get(2)!;
+		const rt3 = rtMap.get(3)!;
+
+		await db.insert(transaksiKasRt).values([
+			{
+				rtId: rt1,
+				namaKas: 'Kas Sosial Kematian',
+				jenis: 'pemasukan',
+				nominal: 1200000,
+				keterangan: 'Iuran Kas Sosial Kematian RT 01 (Bulan Oktober 2026)',
+				tanggal: '2026-10-02',
+				dicatatOleh: 'Bendahara RT 01'
+			},
+			{
+				rtId: rt1,
+				namaKas: 'Kas Sosial Kematian',
+				jenis: 'pengeluaran',
+				nominal: 500000,
+				keterangan: 'Santunan duka cita & bunga pemakaman Alm. Bpk. Supardi RT 01',
+				tanggal: '2026-10-10',
+				dicatatOleh: 'Bendahara RT 01'
+			},
+			{
+				rtId: rt1,
+				namaKas: 'Kas Operasional RT',
+				jenis: 'pemasukan',
+				nominal: 800000,
+				keterangan: 'Penerimaan dana kas operasional lingkungan RT 01',
+				tanggal: '2026-10-04',
+				dicatatOleh: 'Bendahara RT 01'
+			},
+			{
+				rtId: rt2,
+				namaKas: 'Kas Rukun Kematian',
+				jenis: 'pemasukan',
+				nominal: 950000,
+				keterangan: 'Iuran Rukun Kematian RT 02 Periode Oktober',
+				tanggal: '2026-10-03',
+				dicatatOleh: 'Pengurus RT 02'
+			},
+			{
+				rtId: rt2,
+				namaKas: 'Kas Operasional RT',
+				jenis: 'pengeluaran',
+				nominal: 250000,
+				keterangan: 'Perbaikan lampu penerangan gang RT 02',
+				tanggal: '2026-10-08',
+				dicatatOleh: 'Pengurus RT 02'
+			},
+			{
+				rtId: rt3,
+				namaKas: 'Kas Sosial Kematian',
+				jenis: 'pemasukan',
+				nominal: 1100000,
+				keterangan: 'Saldo awal kas sosial kematian RT 03',
+				tanggal: '2026-10-01',
+				dicatatOleh: 'Bendahara RT 03'
+			}
+		]);
+		console.log('   Transaksi Kas RT sampel berhasil dibuat.');
+	} else {
+		console.log('   Transaksi Kas RT sudah ada.');
 	}
 
 	console.log('\n=== Seed selesai ===');
