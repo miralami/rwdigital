@@ -11,6 +11,7 @@
   import ArrowDownRight from '@lucide/svelte/icons/arrow-down-right';
   import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
   import Download from '@lucide/svelte/icons/download';
+  import FileSpreadsheet from '@lucide/svelte/icons/file-spreadsheet';
   import Building2 from '@lucide/svelte/icons/building-2';
   import Home from '@lucide/svelte/icons/home';
   import Receipt from '@lucide/svelte/icons/receipt';
@@ -211,58 +212,41 @@
     },
     {
       key: 'aksi',
-      label  // ─── Ekspor CSV (KU-03) ─────────────────────────────────────────────────────
-  function eksporCsvKasRw() {
-    let csv = 'Laporan Pembukuan Kas Internal RW\n';
-    csv += `Wilayah: ${data.rwData?.nama ?? 'RW 01'}\n`;
-    csv += `Tanggal Unduh: ${new Date().toLocaleString('id-ID')}\n`;
-    csv += `Total Pemasukan Aktif: ${data.totalPemasukanRw}\n`;
-    csv += `Total Pengeluaran Aktif: ${data.totalPengeluaranRw}\n`;
-    csv += `Saldo Akhir Kas RW: ${data.saldoRw}\n\n`;
-    csv += 'Tanggal,Keterangan,Pos Anggaran,Jenis,Nominal,Status,Dicatat Oleh\n';
-
-    for (const t of filteredTransaksiRw) {
-      const ket = (t.keterangan || '').replace(/"/g, '""');
-      const kat = (t.namaKategori || '').replace(/"/g, '""');
-      csv += `"${t.tanggal}","${ket}","${kat}","${t.jenis}",${t.nominal},"${t.dibatalkan ? 'Dibatalkan' : 'Aktif'}","${t.dicatatOleh}"\n`;
+      label: '',
+      sortable: false,
+      render: (row: any) => {
+        if (row.dibatalkan) return '';
+        return `<button type="button" class="btn btn-sm btn-secondary text-xs" data-batal-rt="${row.id}">Batal</button>`;
+      }
     }
+  ];
 
-    unduhFileCsv(csv, `laporan_kas_rw_${new Date().toISOString().slice(0, 10)}.csv`);
+  function onTableClickRw(e: MouseEvent) {
+    const target = (e.target as HTMLElement).closest('[data-batal-rw]') as HTMLElement | null;
+    if (target) {
+      const id = target.getAttribute('data-batal-rw');
+      if (id) {
+        selectedTransaksiId = Number(id);
+        showModalBatalRw = true;
+      }
+    }
   }
 
-  function eksporCsvKasRt() {
-    let csv = 'Laporan Pembukuan Kas Mandiri per-RT (KU-01)\n';
-    csv += `Wilayah: ${data.rwData?.nama ?? 'RW 01'} - Lingkungan RT\n`;
-    csv += `Filter RT: ${filterRtPilihan === 'semua' ? 'Semua RT' : 'RT ' + filterRtPilihan}\n`;
-    csv += `Tanggal Unduh: ${new Date().toLocaleString('id-ID')}\n\n`;
-    csv += 'Tanggal,RT,Nama Buku Kas Mandiri,Keterangan,Pos Kategori,Jenis,Nominal,Status,Dicatat Oleh\n';
-
-    for (const t of filteredTransaksiRt) {
-      const ket = (t.keterangan || '').replace(/"/g, '""');
-      const kat = (t.namaKategori || '').replace(/"/g, '""');
-      const namaKas = (t.namaKas || '').replace(/"/g, '""');
-      csv += `"${t.tanggal}","RT ${String(t.nomorRt).padStart(2, '0')}","${namaKas}","${ket}","${kat}","${t.jenis}",${t.nominal},"${t.dibatalkan ? 'Dibatalkan' : 'Aktif'}","${t.dicatatOleh}"\n`;
+  function onTableClickRt(e: MouseEvent) {
+    const target = (e.target as HTMLElement).closest('[data-batal-rt]') as HTMLElement | null;
+    if (target) {
+      const id = target.getAttribute('data-batal-rt');
+      if (id) {
+        selectedTransaksiId = Number(id);
+        showModalBatalRt = true;
+      }
     }
-
-    unduhFileCsv(csv, `laporan_kas_rt_${new Date().toISOString().slice(0, 10)}.csv`);
   }
 
-  function eksporCsvRekapIuran() {
-    let csv = 'Rekapitulasi Penerimaan Iuran Wajib RT (KU-02)\n';
-    csv += `Periode: ${filterPeriodeIuran}\n`;
-    csv += `Tanggal Unduh: ${new Date().toLocaleString('id-ID')}\n\n`;
-    csv += 'RT,Total KK Terdaftar,KK Lunas,KK Belum Bayar,Persentase Kepatuhan (%),Realisasi Penerimaan,Target Nominal\n';
+  // ─── Ekspor Excel & CSV Berkualitas Tinggi (KU-03) ─────────────────────────
 
-    for (const r of data.rekapIuranRt) {
-      csv += `"RT ${String(r.nomorRt).padStart(2, '0')}",${r.totalKk},${r.lunas},${r.belumBayar},"${r.persentase}%",${r.nominalTerkumpul},${r.targetNominal}\n`;
-    }
-
-    csv += `\nTotal Terhimpun,,,,,${data.totalIuranTerkumpul},${data.totalIuranTarget}\n`;
-    unduhFileCsv(csv, `rekap_iuran_wajib_rt_${filterPeriodeIuran}_${new Date().toISOString().slice(0, 10)}.csv`);
-  }
-
-  function unduhFileCsv(content: string, filename: string) {
-    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  function unduhFileBlob(content: BlobPart, type: string, filename: string) {
+    const blob = new Blob([content], { type });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
@@ -270,6 +254,431 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  function unduhFileCsv(content: string, filename: string) {
+    // UTF-8 BOM (\uFEFF) penting agar Microsoft Excel di Windows membaca teks Indonesia & simbol dengan benar
+    const BOM = '\uFEFF';
+    unduhFileBlob(BOM + content, 'text/csv;charset=utf-8;', filename);
+  }
+
+  function unduhFileExcel(tableHtml: string, judulLaporan: string, filename: string) {
+    const template = `
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<!--[if gte mso 9]>
+<xml>
+ <x:ExcelWorkbook>
+  <x:ExcelWorksheets>
+   <x:ExcelWorksheet>
+    <x:Name>${judulLaporan.slice(0, 31)}</x:Name>
+    <x:WorksheetOptions>
+      <x:DisplayGridlines/>
+    </x:WorksheetOptions>
+   </x:ExcelWorksheet>
+  </x:ExcelWorksheets>
+ </x:ExcelWorkbook>
+</xml>
+<![endif]-->
+<style>
+  body { font-family: Calibri, 'Segoe UI', Arial, sans-serif; font-size: 11pt; }
+  .kop-instansi { font-size: 16pt; font-weight: bold; color: #0f172a; text-align: center; }
+  .kop-sub { font-size: 10pt; color: #475569; text-align: center; }
+  .kop-title { font-size: 13pt; font-weight: bold; color: #1e3a8a; text-align: center; margin-top: 6px; }
+  .kop-meta { font-size: 10pt; color: #64748b; text-align: center; margin-bottom: 12px; }
+
+  table.summary-box { border-collapse: collapse; margin-top: 10px; margin-bottom: 14px; }
+  table.summary-box td { border: 1px solid #cbd5e1; padding: 5px 12px; font-size: 10pt; }
+  table.summary-box .lbl { background-color: #f8fafc; font-weight: bold; color: #334155; }
+
+  table.data-table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+  table.data-table th { background-color: #1e3a8a; color: #ffffff; font-weight: bold; font-size: 10pt; border: 1px solid #0f172a; padding: 8px 6px; text-align: center; vertical-align: middle; }
+  table.data-table td { border: 1px solid #cbd5e1; padding: 6px 8px; font-size: 10pt; vertical-align: middle; }
+
+  .num-cell { mso-number-format:"\#\,\#\#0"; text-align: right; }
+  .center-cell { text-align: center; }
+  .text-cell { text-align: left; }
+
+  .total-row td { background-color: #f1f5f9; font-weight: bold; border-top: 2px solid #0f172a; border-bottom: 2px solid #0f172a; font-size: 10.5pt; }
+  .text-masuk { color: #15803d; font-weight: bold; }
+  .text-keluar { color: #b91c1c; font-weight: bold; }
+  .text-batal { color: #94a3b8; text-decoration: line-through; }
+
+  .ttd-table { border-collapse: collapse; width: 100%; margin-top: 35px; }
+  .ttd-table td { border: none; text-align: center; font-size: 10pt; padding: 4px; }
+</style>
+</head>
+<body>
+  ${tableHtml}
+</body>
+</html>`;
+
+    unduhFileBlob(template, 'application/vnd.ms-excel;charset=utf-8;', filename);
+  }
+
+  // 1. Ekspor Kas RW
+  function getKasRwCalculated() {
+    let running = 0;
+    let totalMasuk = 0;
+    let totalKeluar = 0;
+    const rows = filteredTransaksiRw.map((t: any, index: number) => {
+      const isBatal = !!t.dibatalkan;
+      const masuk = !isBatal && t.jenis === 'pemasukan' ? t.nominal : 0;
+      const keluar = !isBatal && t.jenis === 'pengeluaran' ? t.nominal : 0;
+      if (!isBatal) {
+        running += masuk - keluar;
+        totalMasuk += masuk;
+        totalKeluar += keluar;
+      }
+      return {
+        no: index + 1,
+        tanggal: t.tanggal,
+        keterangan: t.keterangan + (isBatal ? ` (BATAL: ${t.alasanBatal || 'Koreksi'})` : ''),
+        pos: t.namaKategori || '—',
+        masuk,
+        keluar,
+        saldo: running,
+        status: isBatal ? 'Dibatalkan' : 'Aktif',
+        operator: t.dicatatOleh,
+        isBatal
+      };
+    });
+    return { rows, totalMasuk, totalKeluar, saldoAkhir: running };
+  }
+
+  function eksporExcelKasRw() {
+    const { rows, totalMasuk, totalKeluar, saldoAkhir } = getKasRwCalculated();
+    const namaRw = data.rwData?.nama ?? 'RW 01';
+    const alamatRw = `${data.rwData?.alamat ?? ''}, ${data.rwData?.kelurahan ?? ''}, ${data.rwData?.kecamatan ?? ''}, ${data.rwData?.kota ?? ''}`;
+    const tglCetak = new Date().toLocaleDateString('id-ID', { dateStyle: 'long' });
+
+    const html = `
+      <div class="kop-instansi">SISTEM INFORMASI ADMINISTRASI RUKUN WARGA</div>
+      <div class="kop-sub">${namaRw} — ${alamatRw}</div>
+      <div class="kop-title">BUKU KAS UMUM (KAS INTERNAL TINGKAT RW)</div>
+      <div class="kop-meta">Periode: ${filterPeriodeRw.toUpperCase()} | Tanggal Cetak: ${tglCetak}</div>
+
+      <table class="summary-box">
+        <tr>
+          <td class="lbl">Total Penerimaan (Debit)</td>
+          <td class="num-cell text-masuk">${totalMasuk}</td>
+          <td class="lbl">Total Pengeluaran (Kredit)</td>
+          <td class="num-cell text-keluar">${totalKeluar}</td>
+          <td class="lbl">Saldo Akhir Kas RW</td>
+          <td class="num-cell" style="font-weight: bold;">${saldoAkhir}</td>
+        </tr>
+      </table>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 40px;">No</th>
+            <th style="width: 90px;">Tanggal</th>
+            <th>Keterangan Transaksi</th>
+            <th style="width: 140px;">Pos Anggaran</th>
+            <th style="width: 125px;">Penerimaan (Debit) Rp</th>
+            <th style="width: 125px;">Pengeluaran (Kredit) Rp</th>
+            <th style="width: 130px;">Saldo Berjalan (Rp)</th>
+            <th style="width: 90px;">Status</th>
+            <th style="width: 110px;">Dicatat Oleh</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r: any) => `
+            <tr>
+              <td class="center-cell">${r.no}</td>
+              <td class="center-cell">${r.tanggal}</td>
+              <td class="text-cell ${r.isBatal ? 'text-batal' : ''}">${r.keterangan}</td>
+              <td class="text-cell">${r.pos}</td>
+              <td class="num-cell ${r.masuk > 0 ? 'text-masuk' : ''}">${r.masuk > 0 ? r.masuk : '-'}</td>
+              <td class="num-cell ${r.keluar > 0 ? 'text-keluar' : ''}">${r.keluar > 0 ? r.keluar : '-'}</td>
+              <td class="num-cell" style="font-weight: bold;">${r.isBatal ? '-' : r.saldo}</td>
+              <td class="center-cell">${r.status}</td>
+              <td class="center-cell">${r.operator}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="4" class="text-cell font-bold">TOTAL PEMBUKUAN KAS RW</td>
+            <td class="num-cell text-masuk">${totalMasuk}</td>
+            <td class="num-cell text-keluar">${totalKeluar}</td>
+            <td class="num-cell font-bold">${saldoAkhir}</td>
+            <td colspan="2" class="center-cell">${rows.length} Transaksi</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <table class="ttd-table">
+        <tr>
+          <td style="width: 50%;">Mengetahui,<br><strong>Ketua RW</strong><br><br><br><br>( .................................................... )</td>
+          <td style="width: 50%;">Disusun Oleh,<br><strong>Bendahara RW</strong><br><br><br><br>( .................................................... )</td>
+        </tr>
+      </table>
+    `;
+
+    unduhFileExcel(html, 'Kas_RW', `Laporan_Kas_RW_${new Date().toISOString().slice(0, 10)}.xls`);
+  }
+
+  function eksporCsvKasRw() {
+    const { rows, totalMasuk, totalKeluar, saldoAkhir } = getKasRwCalculated();
+    const namaRw = data.rwData?.nama ?? 'RW 01';
+    let csv = `sep=,\n`;
+    csv += `"LAPORAN PEMBUKUAN KAS INTERNAL RW"\n`;
+    csv += `"Wilayah:","${namaRw}"\n`;
+    csv += `"Periode:","${filterPeriodeRw}"\n`;
+    csv += `"Tanggal Cetak:","${new Date().toLocaleString('id-ID')}"\n`;
+    csv += `"Total Penerimaan (Rp)",${totalMasuk}\n`;
+    csv += `"Total Pengeluaran (Rp)",${totalKeluar}\n`;
+    csv += `"Saldo Akhir Kas (Rp)",${saldoAkhir}\n\n`;
+
+    csv += `No,Tanggal,Keterangan,Pos_Anggaran,Pemasukan_Debit_Rp,Pengeluaran_Kredit_Rp,Saldo_Berjalan_Rp,Status,Dicatat_Oleh\n`;
+    for (const r of rows) {
+      const ket = r.keterangan.replace(/"/g, '""');
+      const pos = r.pos.replace(/"/g, '""');
+      csv += `${r.no},"${r.tanggal}","${ket}","${pos}",${r.masuk},${r.keluar},${r.saldo},"${r.status}","${r.operator}"\n`;
+    }
+    csv += `TOTAL,,,,"${totalMasuk}","${totalKeluar}","${saldoAkhir}",,\n`;
+
+    unduhFileCsv(csv, `Laporan_Kas_RW_${new Date().toISOString().slice(0, 10)}.csv`);
+  }
+
+  // 2. Ekspor Kas RT
+  function getKasRtCalculated() {
+    let running = 0;
+    let totalMasuk = 0;
+    let totalKeluar = 0;
+    const rows = filteredTransaksiRt.map((t: any, index: number) => {
+      const isBatal = !!t.dibatalkan;
+      const masuk = !isBatal && t.jenis === 'pemasukan' ? t.nominal : 0;
+      const keluar = !isBatal && t.jenis === 'pengeluaran' ? t.nominal : 0;
+      if (!isBatal) {
+        running += masuk - keluar;
+        totalMasuk += masuk;
+        totalKeluar += keluar;
+      }
+      return {
+        no: index + 1,
+        tanggal: t.tanggal,
+        rt: `RT ${String(t.nomorRt).padStart(2, '0')}`,
+        namaKas: t.namaKas || 'Kas Mandiri RT',
+        keterangan: t.keterangan + (isBatal ? ` (BATAL: ${t.alasanBatal || 'Koreksi'})` : ''),
+        pos: t.namaKategori || '—',
+        masuk,
+        keluar,
+        saldo: running,
+        status: isBatal ? 'Dibatalkan' : 'Aktif',
+        operator: t.dicatatOleh,
+        isBatal
+      };
+    });
+    return { rows, totalMasuk, totalKeluar, saldoAkhir: running };
+  }
+
+  function eksporExcelKasRt() {
+    const { rows, totalMasuk, totalKeluar, saldoAkhir } = getKasRtCalculated();
+    const namaRw = data.rwData?.nama ?? 'RW 01';
+    const filterRtLabel = filterRtPilihan === 'semua' ? 'Semua Wilayah RT' : 'RT ' + filterRtPilihan;
+    const tglCetak = new Date().toLocaleDateString('id-ID', { dateStyle: 'long' });
+
+    const html = `
+      <div class="kop-instansi">SISTEM INFORMASI ADMINISTRASI RUKUN WARGA</div>
+      <div class="kop-sub">${namaRw} — Pembukuan Kas Lingkungan Rukun Tetangga</div>
+      <div class="kop-title">BUKU KAS MANDIRI PER-RT (KAS SOSIAL & OPERASIONAL)</div>
+      <div class="kop-meta">Wilayah: ${filterRtLabel} | Buku Kas: ${filterNamaKas} | Tanggal: ${tglCetak}</div>
+
+      <table class="summary-box">
+        <tr>
+          <td class="lbl">Total Kas Terhimpun (Debit)</td>
+          <td class="num-cell text-masuk">${totalMasuk}</td>
+          <td class="lbl">Total Pengeluaran / Santunan (Kredit)</td>
+          <td class="num-cell text-keluar">${totalKeluar}</td>
+          <td class="lbl">Saldo Kas RT</td>
+          <td class="num-cell" style="font-weight: bold;">${saldoAkhir}</td>
+        </tr>
+      </table>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 40px;">No</th>
+            <th style="width: 85px;">Tanggal</th>
+            <th style="width: 65px;">Wilayah</th>
+            <th style="width: 140px;">Buku Kas Mandiri</th>
+            <th>Keterangan Transaksi</th>
+            <th style="width: 130px;">Pos Kategori</th>
+            <th style="width: 120px;">Penerimaan (Rp)</th>
+            <th style="width: 120px;">Pengeluaran (Rp)</th>
+            <th style="width: 130px;">Saldo Berjalan (Rp)</th>
+            <th style="width: 85px;">Status</th>
+            <th style="width: 110px;">Dicatat Oleh</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r: any) => `
+            <tr>
+              <td class="center-cell">${r.no}</td>
+              <td class="center-cell">${r.tanggal}</td>
+              <td class="center-cell font-bold">${r.rt}</td>
+              <td class="text-cell">${r.namaKas}</td>
+              <td class="text-cell ${r.isBatal ? 'text-batal' : ''}">${r.keterangan}</td>
+              <td class="text-cell">${r.pos}</td>
+              <td class="num-cell ${r.masuk > 0 ? 'text-masuk' : ''}">${r.masuk > 0 ? r.masuk : '-'}</td>
+              <td class="num-cell ${r.keluar > 0 ? 'text-keluar' : ''}">${r.keluar > 0 ? r.keluar : '-'}</td>
+              <td class="num-cell" style="font-weight: bold;">${r.isBatal ? '-' : r.saldo}</td>
+              <td class="center-cell">${r.status}</td>
+              <td class="center-cell">${r.operator}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="6" class="text-cell font-bold">TOTAL REKAPITULASI KAS RT</td>
+            <td class="num-cell text-masuk">${totalMasuk}</td>
+            <td class="num-cell text-keluar">${totalKeluar}</td>
+            <td class="num-cell font-bold">${saldoAkhir}</td>
+            <td colspan="2" class="center-cell">${rows.length} Transaksi</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <table class="ttd-table">
+        <tr>
+          <td style="width: 50%;">Mengetahui,<br><strong>Ketua RT / RW</strong><br><br><br><br>( .................................................... )</td>
+          <td style="width: 50%;">Disusun Oleh,<br><strong>Bendahara RT</strong><br><br><br><br>( .................................................... )</td>
+        </tr>
+      </table>
+    `;
+
+    unduhFileExcel(html, 'Kas_RT', `Laporan_Kas_RT_${new Date().toISOString().slice(0, 10)}.xls`);
+  }
+
+  function eksporCsvKasRt() {
+    const { rows, totalMasuk, totalKeluar, saldoAkhir } = getKasRtCalculated();
+    const namaRw = data.rwData?.nama ?? 'RW 01';
+    let csv = `sep=,\n`;
+    csv += `"LAPORAN PEMBUKUAN KAS MANDIRI PER-RT (KU-01)"\n`;
+    csv += `"Wilayah:","${namaRw}"\n`;
+    csv += `"Filter RT:","${filterRtPilihan === 'semua' ? 'Semua RT' : 'RT ' + filterRtPilihan}"\n`;
+    csv += `"Buku Kas:","${filterNamaKas}"\n`;
+    csv += `"Tanggal Cetak:","${new Date().toLocaleString('id-ID')}"\n`;
+    csv += `"Total Penerimaan (Rp)",${totalMasuk}\n`;
+    csv += `"Total Pengeluaran (Rp)",${totalKeluar}\n`;
+    csv += `"Saldo Kas RT (Rp)",${saldoAkhir}\n\n`;
+
+    csv += `No,Tanggal,Wilayah_RT,Buku_Kas_Mandiri,Pos_Kategori,Keterangan,Penerimaan_Rp,Pengeluaran_Rp,Saldo_Berjalan_Rp,Status,Dicatat_Oleh\n`;
+    for (const r of rows) {
+      const ket = r.keterangan.replace(/"/g, '""');
+      const pos = r.pos.replace(/"/g, '""');
+      const kas = r.namaKas.replace(/"/g, '""');
+      csv += `${r.no},"${r.tanggal}","${r.rt}","${kas}","${pos}","${ket}",${r.masuk},${r.keluar},${r.saldo},"${r.status}","${r.operator}"\n`;
+    }
+    csv += `TOTAL,,,,,,${totalMasuk},${totalKeluar},${saldoAkhir},,\n`;
+
+    unduhFileCsv(csv, `Laporan_Kas_RT_${new Date().toISOString().slice(0, 10)}.csv`);
+  }
+
+  // 3. Ekspor Rekapitulasi Iuran RT (KU-02)
+  function eksporExcelRekapIuran() {
+    const namaRw = data.rwData?.nama ?? 'RW 01';
+    const tglCetak = new Date().toLocaleDateString('id-ID', { dateStyle: 'long' });
+    const totKk = data.rekapIuranRt.reduce((s: number, r: any) => s + r.totalKk, 0);
+    const totLunas = data.rekapIuranRt.reduce((s: number, r: any) => s + r.lunas, 0);
+    const totBelum = data.rekapIuranRt.reduce((s: number, r: any) => s + r.belumBayar, 0);
+
+    const html = `
+      <div class="kop-instansi">SISTEM INFORMASI ADMINISTRASI RUKUN WARGA</div>
+      <div class="kop-sub">${namaRw} — Pelaporan Rekapitulasi Iuran Warga Lingkungan</div>
+      <div class="kop-title">REKAPITULASI PENERIMAAN IURAN WAJIB PER-RT (KU-02)</div>
+      <div class="kop-meta">Periode: ${filterPeriodeIuran} | Tanggal Cetak: ${tglCetak}</div>
+
+      <table class="summary-box">
+        <tr>
+          <td class="lbl">Total Realisasi Himpunan se-RW</td>
+          <td class="num-cell text-masuk">${data.totalIuranTerkumpul}</td>
+          <td class="lbl">Target Potensi Iuran</td>
+          <td class="num-cell">${data.totalIuranTarget}</td>
+          <td class="lbl">Rata-rata Kepatuhan se-RW</td>
+          <td class="center-cell" style="font-weight: bold;">${data.persentaseIuranRw}%</td>
+        </tr>
+      </table>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th style="width: 40px;">No</th>
+            <th style="width: 80px;">Wilayah RT</th>
+            <th style="width: 100px;">KK Terdaftar</th>
+            <th style="width: 90px;">KK Lunas</th>
+            <th style="width: 100px;">KK Belum Bayar</th>
+            <th style="width: 110px;">Kepatuhan (%)</th>
+            <th style="width: 140px;">Realisasi Terhimpun (Rp)</th>
+            <th style="width: 140px;">Target Potensi (Rp)</th>
+            <th style="width: 110px;">Status Kepatuhan</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.rekapIuranRt.map((r: any, idx: number) => `
+            <tr>
+              <td class="center-cell">${idx + 1}</td>
+              <td class="center-cell font-bold">RT ${String(r.nomorRt).padStart(2, '0')}</td>
+              <td class="center-cell">${r.totalKk} KK</td>
+              <td class="center-cell text-masuk font-bold">${r.lunas} KK</td>
+              <td class="center-cell ${r.belumBayar > 0 ? 'text-keluar font-bold' : ''}">${r.belumBayar} KK</td>
+              <td class="center-cell font-bold">${r.persentase}%</td>
+              <td class="num-cell text-masuk">${r.nominalTerkumpul}</td>
+              <td class="num-cell">${r.targetNominal}</td>
+              <td class="center-cell">${r.persentase >= 80 ? 'Tinggi' : r.persentase >= 50 ? 'Sedang' : 'Kurang'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="2" class="center-cell font-bold">TOTAL SE-RW</td>
+            <td class="center-cell font-bold">${totKk} KK</td>
+            <td class="center-cell text-masuk font-bold">${totLunas} KK</td>
+            <td class="center-cell text-keluar font-bold">${totBelum} KK</td>
+            <td class="center-cell font-bold">${data.persentaseIuranRw}%</td>
+            <td class="num-cell text-masuk">${data.totalIuranTerkumpul}</td>
+            <td class="num-cell font-bold">${data.totalIuranTarget}</td>
+            <td class="center-cell font-bold">${data.persentaseIuranRw >= 75 ? 'Optimal' : 'Perlu Evaluasi'}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <table class="ttd-table">
+        <tr>
+          <td style="width: 50%;">Mengetahui,<br><strong>Ketua RW</strong><br><br><br><br>( .................................................... )</td>
+          <td style="width: 50%;">Disusun Oleh,<br><strong>Bendahara RW</strong><br><br><br><br>( .................................................... )</td>
+        </tr>
+      </table>
+    `;
+
+    unduhFileExcel(html, 'Rekap_Iuran_RT', `Rekap_Iuran_RT_${filterPeriodeIuran}_${new Date().toISOString().slice(0, 10)}.xls`);
+  }
+
+  function eksporCsvRekapIuran() {
+    let csv = `sep=,\n`;
+    csv += `"REKAPITULASI PENERIMAAN IURAN WAJIB RT (KU-02)"\n`;
+    csv += `"Wilayah:","${data.rwData?.nama ?? 'RW 01'}"\n`;
+    csv += `"Periode:","${filterPeriodeIuran}"\n`;
+    csv += `"Tanggal Unduh:","${new Date().toLocaleString('id-ID')}"\n`;
+    csv += `"Total Terhimpun (Rp)",${data.totalIuranTerkumpul}\n`;
+    csv += `"Target Potensi (Rp)",${data.totalIuranTarget}\n`;
+    csv += `"Rata-rata Kepatuhan",${data.persentaseIuranRw}%\n\n`;
+
+    csv += `No,Wilayah_RT,Total_KK,KK_Lunas,KK_Belum_Bayar,Kepatuhan_Persen,Realisasi_Penerimaan_Rp,Target_Potensi_Rp,Status\n`;
+    data.rekapIuranRt.forEach((r: any, idx: number) => {
+      const status = r.persentase >= 80 ? 'Tinggi' : r.persentase >= 50 ? 'Sedang' : 'Kurang';
+      csv += `${idx + 1},"RT ${String(r.nomorRt).padStart(2, '0')}",${r.totalKk},${r.lunas},${r.belumBayar},"${r.persentase}%",${r.nominalTerkumpul},${r.targetNominal},"${status}"\n`;
+    });
+    const totKk = data.rekapIuranRt.reduce((s: number, r: any) => s + r.totalKk, 0);
+    const totLunas = data.rekapIuranRt.reduce((s: number, r: any) => s + r.lunas, 0);
+    const totBelum = data.rekapIuranRt.reduce((s: number, r: any) => s + r.belumBayar, 0);
+    csv += `TOTAL,,"${totKk}","${totLunas}","${totBelum}","${data.persentaseIuranRw}%",${data.totalIuranTerkumpul},${data.totalIuranTarget},\n`;
+
+    unduhFileCsv(csv, `Rekap_Iuran_RT_${filterPeriodeIuran}_${new Date().toISOString().slice(0, 10)}.csv`);
   }
 </script>
 
@@ -279,30 +688,48 @@
     subtitle="Pemisahan pembukuan kas RW dan kas per-RT berbasis rekapitulasi (Spesifik Bendahara)."
   >
     <div class="header-actions">
-      <!-- Ekspor CSV Contextual (KU-03) -->
+      <!-- Ekspor Excel & CSV Berkualitas Tinggi (KU-03) -->
       {#if activeTab === 'rw'}
-        <button type="button" class="btn btn-secondary" onclick={eksporCsvKasRw}>
-          <Download size={16} />
-          <span>Ekspor CSV Kas RW</span>
-        </button>
+        <div class="export-btn-group">
+          <button type="button" class="btn btn-secondary" onclick={eksporExcelKasRw} title="Unduh format spreadsheet Microsoft Excel resmi dengan kop & border">
+            <FileSpreadsheet size={16} class="text-success" />
+            <span>Excel (.xls)</span>
+          </button>
+          <button type="button" class="btn btn-secondary" onclick={eksporCsvKasRw} title="Unduh format CSV standar UTF-8 BOM">
+            <Download size={16} />
+            <span>CSV</span>
+          </button>
+        </div>
         <button type="button" class="btn btn-action" onclick={() => (showModalTambahRw = true)}>
           <Plus size={16} />
           <span>Catat Kas RW</span>
         </button>
       {:else if activeTab === 'rt'}
-        <button type="button" class="btn btn-secondary" onclick={eksporCsvKasRt}>
-          <Download size={16} />
-          <span>Ekspor CSV Kas RT</span>
-        </button>
+        <div class="export-btn-group">
+          <button type="button" class="btn btn-secondary" onclick={eksporExcelKasRt} title="Unduh format spreadsheet Microsoft Excel kas RT dengan kop & border">
+            <FileSpreadsheet size={16} class="text-success" />
+            <span>Excel (.xls)</span>
+          </button>
+          <button type="button" class="btn btn-secondary" onclick={eksporCsvKasRt} title="Unduh format CSV standar kas RT UTF-8 BOM">
+            <Download size={16} />
+            <span>CSV</span>
+          </button>
+        </div>
         <button type="button" class="btn btn-action" onclick={() => (showModalTambahRt = true)}>
           <Plus size={16} />
           <span>Catat Kas RT</span>
         </button>
       {:else if activeTab === 'rekap'}
-        <button type="button" class="btn btn-secondary" onclick={eksporCsvRekapIuran}>
-          <Download size={16} />
-          <span>Ekspor Rekap CSV</span>
-        </button>
+        <div class="export-btn-group">
+          <button type="button" class="btn btn-secondary" onclick={eksporExcelRekapIuran} title="Unduh format spreadsheet Microsoft Excel rekap iuran RT">
+            <FileSpreadsheet size={16} class="text-success" />
+            <span>Excel (.xls)</span>
+          </button>
+          <button type="button" class="btn btn-secondary" onclick={eksporCsvRekapIuran} title="Unduh format CSV rekap iuran RT UTF-8 BOM">
+            <Download size={16} />
+            <span>CSV</span>
+          </button>
+        </div>
         <button type="button" class="btn btn-action" onclick={() => (showModalSetoranRt = true)}>
           <Receipt size={16} />
           <span>Catat Setoran RT</span>
