@@ -128,11 +128,12 @@ export const pembayaran = sqliteTable('pembayaran', {
   ...timestamps
 });
 
-// ─── Kas RW ───────────────────────────────────────────────────────────────────
+// ─── Kas RW & Kas RT (KU-01 s/d KU-04) ──────────────────────────────────────
 export const kategoriKas = sqliteTable('kategori_kas', {
   id:    integer('id').primaryKey({ autoIncrement: true }),
   nama:  text('nama').notNull(),
   jenis: text('jenis', { enum: ['pemasukan', 'pengeluaran'] }).notNull(),
+  scope: text('scope', { enum: ['semua', 'rw', 'rt'] }).notNull().default('semua'),
   rwId:  integer('rw_id').notNull().references(() => rw.id)
 });
 
@@ -149,6 +150,23 @@ export const transaksiKas = sqliteTable('transaksi_kas', {
   alasanBatal:    text('alasan_batal'),
   dibatalkanOleh: text('dibatalkan_oleh'),
   rwId:           integer('rw_id').notNull().references(() => rw.id),
+  ...timestamps
+});
+
+export const transaksiKasRt = sqliteTable('transaksi_kas_rt', {
+  id:             integer('id').primaryKey({ autoIncrement: true }),
+  rtId:           integer('rt_id').notNull().references(() => rt.id),
+  namaKas:        text('nama_kas').notNull().default('Kas Sosial Kematian'), // e.g. "Kas Sosial Kematian", "Kas Rukun Kematian", "Kas Operasional RT"
+  jenis:          text('jenis', { enum: ['pemasukan', 'pengeluaran'] }).notNull(),
+  nominal:        real('nominal').notNull(),
+  keterangan:     text('keterangan').notNull(),
+  kategoriId:     integer('kategori_id').references(() => kategoriKas.id),
+  tanggal:        text('tanggal').notNull(),        // ISO date
+  bukti:          text('bukti'),                    // file path/URL lokal
+  dicatatOleh:    text('dicatat_oleh').notNull(),   // user id
+  dibatalkan:     integer('dibatalkan', { mode: 'boolean' }).notNull().default(false),
+  alasanBatal:    text('alasan_batal'),
+  dibatalkanOleh: text('dibatalkan_oleh'),
   ...timestamps
 });
 

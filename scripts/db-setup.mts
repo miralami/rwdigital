@@ -69,6 +69,10 @@ function jalankan(sql, dari) {
 	try {
 		db.exec(sql);
 	} catch (e) {
+		if (e instanceof Error && e.message.includes('duplicate column name')) {
+			console.log(`   lewati (kolom sudah ada)`);
+			return;
+		}
 		console.error(`Gagal menjalankan statement dari ${dari}:`);
 		console.error(sql);
 		console.error(e instanceof Error ? e.message : String(e));
