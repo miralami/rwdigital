@@ -21,6 +21,11 @@
   import HeartHandshake from '@lucide/svelte/icons/heart-handshake';
   import Filter from '@lucide/svelte/icons/filter';
   import Trash2 from '@lucide/svelte/icons/trash-2';
+  import CreditCard from '@lucide/svelte/icons/credit-card';
+  import QrCode from '@lucide/svelte/icons/qr-code';
+  import Loader2 from '@lucide/svelte/icons/loader-2';
+  import Sparkles from '@lucide/svelte/icons/sparkles';
+  import { invalidateAll } from '$app/navigation';
   import type { PageData } from './$types';
 
   let { data } = $props<{ data: PageData }>();
@@ -59,6 +64,177 @@
   let showModalBatalRw = $state(false);
   let showModalBatalRt = $state(false);
   let selectedTransaksiId = $state<number | null>(null);
+
+  // ─── Midtrans Gateway States ────────────────────────────────────────────────
+  let metodeRt = $state<'tunai' | 'midtrans'>('midtrans');
+  let midtransLoading = $state(false);
+  let midtransError = $state('');
+  let midtransSuccess = $state('');
+
+  let formRtId = $state<number>(1);
+  $effect(() => {
+    if (data.daftarRt?.[0]?.id) {
+      formRtId = data.daftarRt[0].id;
+    }
+  });
+  let formNamaKas = $state<string>('Kas Sosial Kematian');
+  let formJenis = $state<'pemasukan' | 'pengeluaran'>('pemasukan');
+  let formNominal = $state<number | ''>('');
+  let formKategoriId = $state<string>('');
+  let formKeterangan = $state<string>('');
+  let formTanggal = $state<string>(new Date().toISOString().slice(0, 10));
+  let donaturNama = $state<string>('');
+  let donaturEmail = $state<string>('');
+  let donaturPhone = $state<string>('');
+
+  let showModalSimulasiMidtrans = $state(false);
+  let simulasiOrderId = $state('');
+  let simulasiNominal = $state(0);
+  let simulasiKeterangan = $state('');
+
+  function loadSnapScript(url: string, clientKey: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      if (typeof window === 'undefined') return resolve(false);
+      if ((window as any).snap) return resolve(true);
+
+      const existing = document.getElementById('midtrans-snap-js');
+      if (existing) {
+        if ((window as any).snap) return resolve(true);
+        existing.addEventListener('load', () => resolve(true));
+        existing.addEventListener('error', () => resolve(false));
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.id = 'midtrans-snap-js';
+      script.src = url;
+      script.setAttribute('data-client-key', clientKey);
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.head.appendChild(script);
+    });
+  }
+
+  $effect(() => {
+    if (typeof window !== 'undefined' && data.midtransSnapUrl && data.midtransClientKey) {
+      loadSnapScript(data.midtransSnapUrl, data.midtransClientKey);
+    }
+  });
+
+  async function prosesBayarMidtrans() {
+    if (!formRtId || !formNominal || Number(formNominal) <= 0 || !formKeterangan.trim()) {
+      midtransError = 'Mohon lengkapi RT, nominal, dan keterangan transaksi.';
+      return;
+    }
+
+    midtransLoading = true;
+    midtransError = '';
+    midtransSuccess = '';
+
+    try {
+      const res = await fetch('/api/midtrans/charge-kas-rt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rtId: formRtId,
+          namaKas: formNamaKas,
+          nominal: Number(formNominal),
+          keterangan: formKeterangan,
+          kategoriId: formKategoriId ? Number(formKategoriId) : null,
+          tanggal: formTanggal,
+          donaturNama: donaturNama || 'Warga RT',
+          donaturEmail: donaturEmail || 'warga@rw.id',
+          donaturPhone: donaturPhone || '08123456789'
+        })
+      });
+
+      const resData = await res.json();
+      if (!res.ok || !resData.success) {
+        throw new Error(resData.error || 'Gagal memproses transaksi Midtrans');
+      }
+
+      const { snapToken, orderId, isSimulated, redirectUrl } = resData;
+
+      if (!isSimulated) {
+        // Pastikan Snap.js sudah ter-load di browser
+        await loadSnapScript(data.midtransSnapUrl, data.midtransClientKey);
+
+        if (typeof window !== 'undefined' && (window as any).snap) {
+          (window as any).snap.pay(snapToken, {
+            onSuccess: async (result: any) => {
+              await selesaikanPembayaranMidtrans(orderId, result.payment_type || 'qris', 'settlement');
+            },
+            onPending: async (result: any) => {
+              await selesaikanPembayaranMidtrans(orderId, result.payment_type || 'pending', 'pending');
+            },
+            onError: () => {
+              midtransError = 'Pembayaran Midtrans gagal atau dibatalkan.';
+              midtransLoading = false;
+            },
+            onClose: () => {
+              midtransLoading = false;
+            }
+          });
+          return;
+        } else if (redirectUrl && redirectUrl !== '#') {
+          // Fallback jika browser memblokir script popup Snap: buka halaman pembayaran langsung
+          window.open(redirectUrl, '_blank');
+          midtransLoading = false;
+          return;
+        }
+      }
+
+      // Mode Simulasi Sandbox jika key demo/tidak aktif
+      simulasiOrderId = orderId;
+      simulasiNominal = Number(formNominal);
+      simulasiKeterangan = formKeterangan;
+      showModalSimulasiMidtrans = true;
+    } catch (err: any) {
+      midtransError = err.message || 'Terjadi kesalahan saat memproses pembayaran.';
+    } finally {
+      midtransLoading = false;
+    }
+  }
+
+  async function selesaikanPembayaranMidtrans(orderId: string, paymentType: string, transactionStatus: string) {
+    midtransLoading = true;
+    try {
+      const res = await fetch('/api/midtrans/finish-kas-rt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId,
+          paymentType,
+          transactionStatus
+        })
+      });
+
+      const resData = await res.json();
+      if (!res.ok || !resData.success) {
+        throw new Error(resData.error || 'Gagal memperbarui status pembayaran.');
+      }
+
+      await invalidateAll();
+      showModalTambahRt = false;
+      showModalSimulasiMidtrans = false;
+      midtransSuccess = `Pembayaran Kas RT via Midtrans (${orderId}) berhasil diselesaikan & dicatat!`;
+
+      formNominal = '';
+      formKeterangan = '';
+      donaturNama = '';
+      donaturEmail = '';
+      donaturPhone = '';
+
+      setTimeout(() => {
+        midtransSuccess = '';
+      }, 6000);
+    } catch (err: any) {
+      midtransError = err.message || 'Gagal menyelesaikan pencatatan pembayaran.';
+    } finally {
+      midtransLoading = false;
+    }
+  }
 
   const sekarang = new Date();
   const thnSekarang = sekarang.getFullYear();
@@ -180,6 +356,26 @@
     },
     { key: 'namaKategori', label: 'Pos Kategori', render: (row: any) => row.namaKategori ?? '—' },
     {
+      key: 'metodePembayaran',
+      label: 'Metode',
+      render: (row: any) => {
+        if (row.metodePembayaran === 'midtrans') {
+          const type = row.midtransPaymentType ? row.midtransPaymentType.toUpperCase() : 'SNAP';
+          const status = row.midtransStatus || 'settlement';
+          const isLunas = status === 'settlement' || status === 'capture';
+          return `<div class="metode-col-cell">
+            <span class="badge-midtrans-pill" title="Order ID: ${row.midtransOrderId ?? ''}">
+              <span class="midtrans-dot"></span>${type}
+            </span>
+            ${isLunas 
+              ? '<span class="status-pill status-pill-success">Lunas</span>' 
+              : `<span class="status-pill status-pill-warning">${status}</span>`}
+          </div>`;
+        }
+        return '<span class="badge variant-default text-xs">Tunai</span>';
+      }
+    },
+    {
       key: 'jenis',
       label: 'Jenis',
       render: (row: any) => {
@@ -204,8 +400,11 @@
     },
     {
       key: 'bukti',
-      label: 'Bukti',
+      label: 'Bukti / Ref',
       render: (row: any) => {
+        if (row.metodePembayaran === 'midtrans') {
+          return `<span class="text-xs font-mono text-muted" title="${row.bukti || ''}">${row.midtransOrderId ? row.midtransOrderId.slice(0, 16) + '...' : (row.bukti || 'Midtrans')}</span>`;
+        }
         if (!row.bukti) return '<span class="text-muted text-xs">—</span>';
         return `<a href="${row.bukti}" target="_blank" rel="noreferrer" class="doc-link text-xs">Lihat Bukti</a>`;
       }
@@ -682,6 +881,10 @@
   }
 </script>
 
+<svelte:head>
+  <script src={data.midtransSnapUrl} data-client-key={data.midtransClientKey}></script>
+</svelte:head>
+
 <div class="kas-container">
   <PageHeader
     title="Modul Keuangan & Kas RT"
@@ -715,7 +918,15 @@
             <span>CSV</span>
           </button>
         </div>
-        <button type="button" class="btn btn-action" onclick={() => (showModalTambahRt = true)}>
+        <button
+          type="button"
+          class="btn btn-action"
+          onclick={() => {
+            formJenis = 'pemasukan';
+            metodeRt = 'midtrans';
+            showModalTambahRt = true;
+          }}
+        >
           <Plus size={16} />
           <span>Catat Kas RT</span>
         </button>
@@ -855,6 +1066,16 @@
   <!-- TAB 2: KAS RT (MANDIRI PER-RT — KU-01)                                 -->
   <!-- ═══════════════════════════════════════════════════════════════════════ -->
   {:else if activeTab === 'rt'}
+    {#if midtransSuccess}
+      <div class="alert alert-success" role="alert" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: var(--space-4); padding: 12px 16px; background: #dcfce7; border: 1px solid #86efac; border-radius: 8px; color: #166534;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <CheckCircle2 size={18} />
+          <span style="font-weight: 500; font-size: 14px;">{midtransSuccess}</span>
+        </div>
+        <button type="button" style="border: none; background: transparent; font-size: 18px; cursor: pointer; color: #166534; font-weight: bold;" onclick={() => (midtransSuccess = '')}>×</button>
+      </div>
+    {/if}
+
     <div class="info-banner">
       <div class="banner-icon">
         <HeartHandshake size={20} />
@@ -1326,113 +1547,381 @@
 <Modal
   open={showModalTambahRt}
   title="Catat Transaksi Kas Mandiri per-RT (KU-01)"
-  onClose={() => (showModalTambahRt = false)}
+  onClose={() => {
+    showModalTambahRt = false;
+    midtransError = '';
+  }}
 >
-  <form method="POST" action="?/tambahKasRt" enctype="multipart/form-data" class="form-modal">
-    <div class="form-row">
-      <div class="form-group flex-1">
-        <label for="rt-id" class="label-caps">Wilayah RT</label>
-        <select id="rt-id" name="rtId" class="form-input" required>
-          {#each data.daftarRt as r}
-            <option value={r.id}>RT {String(r.nomor).padStart(2, '0')}</option>
+  {#if formJenis === 'pemasukan'}
+    <div style="margin-bottom: var(--space-3);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <span class="label-caps font-bold" style="margin: 0;">Pilih Metode Transaksi:</span>
+        <span style="font-size: 11px; color: var(--color-text-muted);">Mendukung QRIS, VA Bank & Tunai</span>
+      </div>
+      <div class="metode-switcher">
+        <button
+          type="button"
+          class="metode-tab-btn"
+          class:active={metodeRt === 'midtrans'}
+          onclick={() => (metodeRt = 'midtrans')}
+        >
+          <CreditCard size={16} />
+          <span>Payment Gateway Midtrans</span>
+          <span class="badge-mini-qris">QRIS & VA</span>
+        </button>
+        <button
+          type="button"
+          class="metode-tab-btn"
+          class:active={metodeRt === 'tunai'}
+          onclick={() => (metodeRt = 'tunai')}
+        >
+          <Wallet size={16} />
+          <span>Tunai / Fisik</span>
+        </button>
+      </div>
+    </div>
+  {/if}
+
+  {#if midtransError}
+    <div class="alert alert-danger mb-4 flex items-center gap-2" role="alert" style="padding: 10px 14px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #b91c1c; font-size: 13px;">
+      <AlertCircle size={16} />
+      <span>{midtransError}</span>
+    </div>
+  {/if}
+
+  {#if metodeRt === 'midtrans' && formJenis === 'pemasukan'}
+    <!-- ─── FORM MIDTRANS PAYMENT GATEWAY ─── -->
+    <div class="midtrans-info-box">
+      <div class="flex items-center gap-2 mb-1">
+        <Sparkles size={16} class="text-primary" />
+        <strong class="text-xs text-primary font-bold">Midtrans Payment Gateway (Online)</strong>
+      </div>
+      <p class="text-xs text-muted leading-relaxed" style="margin: 4px 0 8px 0;">
+        Pencatatan kas RT langsung terkoneksi ke payment gateway Midtrans. Pembayar dapat bertransaksi instan melalui QRIS (GoPay, OVO, ShopeePay, DANA), Virtual Account Bank (BCA, Mandiri, BNI, BRI), atau Kartu Kredit.
+      </p>
+      <div class="midtrans-badges-row">
+        <span class="pill-qris">QRIS Instan</span>
+        <span class="pill-va">BCA VA</span>
+        <span class="pill-va">Mandiri Bill</span>
+        <span class="pill-va">BNI & BRI VA</span>
+        <span class="pill-cc">GoPay & e-Wallet</span>
+      </div>
+    </div>
+
+    <div class="form-modal">
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="rt-id-midtrans" class="label-caps">Wilayah RT</label>
+          <select id="rt-id-midtrans" bind:value={formRtId} class="form-input" required>
+            {#each data.daftarRt as r}
+              <option value={r.id}>RT {String(r.nomor).padStart(2, '0')}</option>
+            {/each}
+          </select>
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="nama-kas-midtrans" class="label-caps">Buku Kas Mandiri</label>
+          <input
+            id="nama-kas-midtrans"
+            bind:value={formNamaKas}
+            type="text"
+            list="list-buku-kas"
+            required
+            placeholder="Misal: Kas Sosial Kematian"
+            class="form-input"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="nominal-midtrans" class="label-caps">Nominal Pembayaran (Rp)</label>
+          <input
+            id="nominal-midtrans"
+            bind:value={formNominal}
+            type="number"
+            min="1000"
+            step="500"
+            required
+            placeholder="Contoh: 150000"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="kategori-midtrans" class="label-caps">Pos Anggaran / Pos Sosial</label>
+          <select id="kategori-midtrans" bind:value={formKategoriId} class="form-input">
+            <option value="">— Tanpa Pos Kategori —</option>
+            {#each data.semuaKategori.filter((k: any) => k.scope !== 'rw' && k.jenis === 'pemasukan') as kat}
+              <option value={kat.id}>{kat.nama}</option>
+            {/each}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="ket-midtrans" class="label-caps">Keterangan / Tujuan Kas</label>
+        <textarea
+          id="ket-midtrans"
+          bind:value={formKeterangan}
+          rows="2"
+          required
+          placeholder="Contoh: Pembayaran kas sosial donasi kematian warga RT 01"
+          class="form-input"
+        ></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="donatur-nama" class="label-caps">Nama Pembayar / Warga (Opsional)</label>
+          <input
+            id="donatur-nama"
+            bind:value={donaturNama}
+            type="text"
+            placeholder="Misal: Bpk. Bambang Supriyanto"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="donatur-kontak" class="label-caps">Email / WhatsApp (Opsional)</label>
+          <input
+            id="donatur-kontak"
+            bind:value={donaturEmail}
+            type="text"
+            placeholder="Untuk bukti invoice pembayaran"
+            class="form-input"
+          />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick={() => (showModalTambahRt = false)}>
+          Batal
+        </button>
+        <button
+          type="button"
+          class="btn btn-midtrans"
+          disabled={midtransLoading}
+          onclick={prosesBayarMidtrans}
+        >
+          {#if midtransLoading}
+            <Loader2 size={16} class="animate-spin" />
+            <span>Menghubungi Midtrans...</span>
+          {:else}
+            <CreditCard size={16} />
+            <span>Bayar via Midtrans Snap</span>
+          {/if}
+        </button>
+      </div>
+    </div>
+  {:else}
+    <!-- ─── FORM MANUAL / FISIK ─── -->
+    <form method="POST" action="?/tambahKasRt" enctype="multipart/form-data" class="form-modal">
+      <input type="hidden" name="metodePembayaran" value="tunai" />
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="rt-id" class="label-caps">Wilayah RT</label>
+          <select id="rt-id" name="rtId" bind:value={formRtId} class="form-input" required>
+            {#each data.daftarRt as r}
+              <option value={r.id}>RT {String(r.nomor).padStart(2, '0')}</option>
+            {/each}
+          </select>
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="nama-kas-rt" class="label-caps">Buku Kas Mandiri</label>
+          <input
+            id="nama-kas-rt"
+            name="namaKas"
+            type="text"
+            list="list-buku-kas"
+            required
+            bind:value={formNamaKas}
+            placeholder="Misal: Kas Sosial Kematian"
+            class="form-input"
+          />
+          <datalist id="list-buku-kas">
+            <option value="Kas Sosial Kematian"></option>
+            <option value="Kas Rukun Kematian"></option>
+            <option value="Kas Operasional RT"></option>
+            <option value="Kas Sampah & Kebersihan"></option>
+          </datalist>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="jenis-rt" class="label-caps">Jenis Transaksi</label>
+          <select
+            id="jenis-rt"
+            name="jenis"
+            class="form-input"
+            required
+            bind:value={formJenis}
+            onchange={() => {
+              if (formJenis === 'pengeluaran') metodeRt = 'tunai';
+            }}
+          >
+            <option value="pemasukan">Pemasukan (+)</option>
+            <option value="pengeluaran">Pengeluaran (-)</option>
+          </select>
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="nominal-rt" class="label-caps">Nominal (Rp)</label>
+          <input
+            id="nominal-rt"
+            name="nominal"
+            type="number"
+            min="1000"
+            step="500"
+            required
+            bind:value={formNominal}
+            placeholder="Contoh: 150000"
+            class="form-input"
+          />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="kategori-rt" class="label-caps">Pos Anggaran / Pos Sosial</label>
+        <select id="kategori-rt" name="kategoriId" bind:value={formKategoriId} class="form-input">
+          <option value="">— Tanpa Pos Kategori —</option>
+          {#each data.semuaKategori.filter((k: any) => k.scope !== 'rw') as kat}
+            <option value={kat.id}>{kat.nama} ({kat.jenis})</option>
           {/each}
         </select>
       </div>
 
-      <div class="form-group flex-1">
-        <label for="nama-kas-rt" class="label-caps">Buku Kas Mandiri</label>
-        <input
-          id="nama-kas-rt"
-          name="namaKas"
-          type="text"
-          list="list-buku-kas"
+      <div class="form-group">
+        <label for="ket-rt" class="label-caps">Keterangan Transaksi</label>
+        <textarea
+          id="ket-rt"
+          name="keterangan"
+          rows="2"
           required
-          placeholder="Misal: Kas Sosial Kematian"
+          bind:value={formKeterangan}
+          placeholder="Contoh: Santunan duka cita Alm. warga RT 01"
           class="form-input"
-        />
-        <datalist id="list-buku-kas">
-          <option value="Kas Sosial Kematian"></option>
-          <option value="Kas Rukun Kematian"></option>
-          <option value="Kas Operasional RT"></option>
-          <option value="Kas Sampah & Kebersihan"></option>
-        </datalist>
+        ></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group flex-1">
+          <label for="tgl-rt" class="label-caps">Tanggal Transaksi</label>
+          <input
+            id="tgl-rt"
+            name="tanggal"
+            type="date"
+            required
+            bind:value={formTanggal}
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-group flex-1">
+          <label for="bukti-rt" class="label-caps">Bukti Nota / Kwitansi</label>
+          <input id="bukti-rt" name="buktiFile" type="file" accept="image/*,.pdf" class="form-input file-input" />
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick={() => (showModalTambahRt = false)}>
+          Batal
+        </button>
+        <button type="submit" class="btn btn-action">
+          Simpan Kas RT
+        </button>
+      </div>
+    </form>
+  {/if}
+</Modal>
+
+<!-- ═════════════════════════════════════════════════════════════════════════ -->
+<!-- MODAL: SIMULASI MIDTRANS SANDBOX                                          -->
+<!-- ═════════════════════════════════════════════════════════════════════════ -->
+<Modal
+  open={showModalSimulasiMidtrans}
+  title="Midtrans Sandbox — Simulasi Pembayaran"
+  onClose={() => (showModalSimulasiMidtrans = false)}
+>
+  <div class="simulasi-wrapper">
+    <div class="simulasi-header">
+      <div class="simulasi-icon-box">
+        <CreditCard size={26} />
+      </div>
+      <div>
+        <h4 style="margin: 0; font-size: 15px; font-weight: 700;">Simulasi Pembayaran Midtrans</h4>
+        <p style="margin: 2px 0 0 0; font-size: 12px; color: var(--color-text-muted);">
+          Lingkungan Sandbox — Pengujian Pembayaran Kas RT Online
+        </p>
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group flex-1">
-        <label for="jenis-rt" class="label-caps">Jenis Transaksi</label>
-        <select id="jenis-rt" name="jenis" class="form-input" required>
-          <option value="pemasukan">Pemasukan (+)</option>
-          <option value="pengeluaran">Pengeluaran (-)</option>
-        </select>
+    <div class="simulasi-details">
+      <div class="detail-row">
+        <span class="detail-label">Order ID:</span>
+        <span class="detail-val font-mono font-semibold">{simulasiOrderId}</span>
       </div>
-
-      <div class="form-group flex-1">
-        <label for="nominal-rt" class="label-caps">Nominal (Rp)</label>
-        <input
-          id="nominal-rt"
-          name="nominal"
-          type="number"
-          min="1000"
-          step="500"
-          required
-          placeholder="Contoh: 150000"
-          class="form-input"
-        />
+      <div class="detail-row">
+        <span class="detail-label">Buku Kas:</span>
+        <span class="detail-val font-medium">{formNamaKas}</span>
+      </div>
+      <div class="detail-row">
+        <span class="detail-label">Keterangan:</span>
+        <span class="detail-val">{simulasiKeterangan}</span>
+      </div>
+      <div class="detail-row border-t pt-2 mt-2">
+        <span class="detail-label" style="font-weight: 600;">Total Bayar:</span>
+        <span class="detail-val text-lg font-bold" style="color: var(--color-success, #16a34a);">
+          {formatRupiah(simulasiNominal)}
+        </span>
       </div>
     </div>
 
-    <div class="form-group">
-      <label for="kategori-rt" class="label-caps">Pos Anggaran / Pos Sosial</label>
-      <select id="kategori-rt" name="kategoriId" class="form-input">
-        <option value="">— Tanpa Pos Kategori —</option>
-        {#each data.semuaKategori.filter((k: any) => k.scope !== 'rw') as kat}
-          <option value={kat.id}>{kat.nama} ({kat.jenis})</option>
-        {/each}
-      </select>
-    </div>
+    <div class="simulasi-actions-list">
+      <p style="font-size: 12px; font-weight: 600; color: var(--color-text-muted); margin-bottom: 8px;">
+        Pilih metode simulasi untuk menyelesaikan pembayaran:
+      </p>
 
-    <div class="form-group">
-      <label for="ket-rt" class="label-caps">Keterangan Transaksi</label>
-      <textarea
-        id="ket-rt"
-        name="keterangan"
-        rows="2"
-        required
-        placeholder="Contoh: Santunan duka cita Alm. warga RT 01"
-        class="form-input"
-      ></textarea>
-    </div>
-
-    <div class="form-row">
-      <div class="form-group flex-1">
-        <label for="tgl-rt" class="label-caps">Tanggal Transaksi</label>
-        <input
-          id="tgl-rt"
-          name="tanggal"
-          type="date"
-          required
-          value={new Date().toISOString().slice(0, 10)}
-          class="form-input"
-        />
-      </div>
-
-      <div class="form-group flex-1">
-        <label for="bukti-rt" class="label-caps">Bukti Nota / Kwitansi</label>
-        <input id="bukti-rt" name="buktiFile" type="file" accept="image/*,.pdf" class="form-input file-input" />
-      </div>
-    </div>
-
-    <div class="modal-actions">
-      <button type="button" class="btn btn-secondary" onclick={() => (showModalTambahRt = false)}>
-        Batal
+      <button
+        type="button"
+        class="simulasi-btn btn-sim-qris"
+        disabled={midtransLoading}
+        onclick={() => selesaikanPembayaranMidtrans(simulasiOrderId, 'qris', 'settlement')}
+      >
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <QrCode size={18} />
+          <span style="font-weight: 600;">Simulasi Bayar QRIS (GoPay/ShopeePay)</span>
+        </div>
+        <span class="badge-sim-status">Status: Settlement (Sukses)</span>
       </button>
-      <button type="submit" class="btn btn-action">
-        Simpan Kas RT
+
+      <button
+        type="button"
+        class="simulasi-btn btn-sim-va"
+        disabled={midtransLoading}
+        onclick={() => selesaikanPembayaranMidtrans(simulasiOrderId, 'bank_transfer', 'settlement')}
+      >
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <CreditCard size={18} />
+          <span style="font-weight: 600;">Simulasi Transfer Virtual Account Bank</span>
+        </div>
+        <span class="badge-sim-status">Status: Settlement (Sukses)</span>
       </button>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
+        <button
+          type="button"
+          class="btn btn-secondary text-xs"
+          onclick={() => (showModalSimulasiMidtrans = false)}
+        >
+          Tutup Simulasi
+        </button>
+      </div>
     </div>
-  </form>
+  </div>
 </Modal>
 
 <!-- ═════════════════════════════════════════════════════════════════════════ -->
@@ -2089,4 +2578,263 @@
   .text-center { text-align: center; }
   .text-right { text-align: right; }
   .flex-1 { flex: 1; min-width: 150px; }
+
+  /* ─── Midtrans Gateway & Simulation Styles ─── */
+  .metode-switcher {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    background-color: var(--color-bg-subtle, #f1f5f9);
+    padding: 4px;
+    border-radius: var(--radius-md, 8px);
+    border: 1px solid var(--color-border);
+  }
+
+  .metode-tab-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm, 6px);
+    border: none;
+    background: transparent;
+    font-size: 0.825rem;
+    font-weight: 500;
+    color: var(--color-text-muted, #64748b);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .metode-tab-btn:hover {
+    color: var(--color-text, #0f172a);
+  }
+
+  .metode-tab-btn.active {
+    background-color: #ffffff;
+    color: #0284c7;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  .badge-mini-qris {
+    font-size: 9px;
+    background: #0284c7;
+    color: #ffffff;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .midtrans-info-box {
+    background: linear-gradient(135deg, #f0fdf4 0%, #f0f9ff 100%);
+    border: 1px solid #bae6fd;
+    border-radius: var(--radius-md, 8px);
+    padding: 12px 14px;
+    margin-bottom: var(--space-3);
+  }
+
+  .midtrans-badges-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .pill-qris {
+    background: #047857;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .pill-va {
+    background: #0369a1;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .pill-cc {
+    background: #4338ca;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .btn-midtrans {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.875rem;
+    border-radius: var(--radius-md, 8px);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+    transition: all 0.15s ease;
+  }
+
+  .btn-midtrans:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.45);
+  }
+
+  .btn-midtrans:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  :global(.metode-col-cell) {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  :global(.badge-midtrans-pill) {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f0f9ff;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 9999px;
+  }
+
+  :global(.midtrans-dot) {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #0284c7;
+    display: inline-block;
+  }
+
+  :global(.status-pill) {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  :global(.status-pill-success) {
+    background-color: #dcfce7;
+    color: #15803d;
+  }
+
+  :global(.status-pill-warning) {
+    background-color: #fef3c7;
+    color: #b45309;
+  }
+
+  /* ─── Simulation Modal Elements ─── */
+  .simulasi-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .simulasi-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .simulasi-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #e0f2fe;
+    color: #0284c7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .simulasi-details {
+    background: var(--color-surface, #ffffff);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+
+  .detail-label {
+    color: var(--color-text-muted);
+  }
+
+  .detail-val {
+    color: var(--color-text);
+  }
+
+  .simulasi-actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .simulasi-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface, #ffffff);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+  }
+
+  .simulasi-btn:hover:not(:disabled) {
+    border-color: #0284c7;
+    background: #f0f9ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  .btn-sim-qris {
+    border-left: 4px solid #059669;
+  }
+
+  .btn-sim-va {
+    border-left: 4px solid #0284c7;
+  }
+
+  .badge-sim-status {
+    font-size: 11px;
+    font-weight: 600;
+    color: #15803d;
+    background: #dcfce7;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
 </style>

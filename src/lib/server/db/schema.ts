@@ -167,6 +167,11 @@ export const transaksiKasRt = sqliteTable('transaksi_kas_rt', {
   dibatalkan:     integer('dibatalkan', { mode: 'boolean' }).notNull().default(false),
   alasanBatal:    text('alasan_batal'),
   dibatalkanOleh: text('dibatalkan_oleh'),
+  metodePembayaran: text('metode_pembayaran').notNull().default('tunai'),
+  midtransOrderId:  text('midtrans_order_id'),
+  midtransPaymentType: text('midtrans_payment_type'),
+  midtransStatus:   text('midtrans_status'),
+  snapToken:        text('snap_token'),
   ...timestamps
 });
 

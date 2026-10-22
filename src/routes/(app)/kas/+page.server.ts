@@ -13,9 +13,31 @@ import {
 import { eq, sql, desc, and } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { saveUploadedFile } from '$lib/server/storage';
+import { getMidtransConfig } from '$lib/server/midtrans';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
+  const midtransConfig = getMidtransConfig();
+
+  // Handle return dari Midtrans redirect jika ada
+  const returnOrderId = url.searchParams.get('order_id');
+  const returnStatus = url.searchParams.get('transaction_status');
+  if (returnOrderId) {
+    const isSuccess =
+      returnStatus === 'settlement' ||
+      returnStatus === 'capture' ||
+      url.searchParams.get('status') === 'midtrans_success';
+    if (isSuccess) {
+      await db
+        .update(transaksiKasRt)
+        .set({
+          midtransStatus: 'settlement',
+          bukti: `Midtrans Snap (Lunas - ${returnOrderId})`
+        })
+        .where(eq(transaksiKasRt.midtransOrderId, returnOrderId));
+    }
+  }
+
   const [rwData] = await db.select().from(rw).limit(1);
   const rwId = rwData?.id ?? 1;
 
@@ -73,7 +95,12 @@ export const load: PageServerLoad = async ({ url }) => {
       dicatatOleh: transaksiKasRt.dicatatOleh,
       dibatalkan: transaksiKasRt.dibatalkan,
       alasanBatal: transaksiKasRt.alasanBatal,
-      dibatalkanOleh: transaksiKasRt.dibatalkanOleh
+      dibatalkanOleh: transaksiKasRt.dibatalkanOleh,
+      metodePembayaran: transaksiKasRt.metodePembayaran,
+      midtransOrderId: transaksiKasRt.midtransOrderId,
+      midtransPaymentType: transaksiKasRt.midtransPaymentType,
+      midtransStatus: transaksiKasRt.midtransStatus,
+      snapToken: transaksiKasRt.snapToken
     })
     .from(transaksiKasRt)
     .innerJoin(rt, eq(transaksiKasRt.rtId, rt.id))
@@ -217,7 +244,11 @@ export const load: PageServerLoad = async ({ url }) => {
     periodeAktif,
     totalIuranTerkumpul,
     totalIuranTarget,
-    persentaseIuranRw
+    persentaseIuranRw,
+    // Midtrans Config
+    midtransClientKey: midtransConfig.clientKey,
+    midtransSnapUrl: midtransConfig.snapUrl,
+    midtransIsProduction: midtransConfig.isProduction
   };
 };
 
@@ -308,7 +339,8 @@ export const actions: Actions = {
       kategoriId,
       tanggal,
       bukti: buktiPath,
-      dicatatOleh: operator
+      dicatatOleh: operator,
+      metodePembayaran: String(formData.get('metodePembayaran') || 'tunai')
     });
 
     return { successKasRt: true };
