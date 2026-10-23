@@ -49,30 +49,49 @@ const BREAKPOINT = '--> statement-breakpoint';
 const CREATE_RE =
 	/^CREATE\s+(UNIQUE\s+)?(TABLE|INDEX)\s+(?:IF\s+NOT\s+EXISTS\s+)?[`"]?([A-Za-z0-9_]+)[`"]?/i;
 
-function sudahAda(type, name) {
+const ALTER_ADD_COLUMN_RE =
+	/^ALTER\s+TABLE\s+[`"]?([A-Za-z0-9_]+)[`"]?\s+ADD\s+(?:COLUMN\s+)?[`"]?([A-Za-z0-9_]+)[`"]?/i;
+
+function sudahAda(type: string, name: string): boolean {
 	return (
 		db.prepare('select name from sqlite_master where type = ? and name = ?').get(type, name) !==
 		undefined
 	);
 }
 
-function jalankan(sql, dari) {
-	const match = CREATE_RE.exec(sql);
-	if (match) {
-		const type = match[2].toLowerCase();
-		const name = match[3];
+function kolomSudahAda(table: string, column: string): boolean {
+	try {
+		const cols = db.prepare(`PRAGMA table_info("${table}")`).all() as Array<{ name: string }>;
+		return cols.some((c) => c.name.toLowerCase() === column.toLowerCase());
+	} catch {
+		return false;
+	}
+}
+
+function jalankan(sql: string, dari: string) {
+	const createMatch = CREATE_RE.exec(sql);
+	if (createMatch) {
+		const type = createMatch[2].toLowerCase();
+		const name = createMatch[3];
 		if (sudahAda(type, name)) {
 			console.log(`   lewati (sudah ada): ${type} ${name}`);
 			return;
 		}
 	}
+
+	const alterMatch = ALTER_ADD_COLUMN_RE.exec(sql);
+	if (alterMatch) {
+		const table = alterMatch[1];
+		const column = alterMatch[2];
+		if (kolomSudahAda(table, column)) {
+			console.log(`   lewati (kolom ${table}.${column} sudah ada)`);
+			return;
+		}
+	}
+
 	try {
 		db.exec(sql);
 	} catch (e) {
-		if (e instanceof Error && e.message.includes('duplicate column name')) {
-			console.log(`   lewati (kolom sudah ada)`);
-			return;
-		}
 		console.error(`Gagal menjalankan statement dari ${dari}:`);
 		console.error(sql);
 		console.error(e instanceof Error ? e.message : String(e));

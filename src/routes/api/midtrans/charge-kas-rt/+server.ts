@@ -5,6 +5,10 @@ import { transaksiKasRt } from '$lib/server/db/schema';
 import { createMidtransSnapTransaction } from '$lib/server/midtrans';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
+  if (!locals.user) {
+    return json({ success: false, error: 'Unauthorized: Sesi login diperlukan untuk mencatat transaksi Kas RT.' }, { status: 401 });
+  }
+
   try {
     const body = await request.json();
     const {

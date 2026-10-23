@@ -4,7 +4,7 @@
   import StatCard from '$lib/components/StatCard.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import Card from '$lib/components/Card.svelte';
-  import { formatRupiah, formatTanggal } from '$lib/format';
+  import { formatRupiah, formatTanggal, escapeHtml, safeUrl } from '$lib/format';
   import Plus from '@lucide/svelte/icons/plus';
   import Tags from '@lucide/svelte/icons/tags';
   import Wallet from '@lucide/svelte/icons/wallet';
@@ -28,7 +28,7 @@
   import { invalidateAll } from '$app/navigation';
   import type { PageData } from './$types';
 
-  let { data } = $props<{ data: PageData }>();
+  let { data, form } = $props<{ data: PageData; form?: any }>();
 
   // ─── Tab Active State ────────────────────────────────────────────────────────
   let activeTab = $state<'rw' | 'rt' | 'rekap' | 'kategori'>('rw');
@@ -64,6 +64,11 @@
   let showModalBatalRw = $state(false);
   let showModalBatalRt = $state(false);
   let selectedTransaksiId = $state<number | null>(null);
+
+  // ─── Modal Detail Transaksi ──────────────────────────────────────────────────
+  let showModalDetail = $state(false);
+  let selectedDetail = $state<any | null>(null);
+  let detailType = $state<'rw' | 'rt'>('rt');
 
   // ─── Midtrans Gateway States ────────────────────────────────────────────────
   let metodeRt = $state<'tunai' | 'midtrans'>('midtrans');
@@ -172,8 +177,19 @@
               midtransError = 'Pembayaran Midtrans gagal atau dibatalkan.';
               midtransLoading = false;
             },
-            onClose: () => {
+            onClose: async () => {
               midtransLoading = false;
+              showModalTambahRt = false;
+              await invalidateAll();
+              midtransSuccess = `Pembayaran ditunda (Pending). Transaksi kas RT (${orderId}) telah disimpan dan dapat dilanjutkan pembayarannya dalam waktu 24 jam via tombol "Bayar" di tabel.`;
+              formNominal = '';
+              formKeterangan = '';
+              donaturNama = '';
+              donaturEmail = '';
+              donaturPhone = '';
+              setTimeout(() => {
+                midtransSuccess = '';
+              }, 7000);
             }
           });
           return;
@@ -181,6 +197,8 @@
           // Fallback jika browser memblokir script popup Snap: buka halaman pembayaran langsung
           window.open(redirectUrl, '_blank');
           midtransLoading = false;
+          showModalTambahRt = false;
+          await invalidateAll();
           return;
         }
       }
@@ -192,6 +210,94 @@
       showModalSimulasiMidtrans = true;
     } catch (err: any) {
       midtransError = err.message || 'Terjadi kesalahan saat memproses pembayaran.';
+    } finally {
+      midtransLoading = false;
+    }
+  }
+
+  // ─── Helper: Hitung Batas Waktu 24 Jam & Status Midtrans ───────────────────
+  function getStatusMidtransPending(row: any) {
+    if (!row || row.metodePembayaran !== 'midtrans') return null;
+    const status = (row.midtransStatus || 'pending').toLowerCase();
+    const isLunas = status === 'settlement' || status === 'capture';
+    if (isLunas) return { isPending: false, isExpired: false, isLunas: true, message: 'Lunas' };
+
+    if (status === 'cancel' || status === 'expire' || status === 'deny') {
+      return { isPending: false, isExpired: true, isLunas: false, message: 'Gagal / Dibatalkan' };
+    }
+
+    // Hitung batas waktu 24 jam berdasarkan waktu pembuatan (createdAt / tanggal)
+    const createdTime = row.createdAt ? new Date(row.createdAt).getTime() : new Date(row.tanggal).getTime();
+    const now = Date.now();
+    const batasWaktu = createdTime + 24 * 60 * 60 * 1000;
+    const sisaMs = batasWaktu - now;
+
+    if (sisaMs <= 0) {
+      return { isPending: false, isExpired: true, isLunas: false, sisaMs: 0, sisaWaktuStr: '0m', message: 'Kadaluarsa (>24 Jam)' };
+    }
+
+    const sisaJam = Math.floor(sisaMs / (1000 * 60 * 60));
+    const sisaMenit = Math.floor((sisaMs % (1000 * 60 * 60)) / (1000 * 60));
+    const sisaWaktuStr = sisaJam > 0 ? `${sisaJam}j ${sisaMenit}m` : `${sisaMenit}m`;
+
+    return {
+      isPending: true,
+      isExpired: false,
+      isLunas: false,
+      sisaMs,
+      sisaWaktuStr,
+      message: `Pending (${sisaWaktuStr})`
+    };
+  }
+
+  // ─── Buka Snap / Simulasi Ulang untuk Transaksi Pending ────────────────────
+  async function bukaSnapUlang(transaksi: any) {
+    if (!transaksi) return;
+
+    const info = getStatusMidtransPending(transaksi);
+    if (info?.isExpired) {
+      midtransError = 'Waktu pembayaran transaksi ini telah melebihi batas 24 jam dan telah kadaluarsa.';
+      return;
+    }
+
+    midtransLoading = true;
+    midtransError = '';
+    midtransSuccess = '';
+
+    try {
+      if (transaksi.snapToken && data.midtransSnapUrl && data.midtransClientKey) {
+        await loadSnapScript(data.midtransSnapUrl, data.midtransClientKey);
+
+        if (typeof window !== 'undefined' && (window as any).snap) {
+          (window as any).snap.pay(transaksi.snapToken, {
+            onSuccess: async (result: any) => {
+              await selesaikanPembayaranMidtrans(transaksi.midtransOrderId, result.payment_type || 'qris', 'settlement');
+            },
+            onPending: async (result: any) => {
+              await selesaikanPembayaranMidtrans(transaksi.midtransOrderId, result.payment_type || 'pending', 'pending');
+            },
+            onError: () => {
+              midtransError = 'Pembayaran Midtrans gagal atau dibatalkan.';
+              midtransLoading = false;
+            },
+            onClose: async () => {
+              midtransLoading = false;
+              await invalidateAll();
+              midtransSuccess = `Pembayaran ditunda (Pending). Transaksi #${transaksi.id} masih dapat dibayar dalam batas waktu 24 jam.`;
+              setTimeout(() => { midtransSuccess = ''; }, 6000);
+            }
+          });
+          return;
+        }
+      }
+
+      // Fallback Mode Simulasi Sandbox jika script Snap tidak tersedia
+      simulasiOrderId = transaksi.midtransOrderId || `KAS-RT-${transaksi.id}`;
+      simulasiNominal = Number(transaksi.nominal);
+      simulasiKeterangan = transaksi.keterangan;
+      showModalSimulasiMidtrans = true;
+    } catch (err: any) {
+      midtransError = err.message || 'Gagal membuka kembali pembayaran Midtrans.';
     } finally {
       midtransLoading = false;
     }
@@ -218,7 +324,11 @@
       await invalidateAll();
       showModalTambahRt = false;
       showModalSimulasiMidtrans = false;
-      midtransSuccess = `Pembayaran Kas RT via Midtrans (${orderId}) berhasil diselesaikan & dicatat!`;
+      if (resData.isLunas) {
+        midtransSuccess = `Pembayaran Kas RT via Midtrans (${orderId}) terverifikasi LUNAS & dicatat!`;
+      } else {
+        midtransSuccess = `Status transaksi Midtrans (${orderId}): ${resData.status || 'Pending'}. Menunggu pelunasan.`;
+      }
 
       formNominal = '';
       formKeterangan = '';
@@ -276,14 +386,14 @@
       key: 'keterangan',
       label: 'Keterangan',
       render: (row: any) => {
-        let html = `<span class="${row.dibatalkan ? 'line-through text-muted' : 'font-medium'}">${row.keterangan}</span>`;
+        let html = `<span class="${row.dibatalkan ? 'line-through text-muted' : 'font-medium'}">${escapeHtml(row.keterangan)}</span>`;
         if (row.dibatalkan) {
-          html += `<br><span class="text-xs text-danger font-medium">Dibatalkan: ${row.alasanBatal ?? 'Koreksi'} (${row.dibatalkanOleh ?? ''})</span>`;
+          html += `<br><span class="text-xs text-danger font-medium">Dibatalkan: ${escapeHtml(row.alasanBatal ?? 'Koreksi')} (${escapeHtml(row.dibatalkanOleh ?? '')})</span>`;
         }
         return html;
       }
     },
-    { key: 'namaKategori', label: 'Pos Anggaran', render: (row: any) => row.namaKategori ?? '—' },
+    { key: 'namaKategori', label: 'Pos Anggaran', render: (row: any) => escapeHtml(row.namaKategori ?? '—') },
     {
       key: 'jenis',
       label: 'Jenis',
@@ -312,16 +422,21 @@
       label: 'Bukti',
       render: (row: any) => {
         if (!row.bukti) return '<span class="text-muted text-xs">—</span>';
-        return `<a href="${row.bukti}" target="_blank" rel="noreferrer" class="doc-link text-xs">Lihat Bukti</a>`;
+        return `<a href="${safeUrl(row.bukti)}" target="_blank" rel="noreferrer" class="doc-link text-xs">Lihat Bukti</a>`;
       }
     },
     {
       key: 'aksi',
-      label: '',
+      label: 'Aksi',
       sortable: false,
       render: (row: any) => {
-        if (row.dibatalkan) return '';
-        return `<button type="button" class="btn btn-sm btn-secondary text-xs" data-batal-rw="${row.id}">Batal</button>`;
+        let html = `<div style="display: inline-flex; align-items: center; gap: 6px;">`;
+        html += `<button type="button" class="btn btn-sm btn-secondary text-xs" data-detail-rw="${escapeHtml(row.id)}" title="Lihat detail rincian transaksi">Detail</button>`;
+        if (!row.dibatalkan) {
+          html += `<button type="button" class="btn btn-sm btn-secondary text-xs" style="color: var(--color-danger); border-color: color-mix(in oklab, var(--color-danger) 40%, transparent);" data-batal-rw="${escapeHtml(row.id)}" title="Batalkan transaksi">Batal</button>`;
+        }
+        html += `</div>`;
+        return html;
       }
     }
   ];
@@ -336,40 +451,49 @@
     {
       key: 'nomorRt',
       label: 'RT',
-      render: (row: any) => `<span class="badge variant-brand font-mono font-bold">RT ${String(row.nomorRt).padStart(2, '0')}</span>`
+      render: (row: any) => `<span class="badge variant-brand font-mono font-bold">RT ${escapeHtml(String(row.nomorRt).padStart(2, '0'))}</span>`
     },
     {
       key: 'namaKas',
       label: 'Buku Kas Mandiri',
-      render: (row: any) => `<span class="badge-subkas">${row.namaKas}</span>`
+      render: (row: any) => `<span class="badge-subkas">${escapeHtml(row.namaKas || 'Kas Mandiri RT')}</span>`
     },
     {
       key: 'keterangan',
       label: 'Keterangan',
       render: (row: any) => {
-        let html = `<span class="${row.dibatalkan ? 'line-through text-muted' : 'font-medium'}">${row.keterangan}</span>`;
+        let html = `<span class="${row.dibatalkan ? 'line-through text-muted' : 'font-medium'}">${escapeHtml(row.keterangan)}</span>`;
         if (row.dibatalkan) {
-          html += `<br><span class="text-xs text-danger font-medium">Dibatalkan: ${row.alasanBatal ?? 'Koreksi'} (${row.dibatalkanOleh ?? ''})</span>`;
+          html += `<br><span class="text-xs text-danger font-medium">Dibatalkan: ${escapeHtml(row.alasanBatal ?? 'Koreksi')} (${escapeHtml(row.dibatalkanOleh ?? '')})</span>`;
         }
         return html;
       }
     },
-    { key: 'namaKategori', label: 'Pos Kategori', render: (row: any) => row.namaKategori ?? '—' },
+    { key: 'namaKategori', label: 'Pos Kategori', render: (row: any) => escapeHtml(row.namaKategori ?? '—') },
     {
       key: 'metodePembayaran',
       label: 'Metode',
       render: (row: any) => {
         if (row.metodePembayaran === 'midtrans') {
-          const type = row.midtransPaymentType ? row.midtransPaymentType.toUpperCase() : 'SNAP';
-          const status = row.midtransStatus || 'settlement';
-          const isLunas = status === 'settlement' || status === 'capture';
+          const type = escapeHtml(row.midtransPaymentType ? row.midtransPaymentType.toUpperCase() : 'SNAP');
+          const info = getStatusMidtransPending(row);
+          const isLunas = info?.isLunas;
+          const isExpired = info?.isExpired;
+
+          let badgeStatus = '';
+          if (isLunas) {
+            badgeStatus = '<span class="status-pill status-pill-success">Lunas</span>';
+          } else if (isExpired) {
+            badgeStatus = '<span class="status-pill status-pill-danger" title="Batas waktu 24 jam telah habis">Kadaluarsa</span>';
+          } else {
+            badgeStatus = `<span class="status-pill status-pill-warning" title="Batas bayar 24 jam">${escapeHtml(info?.message ?? 'Pending')}</span>`;
+          }
+
           return `<div class="metode-col-cell">
-            <span class="badge-midtrans-pill" title="Order ID: ${row.midtransOrderId ?? ''}">
+            <span class="badge-midtrans-pill" title="Order ID: ${escapeHtml(row.midtransOrderId ?? '')}">
               <span class="midtrans-dot"></span>${type}
             </span>
-            ${isLunas 
-              ? '<span class="status-pill status-pill-success">Lunas</span>' 
-              : `<span class="status-pill status-pill-warning">${status}</span>`}
+            ${badgeStatus}
           </div>`;
         }
         return '<span class="badge variant-default text-xs">Tunai</span>';
@@ -393,6 +517,11 @@
         if (row.dibatalkan) {
           return `<span class="line-through text-muted font-medium">${formatRupiah(row.nominal)}</span>`;
         }
+        if (row.metodePembayaran === 'midtrans' && row.midtransStatus !== 'settlement' && row.midtransStatus !== 'capture') {
+          const info = getStatusMidtransPending(row);
+          const statusText = info?.isExpired ? 'Kadaluarsa' : 'Pending';
+          return `<span class="text-muted font-medium" title="Menunggu pembayaran">${formatRupiah(row.nominal)} <span class="text-xs ${info?.isExpired ? 'text-danger' : 'text-warning'} font-semibold">(${statusText})</span></span>`;
+        }
         return row.jenis === 'pemasukan'
           ? `<span style="font-weight: 600; color: var(--color-success)">+${formatRupiah(row.nominal)}</span>`
           : `<span style="font-weight: 600; color: var(--color-danger)">-${formatRupiah(row.nominal)}</span>`;
@@ -403,42 +532,102 @@
       label: 'Bukti / Ref',
       render: (row: any) => {
         if (row.metodePembayaran === 'midtrans') {
-          return `<span class="text-xs font-mono text-muted" title="${row.bukti || ''}">${row.midtransOrderId ? row.midtransOrderId.slice(0, 16) + '...' : (row.bukti || 'Midtrans')}</span>`;
+          const title = escapeHtml(row.bukti || '');
+          const label = escapeHtml(row.midtransOrderId ? row.midtransOrderId.slice(0, 16) + '...' : (row.bukti || 'Midtrans'));
+          return `<span class="text-xs font-mono text-muted" title="${title}">${label}</span>`;
         }
         if (!row.bukti) return '<span class="text-muted text-xs">—</span>';
-        return `<a href="${row.bukti}" target="_blank" rel="noreferrer" class="doc-link text-xs">Lihat Bukti</a>`;
+        return `<a href="${safeUrl(row.bukti)}" target="_blank" rel="noreferrer" class="doc-link text-xs">Lihat Bukti</a>`;
       }
     },
     {
       key: 'aksi',
-      label: '',
+      label: 'Aksi',
       sortable: false,
       render: (row: any) => {
-        if (row.dibatalkan) return '';
-        return `<button type="button" class="btn btn-sm btn-secondary text-xs" data-batal-rt="${row.id}">Batal</button>`;
+        let html = `<div style="display: inline-flex; align-items: center; gap: 6px;">`;
+        html += `<button type="button" class="btn btn-sm btn-secondary text-xs" data-detail-rt="${escapeHtml(row.id)}" title="Lihat detail rincian transaksi">Detail</button>`;
+
+        const info = getStatusMidtransPending(row);
+
+        // Tombol Bayar jika transaksi Midtrans pending dan belum kadaluarsa (<24 jam)
+        if (row.metodePembayaran === 'midtrans' && info?.isPending && !row.dibatalkan) {
+          html += `<button type="button" class="btn-pay-rt" data-pay-rt="${escapeHtml(row.id)}" title="Buka pembayaran Midtrans (Sisa: ${escapeHtml(info.sisaWaktuStr)})">Bayar</button>`;
+        }
+
+        // Kebutuhan user: jika transaksi Midtrans sudah dibayar (lunas), jangan ada tombol batal!
+        const isMidtransLunas = row.metodePembayaran === 'midtrans' && (row.midtransStatus === 'settlement' || row.midtransStatus === 'capture');
+        if (!row.dibatalkan && !isMidtransLunas) {
+          html += `<button type="button" class="btn btn-sm btn-secondary text-xs" style="color: var(--color-danger); border-color: color-mix(in oklab, var(--color-danger) 40%, transparent);" data-batal-rt="${escapeHtml(row.id)}" title="Batalkan transaksi">Batal</button>`;
+        }
+
+        html += `</div>`;
+        return html;
       }
     }
   ];
 
   function onTableClickRw(e: MouseEvent) {
-    const target = (e.target as HTMLElement).closest('[data-batal-rw]') as HTMLElement | null;
-    if (target) {
-      const id = target.getAttribute('data-batal-rw');
+    const targetBatal = (e.target as HTMLElement).closest('[data-batal-rw]') as HTMLElement | null;
+    if (targetBatal) {
+      const id = targetBatal.getAttribute('data-batal-rw');
       if (id) {
         selectedTransaksiId = Number(id);
         showModalBatalRw = true;
       }
+      return;
+    }
+
+    const targetDetail = (e.target as HTMLElement).closest('[data-detail-rw]') as HTMLElement | null;
+    if (targetDetail) {
+      const id = targetDetail.getAttribute('data-detail-rw');
+      if (id) {
+        const item = data.semuaTransaksiRw.find((t: any) => t.id === Number(id));
+        if (item) {
+          selectedDetail = item;
+          detailType = 'rw';
+          showModalDetail = true;
+        }
+      }
+      return;
     }
   }
 
   function onTableClickRt(e: MouseEvent) {
-    const target = (e.target as HTMLElement).closest('[data-batal-rt]') as HTMLElement | null;
-    if (target) {
-      const id = target.getAttribute('data-batal-rt');
+    const targetPay = (e.target as HTMLElement).closest('[data-pay-rt]') as HTMLElement | null;
+    if (targetPay) {
+      const id = targetPay.getAttribute('data-pay-rt');
+      if (id) {
+        const item = data.semuaTransaksiRt.find((t: any) => t.id === Number(id));
+        if (item) {
+          bukaSnapUlang(item);
+        }
+      }
+      return;
+    }
+
+    const targetBatal = (e.target as HTMLElement).closest('[data-batal-rt]') as HTMLElement | null;
+    if (targetBatal) {
+      const id = targetBatal.getAttribute('data-batal-rt');
       if (id) {
         selectedTransaksiId = Number(id);
         showModalBatalRt = true;
       }
+      return;
+    }
+
+    const targetDetail = (e.target as HTMLElement).closest('[data-detail-rt]') as HTMLElement | null;
+    if (targetDetail) {
+      const id = targetDetail.getAttribute('data-detail-rt');
+      if (id) {
+        const item = data.semuaTransaksiRt.find((t: any) => t.id === Number(id));
+        if (item) {
+          selectedDetail = item;
+          detailType = 'rt';
+          showModalDetail = true;
+        }
+      }
+      return;
     }
   }
 
@@ -650,9 +839,10 @@
     let totalKeluar = 0;
     const rows = filteredTransaksiRt.map((t: any, index: number) => {
       const isBatal = !!t.dibatalkan;
-      const masuk = !isBatal && t.jenis === 'pemasukan' ? t.nominal : 0;
+      const isPendingMidtrans = t.metodePembayaran === 'midtrans' && t.midtransStatus !== 'settlement' && t.midtransStatus !== 'capture';
+      const masuk = !isBatal && !isPendingMidtrans && t.jenis === 'pemasukan' ? t.nominal : 0;
       const keluar = !isBatal && t.jenis === 'pengeluaran' ? t.nominal : 0;
-      if (!isBatal) {
+      if (!isBatal && !isPendingMidtrans) {
         running += masuk - keluar;
         totalMasuk += masuk;
         totalKeluar += keluar;
@@ -662,12 +852,12 @@
         tanggal: t.tanggal,
         rt: `RT ${String(t.nomorRt).padStart(2, '0')}`,
         namaKas: t.namaKas || 'Kas Mandiri RT',
-        keterangan: t.keterangan + (isBatal ? ` (BATAL: ${t.alasanBatal || 'Koreksi'})` : ''),
+        keterangan: t.keterangan + (isBatal ? ` (BATAL: ${t.alasanBatal || 'Koreksi'})` : isPendingMidtrans ? ' (MENUNGGU PEMBAYARAN)' : ''),
         pos: t.namaKategori || '—',
         masuk,
         keluar,
         saldo: running,
-        status: isBatal ? 'Dibatalkan' : 'Aktif',
+        status: isBatal ? 'Dibatalkan' : isPendingMidtrans ? 'Pending (Belum Masuk)' : 'Aktif',
         operator: t.dicatatOleh,
         isBatal
       };
@@ -954,6 +1144,31 @@
     </div>
   </PageHeader>
 
+  {#if form?.errorHapusKategori}
+    <div class="alert alert-danger" role="alert" style="display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-4); padding: 12px 16px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b;">
+      <AlertCircle size={18} />
+      <span style="font-weight: 500; font-size: 14px;">{form.errorHapusKategori}</span>
+    </div>
+  {/if}
+  {#if form?.errorSetoran}
+    <div class="alert alert-danger" role="alert" style="display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-4); padding: 12px 16px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b;">
+      <AlertCircle size={18} />
+      <span style="font-weight: 500; font-size: 14px;">{form.errorSetoran}</span>
+    </div>
+  {/if}
+  {#if form?.successSetoran}
+    <div class="alert alert-success" role="alert" style="display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-4); padding: 12px 16px; background: #dcfce7; border: 1px solid #86efac; border-radius: 8px; color: #166534;">
+      <CheckCircle2 size={18} />
+      <span style="font-weight: 500; font-size: 14px;">Setoran kolektif iuran RT berhasil dicatat! {form.jumlahTersetor} tagihan telah dilunasi.</span>
+    </div>
+  {/if}
+  {#if form?.successHapusKategori}
+    <div class="alert alert-success" role="alert" style="display: flex; align-items: center; gap: 8px; margin-bottom: var(--space-4); padding: 12px 16px; background: #dcfce7; border: 1px solid #86efac; border-radius: 8px; color: #166534;">
+      <CheckCircle2 size={18} />
+      <span style="font-weight: 500; font-size: 14px;">Kategori kas berhasil dihapus.</span>
+    </div>
+  {/if}
+
   <!-- ─── Tab Bar Navigation ──────────────────────────────────────────────── -->
   <div class="tab-bar">
     <button
@@ -1073,6 +1288,15 @@
           <span style="font-weight: 500; font-size: 14px;">{midtransSuccess}</span>
         </div>
         <button type="button" style="border: none; background: transparent; font-size: 18px; cursor: pointer; color: #166534; font-weight: bold;" onclick={() => (midtransSuccess = '')}>×</button>
+      </div>
+    {/if}
+    {#if midtransError}
+      <div class="alert alert-danger" role="alert" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: var(--space-4); padding: 12px 16px; background: #fee2e2; border: 1px solid #fca5a5; border-radius: 8px; color: #991b1b;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <AlertCircle size={18} />
+          <span style="font-weight: 500; font-size: 14px;">{midtransError}</span>
+        </div>
+        <button type="button" style="border: none; background: transparent; font-size: 18px; cursor: pointer; color: #991b1b; font-weight: bold;" onclick={() => (midtransError = '')}>×</button>
       </div>
     {/if}
 
@@ -1844,7 +2068,13 @@
 <Modal
   open={showModalSimulasiMidtrans}
   title="Midtrans Sandbox — Simulasi Pembayaran"
-  onClose={() => (showModalSimulasiMidtrans = false)}
+  onClose={async () => {
+    showModalSimulasiMidtrans = false;
+    showModalTambahRt = false;
+    await invalidateAll();
+    midtransSuccess = 'Jendela pembayaran ditutup. Transaksi kas RT tersimpan (Pending) dengan batas bayar 24 jam. Anda dapat melanjutkan pembayaran via tombol "Bayar" di tabel.';
+    setTimeout(() => { midtransSuccess = ''; }, 7000);
+  }}
 >
   <div class="simulasi-wrapper">
     <div class="simulasi-header">
@@ -2106,6 +2336,219 @@
       </button>
     </div>
   </form>
+</Modal>
+
+<!-- ═════════════════════════════════════════════════════════════════════════ -->
+<!-- MODAL: DETAIL LENGKAP TRANSAKSI KAS (RT & RW)                             -->
+<!-- ═════════════════════════════════════════════════════════════════════════ -->
+<Modal
+  open={showModalDetail}
+  title={detailType === 'rt' ? 'Rincian Transaksi Kas RT' : 'Rincian Transaksi Kas RW'}
+  onClose={() => { showModalDetail = false; selectedDetail = null; }}
+>
+  {#if selectedDetail}
+    <div class="detail-transaksi-wrap">
+      <!-- Status & Nominal Banner -->
+      <div
+        class="detail-hero"
+        class:is-pemasukan={selectedDetail.jenis === 'pemasukan' && !selectedDetail.dibatalkan}
+        class:is-pengeluaran={selectedDetail.jenis === 'pengeluaran' && !selectedDetail.dibatalkan}
+        class:is-dibatalkan={selectedDetail.dibatalkan}
+      >
+        <div class="detail-hero-meta">
+          <span
+            class="badge"
+            class:variant-success={selectedDetail.jenis === 'pemasukan' && !selectedDetail.dibatalkan}
+            class:variant-danger={selectedDetail.jenis === 'pengeluaran' && !selectedDetail.dibatalkan}
+            class:variant-default={selectedDetail.dibatalkan}
+          >
+            {selectedDetail.dibatalkan ? 'Dibatalkan' : selectedDetail.jenis === 'pemasukan' ? 'Pemasukan' : 'Pengeluaran'}
+          </span>
+
+          {#if selectedDetail.metodePembayaran === 'midtrans'}
+            <span class="badge-midtrans-pill">
+              <span class="midtrans-dot"></span>{selectedDetail.midtransPaymentType ? selectedDetail.midtransPaymentType.toUpperCase() : 'MIDTRANS'}
+            </span>
+          {:else}
+            <span class="badge variant-default">Tunai</span>
+          {/if}
+        </div>
+
+        <div class="detail-nominal">
+          {selectedDetail.jenis === 'pemasukan' ? '+' : '-'}{formatRupiah(selectedDetail.nominal)}
+        </div>
+
+        <div class="detail-subtext">
+          Tanggal Transaksi: <strong>{formatTanggal(selectedDetail.tanggal)}</strong>
+        </div>
+      </div>
+
+      {#if selectedDetail.dibatalkan}
+        <div class="detail-alert-batal">
+          <AlertCircle size={18} />
+          <div>
+            <strong>Transaksi Dibatalkan:</strong> {selectedDetail.alasanBatal || 'Koreksi pembukuan'}
+            {#if selectedDetail.dibatalkanOleh}
+              <div class="text-xs" style="margin-top: 2px;">Dibatalkan oleh: {selectedDetail.dibatalkanOleh}</div>
+            {/if}
+          </div>
+        </div>
+      {/if}
+
+      <!-- Grid Detail Informasi -->
+      <div class="detail-info-grid">
+        <div class="detail-info-field">
+          <span class="detail-info-label">ID Transaksi</span>
+          <span class="detail-info-value font-mono font-bold">#{selectedDetail.id}</span>
+        </div>
+
+        {#if detailType === 'rt'}
+          <div class="detail-info-field">
+            <span class="detail-info-label">Wilayah RT</span>
+            <span class="detail-info-value font-bold text-accent">RT {String(selectedDetail.nomorRt || '').padStart(2, '0')}</span>
+          </div>
+
+          <div class="detail-info-field">
+            <span class="detail-info-label">Buku Kas Mandiri</span>
+            <span class="detail-info-value font-medium">{selectedDetail.namaKas || 'Kas Mandiri RT'}</span>
+          </div>
+        {/if}
+
+        <div class="detail-info-field">
+          <span class="detail-info-label">Pos Kategori</span>
+          <span class="detail-info-value">{selectedDetail.namaKategori || '— (Pos Umum)'}</span>
+        </div>
+
+        <div class="detail-info-field">
+          <span class="detail-info-label">Metode Pembayaran</span>
+          <span class="detail-info-value">
+            {#if selectedDetail.metodePembayaran === 'midtrans'}
+              Online via Midtrans ({selectedDetail.midtransPaymentType ? selectedDetail.midtransPaymentType.toUpperCase() : 'QRIS/Snap'})
+            {:else}
+              Tunai / Fisik
+            {/if}
+          </span>
+        </div>
+
+        <div class="detail-info-field">
+          <span class="detail-info-label">Dicatat Oleh</span>
+          <span class="detail-info-value">{selectedDetail.dicatatOleh || 'Bendahara'}</span>
+        </div>
+
+        {#if selectedDetail.createdAt}
+          <div class="detail-info-field">
+            <span class="detail-info-label">Waktu Pencatatan</span>
+            <span class="detail-info-value font-mono text-xs">{selectedDetail.createdAt}</span>
+          </div>
+        {/if}
+
+        {#if selectedDetail.metodePembayaran === 'midtrans'}
+          {@const info = getStatusMidtransPending(selectedDetail)}
+          <div class="detail-info-field full-width">
+            <span class="detail-info-label">Midtrans Order ID</span>
+            <span class="detail-info-value font-mono text-xs text-muted">{selectedDetail.midtransOrderId || '—'}</span>
+          </div>
+          <div class="detail-info-field">
+            <span class="detail-info-label">Status Pembayaran Midtrans</span>
+            <span class="detail-info-value">
+              {#if selectedDetail.midtransStatus === 'settlement' || selectedDetail.midtransStatus === 'capture'}
+                <span class="status-pill status-pill-success">Lunas (Settlement)</span>
+              {:else if info?.isExpired}
+                <span class="status-pill status-pill-danger">Kadaluarsa (>24 Jam)</span>
+              {:else}
+                <span class="status-pill status-pill-warning">{info?.message || selectedDetail.midtransStatus || 'Pending'}</span>
+              {/if}
+            </span>
+          </div>
+          {#if info?.isPending && !selectedDetail.dibatalkan}
+            <div class="detail-info-field full-width" style="background: #fefce8; border: 1px solid #fef08a; border-radius: 6px; padding: 10px 12px;">
+              <span class="detail-info-label" style="color: #854d0e;">Batas Waktu Pembayaran (24 Jam)</span>
+              <span class="detail-info-value text-xs" style="color: #713f12; margin-top: 2px;">
+                Transaksi ini berstatus <strong>Pending</strong>. Sisa waktu pembayaran: <strong>{info.sisaWaktuStr}</strong>. Anda dapat mengklik tombol <em>Bayar Sekarang</em> untuk menyelesaikan transaksi.
+              </span>
+            </div>
+          {/if}
+        {/if}
+
+        <div class="detail-info-field full-width">
+          <span class="detail-info-label">Deskripsi / Keterangan Transaksi</span>
+          <div class="detail-desc-box">
+            {selectedDetail.keterangan || 'Tidak ada keterangan tambahan.'}
+          </div>
+        </div>
+
+        {#if selectedDetail.bukti}
+          <div class="detail-info-field full-width">
+            <span class="detail-info-label">Berkas Bukti / Kuitansi</span>
+            <div class="detail-bukti-box">
+              {#if selectedDetail.bukti.startsWith('/') || selectedDetail.bukti.startsWith('http')}
+                <a href={safeUrl(selectedDetail.bukti)} target="_blank" rel="noreferrer" class="btn btn-sm btn-secondary" style="display: inline-flex; align-items: center; gap: 6px;">
+                  <Download size={14} />
+                  <span>Buka / Unduh Berkas Bukti Transaksi</span>
+                </a>
+              {:else}
+                <span class="text-xs text-muted font-mono">{selectedDetail.bukti}</span>
+              {/if}
+            </div>
+          </div>
+        {/if}
+      </div>
+
+      <div class="modal-actions" style="margin-top: var(--space-4); display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); flex-wrap: wrap;">
+        <!-- Tombol Batal: disembunyikan jika transaksi Midtrans sudah lunas -->
+        {#if !selectedDetail.dibatalkan}
+          {#if selectedDetail.metodePembayaran === 'midtrans' && (selectedDetail.midtransStatus === 'settlement' || selectedDetail.midtransStatus === 'capture')}
+            <span class="text-xs text-muted" style="margin-right: auto; display: inline-flex; align-items: center; gap: 4px;">
+              <CheckCircle2 size={14} style="color: var(--color-success);" />
+              <span>Pembayaran online lunas (Dana terverifikasi Midtrans, tidak dapat dibatalkan)</span>
+            </span>
+          {:else}
+            <button
+              type="button"
+              class="btn btn-secondary text-xs"
+              style="color: var(--color-danger); border-color: color-mix(in oklab, var(--color-danger) 40%, transparent); margin-right: auto;"
+              onclick={() => {
+                const id = selectedDetail.id;
+                showModalDetail = false;
+                selectedTransaksiId = id;
+                if (detailType === 'rt') {
+                  showModalBatalRt = true;
+                } else {
+                  showModalBatalRw = true;
+                }
+              }}
+            >
+              Batalkan Transaksi Ini
+            </button>
+          {/if}
+        {/if}
+
+        <!-- Tombol Bayar Sekarang jika transaksi Midtrans masih pending -->
+        {#if selectedDetail.metodePembayaran === 'midtrans' && !selectedDetail.dibatalkan}
+          {@const info = getStatusMidtransPending(selectedDetail)}
+          {#if info?.isPending}
+            <button
+              type="button"
+              class="btn btn-primary"
+              style="display: inline-flex; align-items: center; gap: 6px;"
+              onclick={() => {
+                const item = selectedDetail;
+                showModalDetail = false;
+                bukaSnapUlang(item);
+              }}
+            >
+              <CreditCard size={16} />
+              <span>Bayar Sekarang (Midtrans)</span>
+            </button>
+          {/if}
+        {/if}
+
+        <button type="button" class="btn btn-action" onclick={() => { showModalDetail = false; selectedDetail = null; }}>
+          Tutup Rincian
+        </button>
+      </div>
+    </div>
+  {/if}
 </Modal>
 
 <style>
@@ -2743,6 +3186,31 @@
     color: #b45309;
   }
 
+  :global(.status-pill-danger) {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  :global(.btn-pay-rt) {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #0284c7;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(2, 132, 199, 0.25);
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+
+  :global(.btn-pay-rt:hover) {
+    background: #0369a1;
+  }
+
   /* ─── Simulation Modal Elements ─── */
   .simulasi-wrapper {
     display: flex;
@@ -2836,5 +3304,122 @@
     background: #dcfce7;
     padding: 2px 8px;
     border-radius: 4px;
+  }
+
+  /* ─── Detail Transaksi Modal Styles ─── */
+  .detail-transaksi-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .detail-hero {
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-muted, #f8fafc);
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    text-align: center;
+  }
+  .detail-hero.is-pemasukan {
+    background: color-mix(in oklab, var(--color-success) 8%, var(--color-surface));
+    border-color: color-mix(in oklab, var(--color-success) 30%, transparent);
+  }
+  .detail-hero.is-pengeluaran {
+    background: color-mix(in oklab, var(--color-danger) 8%, var(--color-surface));
+    border-color: color-mix(in oklab, var(--color-danger) 30%, transparent);
+  }
+  .detail-hero.is-dibatalkan {
+    background: var(--color-surface-muted, #f8fafc);
+    border-color: var(--color-border);
+    opacity: 0.85;
+  }
+
+  .detail-hero-meta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-1);
+  }
+
+  .detail-nominal {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-family: var(--font-mono, monospace);
+  }
+  .is-pemasukan .detail-nominal {
+    color: var(--color-success);
+  }
+  .is-pengeluaran .detail-nominal {
+    color: var(--color-danger);
+  }
+  .is-dibatalkan .detail-nominal {
+    text-decoration: line-through;
+    color: var(--color-text-muted);
+  }
+
+  .detail-subtext {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+
+  .detail-alert-batal {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: color-mix(in oklab, var(--color-danger) 10%, transparent);
+    border: 1px solid color-mix(in oklab, var(--color-danger) 30%, transparent);
+    border-radius: var(--radius-md);
+    color: var(--color-danger);
+    font-size: var(--text-sm);
+  }
+
+  .detail-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .detail-info-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .detail-info-field.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .detail-info-label {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+  }
+
+  .detail-info-value {
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    font-weight: 500;
+  }
+
+  .detail-desc-box {
+    padding: var(--space-3);
+    background: var(--color-surface-muted, #f8fafc);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--color-text);
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+
+  .detail-bukti-box {
+    margin-top: 0.25rem;
   }
 </style>

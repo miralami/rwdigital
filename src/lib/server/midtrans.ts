@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFileSync, existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { env } from '$env/dynamic/private';
 
 export interface MidtransConfig {
   serverKey: string;
@@ -11,28 +10,12 @@ export interface MidtransConfig {
   appUrl: string;
 }
 
-function loadFreshEnv(): Record<string, string> {
-  const envObj: Record<string, string> = { ...(process.env as Record<string, string>) };
-  try {
-    const envPath = resolve(process.cwd(), '.env');
-    if (existsSync(envPath)) {
-      const content = readFileSync(envPath, 'utf8');
-      for (const line of content.split('\n')) {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith('#')) continue;
-        const eqIdx = trimmed.indexOf('=');
-        if (eqIdx === -1) continue;
-        const key = trimmed.slice(0, eqIdx).trim();
-        const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
-        envObj[key] = val;
-      }
-    }
-  } catch {}
-  return envObj;
+export function isDummyMidtransKey(key?: string): boolean {
+  if (!key) return true;
+  return key.includes('DEMO') || key.includes('YOUR_SERVER_KEY') || key.startsWith('SB-Mid-server-DEMO');
 }
 
 export function getMidtransConfig(): MidtransConfig {
-  const env = loadFreshEnv();
   const serverKey = env.MIDTRANS_SERVER_KEY || 'SB-Mid-server-DEMO-KAS-RT-KEY';
   const clientKey = env.MIDTRANS_CLIENT_KEY || 'SB-Mid-client-DEMO-KAS-RT-KEY';
   const isProduction = env.MIDTRANS_IS_PRODUCTION === 'true';
@@ -74,12 +57,7 @@ export interface SnapResponse {
 
 export async function createMidtransSnapTransaction(params: CreateSnapParams): Promise<SnapResponse> {
   const config = getMidtransConfig();
-
-  // If serverKey is not configured or dummy, fallback to sandbox simulation
-  const isDummyKey =
-    !config.serverKey ||
-    config.serverKey.includes('DEMO') ||
-    config.serverKey.includes('YOUR_SERVER_KEY');
+  const isDummyKey = isDummyMidtransKey(config.serverKey);
 
   if (!isDummyKey) {
     try {
@@ -93,7 +71,7 @@ export async function createMidtransSnapTransaction(params: CreateSnapParams): P
           secure: true
         },
         callbacks: {
-          finish: `${config.appUrl || 'http://localhost:5173'}/kas?status=midtrans_success`
+          finish: `${config.appUrl || 'http://localhost:5173'}/kas`
         },
         customer_details: {
           first_name: params.customerDetails?.firstName || 'Warga RT',
@@ -162,3 +140,67 @@ export function verifyMidtransSignature(
   const computedHash = createHash('sha512').update(raw).digest('hex');
   return computedHash === signatureKey;
 }
+
+export interface MidtransStatusResult {
+  verified: boolean;
+  transactionStatus?: string;
+  paymentType?: string;
+  fraudStatus?: string;
+  grossAmount?: number;
+  isSimulated?: boolean;
+  error?: string;
+}
+
+export async function checkMidtransTransactionStatus(orderId: string): Promise<MidtransStatusResult> {
+  const config = getMidtransConfig();
+  const isDummy = isDummyMidtransKey(config.serverKey);
+
+  // Jika simulasi (khusus demo/dev tanpa kredensial Midtrans riil)
+  if (isDummy && (orderId.startsWith('SIM-') || orderId.startsWith('KAS-RT-'))) {
+    return {
+      verified: true,
+      transactionStatus: 'settlement',
+      paymentType: 'qris',
+      isSimulated: true
+    };
+  }
+
+  try {
+    const baseUrl = config.isProduction
+      ? 'https://api.midtrans.com'
+      : 'https://api.sandbox.midtrans.com';
+    const authHeader = 'Basic ' + Buffer.from(config.serverKey + ':').toString('base64');
+
+    const res = await fetch(`${baseUrl}/v2/${encodeURIComponent(orderId)}/status`, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: authHeader
+      }
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      return {
+        verified: false,
+        error: `Midtrans API HTTP ${res.status}: ${errText}`
+      };
+    }
+
+    const data = await res.json();
+    return {
+      verified: true,
+      transactionStatus: data.transaction_status,
+      paymentType: data.payment_type,
+      fraudStatus: data.fraud_status,
+      grossAmount: Number(data.gross_amount) || 0,
+      isSimulated: false
+    };
+  } catch (err: any) {
+    return {
+      verified: false,
+      error: err?.message || 'Gagal menghubungi server Midtrans'
+    };
+  }
+}
+

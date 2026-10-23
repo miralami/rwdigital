@@ -13,28 +13,30 @@ import {
 import { eq, sql, desc, and } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { saveUploadedFile } from '$lib/server/storage';
-import { getMidtransConfig } from '$lib/server/midtrans';
+import { getMidtransConfig, checkMidtransTransactionStatus } from '$lib/server/midtrans';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
   const midtransConfig = getMidtransConfig();
 
-  // Handle return dari Midtrans redirect jika ada
+  // Sinkronkan status return jika ada redirect dari Midtrans (harus diverifikasi ke server Midtrans)
   const returnOrderId = url.searchParams.get('order_id');
-  const returnStatus = url.searchParams.get('transaction_status');
   if (returnOrderId) {
-    const isSuccess =
-      returnStatus === 'settlement' ||
-      returnStatus === 'capture' ||
-      url.searchParams.get('status') === 'midtrans_success';
-    if (isSuccess) {
-      await db
-        .update(transaksiKasRt)
-        .set({
-          midtransStatus: 'settlement',
-          bukti: `Midtrans Snap (Lunas - ${returnOrderId})`
-        })
-        .where(eq(transaksiKasRt.midtransOrderId, returnOrderId));
+    try {
+      const checkRes = await checkMidtransTransactionStatus(returnOrderId);
+      if (checkRes.verified && (checkRes.transactionStatus === 'settlement' || checkRes.transactionStatus === 'capture')) {
+        const typeStr = checkRes.paymentType || 'midtrans';
+        await db
+          .update(transaksiKasRt)
+          .set({
+            midtransStatus: 'settlement',
+            midtransPaymentType: typeStr,
+            bukti: `Midtrans ${typeStr.toUpperCase()} (Lunas - ${returnOrderId})`
+          })
+          .where(eq(transaksiKasRt.midtransOrderId, returnOrderId));
+      }
+    } catch (err) {
+      console.warn('[Midtrans Return Verification Error]:', err);
     }
   }
 
@@ -59,7 +61,8 @@ export const load: PageServerLoad = async ({ url }) => {
       dicatatOleh: transaksiKas.dicatatOleh,
       dibatalkan: transaksiKas.dibatalkan,
       alasanBatal: transaksiKas.alasanBatal,
-      dibatalkanOleh: transaksiKas.dibatalkanOleh
+      dibatalkanOleh: transaksiKas.dibatalkanOleh,
+      createdAt: transaksiKas.createdAt
     })
     .from(transaksiKas)
     .leftJoin(kategoriKas, eq(transaksiKas.kategoriId, kategoriKas.id))
@@ -100,7 +103,8 @@ export const load: PageServerLoad = async ({ url }) => {
       midtransOrderId: transaksiKasRt.midtransOrderId,
       midtransPaymentType: transaksiKasRt.midtransPaymentType,
       midtransStatus: transaksiKasRt.midtransStatus,
-      snapToken: transaksiKasRt.snapToken
+      snapToken: transaksiKasRt.snapToken,
+      createdAt: transaksiKasRt.createdAt
     })
     .from(transaksiKasRt)
     .innerJoin(rt, eq(transaksiKasRt.rtId, rt.id))
@@ -113,7 +117,10 @@ export const load: PageServerLoad = async ({ url }) => {
       (t) => t.rtId === rtItem.id && !t.dibatalkan
     );
     const totalPemasukan = transaksiRtIni
-      .filter((t) => t.jenis === 'pemasukan')
+      .filter((t) =>
+        t.jenis === 'pemasukan' &&
+        (t.metodePembayaran !== 'midtrans' || t.midtransStatus === 'settlement' || t.midtransStatus === 'capture')
+      )
       .reduce((sum, t) => sum + t.nominal, 0);
     const totalPengeluaran = transaksiRtIni
       .filter((t) => t.jenis === 'pengeluaran')
@@ -352,6 +359,29 @@ export const actions: Actions = {
     const alasan = String(formData.get('alasan') || 'Koreksi pembukuan kas RT').trim();
     const operator = locals.user?.name ?? locals.user?.id ?? 'Bendahara';
 
+    if (!id) {
+      return fail(400, { errorKasRt: 'ID transaksi tidak valid.' });
+    }
+
+    const [transaksi] = await db
+      .select()
+      .from(transaksiKasRt)
+      .where(eq(transaksiKasRt.id, id))
+      .limit(1);
+
+    if (!transaksi) {
+      return fail(404, { errorKasRt: 'Transaksi tidak ditemukan.' });
+    }
+
+    if (
+      transaksi.metodePembayaran === 'midtrans' &&
+      (transaksi.midtransStatus === 'settlement' || transaksi.midtransStatus === 'capture')
+    ) {
+      return fail(400, {
+        errorKasRt: 'Transaksi online Midtrans yang sudah lunas (settlement) tidak dapat dibatalkan.'
+      });
+    }
+
     await db
       .update(transaksiKasRt)
       .set({
@@ -368,16 +398,23 @@ export const actions: Actions = {
   catatSetoranRt: async ({ request, locals }) => {
     const formData = await request.formData();
     const rtId = Number(formData.get('rtId'));
-    const periode = String(formData.get('periode') || '2026-10');
-    const jumlahKkDisetor = Number(formData.get('jumlahKkDisetor') || 0);
+    const periode = String(formData.get('periode') || '').trim();
+    const rawJumlah = formData.get('jumlahKkDisetor');
+    const jumlahKkDisetor = rawJumlah && String(rawJumlah).trim() !== '' ? Number(rawJumlah) : null;
 
     if (!rtId) {
       return fail(400, { errorSetoran: 'Pilih RT yang menyetor.' });
     }
+    if (!periode || !/^\d{4}-\d{2}$/.test(periode)) {
+      return fail(400, { errorSetoran: 'Periode iuran wajib diisi dengan format YYYY-MM (misal: 2026-10).' });
+    }
+    if (jumlahKkDisetor !== null && (isNaN(jumlahKkDisetor) || jumlahKkDisetor < 1)) {
+      return fail(400, { errorSetoran: 'Jumlah KK yang disetor harus berupa angka positif minimal 1.' });
+    }
 
-    // Ambil tagihan yang belum lunas di RT tersebut untuk periode ini
-    const tagihanBelumLunas = await db
-      .select({ id: tagihan.id, nominal: tagihan.nominal })
+    // Ambil tagihan yang belum lunas di RT tersebut dengan urutan deterministik (nomor KK lalu ID tagihan)
+    const baseQuery = db
+      .select({ id: tagihan.id, nominal: tagihan.nominal, noKk: kk.noKk })
       .from(tagihan)
       .innerJoin(kk, eq(tagihan.kkId, kk.id))
       .where(
@@ -387,7 +424,13 @@ export const actions: Actions = {
           eq(tagihan.status, 'belum_bayar')
         )
       )
-      .limit(jumlahKkDisetor > 0 ? jumlahKkDisetor : 100);
+      .orderBy(kk.noKk, tagihan.id);
+
+    const tagihanBelumLunas = jumlahKkDisetor ? await baseQuery.limit(jumlahKkDisetor) : await baseQuery;
+
+    if (tagihanBelumLunas.length === 0) {
+      return fail(400, { errorSetoran: `Tidak ada tagihan 'belum_bayar' untuk RT ini pada periode ${periode}.` });
+    }
 
     const operator = locals.user?.name ?? locals.user?.id ?? 'Bendahara RT';
     const nowIso = new Date().toISOString();
@@ -403,7 +446,7 @@ export const actions: Actions = {
         jumlah: item.nominal,
         metodeBayar: 'tunai',
         referensi: `REKAP-RT-${rtId}-${periode}`,
-        catatan: `Setoran kolektif rekap iuran warga RT`,
+        catatan: `Setoran kolektif rekap iuran warga RT (KK: ${item.noKk})`,
         dibayarPada: nowIso,
         dicatatOleh: operator
       });
@@ -439,10 +482,42 @@ export const actions: Actions = {
     const formData = await request.formData();
     const id = Number(formData.get('id'));
 
-    if (id) {
-      await db.delete(kategoriKas).where(eq(kategoriKas.id, id));
+    if (!id) {
+      return fail(400, { errorHapusKategori: 'ID kategori tidak valid.' });
     }
 
-    return { successHapusKategori: true };
+    // Cek relasi foreign key sebelum menghapus
+    const [usedInRw] = await db
+      .select({ id: transaksiKas.id })
+      .from(transaksiKas)
+      .where(eq(transaksiKas.kategoriId, id))
+      .limit(1);
+
+    if (usedInRw) {
+      return fail(400, {
+        errorHapusKategori: 'Kategori tidak dapat dihapus karena masih digunakan dalam catatan transaksi Kas RW.'
+      });
+    }
+
+    const [usedInRt] = await db
+      .select({ id: transaksiKasRt.id })
+      .from(transaksiKasRt)
+      .where(eq(transaksiKasRt.kategoriId, id))
+      .limit(1);
+
+    if (usedInRt) {
+      return fail(400, {
+        errorHapusKategori: 'Kategori tidak dapat dihapus karena masih digunakan dalam catatan transaksi Kas RT.'
+      });
+    }
+
+    try {
+      await db.delete(kategoriKas).where(eq(kategoriKas.id, id));
+      return { successHapusKategori: true };
+    } catch (err: any) {
+      return fail(400, {
+        errorHapusKategori: 'Gagal menghapus kategori: terdapat data yang terkait pada database.'
+      });
+    }
   }
 };
