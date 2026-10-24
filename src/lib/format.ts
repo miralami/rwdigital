@@ -215,3 +215,29 @@ export function formatRentangTanggal(mulai?: string | null, selesai?: string | n
   return `${strMulai} – ${strSelesai}`;
 }
 
+/**
+ * Sanitasi string untuk mencegah Stored XSS saat dirender via {@html} (misal pada DataTable).
+ */
+export function escapeHtml(str: unknown): string {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+/**
+ * Validasi dan sanitasi URL agar terhindar dari javascript: / data: URI attack
+ */
+export function safeUrl(url: unknown): string {
+  if (!url || typeof url !== 'string') return '#';
+  const clean = url.trim();
+  if (clean.startsWith('/') || clean.startsWith('http://') || clean.startsWith('https://')) {
+    return escapeHtml(clean);
+  }
+  return '#';
+}
+
+
