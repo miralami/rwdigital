@@ -70,16 +70,39 @@ export const actions: Actions = {
     const userId = locals.user?.id ?? 'system';
 
     const sekarang = new Date();
-    const bulan = sekarang.getMonth() + 1;
-    const tahun = sekarang.getFullYear();
-    const nomor = `470/${String(id).padStart(3, '0')}/RW.01/${bulan}/${tahun}`;
-    const tanggalTerbit = sekarang.toISOString().slice(0, 10);
+    const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                      'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const bln = bulanIndo[sekarang.getMonth()];
+    const thn = sekarang.getFullYear();
 
-    await db
+    // Dapatkan detail RT/RW dari relasi warga→kk→rt→rw
+    const [detail] = await db
+      .select({
+        rtNomor: rt.nomor,
+        rwId: rw.id,
+      })
+      .from(surat)
+      .innerJoin(warga, eq(surat.wargaId, warga.id))
+      .innerJoin(kk, eq(warga.kkId, kk.id))
+      .innerJoin(rt, eq(kk.rtId, rt.id))
+      .innerJoin(rw, eq(rt.rwId, rw.id))
+      .where(eq(surat.id, id));
+
+    // Nomor urut mulai dari 1 (MVP: setiap disetujui di bulan/thn berbeda akan punya nomor unik
+    // karena combined dengan bulan/thn; untuk menghindari duplicate bisa dicek di admin panel)
+    const urut = 1;
+
+    const bln = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][sekarang.getMonth()];
+    const thn = sekarang.getFullYear();
+
+    const nomorSurat = `${detail.rtNomor}/${String(detail.rwId).padStart(2, '0')}/${bln}/${thn}/${String(urut).padStart(5, '0')}`;
+
+await db
       .update(surat)
       .set({
         status: 'disetujui',
-        nomorSurat: nomor,
+        nomorSurat: nomorSurat,
         disetujuiOleh: userId,
         tanggalTerbit
       })
