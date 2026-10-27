@@ -15,8 +15,10 @@ export const load: PageServerLoad = async ({ locals }) => {
       alamatKk: kk.alamat,
       jenisIuranId: jenisIuran.id,
       namaJenisIuran: jenisIuran.nama,
+      scopeJenis: jenisIuran.scope,
       periode: tagihan.periode,
       nominal: tagihan.nominal,
+      porsiRw: tagihan.porsiRw,
       status: tagihan.status
     })
     .from(tagihan)

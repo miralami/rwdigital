@@ -3,7 +3,8 @@ import {
   integer,
   real,
   sqliteTable,
-  text
+  text,
+  uniqueIndex
 } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 
@@ -160,21 +161,58 @@ export const jenisIuran = sqliteTable('jenis_iuran', {
   id:       integer('id').primaryKey({ autoIncrement: true }),
   nama:     text('nama').notNull(),             // e.g. "Iuran Keamanan", "Kebersihan"
   nominal:  real('nominal').notNull(),
+  // Bagian RW dari tiap tagihan (nominal tetap per KK). Nilai ini adalah
+  // konfigurasi data, bukan konstanta kode, sehingga porsi bisa diubah
+  // kapan saja tanpa menyentuh tagihan lama (lihat snapshot di `tagihan`).
+  porsiRw:  real('porsi_rw').notNull().default(0),
   periode:  text('periode', { enum: ['bulanan', 'tahunan', 'insidental'] }).notNull().default('bulanan'),
+  // Siapa yang menagih: 'rw' = langsung RW ke warga, 'rt' = lewat RT.
+  // Hanya jenis ber-scope 'rt' yang boleh digenerate per RT. Default 'rt'
+  // supaya data lama (yang selama ini ditagih lewat RT) tetap bisa digenerate.
+  scope:    text('scope', { enum: ['rw', 'rt'] }).notNull().default('rt'),
+  rtId:     integer('rt_id').references(() => rt.id), // pemilik bila scope 'rt'; null = semua RT
+  urutan:   integer('urutan').notNull().default(0),
   aktif:    integer('aktif', { mode: 'boolean' }).notNull().default(true),
   rwId:     integer('rw_id').notNull().references(() => rw.id),
   ...timestamps
 });
+
+// Paket = preset beberapa jenis iuran yang biasa ditagih bersamaan
+// (mis. K3 + Soskem + Santunan). Isinya data, bukan kode.
+export const paketIuran = sqliteTable('paket_iuran', {
+  id:         integer('id').primaryKey({ autoIncrement: true }),
+  nama:       text('nama').notNull(),
+  keterangan: text('keterangan'),
+  aktif:      integer('aktif', { mode: 'boolean' }).notNull().default(true),
+  rwId:       integer('rw_id').notNull().references(() => rw.id),
+  ...timestamps
+});
+
+export const paketIuranItem = sqliteTable('paket_iuran_item', {
+  id:           integer('id').primaryKey({ autoIncrement: true }),
+  paketId:      integer('paket_id').notNull().references(() => paketIuran.id, { onDelete: 'cascade' }),
+  jenisIuranId: integer('jenis_iuran_id').notNull().references(() => jenisIuran.id),
+  urutan:       integer('urutan').notNull().default(0)
+}, (table) => [
+  uniqueIndex('paket_iuran_item_unik').on(table.paketId, table.jenisIuranId)
+]);
 
 export const tagihan = sqliteTable('tagihan', {
   id:           integer('id').primaryKey({ autoIncrement: true }),
   kkId:         integer('kk_id').notNull().references(() => kk.id),
   jenisIuranId: integer('jenis_iuran_id').notNull().references(() => jenisIuran.id),
   periode:      text('periode').notNull(),      // e.g. "2025-01"
+  // Snapshot saat tagihan dibuat: perubahan nominal/porsi di jenis_iuran
+  // tidak boleh mengubah tagihan yang sudah terbit.
   nominal:      real('nominal').notNull(),
+  porsiRw:      real('porsi_rw').notNull().default(0),
   status:       text('status', { enum: ['belum_bayar', 'lunas', 'sebagian'] }).notNull().default('belum_bayar'),
   ...timestamps
-});
+}, (table) => [
+  // Satu KK hanya punya satu tagihan per jenis per periode. Ini yang membuat
+  // generate ulang idempoten, termasuk saat dua permintaan berjalan bersamaan.
+  uniqueIndex('tagihan_kk_jenis_periode_unik').on(table.kkId, table.jenisIuranId, table.periode)
+]);
 
 export const pembayaran = sqliteTable('pembayaran', {
   id:          integer('id').primaryKey({ autoIncrement: true }),
