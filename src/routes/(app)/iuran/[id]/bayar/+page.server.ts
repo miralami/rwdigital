@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import { requirePermission } from '$lib/server/rbac';
+import { requireRtAccess, requireScope, scopeFromRole } from '$lib/server/scope';
 import type { PageServerLoad, Actions } from './$types';
 
 const pembayaranSchema = z.object({
@@ -14,13 +15,15 @@ const pembayaranSchema = z.object({
   dibayarPada: z.string().min(1, 'Tanggal pembayaran wajib diisi')
 });
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
   const id = Number(params.id);
+  const scope = requireScope(scopeFromRole(locals));
 
   const [detail] = await db
     .select({
       id: tagihan.id,
       kkId: kk.id,
+      rtId: kk.rtId,
       noKk: kk.noKk,
       alamatKk: kk.alamat,
       jenisIuranId: jenisIuran.id,
@@ -37,6 +40,8 @@ export const load: PageServerLoad = async ({ params }) => {
   if (!detail) {
     redirect(302, '/iuran');
   }
+
+  requireRtAccess(scope, detail.rtId);
 
   const riwayatPembayaran = await db
     .select()
@@ -69,6 +74,14 @@ export const actions: Actions = {
 
     const [tagihanData] = await db.select().from(tagihan).where(eq(tagihan.id, id));
     if (!tagihanData) redirect(302, '/iuran');
+
+    const [pemilik] = await db
+      .select({ rtId: kk.rtId })
+      .from(tagihan)
+      .innerJoin(kk, eq(tagihan.kkId, kk.id))
+      .where(eq(tagihan.id, id))
+      .limit(1);
+    requireRtAccess(scopeFromRole(locals), pemilik?.rtId);
 
     const existingPayments = await db.select().from(pembayaran).where(eq(pembayaran.tagihanId, id));
     const totalDibayar = existingPayments.reduce((sum, p) => sum + p.jumlah, 0);

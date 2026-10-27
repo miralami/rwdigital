@@ -17,7 +17,8 @@ import {
 	transaksiKasRt,
 	jenisIuran,
 	tagihan,
-	pengurus
+	pengurus,
+	petugasRt
 } from '../src/lib/server/db/schema';
 
 // ─── Load .env ────────────────────────────────────────────────────────────────
@@ -338,8 +339,27 @@ async function seed() {
 	}
 
 	const akunWargaId = await pastikanAkun('warga@rw.id', 'warga123', 'Warga Contoh', 'warga');
-	await pastikanAkun('pengurus@rw.id', 'pengurus123', 'Pengurus RT 01', 'pengurus_rt');
+	const akunPengurusId = await pastikanAkun('pengurus@rw.id', 'pengurus123', 'Pengurus RT 01', 'pengurus_rt');
 	await pastikanAkun('bendahara@rw.id', 'bendahara123', 'Bendahara RW', 'bendahara');
+
+	// Tugaskan akun pengurus ke RT 01. Tanpa baris ini, scoping fail-closed
+	// membuat akun pengurus tidak bisa melihat data RT mana pun.
+	const rt01Id = rtMap.get(1);
+	if (rt01Id) {
+		const [tugasLama] = await db
+			.select()
+			.from(petugasRt)
+			.where(eq(petugasRt.userId, akunPengurusId))
+			.limit(1);
+
+		if (!tugasLama) {
+			await db.insert(petugasRt).values({ userId: akunPengurusId, rtId: rt01Id });
+			console.log('   Akun pengurus@rw.id ditugaskan ke RT 01.');
+		} else if (tugasLama.rtId !== rt01Id) {
+			await db.update(petugasRt).set({ rtId: rt01Id }).where(eq(petugasRt.id, tugasLama.id));
+			console.log('   Penugasan pengurus@rw.id diperbarui ke RT 01.');
+		}
+	}
 
 	// Tautkan akun warga ke warga pertama yang belum punya akun — tapi hanya
 	// kalau akun itu belum tertaut ke siapa pun. Tanpa cek ini, seed yang

@@ -15,11 +15,13 @@ import { fail } from '@sveltejs/kit';
 import { saveUploadedFile, UploadError } from '$lib/server/storage';
 import { getMidtransConfig } from '$lib/server/midtrans';
 import { requirePermission } from '$lib/server/rbac';
+import { requireRtAccess, requireScope, scopeFromRole, visibleRt } from '$lib/server/scope';
 import { hitungPersentase, hitungRekapIuran, hitungSaldo } from '$lib/server/kas';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, locals }) => {
   const midtransConfig = getMidtransConfig();
+  const scope = requireScope(scopeFromRole(locals));
 
   // Jangan menulis ke database dari GET. Cukup teruskan order id ke klien,
   // lalu klien memanggil endpoint verifikasi (POST) yang mengecek ke Midtrans.
@@ -29,7 +31,10 @@ export const load: PageServerLoad = async ({ url }) => {
   const rwId = rwData?.id ?? 1;
 
   // ─── 1. Daftar RT & Kategori ───────────────────────────────────────────────
-  const daftarRt = await db.select().from(rt).where(eq(rt.rwId, rwId)).orderBy(rt.nomor);
+  const daftarRt = visibleRt(
+    scope,
+    await db.select().from(rt).where(eq(rt.rwId, rwId)).orderBy(rt.nomor)
+  );
   const semuaKategori = await db.select().from(kategoriKas).where(eq(kategoriKas.rwId, rwId));
 
   // ─── 2. Kas Internal RW ───────────────────────────────────────────────────
@@ -94,6 +99,7 @@ export const load: PageServerLoad = async ({ url }) => {
     .from(transaksiKasRt)
     .innerJoin(rt, eq(transaksiKasRt.rtId, rt.id))
     .leftJoin(kategoriKas, eq(transaksiKasRt.kategoriId, kategoriKas.id))
+    .where(scope.kind === 'rt' ? eq(transaksiKasRt.rtId, scope.rtId) : undefined)
     .orderBy(desc(transaksiKasRt.tanggal), desc(transaksiKasRt.id));
 
   // Rekapitulasi Saldo per-RT
@@ -153,7 +159,9 @@ export const load: PageServerLoad = async ({ url }) => {
     })
     .from(kk)
     .innerJoin(rt, eq(kk.rtId, rt.id))
-    .where(eq(rt.rwId, rwId));
+    .where(
+      and(eq(rt.rwId, rwId), scope.kind === 'rt' ? eq(kk.rtId, scope.rtId) : undefined)
+    );
 
   const semuaTagihan = await db
     .select({
@@ -170,7 +178,9 @@ export const load: PageServerLoad = async ({ url }) => {
     .innerJoin(kk, eq(tagihan.kkId, kk.id))
     .innerJoin(rt, eq(kk.rtId, rt.id))
     .innerJoin(jenisIuran, eq(tagihan.jenisIuranId, jenisIuran.id))
-    .where(eq(rt.rwId, rwId));
+    .where(
+      and(eq(rt.rwId, rwId), scope.kind === 'rt' ? eq(kk.rtId, scope.rtId) : undefined)
+    );
 
   // Ambil daftar periode tagihan
   const periodeSet = new Set<string>();
@@ -311,6 +321,8 @@ export const actions: Actions = {
       return fail(400, { errorKasRt: 'RT, nominal, dan keterangan wajib diisi.' });
     }
 
+    requireRtAccess(scopeFromRole(locals), rtId);
+
     const buktiFile = formData.get('buktiFile') as File | null;
     let buktiPath: string | null = null;
     if (buktiFile && buktiFile.size > 0) {
@@ -362,6 +374,8 @@ export const actions: Actions = {
       return fail(404, { errorKasRt: 'Transaksi tidak ditemukan.' });
     }
 
+    requireRtAccess(scopeFromRole(locals), transaksi.rtId);
+
     if (
       transaksi.metodePembayaran === 'midtrans' &&
       (transaksi.midtransStatus === 'settlement' || transaksi.midtransStatus === 'capture')
@@ -401,6 +415,8 @@ export const actions: Actions = {
     if (jumlahKkDisetor !== null && (isNaN(jumlahKkDisetor) || jumlahKkDisetor < 1)) {
       return fail(400, { errorSetoran: 'Jumlah KK yang disetor harus berupa angka positif minimal 1.' });
     }
+
+    requireRtAccess(scopeFromRole(locals), rtId);
 
     // Ambil tagihan yang belum lunas di RT tersebut dengan urutan deterministik (nomor KK lalu ID tagihan)
     const baseQuery = db

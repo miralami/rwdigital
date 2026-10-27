@@ -1,9 +1,10 @@
 import { db } from '$lib/server/db';
-import { warga, permintaanPembaruan } from '$lib/server/db/schema';
+import { warga, kk, permintaanPembaruan } from '$lib/server/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { requireRole, STAFF_ROLES } from '$lib/server/guard';
 import { requirePermission } from '$lib/server/rbac';
+import { requireRtAccess, requireScope, scopeFromRole } from '$lib/server/scope';
 import type { Actions, PageServerLoad } from './$types';
 
 /**
@@ -21,8 +22,9 @@ const TRANSISI_VALID: Record<string, readonly string[]> = {
 
 export const load: PageServerLoad = async ({ locals, url }) => {
   requireRole({ locals, url }, STAFF_ROLES);
+  const scope = requireScope(scopeFromRole(locals));
 
-  // Daftar semua permintaan dengan data warga
+  // Daftar permintaan dengan data warga, dibatasi ke RT tugas pengurus.
   const semuaPermintaan = await db
     .select({
       id: permintaanPembaruan.id,
@@ -39,6 +41,8 @@ export const load: PageServerLoad = async ({ locals, url }) => {
     })
     .from(permintaanPembaruan)
     .innerJoin(warga, eq(permintaanPembaruan.wargaId, warga.id))
+    .innerJoin(kk, eq(warga.kkId, kk.id))
+    .where(scope.kind === 'rt' ? eq(kk.rtId, scope.rtId) : undefined)
     .orderBy(desc(permintaanPembaruan.createdAt));
 
   const statusFilter = url.searchParams.get('status') ?? 'diajukan';
@@ -70,6 +74,15 @@ export const actions: Actions = {
       .where(eq(permintaanPembaruan.id, id));
 
     if (!req) return fail(404, { error: 'Permintaan tidak ditemukan.' });
+
+    // Pastikan permintaan milik warga di RT tugas pengurus.
+    const [pemilik] = await db
+      .select({ rtId: kk.rtId })
+      .from(warga)
+      .innerJoin(kk, eq(warga.kkId, kk.id))
+      .where(eq(warga.id, req.wargaId))
+      .limit(1);
+    requireRtAccess(scopeFromRole(locals), pemilik?.rtId);
 
     // ── State machine guard (#1) ─────────────────────────────────────────────
     // Hanya izinkan transisi dari status yang valid agar permintaan yang sudah

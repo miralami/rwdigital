@@ -4,10 +4,23 @@ import { eq, sql, desc } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { auth } from '$lib/server/auth';
 import { requirePermission } from '$lib/server/rbac';
+import { requireRtAccess, requireScope, scopeFromRole } from '$lib/server/scope';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ params }) => {
+/** RT pemilik satu baris warga (lewat KK). Null kalau data tidak ditemukan. */
+async function rtIdWarga(wargaId: number): Promise<number | null> {
+  const [row] = await db
+    .select({ rtId: kk.rtId })
+    .from(warga)
+    .innerJoin(kk, eq(warga.kkId, kk.id))
+    .where(eq(warga.id, wargaId))
+    .limit(1);
+  return row?.rtId ?? null;
+}
+
+export const load: PageServerLoad = async ({ params, locals }) => {
   const id = Number(params.id);
+  const scope = requireScope(scopeFromRole(locals));
 
   const [detail] = await db
     .select({
@@ -42,6 +55,8 @@ export const load: PageServerLoad = async ({ params }) => {
     redirect(302, '/warga');
   }
 
+  requireRtAccess(scope, detail.rtId);
+
   const anggotaKk = await db
     .select()
     .from(warga)
@@ -73,6 +88,8 @@ export const actions: Actions = {
   nonaktifkan: async ({ params, request, locals }) => {
     requirePermission(locals, 'warga', 'update');
     const id = Number(params.id);
+    const scope = scopeFromRole(locals);
+    requireRtAccess(scope, await rtIdWarga(id));
     const formData = await request.formData();
     const alasan = String(formData.get('alasan') || 'Tidak disebutkan').trim();
     const tanggal = String(formData.get('tanggal') || new Date().toISOString().slice(0, 10)).trim();
@@ -92,6 +109,7 @@ export const actions: Actions = {
   aktifkan: async ({ params, locals }) => {
     requirePermission(locals, 'warga', 'update');
     const id = Number(params.id);
+    requireRtAccess(scopeFromRole(locals), await rtIdWarga(id));
     await db
       .update(warga)
       .set({
@@ -107,6 +125,7 @@ export const actions: Actions = {
   buatAkun: async ({ params, request, locals }) => {
     requirePermission(locals, 'user', 'create');
     const id = Number(params.id);
+    requireRtAccess(scopeFromRole(locals), await rtIdWarga(id));
     const formData = await request.formData();
     const email = String(formData.get('email') || '').trim();
     const password = String(formData.get('password') || 'warga123').trim();

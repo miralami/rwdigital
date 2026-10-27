@@ -3,10 +3,12 @@ import { surat, warga, kk, rt, rw } from '$lib/server/db/schema';
 import { and, count, eq, like } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { requirePermission } from '$lib/server/rbac';
+import { requireRtAccess, requireScope, scopeFromRole } from '$lib/server/scope';
 import type { PageServerLoad, Actions } from './$types';
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
   const id = Number(params.id);
+  const scope = requireScope(scopeFromRole(locals));
 
   const [detail] = await db
     .select({
@@ -32,6 +34,7 @@ export const load: PageServerLoad = async ({ params }) => {
       pekerjaan: warga.pekerjaan,
       statusPerkawinan: warga.statusPerkawinan,
       noKk: kk.noKk,
+      rtId: kk.rtId,
       alamatKk: kk.alamat,
       nomorRt: rt.nomor,
       namaRw: rw.nama
@@ -46,6 +49,8 @@ export const load: PageServerLoad = async ({ params }) => {
   if (!detail) {
     redirect(302, '/surat');
   }
+
+  requireRtAccess(scope, detail.rtId);
 
   return { detail };
 };

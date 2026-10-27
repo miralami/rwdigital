@@ -8,6 +8,8 @@ declare global {
     interface Locals {
       user:    User    | null;
       session: Session | null;
+      /** RT tugas untuk akun `pengurus_rt`; null kalau belum ditugaskan. */
+      petugasRtId: number | null;
     }
   }
 }

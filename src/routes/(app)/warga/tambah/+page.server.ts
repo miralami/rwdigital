@@ -3,6 +3,7 @@ import { kk, rt, warga } from '$lib/server/db/schema';
 import { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
 import { requirePermission } from '$lib/server/rbac';
+import { requireRtAccess, requireScope, scopeFromRole, visibleRt } from '$lib/server/scope';
 import type { PageServerLoad, Actions } from './$types';
 
 const kkSchema = z.object({
@@ -25,14 +26,16 @@ const wargaSchema = z.object({
   statusHubunganKk: z.enum(['kepala_keluarga', 'istri', 'anak', 'lainnya']).default('kepala_keluarga')
 });
 
-export const load: PageServerLoad = async () => {
-  const semuaRt = await db.select().from(rt).orderBy(rt.nomor);
+export const load: PageServerLoad = async ({ locals }) => {
+  const scope = requireScope(scopeFromRole(locals));
+  const semuaRt = visibleRt(scope, await db.select().from(rt).orderBy(rt.nomor));
   return { semuaRt };
 };
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
     requirePermission(locals, 'warga', 'create');
+    const scope = requireScope(scopeFromRole(locals));
     const formData = await request.formData();
 
     // Parse KK data
@@ -46,6 +49,9 @@ export const actions: Actions = {
     if (!kkResult.success) {
       return fail(400, { errors: kkResult.error.flatten().fieldErrors });
     }
+
+    // Pengurus RT tidak boleh membuat KK di RT lain, termasuk lewat POST manual.
+    requireRtAccess(scope, kkResult.data.rtId);
 
     // Parse warga data
     const wargaResult = wargaSchema.safeParse({
