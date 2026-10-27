@@ -14,6 +14,69 @@
   const s = $derived(data.detail);
 
   let showModalTolak = $state(false);
+
+  /**
+   * Timeline status: setiap langkah hanya dianggap selesai kalau jejak
+   * waktunya ada. Data lama (sebelum kolom jejak waktu dibuat) memakai
+   * tanggal terbit sebagai perkiraan supaya tidak tampil kosong.
+   */
+  const linimasa = $derived.by(() => {
+    const langkah: {
+      judul: string;
+      waktu: string;
+      selesai: boolean;
+      nada: 'netral' | 'sukses' | 'bahaya';
+    }[] = [
+      {
+        judul: 'Pengajuan diterima',
+        waktu: formatTanggal(s.createdAt),
+        selesai: true,
+        nada: 'netral'
+      },
+      {
+        judul: 'Verifikasi berkas',
+        waktu: s.diverifikasiPada ? formatTanggal(s.diverifikasiPada) : '—',
+        selesai: Boolean(s.diverifikasiPada),
+        nada: 'netral'
+      }
+    ];
+
+    if (s.status === 'disetujui') {
+      langkah.push({
+        judul: 'Disetujui & nomor terbit',
+        waktu: formatTanggal(s.disetujuiPada ?? s.tanggalTerbit),
+        selesai: true,
+        nada: 'sukses'
+      });
+    } else if (s.status === 'ditolak') {
+      langkah.push({
+        judul: 'Ditolak',
+        waktu: tanggalWaktu(s.ditolakPada),
+        selesai: true,
+        nada: 'bahaya'
+      });
+    } else {
+      langkah.push({
+        judul: 'Penerbitan surat',
+        waktu: '—',
+        selesai: false,
+        nada: 'netral'
+      });
+    }
+
+    return langkah;
+  });
+
+  /** Tanggal + jam singkat, mis. "28 Okt 2026, 14.05". */
+  function tanggalWaktu(nilai: string | null): string {
+    if (!nilai) return '—';
+    const d = new Date(nilai);
+    if (Number.isNaN(d.getTime())) return '—';
+    const jam = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' })
+      .format(d)
+      .replace(':', '.');
+    return `${formatTanggal(d)}, ${jam}`;
+  }
 </script>
 
 <div class="surat-detail-page">
@@ -32,7 +95,7 @@
       </div>
 
       <div class="actions">
-        {#if s.status === 'diajukan'}
+        {#if data.bisaProses && s.status === 'diajukan'}
           <form method="POST" action="?/verifikasi">
             <button type="submit" class="btn btn-primary">
               <Check size={16} />
@@ -47,7 +110,7 @@
             <X size={16} />
             <span>Tolak</span>
           </button>
-        {:else if s.status === 'diverifikasi'}
+        {:else if data.bisaProses && s.status === 'diverifikasi'}
           <form method="POST" action="?/setujui">
             <button type="submit" class="btn btn-primary">
               <FileCheck size={16} />
@@ -100,6 +163,23 @@
         <strong>Catatan Pengurus:</strong> {s.catatanPengurus}
       </div>
     {/if}
+
+    <ol class="timeline" aria-label="Riwayat status surat">
+      {#each linimasa as langkah, i (langkah.judul)}
+        <li
+          class="timeline-item"
+          class:selesai={langkah.selesai}
+          class:sukses={langkah.nada === 'sukses'}
+          class:bahaya={langkah.nada === 'bahaya'}
+        >
+          <span class="timeline-dot" aria-hidden="true">{i + 1}</span>
+          <span class="timeline-text">
+            <strong>{langkah.judul}</strong>
+            <span class="timeline-waktu">{langkah.waktu}</span>
+          </span>
+        </li>
+      {/each}
+    </ol>
 
     <dl class="info-grid">
       <div class="info-item">
@@ -304,6 +384,67 @@
     font-size: var(--text-lg);
     font-weight: 600;
     color: var(--color-text-primary);
+  }
+
+  /* ─── Timeline status ─────────────────────────────────────────────── */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-5);
+    padding: 0;
+    list-style: none;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    color: var(--color-text-muted);
+  }
+
+  .timeline-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: var(--text-xs);
+    font-weight: 700;
+  }
+
+  .timeline-item.selesai .timeline-dot {
+    border-color: var(--color-brand-600);
+    background: var(--color-brand-600);
+    color: #fff;
+  }
+
+  .timeline-item.sukses .timeline-dot {
+    border-color: var(--color-success);
+    background: var(--color-success);
+  }
+
+  .timeline-item.bahaya .timeline-dot {
+    border-color: var(--color-danger);
+    background: var(--color-danger);
+  }
+
+  .timeline-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .timeline-item.selesai .timeline-text strong {
+    color: var(--color-text-primary);
+  }
+
+  .timeline-waktu {
+    font-size: var(--text-xs);
   }
 
   .info-grid {

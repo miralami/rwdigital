@@ -238,7 +238,9 @@ export const transaksiKasRt = sqliteTable('transaksi_kas_rt', {
 // ─── Surat-Menyurat (SF-SR-01 s/d SF-SR-07) ─────────────────────────────────
 export const surat = sqliteTable('surat', {
   id:               integer('id').primaryKey({ autoIncrement: true }),
-  nomorSurat:       text('nomor_surat'),
+  // Nomor hanya diisi saat surat disetujui. UNIQUE menjaga agar dua surat
+  // tidak pernah mendapat nomor yang sama walau ada pengajuan bersamaan.
+  nomorSurat:       text('nomor_surat').unique(),
   jenis:            text('jenis').notNull(),         // e.g. "skck", "sktm", "domisili", "usaha", "kematian", "umum"
   keperluan:        text('keperluan').notNull(),
   keterangan:       text('keterangan'),
@@ -250,6 +252,10 @@ export const surat = sqliteTable('surat', {
   diverifikasiOleh: text('diverifikasi_oleh'),       // user id pengurus RT/RW
   disetujuiOleh:    text('disetujui_oleh'),          // user id Admin RW
   tanggalTerbit:    text('tanggal_terbit'),          // ISO date
+  // Jejak waktu tiap perpindahan status, dipakai timeline di halaman detail.
+  diverifikasiPada: text('diverifikasi_pada'),       // ISO datetime
+  disetujuiPada:    text('disetujui_pada'),          // ISO datetime
+  ditolakPada:      text('ditolak_pada'),            // ISO datetime
   wargaId:          integer('warga_id').notNull().references(() => warga.id),
   ...timestamps
 });
