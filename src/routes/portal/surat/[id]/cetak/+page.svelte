@@ -1,7 +1,7 @@
 <script lang="ts">
   import Printer from '@lucide/svelte/icons/printer';
   import ArrowLeft from '@lucide/svelte/icons/arrow-left';
-  import { formatTanggalPanjang } from '$lib/format';
+  import { formatTanggalPanjang, maskNik, maskNoKk } from '$lib/format';
   import type { PageData } from './$types';
 
   let { data } = $props<{ data: PageData }>();
@@ -59,12 +59,12 @@
           <tr>
             <td class="col-label">Nomor Induk Kependudukan (NIK)</td>
             <td class="col-sep">:</td>
-            <td class="col-val">{s.nikWarga}</td>
+            <td class="col-val">{maskNik(s.nikWarga)}</td>
           </tr>
           <tr>
             <td class="col-label">Nomor Kartu Keluarga (KK)</td>
             <td class="col-sep">:</td>
-            <td class="col-val">{s.noKk}</td>
+            <td class="col-val">{maskNoKk(s.noKk)}</td>
           </tr>
           <tr>
             <td class="col-label">Tempat, Tanggal Lahir</td>

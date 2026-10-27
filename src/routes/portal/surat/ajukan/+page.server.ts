@@ -69,7 +69,12 @@ export const actions: Actions = {
     }
 
     let dokumenPath: string | null = null;
+    // Batas ukuran: maksimal 10MB untuk satu berkas persyaratan.
     if (berkasSyarat && berkasSyarat.size > 0) {
+      const maksBerkas = 10 * 1024 * 1024;
+      if (berkasSyarat.size > maksBerkas) {
+        return fail(400, { error: 'Ukuran berkas melebihi 10MB' });
+      }
       dokumenPath = await saveUploadedFile(berkasSyarat, 'surat');
     }
 
