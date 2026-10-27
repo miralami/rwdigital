@@ -196,38 +196,41 @@ Status: diperbaiki pada PR #62/#63 sebelum merge.
 | 1 | Role warga belum ada | #64 | **Selesai** (`6aaabcd`) |
 | 2 | Dropdown RT kosong | #64 | **Selesai** |
 | 3 | Menu konfigurasi RT (CRUD RT + kepengurusan) | #64 | **Selesai** |
-| 4 | Iuran K3 36k + soskem 5k + santunan 10k per KK | #66, #71 (D2) | Menunggu keputusan |
-| 5 | Iuran fokus ke RW | #66, #71 (D1) | Menunggu keputusan |
-| 6 | Kas RW berasal dari sisa K3 | #65, #71 (D3) | Menunggu keputusan |
-| 7 | Surat RW hanya mencatat + validasi | #70 | Belum |
-| 8 | Galeri di landing | #68 | Belum |
-| 9 | Foto pengurus di bagan | #68 | Belum |
-| 10 | Background landing bisa diganti | #68 | Belum |
+| 4 | Iuran K3 36k + soskem 5k + santunan 10k per KK | #66, #71 (D2) | **Selesai** (`4ee3b69`) — nominal jadi data, preset ter-seed |
+| 5 | Iuran fokus ke RW | #66, #71 (D1) | Sebagian (`#66`: scope `rw`/`rt` tersedia; D1 belum dikunci) |
+| 6 | Kas RW berasal dari sisa K3 | #65, #71 (D3) | Menunggu keputusan (porsi RW sudah jadi kolom data di #66) |
+| 7 | Surat RW hanya mencatat + validasi | #70 | **Selesai** (`0da0215`) |
+| 8 | Galeri di landing | #68 | **Selesai** (`678ccca`) |
+| 9 | Foto pengurus di bagan | #68 | **Selesai** (`678ccca`) |
+| 10 | Background landing bisa diganti | #68 | **Selesai** (`678ccca`) |
 | 11 | Rincian tagihan & pembayaran warga | #69 | Belum |
-| 12 | Alur keuangan RT vs RW + tanggal pencatatan | #65, #66, #71 (D1–D4) | Menunggu keputusan |
+| 12 | Alur keuangan RT vs RW + tanggal pencatatan | #65, #66, #71 (D1–D4) | Menunggu keputusan (porsi & scope sudah configurable di #66) |
 | 13 | Use case, ERD, alur akuntansi & surat | #71 (deliverable) | Menunggu keputusan |
-| 14 | Role lebih detail | #64, #73 | **Selesai** (matriks role + scoping) |
+| 14 | Role lebih detail | #64, #73 | **Selesai** (matriks role + scoping, `b0ea533`) |
 | 15 | Data keuangan lama | #72, #71 (D5) | Menunggu keputusan |
 
 ### 4.7 Pekerjaan teknis pendamping (bukan permintaan stakeholder)
 
 | Issue | Asal | Status |
 |---|---|---|
-| #67 | Temuan review: repo belum punya test/CI | Sebagian (Vitest + CI selesai; Playwright belum) |
-| #73 | Temuan review: izin baru per aksi, belum per baris | Sebagian (scoping selesai; agregat dashboard belum) |
+| #67 | Temuan review: repo belum punya test/CI | **Selesai** (`3be1365`) — Vitest + CI + 7 tes Playwright |
+| #73 | Temuan review: izin baru per aksi, belum per baris | **Selesai** (`b0ea533`) — scoping per RT di dashboard, kas, warga, iuran, surat |
 | #74 | Pendukung #64 (CI di branch fitur) | **Selesai** (`27f2377`) |
 
 ---
 
 ## 5. Keputusan yang Masih Terbuka (#71)
 
-Implementasi iuran dan setoran sengaja ditahan sampai lima keputusan ini dikunci.
+Implementasi **iuran** sudah jalan dengan pendekatan *config-driven*: nominal, porsi RW, dan
+scope (`rw`/`rt`) disimpan sebagai data di `jenis_iuran`, dan tiap tagihan menyimpan snapshot
+nilainya. Jadi kelima keputusan di bawah tinggal mengisi angka/kebijakan, tanpa perlu ubah kode.
+**Setoran RT → RW (#65)** dan **migrasi data lama (#72)** tetap ditahan sampai D1–D5 dikunci.
 
 | Kode | Pertanyaan | Usulan | Dipakai oleh |
 |---|---|---|---|
 | **D1** | Alur uang: warga → RW langsung, atau warga → RT → RW? | Warga → RT → RW | #65, #66 |
-| **D2** | Nominal per KK: K3 36k + soskem 5k + santunan 10k, atau K3 total 50k? | Sesuai catatan Zidan | #66 |
-| **D3** | Porsi K3 yang tinggal di RT vs disetor ke RW | Persen atau nominal tetap | #65 |
+| **D2** | Nominal per KK: K3 36k + soskem 5k + santunan 10k, atau K3 total 50k? | Sesuai catatan Zidan (sudah jadi preset di #66) | #66 |
+| **D3** | Porsi K3 yang tinggal di RT vs disetor ke RW | Persen atau nominal tetap (kolom `jenis_iuran.porsi_rw` sudah tersedia, preset 0) | #65, #66 |
 | **D4** | Tanggal tagihan, jatuh tempo, dan closing periode | Per bulan, closing akhir bulan | #66 |
 | **D5** | Format data keuangan lama & mekanisme saldo awal | CSV + transaksi pembuka | #72 |
 
