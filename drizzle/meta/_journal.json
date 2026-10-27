@@ -64,6 +64,13 @@
       "when": 1793133181237,
       "tag": "0008_petugas_rt",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1793134416858,
+      "tag": "0009_landing_galeri",
+      "breakpoints": true
     }
   ]
 }
