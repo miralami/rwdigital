@@ -40,6 +40,7 @@
     '/kas/kategori',
     '/warga/tambah',
     '/warga/impor',
+    '/warga/pembaruan',
     '/warga/[id]/edit',
     '/surat/[id]',
     '/iuran/generate',
