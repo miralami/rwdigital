@@ -3,6 +3,7 @@ import { jenisIuran, rw } from '$lib/server/db/schema';
 import { fail, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { requirePermission } from '$lib/server/rbac';
 import type { PageServerLoad, Actions } from './$types';
 
 const jenisSchema = z.object({
@@ -18,7 +19,8 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  tambah: async ({ request }) => {
+  tambah: async ({ request, locals }) => {
+    requirePermission(locals, 'iuran', 'create');
     const formData = await request.formData();
     const result = jenisSchema.safeParse({
       nama: formData.get('nama'),
@@ -41,7 +43,8 @@ export const actions: Actions = {
     redirect(303, '/iuran/jenis');
   },
 
-  hapus: async ({ request }) => {
+  hapus: async ({ request, locals }) => {
+    requirePermission(locals, 'iuran', 'delete');
     const formData = await request.formData();
     const id = Number(formData.get('id'));
     if (id) {

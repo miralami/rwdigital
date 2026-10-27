@@ -3,6 +3,7 @@ import { tagihan, kk, jenisIuran } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
+import { requirePermission } from '$lib/server/rbac';
 import type { PageServerLoad, Actions } from './$types';
 
 const generateSchema = z.object({
@@ -16,7 +17,8 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  default: async ({ request }) => {
+  default: async ({ request, locals }) => {
+    requirePermission(locals, 'iuran', 'create');
     const formData = await request.formData();
 
     const result = generateSchema.safeParse({

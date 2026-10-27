@@ -3,6 +3,7 @@ import { warga, permintaanPembaruan } from '$lib/server/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { requireRole, STAFF_ROLES } from '$lib/server/guard';
+import { requirePermission } from '$lib/server/rbac';
 import type { Actions, PageServerLoad } from './$types';
 
 /**
@@ -51,6 +52,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 export const actions: Actions = {
   tinjau: async ({ request, locals, url }) => {
     requireRole({ locals, url }, STAFF_ROLES);
+    requirePermission(locals, 'warga', 'update');
     const userId = locals.user!.id;
 
     const formData = await request.formData();

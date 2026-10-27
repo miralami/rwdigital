@@ -77,7 +77,7 @@
       <FormField
         label="Unggah Berkas / Dokumen Persyaratan (Opsional)"
         name="berkasSyarat"
-        hint="Unggah foto KTP, Kartu Keluarga, atau pengantar pengurus RT (format JPG/PNG/PDF, maks 5MB)."
+        hint="Unggah foto KTP, Kartu Keluarga, atau pengantar pengurus RT (format JPG/PNG/WEBP/PDF, maks 10MB)."
       >
         <input
           type="file"

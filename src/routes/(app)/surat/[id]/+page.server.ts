@@ -2,6 +2,7 @@ import { db } from '$lib/server/db';
 import { surat, warga, kk, rt, rw } from '$lib/server/db/schema';
 import { and, count, eq, like } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
+import { requirePermission } from '$lib/server/rbac';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -51,6 +52,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 export const actions: Actions = {
   verifikasi: async ({ params, locals }) => {
+    requirePermission(locals, 'surat', 'update');
     const id = Number(params.id);
     const userId = locals.user?.id ?? 'system';
 
@@ -66,6 +68,7 @@ export const actions: Actions = {
   },
 
   setujui: async ({ params, locals }) => {
+    requirePermission(locals, 'surat', 'update');
     const id = Number(params.id);
     const userId = locals.user?.id ?? 'system';
 
@@ -132,7 +135,8 @@ export const actions: Actions = {
     return { success: true };
   },
 
-  tolak: async ({ params, request }) => {
+  tolak: async ({ params, request, locals }) => {
+    requirePermission(locals, 'surat', 'update');
     const id = Number(params.id);
     const formData = await request.formData();
     const alasan = String(formData.get('catatan') || 'Dokumen persyaratan tidak lengkap').trim();

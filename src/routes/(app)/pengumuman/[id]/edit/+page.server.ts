@@ -3,6 +3,7 @@ import { pengumuman } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
+import { requirePermission } from '$lib/server/rbac';
 import type { PageServerLoad, Actions } from './$types';
 
 const editSchema = z
@@ -50,7 +51,8 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions: Actions = {
-  default: async ({ params, request }) => {
+  default: async ({ params, request, locals }) => {
+    requirePermission(locals, 'pengumuman', 'update');
     const id = Number(params.id);
     const formData = await request.formData();
 

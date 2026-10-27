@@ -6,6 +6,7 @@ import Ellipsis from '@lucide/svelte/icons/ellipsis';
 import Megaphone from '@lucide/svelte/icons/megaphone';
 import User from '@lucide/svelte/icons/user';
 import FileText from '@lucide/svelte/icons/file-text';
+import Settings from '@lucide/svelte/icons/settings';
 import type { Component } from 'svelte';
 
 export interface NavItem {
@@ -37,7 +38,8 @@ export const PRIMARY_NAV_ITEMS: NavItem[] = [
 /** Destinasi yang tidak muat di bottom nav, dibuka lewat "Lainnya". */
 export const MORE_NAV_ITEMS: NavItem[] = [
   { href: '/surat', label: 'Surat', shortLabel: 'Surat', icon: FileText },
-  { href: '/pengumuman', label: 'Pengumuman', shortLabel: 'Pengumuman', icon: Megaphone }
+  { href: '/pengumuman', label: 'Pengumuman', shortLabel: 'Pengumuman', icon: Megaphone },
+  { href: '/pengaturan', label: 'Pengaturan', shortLabel: 'Atur', icon: Settings }
 ];
 
 export const MORE_NAV_ITEM: NavItem = {
