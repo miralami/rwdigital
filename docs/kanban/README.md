@@ -9,6 +9,7 @@ Titik masuk penerapan Kanban untuk proyek SI-RW.
 | `workflow.md` | Aturan operasional: kolom, kriteria transisi, WIP limit, DoR/DoD, MoSCoW, konvensi Git, grey-out, prosedur back-fill |
 | `backlog.md` | 38 kartu + 6 grey-out + Epic + PIC + bukti kode (as-is + back-fill) |
 | `board.md` | Snapshot papan, audit WIP, metrik awal, kondisi papan terpasang + peta kartu ↔ issue |
+| `permintaan-stakeholder.md` | Ledger permintaan customer/mitra & dosen per iterasi + peta ke issue (label `req-stakeholder`, `iterasi-2`) |
 | `temuan-inkonsistensi.md` | Temuan F1–F7 & arah penyelesaian |
 
 Revisi laporan (untuk dipindahkan ke `laporan.md`): `docs/arsip/laporanRevisi.md`.
