@@ -1,6 +1,7 @@
 <script lang="ts">
   import { browser } from '$app/environment';
   import { goto } from '$app/navigation';
+  import { page } from '$app/state';
   import { signOut } from '$lib/auth-client';
   import BottomNav from '$lib/components/BottomNav.svelte';
   import ProfileBlock from '$lib/components/ProfileBlock.svelte';
@@ -86,7 +87,9 @@
 
   <BottomNav
     items={PORTAL_NAV_ITEMS}
-    activeKey={PORTAL_SECTION_HREF[section]}
+    activeKey={page.url.pathname.startsWith('/portal/iuran')
+      ? '/portal/iuran'
+      : PORTAL_SECTION_HREF[section]}
     panelOpen={profilOpen}
     panelId="portal-profil"
     onOpenPanel={() => (profilOpen = true)}

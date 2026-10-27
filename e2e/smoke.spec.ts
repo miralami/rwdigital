@@ -73,6 +73,15 @@ test.describe('login per role', () => {
     await page.goto('/pengaturan');
     await expect(page).toHaveURL(/\/portal/);
   });
+
+  test('warga bisa membuka rincian tagihan & pembayaran', async ({ page }) => {
+    await login(page, AKUN.warga);
+
+    await page.goto('/portal/iuran');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Tagihan');
+    await expect(page.getByRole('heading', { name: 'Rincian tagihan' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Riwayat pembayaran' })).toBeVisible();
+  });
 });
 
 test('menu pengguna terkunci untuk role tanpa izin', async ({ page }) => {

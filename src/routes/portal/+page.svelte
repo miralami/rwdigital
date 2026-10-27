@@ -22,8 +22,6 @@
 
   let { data } = $props<{ data: PageData }>();
 
-  let catatanQris = $state(false);
-
   const belumBayar = $derived(data.iuran?.status === 'belum_bayar');
 
   function maskNik(nik: string): string {
@@ -87,19 +85,20 @@
               variant="primary"
               size="lg"
               fullWidth
+              href="/portal/iuran"
               icon={QrCode}
-              onclick={() => (catatanQris = true)}
             >
-              Bayar dengan QRIS
+              Lihat tagihan &amp; bayar
             </Button>
-            {#if catatanQris}
-              <p class="iuran-note" role="status">
-                Pembayaran QRIS sedang disiapkan bersama mitra RW dan penyedia pembayaran.
-                Untuk saat ini pembayaran dapat diserahkan tunai ke Bendahara atau transfer bank.
-              </p>
-            {/if}
+            <p class="iuran-note">
+              Rincian semua tagihan, konfirmasi pembayaran tunai/transfer, dan riwayat pembayaran
+              ada di halaman Tagihan &amp; pembayaran.
+            </p>
           {:else}
             <p class="iuran-meta">Iuran untuk periode ini telah berstatus lunas.</p>
+            <Button variant="secondary" size="md" fullWidth href="/portal/iuran">
+              Lihat semua tagihan
+            </Button>
           {/if}
         </div>
       </Card>

@@ -67,7 +67,7 @@ export function isNavActive(pathname: string, href: string): boolean {
  */
 export const PORTAL_NAV_ITEMS: NavItem[] = [
   { href: PORTAL_PATH, label: 'Beranda', shortLabel: 'Beranda', icon: House },
-  { href: `${PORTAL_PATH}#iuran`, label: 'Iuran', shortLabel: 'Iuran', icon: Receipt },
+  { href: `${PORTAL_PATH}/iuran`, label: 'Iuran', shortLabel: 'Iuran', icon: Receipt },
   { href: `${PORTAL_PATH}#surat`, label: 'Surat', shortLabel: 'Surat', icon: FileText },
   { href: `${PORTAL_PATH}#info`, label: 'Info', shortLabel: 'Info', icon: Megaphone },
   { href: '', label: 'Profil', shortLabel: 'Profil', icon: User }
@@ -80,7 +80,7 @@ export type PortalSection = 'beranda' | (typeof PORTAL_SECTIONS)[number];
 /** Section id -> href nav, supaya status aktif nav dan section sinkron. */
 export const PORTAL_SECTION_HREF: Record<PortalSection, string> = {
   beranda: PORTAL_PATH,
-  iuran: `${PORTAL_PATH}#iuran`,
+  iuran: `${PORTAL_PATH}/iuran`,
   surat: `${PORTAL_PATH}#surat`,
   info: `${PORTAL_PATH}#info`
 };

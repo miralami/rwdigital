@@ -4,6 +4,7 @@
   import PageHeader from '$lib/components/PageHeader.svelte';
   import Settings2 from '@lucide/svelte/icons/settings-2';
   import FilePlus2 from '@lucide/svelte/icons/file-plus-2';
+  import CircleCheckBig from '@lucide/svelte/icons/circle-check-big';
   import Download from '@lucide/svelte/icons/download';
   import { maskNoKk } from '$lib/format';
   import type { PageData } from './$types';
@@ -82,6 +83,10 @@
       <Download size={16} />
       <span>Ekspor CSV</span>
     </button>
+    <a href="/iuran/konfirmasi" class="btn btn-secondary">
+      <CircleCheckBig size={16} />
+      <span>Konfirmasi bayar</span>
+    </a>
     <a href="/iuran/jenis" class="btn btn-secondary">
       <Settings2 size={16} />
       <span>Kelola jenis</span>
