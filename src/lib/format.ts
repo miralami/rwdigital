@@ -240,4 +240,15 @@ export function safeUrl(url: unknown): string {
   return '#';
 }
 
+/**
+ * Bungkus satu sel CSV: escape kutip ganda + cegah CSV/formula injection.
+ * Excel & LibreOffice mengeksekusi sel yang diawali `=`, `+`, `-`, `@`, TAB, atau CR,
+ * jadi nilai seperti itu diberi prefix apostrof.
+ */
+export function csvCell(value: unknown): string {
+  const raw = value === null || value === undefined ? '' : String(value);
+  const aman = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
+  return `"${aman.replace(/"/g, '""')}"`;
+}
+
 

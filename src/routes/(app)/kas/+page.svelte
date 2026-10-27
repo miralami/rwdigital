@@ -4,7 +4,7 @@
   import StatCard from '$lib/components/StatCard.svelte';
   import Modal from '$lib/components/Modal.svelte';
   import Card from '$lib/components/Card.svelte';
-  import { formatRupiah, formatTanggal, escapeHtml, safeUrl } from '$lib/format';
+  import { formatRupiah, formatTanggal, escapeHtml, safeUrl, csvCell } from '$lib/format';
   import Plus from '@lucide/svelte/icons/plus';
   import Tags from '@lucide/svelte/icons/tags';
   import Wallet from '@lucide/svelte/icons/wallet';
@@ -125,6 +125,34 @@
     if (typeof window !== 'undefined' && data.midtransSnapUrl && data.midtransClientKey) {
       loadSnapScript(data.midtransSnapUrl, data.midtransClientKey);
     }
+  });
+
+  // Sinkronisasi status setelah redirect Midtrans. Sengaja lewat POST, bukan
+  // menulis DB dari load() (GET).
+  let syncedOrderId = '';
+  $effect(() => {
+    const orderId = (data as { orderIdToSync?: string | null }).orderIdToSync;
+    if (!orderId || syncedOrderId === orderId) return;
+    syncedOrderId = orderId;
+
+    void (async () => {
+      try {
+        const res = await fetch('/api/midtrans/finish-kas-rt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderId })
+        });
+        const result = await res.json();
+        if (res.ok && result?.isLunas) {
+          midtransSuccess = `Pembayaran Midtrans (${orderId}) terverifikasi LUNAS.`;
+          setTimeout(() => { midtransSuccess = ''; }, 7000);
+        }
+      } catch (err) {
+        console.warn('[Midtrans] Gagal menyinkronkan status pembayaran:', err);
+      } finally {
+        await invalidateAll();
+      }
+    })();
   });
 
   async function prosesBayarMidtrans() {
@@ -743,9 +771,9 @@
 
     const html = `
       <div class="kop-instansi">SISTEM INFORMASI ADMINISTRASI RUKUN WARGA</div>
-      <div class="kop-sub">${namaRw} — ${alamatRw}</div>
+      <div class="kop-sub">${escapeHtml(namaRw)} — ${escapeHtml(alamatRw)}</div>
       <div class="kop-title">BUKU KAS UMUM (KAS INTERNAL TINGKAT RW)</div>
-      <div class="kop-meta">Periode: ${filterPeriodeRw.toUpperCase()} | Tanggal Cetak: ${tglCetak}</div>
+      <div class="kop-meta">Periode: ${escapeHtml(filterPeriodeRw.toUpperCase())} | Tanggal Cetak: ${escapeHtml(tglCetak)}</div>
 
       <table class="summary-box">
         <tr>
@@ -776,14 +804,14 @@
           ${rows.map((r: any) => `
             <tr>
               <td class="center-cell">${r.no}</td>
-              <td class="center-cell">${r.tanggal}</td>
-              <td class="text-cell ${r.isBatal ? 'text-batal' : ''}">${r.keterangan}</td>
-              <td class="text-cell">${r.pos}</td>
+              <td class="center-cell">${escapeHtml(r.tanggal)}</td>
+              <td class="text-cell ${r.isBatal ? 'text-batal' : ''}">${escapeHtml(r.keterangan)}</td>
+              <td class="text-cell">${escapeHtml(r.pos)}</td>
               <td class="num-cell ${r.masuk > 0 ? 'text-masuk' : ''}">${r.masuk > 0 ? r.masuk : '-'}</td>
               <td class="num-cell ${r.keluar > 0 ? 'text-keluar' : ''}">${r.keluar > 0 ? r.keluar : '-'}</td>
               <td class="num-cell" style="font-weight: bold;">${r.isBatal ? '-' : r.saldo}</td>
-              <td class="center-cell">${r.status}</td>
-              <td class="center-cell">${r.operator}</td>
+              <td class="center-cell">${escapeHtml(r.status)}</td>
+              <td class="center-cell">${escapeHtml(r.operator)}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -814,18 +842,16 @@
     const namaRw = data.rwData?.nama ?? 'RW 01';
     let csv = `sep=,\n`;
     csv += `"LAPORAN PEMBUKUAN KAS INTERNAL RW"\n`;
-    csv += `"Wilayah:","${namaRw}"\n`;
-    csv += `"Periode:","${filterPeriodeRw}"\n`;
-    csv += `"Tanggal Cetak:","${new Date().toLocaleString('id-ID')}"\n`;
+    csv += `"Wilayah:",${csvCell(namaRw)}\n`;
+    csv += `"Periode:",${csvCell(filterPeriodeRw)}\n`;
+    csv += `"Tanggal Cetak:",${csvCell(new Date().toLocaleString('id-ID'))}\n`;
     csv += `"Total Penerimaan (Rp)",${totalMasuk}\n`;
     csv += `"Total Pengeluaran (Rp)",${totalKeluar}\n`;
     csv += `"Saldo Akhir Kas (Rp)",${saldoAkhir}\n\n`;
 
     csv += `No,Tanggal,Keterangan,Pos_Anggaran,Pemasukan_Debit_Rp,Pengeluaran_Kredit_Rp,Saldo_Berjalan_Rp,Status,Dicatat_Oleh\n`;
     for (const r of rows) {
-      const ket = r.keterangan.replace(/"/g, '""');
-      const pos = r.pos.replace(/"/g, '""');
-      csv += `${r.no},"${r.tanggal}","${ket}","${pos}",${r.masuk},${r.keluar},${r.saldo},"${r.status}","${r.operator}"\n`;
+      csv += `${r.no},${csvCell(r.tanggal)},${csvCell(r.keterangan)},${csvCell(r.pos)},${r.masuk},${r.keluar},${r.saldo},${csvCell(r.status)},${csvCell(r.operator)}\n`;
     }
     csv += `TOTAL,,,,"${totalMasuk}","${totalKeluar}","${saldoAkhir}",,\n`;
 
@@ -873,9 +899,9 @@
 
     const html = `
       <div class="kop-instansi">SISTEM INFORMASI ADMINISTRASI RUKUN WARGA</div>
-      <div class="kop-sub">${namaRw} — Pembukuan Kas Lingkungan Rukun Tetangga</div>
+      <div class="kop-sub">${escapeHtml(namaRw)} — Pembukuan Kas Lingkungan Rukun Tetangga</div>
       <div class="kop-title">BUKU KAS MANDIRI PER-RT (KAS SOSIAL & OPERASIONAL)</div>
-      <div class="kop-meta">Wilayah: ${filterRtLabel} | Buku Kas: ${filterNamaKas} | Tanggal: ${tglCetak}</div>
+      <div class="kop-meta">Wilayah: ${escapeHtml(filterRtLabel)} | Buku Kas: ${escapeHtml(filterNamaKas)} | Tanggal: ${escapeHtml(tglCetak)}</div>
 
       <table class="summary-box">
         <tr>
@@ -908,16 +934,16 @@
           ${rows.map((r: any) => `
             <tr>
               <td class="center-cell">${r.no}</td>
-              <td class="center-cell">${r.tanggal}</td>
-              <td class="center-cell font-bold">${r.rt}</td>
-              <td class="text-cell">${r.namaKas}</td>
-              <td class="text-cell ${r.isBatal ? 'text-batal' : ''}">${r.keterangan}</td>
-              <td class="text-cell">${r.pos}</td>
+              <td class="center-cell">${escapeHtml(r.tanggal)}</td>
+              <td class="center-cell font-bold">${escapeHtml(r.rt)}</td>
+              <td class="text-cell">${escapeHtml(r.namaKas)}</td>
+              <td class="text-cell ${r.isBatal ? 'text-batal' : ''}">${escapeHtml(r.keterangan)}</td>
+              <td class="text-cell">${escapeHtml(r.pos)}</td>
               <td class="num-cell ${r.masuk > 0 ? 'text-masuk' : ''}">${r.masuk > 0 ? r.masuk : '-'}</td>
               <td class="num-cell ${r.keluar > 0 ? 'text-keluar' : ''}">${r.keluar > 0 ? r.keluar : '-'}</td>
               <td class="num-cell" style="font-weight: bold;">${r.isBatal ? '-' : r.saldo}</td>
-              <td class="center-cell">${r.status}</td>
-              <td class="center-cell">${r.operator}</td>
+              <td class="center-cell">${escapeHtml(r.status)}</td>
+              <td class="center-cell">${escapeHtml(r.operator)}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -948,20 +974,17 @@
     const namaRw = data.rwData?.nama ?? 'RW 01';
     let csv = `sep=,\n`;
     csv += `"LAPORAN PEMBUKUAN KAS MANDIRI PER-RT (KU-01)"\n`;
-    csv += `"Wilayah:","${namaRw}"\n`;
-    csv += `"Filter RT:","${filterRtPilihan === 'semua' ? 'Semua RT' : 'RT ' + filterRtPilihan}"\n`;
-    csv += `"Buku Kas:","${filterNamaKas}"\n`;
-    csv += `"Tanggal Cetak:","${new Date().toLocaleString('id-ID')}"\n`;
+    csv += `"Wilayah:",${csvCell(namaRw)}\n`;
+    csv += `"Filter RT:",${csvCell(filterRtPilihan === 'semua' ? 'Semua RT' : 'RT ' + filterRtPilihan)}\n`;
+    csv += `"Buku Kas:",${csvCell(filterNamaKas)}\n`;
+    csv += `"Tanggal Cetak:",${csvCell(new Date().toLocaleString('id-ID'))}\n`;
     csv += `"Total Penerimaan (Rp)",${totalMasuk}\n`;
     csv += `"Total Pengeluaran (Rp)",${totalKeluar}\n`;
     csv += `"Saldo Kas RT (Rp)",${saldoAkhir}\n\n`;
 
     csv += `No,Tanggal,Wilayah_RT,Buku_Kas_Mandiri,Pos_Kategori,Keterangan,Penerimaan_Rp,Pengeluaran_Rp,Saldo_Berjalan_Rp,Status,Dicatat_Oleh\n`;
     for (const r of rows) {
-      const ket = r.keterangan.replace(/"/g, '""');
-      const pos = r.pos.replace(/"/g, '""');
-      const kas = r.namaKas.replace(/"/g, '""');
-      csv += `${r.no},"${r.tanggal}","${r.rt}","${kas}","${pos}","${ket}",${r.masuk},${r.keluar},${r.saldo},"${r.status}","${r.operator}"\n`;
+      csv += `${r.no},${csvCell(r.tanggal)},${csvCell(r.rt)},${csvCell(r.namaKas)},${csvCell(r.pos)},${csvCell(r.keterangan)},${r.masuk},${r.keluar},${r.saldo},${csvCell(r.status)},${csvCell(r.operator)}\n`;
     }
     csv += `TOTAL,,,,,,${totalMasuk},${totalKeluar},${saldoAkhir},,\n`;
 
@@ -978,9 +1001,9 @@
 
     const html = `
       <div class="kop-instansi">SISTEM INFORMASI ADMINISTRASI RUKUN WARGA</div>
-      <div class="kop-sub">${namaRw} — Pelaporan Rekapitulasi Iuran Warga Lingkungan</div>
+      <div class="kop-sub">${escapeHtml(namaRw)} — Pelaporan Rekapitulasi Iuran Warga Lingkungan</div>
       <div class="kop-title">REKAPITULASI PENERIMAAN IURAN WAJIB PER-RT (KU-02)</div>
-      <div class="kop-meta">Periode: ${filterPeriodeIuran} | Tanggal Cetak: ${tglCetak}</div>
+      <div class="kop-meta">Periode: ${escapeHtml(filterPeriodeIuran)} | Tanggal Cetak: ${escapeHtml(tglCetak)}</div>
 
       <table class="summary-box">
         <tr>
@@ -1050,9 +1073,9 @@
   function eksporCsvRekapIuran() {
     let csv = `sep=,\n`;
     csv += `"REKAPITULASI PENERIMAAN IURAN WAJIB RT (KU-02)"\n`;
-    csv += `"Wilayah:","${data.rwData?.nama ?? 'RW 01'}"\n`;
-    csv += `"Periode:","${filterPeriodeIuran}"\n`;
-    csv += `"Tanggal Unduh:","${new Date().toLocaleString('id-ID')}"\n`;
+    csv += `"Wilayah:",${csvCell(data.rwData?.nama ?? 'RW 01')}\n`;
+    csv += `"Periode:",${csvCell(filterPeriodeIuran)}\n`;
+    csv += `"Tanggal Unduh:",${csvCell(new Date().toLocaleString('id-ID'))}\n`;
     csv += `"Total Terhimpun (Rp)",${data.totalIuranTerkumpul}\n`;
     csv += `"Target Potensi (Rp)",${data.totalIuranTarget}\n`;
     csv += `"Rata-rata Kepatuhan",${data.persentaseIuranRw}%\n\n`;

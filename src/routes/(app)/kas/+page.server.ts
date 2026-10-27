@@ -13,32 +13,15 @@ import {
 import { eq, sql, desc, and } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { saveUploadedFile } from '$lib/server/storage';
-import { getMidtransConfig, checkMidtransTransactionStatus } from '$lib/server/midtrans';
+import { getMidtransConfig } from '$lib/server/midtrans';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
   const midtransConfig = getMidtransConfig();
 
-  // Sinkronkan status return jika ada redirect dari Midtrans (harus diverifikasi ke server Midtrans)
-  const returnOrderId = url.searchParams.get('order_id');
-  if (returnOrderId) {
-    try {
-      const checkRes = await checkMidtransTransactionStatus(returnOrderId);
-      if (checkRes.verified && (checkRes.transactionStatus === 'settlement' || checkRes.transactionStatus === 'capture')) {
-        const typeStr = checkRes.paymentType || 'midtrans';
-        await db
-          .update(transaksiKasRt)
-          .set({
-            midtransStatus: 'settlement',
-            midtransPaymentType: typeStr,
-            bukti: `Midtrans ${typeStr.toUpperCase()} (Lunas - ${returnOrderId})`
-          })
-          .where(eq(transaksiKasRt.midtransOrderId, returnOrderId));
-      }
-    } catch (err) {
-      console.warn('[Midtrans Return Verification Error]:', err);
-    }
-  }
+  // Jangan menulis ke database dari GET. Cukup teruskan order id ke klien,
+  // lalu klien memanggil endpoint verifikasi (POST) yang mengecek ke Midtrans.
+  const orderIdToSync = url.searchParams.get('order_id');
 
   const [rwData] = await db.select().from(rw).limit(1);
   const rwId = rwData?.id ?? 1;
@@ -255,7 +238,9 @@ export const load: PageServerLoad = async ({ url }) => {
     // Midtrans Config
     midtransClientKey: midtransConfig.clientKey,
     midtransSnapUrl: midtransConfig.snapUrl,
-    midtransIsProduction: midtransConfig.isProduction
+    midtransIsProduction: midtransConfig.isProduction,
+    // Order Midtrans yang perlu disinkronkan lewat POST (bukan di load)
+    orderIdToSync: orderIdToSync ?? null
   };
 };
 
@@ -435,22 +420,26 @@ export const actions: Actions = {
     const operator = locals.user?.name ?? locals.user?.id ?? 'Bendahara RT';
     const nowIso = new Date().toISOString();
 
-    for (const item of tagihanBelumLunas) {
-      await db
-        .update(tagihan)
-        .set({ status: 'lunas' })
-        .where(eq(tagihan.id, item.id));
+    // Satu transaksi DB: kalau satu baris gagal, jangan sampai tagihan sudah
+    // "lunas" tapi catatan pembayarannya tidak tersimpan.
+    await db.transaction(async (tx) => {
+      for (const item of tagihanBelumLunas) {
+        await tx
+          .update(tagihan)
+          .set({ status: 'lunas' })
+          .where(eq(tagihan.id, item.id));
 
-      await db.insert(pembayaran).values({
-        tagihanId: item.id,
-        jumlah: item.nominal,
-        metodeBayar: 'tunai',
-        referensi: `REKAP-RT-${rtId}-${periode}`,
-        catatan: `Setoran kolektif rekap iuran warga RT (KK: ${item.noKk})`,
-        dibayarPada: nowIso,
-        dicatatOleh: operator
-      });
-    }
+        await tx.insert(pembayaran).values({
+          tagihanId: item.id,
+          jumlah: item.nominal,
+          metodeBayar: 'tunai',
+          referensi: `REKAP-RT-${rtId}-${periode}`,
+          catatan: `Setoran kolektif rekap iuran warga RT (KK: ${item.noKk})`,
+          dibayarPada: nowIso,
+          dicatatOleh: operator
+        });
+      }
+    });
 
     return { successSetoran: true, jumlahTersetor: tagihanBelumLunas.length };
   },

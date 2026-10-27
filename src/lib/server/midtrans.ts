@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import { env } from '$env/dynamic/private';
 
 export interface MidtransConfig {
@@ -58,6 +58,14 @@ export interface SnapResponse {
 export async function createMidtransSnapTransaction(params: CreateSnapParams): Promise<SnapResponse> {
   const config = getMidtransConfig();
   const isDummyKey = isDummyMidtransKey(config.serverKey);
+
+  // Jangan pernah membuat transaksi palsu di production. Lebih baik gagal keras
+  // daripada menandai pembayaran lunas tanpa uang yang benar-benar masuk.
+  if (config.isProduction && isDummyKey) {
+    throw new Error(
+      '[Midtrans] MIDTRANS_IS_PRODUCTION=true tetapi MIDTRANS_SERVER_KEY masih dummy/placeholder. Isi kredensial produksi.'
+    );
+  }
 
   if (!isDummyKey) {
     try {
@@ -120,7 +128,11 @@ export async function createMidtransSnapTransaction(params: CreateSnapParams): P
     }
   }
 
-  // Graceful fallback simulation token (allows instant testing in sandbox/dev)
+  if (config.isProduction) {
+    throw new Error('[Midtrans] Gagal membuat transaksi Snap di production. Pembayaran dibatalkan.');
+  }
+
+  // Graceful fallback simulation token (khusus dev/sandbox tanpa kredensial Midtrans)
   return {
     token: `SIM-SNAP-${params.orderId}`,
     redirectUrl: '#',
@@ -136,9 +148,23 @@ export function verifyMidtransSignature(
   signatureKey: string
 ): boolean {
   const config = getMidtransConfig();
+
+  // Fail-closed: key dummy berarti signature siapa pun bisa dipalsukan karena
+  // nilainya ada di source code.
+  if (config.isProduction && isDummyMidtransKey(config.serverKey)) {
+    console.error('[Midtrans] Signature ditolak: server key masih dummy di production.');
+    return false;
+  }
+  if (!signatureKey) return false;
+
   const raw = `${orderId}${statusCode}${grossAmount}${config.serverKey}`;
   const computedHash = createHash('sha512').update(raw).digest('hex');
-  return computedHash === signatureKey;
+
+  const computed = Buffer.from(computedHash, 'utf8');
+  const received = Buffer.from(String(signatureKey), 'utf8');
+  if (computed.length !== received.length) return false;
+
+  return timingSafeEqual(computed, received);
 }
 
 export interface MidtransStatusResult {
@@ -155,8 +181,17 @@ export async function checkMidtransTransactionStatus(orderId: string): Promise<M
   const config = getMidtransConfig();
   const isDummy = isDummyMidtransKey(config.serverKey);
 
-  // Jika simulasi (khusus demo/dev tanpa kredensial Midtrans riil)
-  if (isDummy && (orderId.startsWith('SIM-') || orderId.startsWith('KAS-RT-'))) {
+  // Fail-closed di production: jangan pernah menganggap transaksi lunas hanya
+  // karena key belum dikonfigurasi.
+  if (config.isProduction && isDummy) {
+    return {
+      verified: false,
+      error: 'MIDTRANS_SERVER_KEY belum dikonfigurasi untuk production.'
+    };
+  }
+
+  // Simulasi hanya untuk dev/sandbox, tidak pernah untuk production.
+  if (!config.isProduction && isDummy && (orderId.startsWith('SIM-') || orderId.startsWith('KAS-RT-'))) {
     return {
       verified: true,
       transactionStatus: 'settlement',

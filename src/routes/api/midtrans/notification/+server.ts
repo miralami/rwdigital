@@ -29,6 +29,31 @@ export const POST: RequestHandler = async ({ request }) => {
       return json({ message: 'Invalid signature' }, { status: 403 });
     }
 
+    const [existing] = await db
+      .select({ id: transaksiKasRt.id, nominal: transaksiKasRt.nominal })
+      .from(transaksiKasRt)
+      .where(eq(transaksiKasRt.midtransOrderId, order_id))
+      .limit(1);
+
+    // Order tidak dikenal: balas 200 supaya Midtrans berhenti mengirim ulang,
+    // tapi jangan menyentuh database.
+    if (!existing) {
+      console.warn('[Midtrans Webhook] Order tidak ditemukan, diabaikan:', order_id);
+      return json({ status: 'OK', order_id, ignored: true });
+    }
+
+    // Nominal notifikasi wajib sama dengan nominal yang tercatat.
+    const nominalNotifikasi = Number(gross_amount);
+    if (!Number.isFinite(nominalNotifikasi)) {
+      return json({ message: 'Invalid gross_amount' }, { status: 400 });
+    }
+    if (Math.abs(nominalNotifikasi - Number(existing.nominal)) > 0.01) {
+      console.warn(
+        `[Midtrans Webhook] Nominal tidak cocok untuk ${order_id}: Midtrans ${nominalNotifikasi} vs tercatat ${existing.nominal}`
+      );
+      return json({ message: 'Amount mismatch' }, { status: 403 });
+    }
+
     let midtransStatus = 'pending';
     if (transaction_status === 'capture') {
       midtransStatus = fraud_status === 'challenge' ? 'challenge' : 'settlement';
@@ -50,9 +75,9 @@ export const POST: RequestHandler = async ({ request }) => {
         midtransStatus,
         midtransPaymentType: payment_type || 'midtrans',
         bukti: `Midtrans Webhook (${(payment_type || '').toUpperCase()} - ${order_id})`,
-        dibatalkan: midtransStatus === 'cancel' || midtransStatus === 'expire'
+        dibatalkan: midtransStatus === 'cancel' || midtransStatus === 'expire' || midtransStatus === 'deny'
       })
-      .where(eq(transaksiKasRt.midtransOrderId, order_id));
+      .where(eq(transaksiKasRt.id, existing.id));
 
     return json({ status: 'OK', order_id, midtransStatus });
   } catch (err: any) {
