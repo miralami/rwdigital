@@ -3,6 +3,7 @@
   import Building2 from '@lucide/svelte/icons/building-2';
   import Users from '@lucide/svelte/icons/users';
   import UserCog from '@lucide/svelte/icons/user-cog';
+  import Images from '@lucide/svelte/icons/images';
   import ChevronRight from '@lucide/svelte/icons/chevron-right';
   import type { PageData } from './$types';
 
@@ -22,6 +23,13 @@
       keterangan: 'Susun bagan pengurus RW dan tiap RT, lengkap dengan foto.',
       icon: Users,
       boleh: data.akses.pengurus
+    },
+    {
+      href: '/pengaturan/landing',
+      judul: 'Landing & Galeri',
+      keterangan: 'Atur latar hero, sambutan, profil RW, dan foto galeri halaman publik.',
+      icon: Images,
+      boleh: data.akses.landing
     },
     {
       href: '/pengaturan/pengguna',

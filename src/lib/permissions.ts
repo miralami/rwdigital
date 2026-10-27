@@ -14,7 +14,8 @@ const statement = {
   iuran: ['create', 'read', 'update', 'delete'],
   kas: ['create', 'read', 'update', 'delete'],
   pengurus: ['create', 'read', 'update', 'delete'],
-  surat: ['create', 'read', 'update', 'delete']
+  surat: ['create', 'read', 'update', 'delete'],
+  landing: ['create', 'read', 'update', 'delete']
 } as const;
 
 export const ac = createAccessControl(statement);
@@ -31,7 +32,8 @@ export const adminRw = ac.newRole({
   iuran: ['create', 'read', 'update', 'delete'],
   kas: ['create', 'read', 'update', 'delete'],
   pengurus: ['create', 'read', 'update', 'delete'],
-  surat: ['create', 'read', 'update', 'delete']
+  surat: ['create', 'read', 'update', 'delete'],
+  landing: ['create', 'read', 'update', 'delete']
 });
 
 // Pengurus RT — kelola data warga & KK wilayahnya, ajukan surat.
@@ -44,7 +46,8 @@ export const pengurusRt = ac.newRole({
   iuran: ['read'],
   kas: ['read'],
   pengurus: ['read'],
-  surat: ['create', 'read']
+  surat: ['create', 'read'],
+  landing: ['read']
 });
 
 // Bendahara — akses penuh modul keuangan & iuran, data warga hanya dibaca.
@@ -57,14 +60,16 @@ export const bendahara = ac.newRole({
   iuran: ['create', 'read', 'update', 'delete'],
   kas: ['create', 'read', 'update', 'delete'],
   pengurus: ['read'],
-  surat: ['read']
+  surat: ['read'],
+  landing: ['read']
 });
 
 // Warga — akses terbatas: baca info RW & pengumuman, ajukan surat.
 export const warga = ac.newRole({
   pengumuman: ['read'],
   iuran: ['read'],
-  surat: ['create', 'read']
+  surat: ['create', 'read'],
+  landing: ['read']
 });
 
 export const roles = {

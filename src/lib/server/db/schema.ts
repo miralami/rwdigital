@@ -105,6 +105,37 @@ export const pengurus = sqliteTable('pengurus', {
   index('pengurus_rt_id_idx').on(table.rtId)
 ]);
 
+// ─── Pengaturan Landing & Galeri (LP-01) ────────────────────────────────────
+// Satu baris konfigurasi (id = 1). Nilai kosong berarti landing memakai
+// default yang tertanam di kode, sehingga instalasi baru tetap tampil utuh.
+export const pengaturanLanding = sqliteTable('pengaturan_landing', {
+  id:               integer('id').primaryKey(),
+  heroJudul:        text('hero_judul'),
+  heroSubjudul:     text('hero_subjudul'),
+  // Berupa warna hex (#0f172a) atau path gambar (/uploads/landing/...).
+  heroBackground:   text('hero_background'),
+  sambutan:         text('sambutan'),
+  namaKetua:        text('nama_ketua'),
+  fotoKetua:        text('foto_ketua'),
+  visi:             text('visi'),
+  misi:             text('misi'),          // satu poin per baris
+  sejarah:          text('sejarah'),
+  alamat:           text('alamat'),
+  telepon:          text('telepon'),
+  email:            text('email'),
+  ...timestamps
+});
+
+export const galeri = sqliteTable('galeri', {
+  id:         integer('id').primaryKey({ autoIncrement: true }),
+  judul:      text('judul').notNull(),
+  keterangan: text('keterangan'),
+  fotoUrl:    text('foto_url').notNull(),
+  urutan:     integer('urutan').notNull().default(0),
+  aktif:      integer('aktif', { mode: 'boolean' }).notNull().default(true),
+  ...timestamps
+});
+
 // ─── Pengumuman ───────────────────────────────────────────────────────────────
 export const pengumuman = sqliteTable('pengumuman', {
   id:            integer('id').primaryKey({ autoIncrement: true }),

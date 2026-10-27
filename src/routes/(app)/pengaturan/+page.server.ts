@@ -8,6 +8,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     akses: {
       rt: izin.canUpdate('rt'),
       pengurus: izin.can('pengurus', 'create'),
+      landing: izin.canUpdate('landing'),
       pengguna: izin.can('user', 'create')
     }
   };
