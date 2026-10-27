@@ -68,12 +68,22 @@
 <div class="dashboard">
   <h1 class="sr-only">Beranda RW Digital</h1>
 
+  {#if data.scopeKind === 'rt'}
+    <p class="scope-banner" role="status">
+      Menampilkan data <strong>{data.scopeLabel}</strong>. Angka RW lain tidak termasuk.
+    </p>
+  {:else if data.scopeKind === 'none'}
+    <p class="scope-banner scope-banner-warning" role="alert">
+      Akun ini belum ditugaskan ke RT, jadi belum ada data yang bisa ditampilkan. Hubungi admin RW.
+    </p>
+  {/if}
+
   <!-- KPI: 4 sel. Di mobile sel saldo jadi hero dan sel pengumuman disembunyikan
        (datanya sudah tampil di panel "Perlu perhatian"). -->
   <section class="kpi-grid" aria-label="Ringkasan kas, warga, iuran, dan pengumuman">
     <div class="kpi-cell kpi-cell-hero">
       <StatCard
-        title="Saldo kas"
+        title={data.kasLabel}
         value={formatRupiah(data.stats.saldoKas)}
         description="Pemasukan {formatRupiah(data.stats.totalPemasukan)}"
         variant="hero"
@@ -83,7 +93,9 @@
 
     <div class="kpi-cell kpi-cell-actions">
       <div class="cell-actions">
-        <Button href="/kas/tambah" variant="primary" size="lg" icon={Plus} class="cell-action-primary">Catat kas</Button>
+        {#if data.bisaCatatKas}
+          <Button href="/kas/tambah" variant="primary" size="lg" icon={Plus} class="cell-action-primary">Catat kas</Button>
+        {/if}
         <Button href="/warga" variant="secondary" size="lg" icon={UserPlus}>Warga</Button>
       </div>
     </div>
@@ -166,7 +178,12 @@
   {/if}
 
   <div class="dash-cols">
-    <Card title="Arus kas terbaru" actionHref="/kas" actionLabel="Lihat semua" padded={false}>
+    <Card
+      title={data.scopeKind === 'rt' ? 'Arus kas RT terbaru' : 'Arus kas terbaru'}
+      actionHref="/kas"
+      actionLabel="Lihat semua"
+      padded={false}
+    >
       {#if data.transaksiTerbaru.length > 0}
         <div class="row-list">
           {#each data.transaksiTerbaru as tx (tx.id)}
@@ -184,10 +201,12 @@
       {:else}
         <EmptyState
           compact
-          message="Catat transaksi kas pertama"
+          message={data.scopeKind === 'rt' ? 'Belum ada transaksi kas RT' : 'Catat transaksi kas pertama'}
           description="Setiap pemasukan atau pengeluaran langsung memperbarui saldo kas."
         >
-          <Button href="/kas/tambah" variant="primary" icon={Plus}>Catat kas</Button>
+          {#if data.bisaCatatKas}
+            <Button href="/kas/tambah" variant="primary" icon={Plus}>Catat kas</Button>
+          {/if}
         </EmptyState>
       {/if}
     </Card>
@@ -228,7 +247,9 @@
           message="Tidak ada yang perlu ditindaklanjuti"
           description="Iuran lunas dan tidak ada pengumuman yang menunggu."
         >
-          <Button href="/pengumuman/tambah" variant="primary" icon={Megaphone}>Buat pengumuman</Button>
+          {#if data.bisaBuatPengumuman}
+            <Button href="/pengumuman/tambah" variant="primary" icon={Megaphone}>Buat pengumuman</Button>
+          {/if}
         </EmptyState>
       {/if}
     </Card>
@@ -240,6 +261,23 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
+  }
+
+  .scope-banner {
+    margin: 0;
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-brand-600);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-muted);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .scope-banner-warning {
+    border-left-color: var(--color-warning);
+    background: var(--color-warning-bg, var(--color-surface-muted));
+    color: var(--color-text);
   }
 
   /* ─── KPI ─── */
