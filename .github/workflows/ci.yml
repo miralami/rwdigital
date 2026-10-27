@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Batalkan run lama untuk ref yang sama supaya PR yang di-push berulang tidak
+# menumpuk job.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check, test & build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Siapkan Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # `$env/static/private` di-inline saat build, jadi variabel berikut wajib
+      # ada walau CI tidak menyentuh database sungguhan.
+      - name: Siapkan environment dummy
+        run: |
+          cat > .env <<'EOF'
+          TURSO_DATABASE_URL=file:ci.db
+          TURSO_AUTH_TOKEN=
+          BETTER_AUTH_SECRET=ci-secret-rwdigital-0123456789abcdef
+          BETTER_AUTH_URL=http://localhost:5173
+          EOF
+
+      - name: Svelte check
+        run: npm run check
+
+      - name: Unit test
+        run: npm test
+
+      - name: Build
+        run: npm run build
