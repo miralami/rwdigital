@@ -76,6 +76,22 @@ export const riwayatWarga = sqliteTable('riwayat_warga', {
   tanggal:    text('tanggal').notNull().default(sql`(current_timestamp)`)
 });
 
+// ─── Pengurus (bagan organisasi RW & RT) ────────────────────────────────────
+// `rtId` NULL = pengurus tingkat RW. `fotoUrl` menunjuk ke /uploads/pengurus/...
+// supaya bagan pengurus di landing page bisa menampilkan foto asli.
+export const pengurus = sqliteTable('pengurus', {
+  id:       integer('id').primaryKey({ autoIncrement: true }),
+  rtId:     integer('rt_id').references(() => rt.id),   // null = pengurus RW
+  jabatan:  text('jabatan').notNull(),                  // Ketua, Sekretaris, Bendahara, ...
+  nama:     text('nama').notNull(),
+  fotoUrl:  text('foto_url'),
+  urutan:   integer('urutan').notNull().default(0),
+  aktif:    integer('aktif', { mode: 'boolean' }).notNull().default(true),
+  ...timestamps
+}, (table) => [
+  index('pengurus_rt_id_idx').on(table.rtId)
+]);
+
 // ─── Pengumuman ───────────────────────────────────────────────────────────────
 export const pengumuman = sqliteTable('pengumuman', {
   id:            integer('id').primaryKey({ autoIncrement: true }),

@@ -47,7 +47,10 @@
     '/iuran/jenis',
     '/iuran/[id]/bayar',
     '/pengumuman/tambah',
-    '/pengumuman/[id]/edit'
+    '/pengumuman/[id]/edit',
+    '/pengaturan/rt',
+    '/pengaturan/pengurus',
+    '/pengaturan/pengguna'
   ];
 
   /** Cocokkan pathname ke `FORM_ROUTES` per segmen, bukan `startsWith` polos. */

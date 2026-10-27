@@ -5,7 +5,7 @@ import { admin } from 'better-auth/plugins';
 import { LibsqlDialect } from '@libsql/kysely-libsql';
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
-import { eq } from 'drizzle-orm';
+import { eq, isNull } from 'drizzle-orm';
 import { ac, roles } from '../src/lib/permissions';
 import {
 	rw,
@@ -16,7 +16,8 @@ import {
 	transaksiKas,
 	transaksiKasRt,
 	jenisIuran,
-	tagihan
+	tagihan,
+	pengurus
 } from '../src/lib/server/db/schema';
 
 // ─── Load .env ────────────────────────────────────────────────────────────────
@@ -77,7 +78,8 @@ const db = drizzle(client, {
 		transaksiKas,
 		transaksiKasRt,
 		jenisIuran,
-		tagihan
+		tagihan,
+		pengurus
 	}
 });
 
@@ -158,15 +160,15 @@ async function seed() {
 			const [insertedRw] = await db
 				.insert(rw)
 				.values({
-					nama: 'RW 05 Sukamaju',
+					nama: 'RW 06 Kota Baru',
 					alamat: 'Jl. Merpati Putih No. 12',
-					kelurahan: 'Kelurahan Sukamaju',
-					kecamatan: 'Kecamatan Cilodong',
-					kota: 'Kota Depok'
+					kelurahan: 'Kelurahan Kota Baru',
+					kecamatan: 'Kecamatan Bekasi Barat',
+					kota: 'Kota Bekasi'
 				})
 				.returning();
 			rwId = insertedRw.id;
-			console.log(`   RW default dibuat: RW 05 (id: ${rwId})`);
+			console.log(`   RW default dibuat: RW 06 Kota Baru (id: ${rwId})`);
 		}
 	} catch (e) {
 		console.error(`   Gagal membuat RW: ${e}`);
@@ -174,42 +176,59 @@ async function seed() {
 	}
 
 	// 4. Create RT records (RT 01 s/d RT 04)
-	console.log('4. Membuat data RT (RT 01 - RT 04)...');
+	console.log('4. Melengkapi data RT (RT 01 - RT 04)...');
 	const rtMap = new Map<number, number>(); // nomor RT -> id RT
 	const existingRts = await db.select().from(rt).where(eq(rt.rwId, rwId));
 
-	if (existingRts.length === 0) {
-		for (const nomor of [1, 2, 3, 4]) {
-			const [insertedRt] = await db.insert(rt).values({ nomor, rwId }).returning();
-			rtMap.set(nomor, insertedRt.id);
+	let rtBaru = 0;
+	for (const nomor of [1, 2, 3, 4]) {
+		const sudahAda = existingRts.find((r) => r.nomor === nomor);
+		if (sudahAda) {
+			rtMap.set(nomor, sudahAda.id);
+			continue;
 		}
-		console.log('   4 RT berhasil dibuat.');
-	} else {
-		for (const r of existingRts) {
-			rtMap.set(r.nomor, r.id);
-		}
-		console.log(`   ${existingRts.length} RT sudah ada.`);
+		const [insertedRt] = await db.insert(rt).values({ nomor, rwId }).returning();
+		rtMap.set(nomor, insertedRt.id);
+		rtBaru += 1;
 	}
+
+	console.log(
+		rtBaru > 0
+			? `   ${rtBaru} RT baru dibuat, total ${rtMap.size} RT siap dipakai.`
+			: `   Semua RT (${rtMap.size}) sudah ada.`
+	);
 
 	// 5. Create default kategori kas (pos pengeluaran & pos penerimaan)
 	console.log('5. Membuat kategori kas & pos anggaran...');
 	const existingKategori = await db.select().from(kategoriKas).where(eq(kategoriKas.rwId, rwId));
 
-	if (existingKategori.length === 0) {
-		await db.insert(kategoriKas).values([
-			{ nama: 'Iuran Wajib RT', jenis: 'pemasukan', scope: 'rt', rwId },
-			{ nama: 'Kas Sosial Kematian', jenis: 'pemasukan', scope: 'rt', rwId },
-			{ nama: 'Donasi & Sumbangan', jenis: 'pemasukan', scope: 'semua', rwId },
-			{ nama: 'Iuran Kebersihan & Sampah', jenis: 'pemasukan', scope: 'rt', rwId },
-			{ nama: 'Operasional RW', jenis: 'pengeluaran', scope: 'rw', rwId },
-			{ nama: 'Santunan Kematian RT', jenis: 'pengeluaran', scope: 'rt', rwId },
-			{ nama: 'Operasional RT', jenis: 'pengeluaran', scope: 'rt', rwId },
-			{ nama: 'Pemeliharaan Sarana / Tenda', jenis: 'pengeluaran', scope: 'semua', rwId },
-			{ nama: 'Kegiatan Warga / PHBI', jenis: 'pengeluaran', scope: 'semua', rwId }
-		]);
-		console.log('   Kategori kas lengkap berhasil dibuat.');
+	const kategoriSeed = [
+		{ nama: 'Iuran Wajib RT', jenis: 'pemasukan' as const, scope: 'rt' as const },
+		{ nama: 'Kas Sosial Kematian', jenis: 'pemasukan' as const, scope: 'rt' as const },
+		{ nama: 'Donasi & Sumbangan', jenis: 'pemasukan' as const, scope: 'semua' as const },
+		{ nama: 'Iuran Kebersihan & Sampah', jenis: 'pemasukan' as const, scope: 'rt' as const },
+		{ nama: 'Iuran Keamanan (K3)', jenis: 'pemasukan' as const, scope: 'rt' as const },
+		{ nama: 'Iuran Sosial Kematian (Soskem)', jenis: 'pemasukan' as const, scope: 'rt' as const },
+		{ nama: 'Iuran Air Bersih', jenis: 'pemasukan' as const, scope: 'rt' as const },
+		{ nama: 'Sumbangan Kematian Warga', jenis: 'pemasukan' as const, scope: 'rt' as const },
+		{ nama: 'Setoran RT ke RW', jenis: 'pemasukan' as const, scope: 'rw' as const },
+		{ nama: 'Operasional RW', jenis: 'pengeluaran' as const, scope: 'rw' as const },
+		{ nama: 'Santunan Kematian RT', jenis: 'pengeluaran' as const, scope: 'rt' as const },
+		{ nama: 'Operasional RT', jenis: 'pengeluaran' as const, scope: 'rt' as const },
+		{ nama: 'Pemeliharaan Sarana / Tenda', jenis: 'pengeluaran' as const, scope: 'semua' as const },
+		{ nama: 'Kegiatan Warga / PHBI', jenis: 'pengeluaran' as const, scope: 'semua' as const }
+	];
+
+	// Backfill per nama: DB lama hanya punya sebagian pos, dan menambah pos
+	// baru tidak boleh menyentuh kategori yang sudah dipakai transaksi.
+	const namaKategoriAda = new Set(existingKategori.map((k) => k.nama));
+	const kategoriBaru = kategoriSeed.filter((k) => !namaKategoriAda.has(k.nama));
+
+	if (kategoriBaru.length > 0) {
+		await db.insert(kategoriKas).values(kategoriBaru.map((k) => ({ ...k, rwId })));
+		console.log(`   ${kategoriBaru.length} kategori kas baru dibuat (total ${kategoriSeed.length} pos).`);
 	} else {
-		console.log(`   ${existingKategori.length} kategori kas sudah ada.`);
+		console.log(`   Semua ${kategoriSeed.length} kategori kas sudah ada.`);
 	}
 
 	// 6. Create sample KK & Warga
@@ -287,6 +306,68 @@ async function seed() {
 		console.log('   Tagihan sampel iuran RT dibuat.');
 	} else {
 		console.log('   Data KK sudah ada.');
+	}
+
+	// 7b. Akun demo untuk setiap role + tautkan akun warga ke data kependudukan
+	console.log('7b. Menyiapkan akun demo per role...');
+
+	async function pastikanAkun(
+		email: string,
+		password: string,
+		name: string,
+		role: string
+	): Promise<string> {
+		const found = await client.execute({
+			sql: 'SELECT id FROM user WHERE email = ?',
+			args: [email]
+		});
+		let id = (found.rows[0] as { id: string } | undefined)?.id;
+
+		if (!id) {
+			const res = await auth.api.signUpEmail({ body: { email, password, name } });
+			id = res.user.id;
+			console.log(`   Akun dibuat: ${email} (${role})`);
+		} else {
+			console.log(`   Akun sudah ada: ${email}`);
+		}
+
+		// Role di-set langsung di DB: `setRole` butuh sesi admin, sedangkan seed
+		// berjalan tanpa sesi.
+		await client.execute({ sql: 'UPDATE user SET role = ? WHERE id = ?', args: [role, id] });
+		return id;
+	}
+
+	const akunWargaId = await pastikanAkun('warga@rw.id', 'warga123', 'Warga Contoh', 'warga');
+	await pastikanAkun('pengurus@rw.id', 'pengurus123', 'Pengurus RT 01', 'pengurus_rt');
+	await pastikanAkun('bendahara@rw.id', 'bendahara123', 'Bendahara RW', 'bendahara');
+
+	// Tautkan akun warga ke warga pertama yang belum punya akun — tapi hanya
+	// kalau akun itu belum tertaut ke siapa pun. Tanpa cek ini, seed yang
+	// dijalankan berulang akan menautkan satu akun ke banyak baris warga.
+	const [sudahTertaut] = await db
+		.select({ id: warga.id, nama: warga.nama })
+		.from(warga)
+		.where(eq(warga.userId, akunWargaId))
+		.limit(1);
+
+	if (sudahTertaut) {
+		console.log(`   Akun warga@rw.id sudah tertaut ke ${sudahTertaut.nama}.`);
+	} else {
+		const [wargaBelumTertaut] = await db
+			.select({ id: warga.id, nama: warga.nama })
+			.from(warga)
+			.where(isNull(warga.userId))
+			.limit(1);
+
+		if (wargaBelumTertaut) {
+			await db
+				.update(warga)
+				.set({ userId: akunWargaId })
+				.where(eq(warga.id, wargaBelumTertaut.id));
+			console.log(`   Akun warga@rw.id ditautkan ke ${wargaBelumTertaut.nama}.`);
+		} else {
+			console.log('   Tidak ada warga tanpa akun untuk ditautkan.');
+		}
 	}
 
 	// 8. Sample Transaksi Kas RW
@@ -393,11 +474,54 @@ async function seed() {
 		console.log('   Transaksi Kas RT sudah ada.');
 	}
 
+	// 10. Data pengurus (bagan RW & tiap RT)
+	console.log('10. Mengecek data pengurus...');
+	const existingPengurus = await db.select().from(pengurus).limit(1);
+
+	if (existingPengurus.length === 0) {
+		const barisPengurus: {
+			rtId: number | null;
+			jabatan: string;
+			nama: string;
+			urutan: number;
+		}[] = [
+			{ rtId: null, jabatan: 'Ketua RW', nama: 'H. Sutrisno', urutan: 1 },
+			{ rtId: null, jabatan: 'Sekretaris RW', nama: 'Dian Puspita', urutan: 2 },
+			{ rtId: null, jabatan: 'Bendahara RW', nama: 'Rina Marlina', urutan: 3 }
+		];
+
+		const ketuaPerRt: [number, string][] = [
+			[1, 'Bambang Supriyanto'],
+			[2, 'Siti Rahmawati'],
+			[3, 'Dedi Kurniawan'],
+			[4, 'Ahmad Fauzi']
+		];
+
+		for (const [nomor, nama] of ketuaPerRt) {
+			const rtId = rtMap.get(nomor);
+			if (rtId) {
+				barisPengurus.push({
+					rtId,
+					jabatan: `Ketua RT ${String(nomor).padStart(2, '0')}`,
+					nama,
+					urutan: 1
+				});
+			}
+		}
+
+		await db.insert(pengurus).values(barisPengurus);
+		console.log(`   ${barisPengurus.length} data pengurus dibuat.`);
+	} else {
+		console.log('   Data pengurus sudah ada.');
+	}
+
 	console.log('\n=== Seed selesai ===');
 	console.log('\nCredentials:');
-	console.log(`  Email:    ${ADMIN_EMAIL}`);
-	console.log(`  Password: ${ADMIN_PASSWORD}`);
-	console.log(`  Role:     admin_rw`);
+	console.log(`  ${'Email'.padEnd(20)} ${'Password'.padEnd(14)} Role`);
+	console.log(`  ${'admin@rw.id'.padEnd(20)} ${'admin123'.padEnd(14)} admin_rw`);
+	console.log(`  ${'bendahara@rw.id'.padEnd(20)} ${'bendahara123'.padEnd(14)} bendahara`);
+	console.log(`  ${'pengurus@rw.id'.padEnd(20)} ${'pengurus123'.padEnd(14)} pengurus_rt`);
+	console.log(`  ${'warga@rw.id'.padEnd(20)} ${'warga123'.padEnd(14)} warga (tertaut ke 1 KK)`);
 }
 
 seed().catch((error) => {
