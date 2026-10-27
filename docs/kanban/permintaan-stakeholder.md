@@ -85,7 +85,7 @@ Klarifikasi pada hari yang sama:
 | Kas RT terpisah | #43 (`KU-01`) | Sebagian (kas RT sudah ada, lanjut #65) |
 | Rekap iuran wajib RT | #42 (`KU-02`) | Sebagian (lanjut #66) |
 | Ekspor laporan keuangan RW & RT | #40 (`KU-03`) | Sebagian |
-| Portal warga (individu) | #69 | Iterasi 2 |
+| Portal warga (individu) | #69 | **Selesai** — tagihan, konfirmasi bayar, riwayat (online/Midtrans menyusul) |
 | Template surat A–G | #49 (`SR-01`) | Backlog |
 | Tanda tangan digital pengurus | #48 (`SR-03b`) | Backlog |
 | Approval / verifikasi surat | #50, #70 | Sebagian (#50), lanjut #70 |
@@ -203,7 +203,7 @@ Status: diperbaiki pada PR #62/#63 sebelum merge.
 | 8 | Galeri di landing | #68 | **Selesai** (`678ccca`) |
 | 9 | Foto pengurus di bagan | #68 | **Selesai** (`678ccca`) |
 | 10 | Background landing bisa diganti | #68 | **Selesai** (`678ccca`) |
-| 11 | Rincian tagihan & pembayaran warga | #69 | Belum |
+| 11 | Rincian tagihan & pembayaran warga | #69 | **Selesai** (`6867606`) — portal tagihan, konfirmasi bayar, verifikasi bendahara |
 | 12 | Alur keuangan RT vs RW + tanggal pencatatan | #65, #66, #71 (D1–D4) | Menunggu keputusan (porsi & scope sudah configurable di #66) |
 | 13 | Use case, ERD, alur akuntansi & surat | #71 (deliverable) | Menunggu keputusan |
 | 14 | Role lebih detail | #64, #73 | **Selesai** (matriks role + scoping, `b0ea533`) |
@@ -225,6 +225,10 @@ Implementasi **iuran** sudah jalan dengan pendekatan *config-driven*: nominal, p
 scope (`rw`/`rt`) disimpan sebagai data di `jenis_iuran`, dan tiap tagihan menyimpan snapshot
 nilainya. Jadi kelima keputusan di bawah tinggal mengisi angka/kebijakan, tanpa perlu ubah kode.
 **Setoran RT → RW (#65)** dan **migrasi data lama (#72)** tetap ditahan sampai D1–D5 dikunci.
+
+Pembayaran warga (#69) sudah utuh untuk **tunai & transfer** lewat konfirmasi bendahara.
+Pembayaran **online (Midtrans)** belum disambungkan ke tagihan iuran; callback-nya nanti
+ditempelkan ke jalur `catatPembayaran` yang sama.
 
 | Kode | Pertanyaan | Usulan | Dipakai oleh |
 |---|---|---|---|
