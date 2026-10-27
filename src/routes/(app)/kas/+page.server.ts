@@ -15,6 +15,7 @@ import { fail } from '@sveltejs/kit';
 import { saveUploadedFile, UploadError } from '$lib/server/storage';
 import { getMidtransConfig } from '$lib/server/midtrans';
 import { requirePermission } from '$lib/server/rbac';
+import { hitungPersentase, hitungRekapIuran, hitungSaldo } from '$lib/server/kas';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -100,16 +101,18 @@ export const load: PageServerLoad = async ({ url }) => {
     const transaksiRtIni = semuaTransaksiRt.filter(
       (t) => t.rtId === rtItem.id && !t.dibatalkan
     );
-    const totalPemasukan = transaksiRtIni
-      .filter((t) =>
-        t.jenis === 'pemasukan' &&
-        (t.metodePembayaran !== 'midtrans' || t.midtransStatus === 'settlement' || t.midtransStatus === 'capture')
-      )
-      .reduce((sum, t) => sum + t.nominal, 0);
-    const totalPengeluaran = transaksiRtIni
-      .filter((t) => t.jenis === 'pengeluaran')
-      .reduce((sum, t) => sum + t.nominal, 0);
-    const saldo = totalPemasukan - totalPengeluaran;
+    // Pemasukan Midtrans baru dihitung setelah settlement/capture. Aturan ini
+    // tetap di sini karena bergantung pada status gateway, bukan pada hitungan
+    // saldo murni di `$lib/server/kas`.
+    const transaksiTerhitung = transaksiRtIni.filter(
+      (t) =>
+        t.jenis === 'pengeluaran' ||
+        t.metodePembayaran !== 'midtrans' ||
+        t.midtransStatus === 'settlement' ||
+        t.midtransStatus === 'capture'
+    );
+    const { pemasukan: totalPemasukan, pengeluaran: totalPengeluaran, saldo } =
+      hitungSaldo(transaksiTerhitung);
 
     // Sub-kas yang ada di RT ini (misal Kas Sosial Kematian, Kas Operasional RT)
     const bukuKasSet = new Set<string>();
@@ -183,35 +186,19 @@ export const load: PageServerLoad = async ({ url }) => {
   const rekapIuranRt = daftarRt.map((rtItem) => {
     const kkDiRt = semuaKk.filter((k) => k.rtId === rtItem.id);
     const tagihanDiRt = tagihanPeriodeIni.filter((t) => t.rtId === rtItem.id);
-
-    const totalKk = kkDiRt.length;
-    const lunas = tagihanDiRt.filter((t) => t.status === 'lunas').length;
-    const belumBayar = tagihanDiRt.filter((t) => t.status === 'belum_bayar').length;
-    const sebagian = tagihanDiRt.filter((t) => t.status === 'sebagian').length;
-
-    const nominalTerkumpul = tagihanDiRt
-      .filter((t) => t.status === 'lunas')
-      .reduce((sum, t) => sum + t.nominal, 0);
-
-    const targetNominal = tagihanDiRt.reduce((sum, t) => sum + t.nominal, 0);
-    const persen = targetNominal > 0 ? Math.round((nominalTerkumpul / targetNominal) * 100) : 0;
+    const rekap = hitungRekapIuran(tagihanDiRt);
 
     return {
       rtId: rtItem.id,
       nomorRt: rtItem.nomor,
-      totalKk,
-      lunas,
-      belumBayar,
-      sebagian,
-      nominalTerkumpul,
-      targetNominal,
-      persentase: persen
+      totalKk: kkDiRt.length,
+      ...rekap
     };
   });
 
   const totalIuranTerkumpul = rekapIuranRt.reduce((s, r) => s + r.nominalTerkumpul, 0);
   const totalIuranTarget = rekapIuranRt.reduce((s, r) => s + r.targetNominal, 0);
-  const persentaseIuranRw = totalIuranTarget > 0 ? Math.round((totalIuranTerkumpul / totalIuranTarget) * 100) : 0;
+  const persentaseIuranRw = hitungPersentase(totalIuranTerkumpul, totalIuranTarget);
 
   return {
     rwData,
