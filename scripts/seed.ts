@@ -16,6 +16,8 @@ import {
 	transaksiKas,
 	transaksiKasRt,
 	jenisIuran,
+	paketIuran,
+	paketIuranItem,
 	tagihan,
 	pengurus,
 	petugasRt
@@ -79,6 +81,8 @@ const db = drizzle(client, {
 		transaksiKas,
 		transaksiKasRt,
 		jenisIuran,
+		paketIuran,
+		paketIuranItem,
 		tagihan,
 		pengurus
 	}
@@ -389,6 +393,57 @@ async function seed() {
 			console.log('   Tidak ada warga tanpa akun untuk ditautkan.');
 		}
 	}
+
+	// 7c. Preset jenis iuran & paket — nominal dan porsi adalah DATA, bukan
+	// konstanta kode, supaya bendahara bisa mengubahnya tanpa deploy. Nilai
+	// awal mengikuti catatan stakeholder (K3 36k, Soskem 5k, Santunan 10k);
+	// porsi RW dibiarkan 0 karena keputusan D3 belum dikunci.
+	console.log('7c. Menyiapkan preset jenis iuran & paket...');
+	const presetJenis = [
+		{ nama: 'Iuran Keamanan (K3)', nominal: 36000, porsiRw: 0, periode: 'bulanan' as const, urutan: 1 },
+		{ nama: 'Iuran Sosial Kematian (Soskem)', nominal: 5000, porsiRw: 0, periode: 'bulanan' as const, urutan: 2 },
+		{ nama: 'Santunan Kematian Warga', nominal: 10000, porsiRw: 0, periode: 'insidental' as const, urutan: 3 }
+	];
+	const jenisTersedia = await db.select().from(jenisIuran);
+	const idJenis = new Map(jenisTersedia.map((j) => [j.nama, j.id]));
+
+	for (const preset of presetJenis) {
+		if (idJenis.has(preset.nama)) continue;
+		const [baru] = await db
+			.insert(jenisIuran)
+			.values({ ...preset, scope: 'rt', rtId: null, aktif: true, rwId })
+			.returning();
+		idJenis.set(preset.nama, baru.id);
+	}
+
+	const presetPaket = [
+		{
+			nama: 'Iuran Wajib RT',
+			keterangan: 'K3 + Soskem, ditagih setiap bulan.',
+			isi: ['Iuran Keamanan (K3)', 'Iuran Sosial Kematian (Soskem)']
+		},
+		{
+			nama: 'Santunan Kematian',
+			keterangan: 'Ditagih insidental saat ada warga meninggal.',
+			isi: ['Santunan Kematian Warga']
+		}
+	];
+	const paketTersedia = await db.select().from(paketIuran);
+
+	for (const preset of presetPaket) {
+		if (paketTersedia.some((p) => p.nama === preset.nama)) continue;
+		const [paket] = await db
+			.insert(paketIuran)
+			.values({ nama: preset.nama, keterangan: preset.keterangan, aktif: true, rwId })
+			.returning();
+
+		const item = preset.isi.flatMap((nama, index) => {
+			const jenisIuranId = idJenis.get(nama);
+			return jenisIuranId ? [{ paketId: paket.id, jenisIuranId, urutan: index }] : [];
+		});
+		if (item.length > 0) await db.insert(paketIuranItem).values(item);
+	}
+	console.log(`   ${presetJenis.length} jenis & ${presetPaket.length} paket preset siap.`);
 
 	// 8. Sample Transaksi Kas RW
 	console.log('8. Mengecek transaksi Kas RW...');

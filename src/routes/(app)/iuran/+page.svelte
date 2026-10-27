@@ -34,6 +34,12 @@
       render: (row: any) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(row.nominal)
     },
     {
+      key: 'porsiRw',
+      label: 'Porsi RW',
+      class: 'text-right',
+      render: (row: any) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(row.porsiRw)
+    },
+    {
       key: 'status',
       label: 'Status',
       render: (row: any) => {
@@ -50,9 +56,9 @@
 
   function eksporCsv() {
     let csv = 'Rekapitulasi Tagihan Iuran Warga RW\n\n';
-    csv += 'No. KK,Alamat,Jenis Iuran,Periode,Nominal,Status\n';
+    csv += 'No. KK,Alamat,Jenis Iuran,Periode,Nominal,Porsi RW,Status\n';
     for (const t of filtered) {
-      csv += `"${t.noKk}","${t.alamatKk}","${t.namaJenisIuran}","${t.periode}",${t.nominal},"${t.status}"\n`;
+      csv += `"${t.noKk}","${t.alamatKk}","${t.namaJenisIuran}","${t.periode}",${t.nominal},${t.porsiRw},"${t.status}"\n`;
     }
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
