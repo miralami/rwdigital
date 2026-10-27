@@ -2,6 +2,7 @@ import { db } from '$lib/server/db';
 import { kk, rt, warga } from '$lib/server/db/schema';
 import { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
+import { requirePermission } from '$lib/server/rbac';
 import type { PageServerLoad, Actions } from './$types';
 
 const kkSchema = z.object({
@@ -30,7 +31,8 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  default: async ({ request }) => {
+  default: async ({ request, locals }) => {
+    requirePermission(locals, 'warga', 'create');
     const formData = await request.formData();
 
     // Parse KK data

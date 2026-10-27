@@ -2,6 +2,7 @@ import { db } from '$lib/server/db';
 import { pengumuman, rw } from '$lib/server/db/schema';
 import { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
+import { requirePermission } from '$lib/server/rbac';
 import type { PageServerLoad, Actions } from './$types';
 
 const pengumumanSchema = z
@@ -47,6 +48,7 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
+    requirePermission(locals, 'pengumuman', 'create');
     const formData = await request.formData();
 
     const rawValues = {

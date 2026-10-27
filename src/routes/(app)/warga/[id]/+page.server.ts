@@ -3,6 +3,7 @@ import { warga, kk, rt, riwayatWarga } from '$lib/server/db/schema';
 import { eq, sql, desc } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { auth } from '$lib/server/auth';
+import { requirePermission } from '$lib/server/rbac';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
@@ -69,7 +70,8 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions: Actions = {
-  nonaktifkan: async ({ params, request }) => {
+  nonaktifkan: async ({ params, request, locals }) => {
+    requirePermission(locals, 'warga', 'update');
     const id = Number(params.id);
     const formData = await request.formData();
     const alasan = String(formData.get('alasan') || 'Tidak disebutkan').trim();
@@ -87,7 +89,8 @@ export const actions: Actions = {
     return { success: true };
   },
 
-  aktifkan: async ({ params }) => {
+  aktifkan: async ({ params, locals }) => {
+    requirePermission(locals, 'warga', 'update');
     const id = Number(params.id);
     await db
       .update(warga)
@@ -101,7 +104,8 @@ export const actions: Actions = {
     return { success: true };
   },
 
-  buatAkun: async ({ params, request }) => {
+  buatAkun: async ({ params, request, locals }) => {
+    requirePermission(locals, 'user', 'create');
     const id = Number(params.id);
     const formData = await request.formData();
     const email = String(formData.get('email') || '').trim();
@@ -122,6 +126,9 @@ export const actions: Actions = {
       });
 
       if (res?.user?.id) {
+        // `signUpEmail` tidak menerima role. Set eksplisit supaya akun ini
+        // benar-benar jadi portal warga, bukan role default.
+        await db.run(sql`UPDATE user SET role = ${'warga'} WHERE id = ${res.user.id}`);
         await db.update(warga).set({ userId: res.user.id }).where(eq(warga.id, id));
       }
 

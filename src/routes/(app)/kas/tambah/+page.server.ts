@@ -4,7 +4,8 @@ import { superForm } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
-import { saveUploadedFile } from '$lib/server/storage';
+import { saveUploadedFile, UploadError } from '$lib/server/storage';
+import { requirePermission } from '$lib/server/rbac';
 import type { PageServerLoad, Actions } from './$types';
 
 const transaksiSchema = z.object({
@@ -24,6 +25,7 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
+    requirePermission(locals, 'kas', 'create');
     const formData = await request.formData();
 
     const result = transaksiSchema.safeParse({
@@ -43,7 +45,13 @@ export const actions: Actions = {
     let buktiPath: string | null = null;
 
     if (buktiFile && buktiFile.size > 0) {
-      buktiPath = await saveUploadedFile(buktiFile, 'kas');
+      try {
+        buktiPath = await saveUploadedFile(buktiFile, 'kas');
+      } catch (err) {
+        return fail(400, {
+          error: err instanceof UploadError ? err.message : 'Gagal mengunggah bukti.'
+        });
+      }
     }
 
     const operator = locals.user?.name ?? locals.user?.id ?? 'Bendahara';

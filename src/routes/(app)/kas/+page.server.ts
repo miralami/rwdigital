@@ -10,10 +10,11 @@ import {
   jenisIuran,
   pembayaran
 } from '$lib/server/db/schema';
-import { eq, sql, desc, and } from 'drizzle-orm';
+import { eq, sql, desc, and, or } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
-import { saveUploadedFile } from '$lib/server/storage';
+import { saveUploadedFile, UploadError } from '$lib/server/storage';
 import { getMidtransConfig } from '$lib/server/midtrans';
+import { requirePermission } from '$lib/server/rbac';
 import type { PageServerLoad, Actions } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -247,6 +248,7 @@ export const load: PageServerLoad = async ({ url }) => {
 export const actions: Actions = {
   // ─── Aksi Kas RW ─────────────────────────────────────────────────────────
   tambahKasRw: async ({ request, locals }) => {
+    requirePermission(locals, 'kas', 'create');
     const formData = await request.formData();
     const jenis = String(formData.get('jenis')) as 'pemasukan' | 'pengeluaran';
     const nominal = Number(formData.get('nominal'));
@@ -262,7 +264,13 @@ export const actions: Actions = {
     const buktiFile = formData.get('buktiFile') as File | null;
     let buktiPath: string | null = null;
     if (buktiFile && buktiFile.size > 0) {
-      buktiPath = await saveUploadedFile(buktiFile, 'kas');
+      try {
+        buktiPath = await saveUploadedFile(buktiFile, 'kas');
+      } catch (err) {
+        return fail(400, {
+          errorKasRw: err instanceof UploadError ? err.message : 'Gagal mengunggah bukti.'
+        });
+      }
     }
 
     const operator = locals.user?.name ?? locals.user?.id ?? 'Bendahara RW';
@@ -282,6 +290,7 @@ export const actions: Actions = {
   },
 
   batalkanKasRw: async ({ request, locals }) => {
+    requirePermission(locals, 'kas', 'update');
     const formData = await request.formData();
     const id = Number(formData.get('transaksiId'));
     const alasan = String(formData.get('alasan') || 'Koreksi pembukuan kas RW').trim();
@@ -301,6 +310,7 @@ export const actions: Actions = {
 
   // ─── Aksi Kas RT (KU-01) ──────────────────────────────────────────────────
   tambahKasRt: async ({ request, locals }) => {
+    requirePermission(locals, 'kas', 'create');
     const formData = await request.formData();
     const rtId = Number(formData.get('rtId'));
     const namaKas = String(formData.get('namaKas') || 'Kas Sosial Kematian').trim();
@@ -317,7 +327,13 @@ export const actions: Actions = {
     const buktiFile = formData.get('buktiFile') as File | null;
     let buktiPath: string | null = null;
     if (buktiFile && buktiFile.size > 0) {
-      buktiPath = await saveUploadedFile(buktiFile, 'kas');
+      try {
+        buktiPath = await saveUploadedFile(buktiFile, 'kas');
+      } catch (err) {
+        return fail(400, {
+          errorKasRt: err instanceof UploadError ? err.message : 'Gagal mengunggah bukti.'
+        });
+      }
     }
 
     const operator = locals.user?.name ?? locals.user?.id ?? `Bendahara RT`;
@@ -339,6 +355,7 @@ export const actions: Actions = {
   },
 
   batalkanKasRt: async ({ request, locals }) => {
+    requirePermission(locals, 'kas', 'update');
     const formData = await request.formData();
     const id = Number(formData.get('transaksiId'));
     const alasan = String(formData.get('alasan') || 'Koreksi pembukuan kas RT').trim();
@@ -381,6 +398,7 @@ export const actions: Actions = {
 
   // ─── Aksi Rekapitulasi Setoran Iuran RT (KU-02) ───────────────────────────
   catatSetoranRt: async ({ request, locals }) => {
+    requirePermission(locals, 'kas', 'create');
     const formData = await request.formData();
     const rtId = Number(formData.get('rtId'));
     const periode = String(formData.get('periode') || '').trim();
@@ -420,6 +438,46 @@ export const actions: Actions = {
     const operator = locals.user?.name ?? locals.user?.id ?? 'Bendahara RT';
     const nowIso = new Date().toISOString();
 
+    // Setoran RT adalah uang yang MASUK ke kas RW. Tanpa baris ini, tagihan
+    // warga berubah "lunas" tapi saldo Kas RW tidak pernah bertambah.
+    const [rwData] = await db.select({ id: rw.id }).from(rw).limit(1);
+    if (!rwData) {
+      return fail(400, { errorSetoran: 'Data RW belum ada. Jalankan seed terlebih dahulu.' });
+    }
+
+    const [rtData] = await db
+      .select({ nomor: rt.nomor })
+      .from(rt)
+      .where(eq(rt.id, rtId))
+      .limit(1);
+
+    // Pos "Setoran RT ke RW" dipakai kalau ada; kalau belum, fallback ke pos
+    // pemasukan pertama yang scope-nya RW/semua supaya angka tetap terkelompok.
+    const [kategoriKhusus] = await db
+      .select({ id: kategoriKas.id })
+      .from(kategoriKas)
+      .where(eq(kategoriKas.nama, 'Setoran RT ke RW'))
+      .limit(1);
+
+    let kategoriId: number | null = kategoriKhusus?.id ?? null;
+    if (!kategoriId) {
+      const [kategoriFallback] = await db
+        .select({ id: kategoriKas.id })
+        .from(kategoriKas)
+        .where(
+          and(
+            eq(kategoriKas.jenis, 'pemasukan'),
+            or(eq(kategoriKas.scope, 'rw'), eq(kategoriKas.scope, 'semua'))
+          )
+        )
+        .orderBy(kategoriKas.id)
+        .limit(1);
+      kategoriId = kategoriFallback?.id ?? null;
+    }
+
+    const totalSetoran = tagihanBelumLunas.reduce((sum, item) => sum + Number(item.nominal), 0);
+    const nomorRtLabel = String(rtData?.nomor ?? rtId).padStart(2, '0');
+
     // Satu transaksi DB: kalau satu baris gagal, jangan sampai tagihan sudah
     // "lunas" tapi catatan pembayarannya tidak tersimpan.
     await db.transaction(async (tx) => {
@@ -439,13 +497,24 @@ export const actions: Actions = {
           dicatatOleh: operator
         });
       }
+
+      await tx.insert(transaksiKas).values({
+        jenis: 'pemasukan',
+        nominal: totalSetoran,
+        keterangan: `Setoran iuran RT ${nomorRtLabel} periode ${periode} (${tagihanBelumLunas.length} KK)`,
+        kategoriId,
+        tanggal: nowIso.slice(0, 10),
+        dicatatOleh: operator,
+        rwId: rwData.id
+      });
     });
 
     return { successSetoran: true, jumlahTersetor: tagihanBelumLunas.length };
   },
 
   // ─── Aksi Kategori Kas (KU-04) ────────────────────────────────────────────
-  tambahKategori: async ({ request }) => {
+  tambahKategori: async ({ request, locals }) => {
+    requirePermission(locals, 'kas', 'create');
     const formData = await request.formData();
     const nama = String(formData.get('nama') || '').trim();
     const jenis = String(formData.get('jenis')) as 'pemasukan' | 'pengeluaran';
@@ -467,7 +536,8 @@ export const actions: Actions = {
     return { successKategori: true };
   },
 
-  hapusKategori: async ({ request }) => {
+  hapusKategori: async ({ request, locals }) => {
+    requirePermission(locals, 'kas', 'delete');
     const formData = await request.formData();
     const id = Number(formData.get('id'));
 

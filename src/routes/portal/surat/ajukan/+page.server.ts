@@ -2,7 +2,7 @@ import { db } from '$lib/server/db';
 import { warga, surat } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
-import { saveUploadedFile } from '$lib/server/storage';
+import { saveUploadedFile, UploadError } from '$lib/server/storage';
 import { z } from 'zod';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -71,11 +71,13 @@ export const actions: Actions = {
     let dokumenPath: string | null = null;
     // Batas ukuran: maksimal 10MB untuk satu berkas persyaratan.
     if (berkasSyarat && berkasSyarat.size > 0) {
-      const maksBerkas = 10 * 1024 * 1024;
-      if (berkasSyarat.size > maksBerkas) {
-        return fail(400, { error: 'Ukuran berkas melebihi 10MB' });
+      try {
+        dokumenPath = await saveUploadedFile(berkasSyarat, 'surat');
+      } catch (err) {
+        return fail(400, {
+          error: err instanceof UploadError ? err.message : 'Gagal mengunggah berkas persyaratan.'
+        });
       }
-      dokumenPath = await saveUploadedFile(berkasSyarat, 'surat');
     }
 
     await db.insert(surat).values({

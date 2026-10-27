@@ -3,6 +3,7 @@ import { tagihan, pembayaran, kk, jenisIuran, transaksiKas, kategoriKas } from '
 import { eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
+import { requirePermission } from '$lib/server/rbac';
 import type { PageServerLoad, Actions } from './$types';
 
 const pembayaranSchema = z.object({
@@ -50,6 +51,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
 export const actions: Actions = {
   default: async ({ params, request, locals }) => {
+    requirePermission(locals, 'iuran', 'update');
     const id = Number(params.id);
     const formData = await request.formData();
 

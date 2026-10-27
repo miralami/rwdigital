@@ -2,6 +2,7 @@ import { db } from '$lib/server/db';
 import { warga, kk, rt, rw } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
+import { requirePermission } from '$lib/server/rbac';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -9,7 +10,8 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  default: async ({ request }) => {
+  default: async ({ request, locals }) => {
+    requirePermission(locals, 'warga', 'create');
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
 
