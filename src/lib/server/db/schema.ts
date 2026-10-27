@@ -226,6 +226,26 @@ export const pembayaran = sqliteTable('pembayaran', {
   ...timestamps
 });
 
+// Pengajuan konfirmasi bayar dari portal warga (biasanya tunai ke bendahara).
+// Baru menjadi `pembayaran` resmi setelah diterima bendahara, supaya status
+// tagihan di portal dan di halaman staf selalu berasal dari sumber yang sama.
+export const konfirmasiBayar = sqliteTable('konfirmasi_bayar', {
+  id:           integer('id').primaryKey({ autoIncrement: true }),
+  tagihanId:    integer('tagihan_id').notNull().references(() => tagihan.id),
+  jumlah:       real('jumlah').notNull(),
+  metodeBayar:  text('metode_bayar', { enum: ['tunai', 'transfer'] }).notNull().default('tunai'),
+  catatan:      text('catatan'),
+  status:       text('status', { enum: ['menunggu', 'diterima', 'ditolak'] }).notNull().default('menunggu'),
+  diajukanOleh: text('diajukan_oleh').notNull(),  // user id warga
+  diprosesOleh: text('diproses_oleh'),
+  diprosesPada: text('diproses_pada'),
+  alasanTolak:  text('alasan_tolak'),
+  ...timestamps
+}, (table) => [
+  index('konfirmasi_bayar_tagihan_idx').on(table.tagihanId),
+  index('konfirmasi_bayar_status_idx').on(table.status)
+]);
+
 // ─── Kas RW & Kas RT (KU-01 s/d KU-04) ──────────────────────────────────────
 export const kategoriKas = sqliteTable('kategori_kas', {
   id:    integer('id').primaryKey({ autoIncrement: true }),

@@ -85,6 +85,13 @@
       "when": 1793135865993,
       "tag": "0011_iuran_config",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1793136534767,
+      "tag": "0012_konfirmasi_bayar",
+      "breakpoints": true
     }
   ]
 }
