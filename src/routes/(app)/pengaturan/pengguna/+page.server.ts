@@ -1,10 +1,11 @@
 import { auth } from '$lib/server/auth';
 import { db } from '$lib/server/db';
-import { kk, rt, warga } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { kk, rt, warga, petugasRt } from '$lib/server/db/schema';
+import { eq, sql } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import { permissionsOf, requirePermission } from '$lib/server/rbac';
+import { normalizeRole } from '$lib/server/guard';
 import { LABEL_ROLE, ROLE_VALUES } from '$lib/roles';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -38,6 +39,16 @@ export const load: PageServerLoad = async ({ locals, request }) => {
     createdAt?: Date | string;
   }> = [];
   let errorUser: string | null = null;
+  let daftarRt: Array<{ id: number; nomor: number }> = [];
+  let daftarTugas: Array<{ userId: string; rtId: number; nomorRt: number }> = [];
+  let daftarWarga: Array<{
+    id: number;
+    nama: string;
+    nik: string;
+    userId: string | null;
+    nomorRt: number;
+    noKk: string;
+  }> = [];
 
   if (bisaKelola) {
     try {
@@ -49,26 +60,39 @@ export const load: PageServerLoad = async ({ locals, request }) => {
     } catch (err) {
       errorUser = pesanError(err, 'Gagal memuat daftar pengguna.');
     }
-  }
 
-  const daftarWarga = await db
-    .select({
-      id: warga.id,
-      nama: warga.nama,
-      nik: warga.nik,
-      userId: warga.userId,
-      nomorRt: rt.nomor,
-      noKk: kk.noKk
-    })
-    .from(warga)
-    .innerJoin(kk, eq(warga.kkId, kk.id))
-    .innerJoin(rt, eq(kk.rtId, rt.id))
-    .where(eq(warga.aktif, true))
-    .orderBy(warga.nama);
+    // Penugasan RT hanya relevan untuk pengurus_rt, tapi daftar RT tetap
+    // dikirim supaya admin bisa langsung memilih wilayah tugas.
+    daftarRt = await db.select({ id: rt.id, nomor: rt.nomor }).from(rt).orderBy(rt.nomor);
+    daftarTugas = await db
+      .select({ userId: petugasRt.userId, rtId: petugasRt.rtId, nomorRt: rt.nomor })
+      .from(petugasRt)
+      .innerJoin(rt, eq(petugasRt.rtId, rt.id))
+      .orderBy(rt.nomor);
+
+    // Data warga hanya dikirim ke pengelola akun. Pengurus/bendahara yang
+    // membuka halaman ini tidak perlu (dan tidak boleh) melihatnya.
+    daftarWarga = await db
+      .select({
+        id: warga.id,
+        nama: warga.nama,
+        nik: warga.nik,
+        userId: warga.userId,
+        nomorRt: rt.nomor,
+        noKk: kk.noKk
+      })
+      .from(warga)
+      .innerJoin(kk, eq(warga.kkId, kk.id))
+      .innerJoin(rt, eq(kk.rtId, rt.id))
+      .where(eq(warga.aktif, true))
+      .orderBy(warga.nama);
+  }
 
   return {
     daftarUser,
     daftarWarga,
+    daftarRt,
+    daftarTugas,
     errorUser,
     bisaKelola,
     bisaTambah: izin.can('user', 'create'),
@@ -170,8 +194,72 @@ export const actions: Actions = {
       return fail(400, { error: pesanError(err, 'Gagal mengubah role.') });
     }
 
+    // Role yang bukan pengurus RT tidak boleh menyisakan penugasan RT lama.
+    if (role !== 'pengurus_rt') {
+      await db.delete(petugasRt).where(eq(petugasRt.userId, userId));
+    }
+
     return {
       sukses: `Role diperbarui menjadi ${LABEL_ROLE[role as (typeof ROLE_VALUES)[number]]}.`
+    };
+  },
+
+  aturRt: async ({ request, locals }) => {
+    requirePermission(locals, 'user', 'update');
+
+    const formData = await request.formData();
+    const userId = String(formData.get('userId') || '').trim();
+    const rtId = Number(formData.get('rtId'));
+
+    if (!userId || !Number.isInteger(rtId) || rtId <= 0) {
+      return fail(400, { error: 'Pilih RT tugas yang valid.' });
+    }
+
+    // Hanya akun pengurus_rt yang boleh punya wilayah tugas.
+    const [target] = await db.all<{ role: string | null }>(
+      sql`SELECT role FROM user WHERE id = ${userId}`
+    );
+    if (!target) {
+      return fail(404, { error: 'Akun tidak ditemukan.' });
+    }
+    if (!normalizeRole(target.role).includes('pengurus_rt')) {
+      return fail(400, { error: 'RT tugas hanya bisa diberikan ke akun pengurus RT.' });
+    }
+
+    const [rtTujuan] = await db
+      .select({ id: rt.id, nomor: rt.nomor })
+      .from(rt)
+      .where(eq(rt.id, rtId))
+      .limit(1);
+    if (!rtTujuan) {
+      return fail(400, { error: 'RT tidak ditemukan.' });
+    }
+
+    await db
+      .insert(petugasRt)
+      .values({ userId, rtId })
+      .onConflictDoUpdate({
+        target: petugasRt.userId,
+        set: { rtId, updatedAt: new Date().toISOString() }
+      });
+
+    return { sukses: `RT tugas diperbarui ke RT ${String(rtTujuan.nomor).padStart(2, '0')}.` };
+  },
+
+  lepasRt: async ({ request, locals }) => {
+    requirePermission(locals, 'user', 'update');
+
+    const formData = await request.formData();
+    const userId = String(formData.get('userId') || '').trim();
+
+    if (!userId) {
+      return fail(400, { error: 'User ID tidak valid.' });
+    }
+
+    await db.delete(petugasRt).where(eq(petugasRt.userId, userId));
+
+    return {
+      sukses: 'Penugasan RT dilepas. Akun tidak bisa melihat data RT sampai ditugaskan kembali.'
     };
   },
 
@@ -243,6 +331,7 @@ export const actions: Actions = {
 
     // Lepas tautan dulu supaya data warga tidak menunjuk user yang sudah hilang.
     await db.update(warga).set({ userId: null }).where(eq(warga.userId, userId));
+    await db.delete(petugasRt).where(eq(petugasRt.userId, userId));
 
     try {
       await auth.api.removeUser({ body: { userId }, headers: request.headers });

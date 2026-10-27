@@ -1,10 +1,15 @@
 import { db } from '$lib/server/db';
 import { warga, kk, rt } from '$lib/server/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { hitungBucketUsia } from '$lib/server/usia';
+import { requireScope, scopeFromRole } from '$lib/server/scope';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+  // Pengurus RT hanya menerima rekap wilayahnya; admin & bendahara melihat RW.
+  const scope = requireScope(scopeFromRole(locals));
+  const filterRt = scope.kind === 'rt' ? eq(kk.rtId, scope.rtId) : undefined;
+
   // 1. Data per RT
   const rekapRt = await db
     .select({
@@ -16,6 +21,7 @@ export const load: PageServerLoad = async () => {
     .from(rt)
     .leftJoin(kk, eq(kk.rtId, rt.id))
     .leftJoin(warga, eq(warga.kkId, kk.id))
+    .where(scope.kind === 'rt' ? eq(rt.id, scope.rtId) : undefined)
     .groupBy(rt.id, rt.nomor)
     .orderBy(rt.nomor);
 
@@ -27,7 +33,8 @@ export const load: PageServerLoad = async () => {
       total: sql<number>`count(*)`
     })
     .from(warga)
-    .where(eq(warga.aktif, true));
+    .innerJoin(kk, eq(warga.kkId, kk.id))
+    .where(and(eq(warga.aktif, true), filterRt));
 
   // 3. Status Huni KK
   const rekapHuni = await db
@@ -37,14 +44,16 @@ export const load: PageServerLoad = async () => {
       kos: sql<number>`COALESCE(SUM(CASE WHEN ${kk.statusHuni} = 'kos' THEN 1 ELSE 0 END), 0)`,
       totalKk: sql<number>`count(*)`
     })
-    .from(kk);
+    .from(kk)
+    .where(filterRt);
 
-  // 4. Perhitungan Rentang Usia (KP-01) — pakai util bersama agar definisi
+  // 4. Perhitungan Rentang Usia (KP-01). Pakai util bersama agar definisi
   //    bucket tidak bercabang antara rekap, dashboard, dan landing page.
   const semuaTglLahir = await db
     .select({ tanggalLahir: warga.tanggalLahir })
     .from(warga)
-    .where(eq(warga.aktif, true));
+    .innerJoin(kk, eq(warga.kkId, kk.id))
+    .where(and(eq(warga.aktif, true), filterRt));
 
   const usia = hitungBucketUsia(semuaTglLahir);
 

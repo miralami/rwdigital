@@ -1,9 +1,12 @@
 import { db } from '$lib/server/db';
 import { tagihan, kk, jenisIuran } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
+import { requireScope, scopeFromRole } from '$lib/server/scope';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+  const scope = requireScope(scopeFromRole(locals));
+
   const semuaTagihan = await db
     .select({
       id: tagihan.id,
@@ -19,6 +22,7 @@ export const load: PageServerLoad = async () => {
     .from(tagihan)
     .innerJoin(kk, eq(tagihan.kkId, kk.id))
     .innerJoin(jenisIuran, eq(tagihan.jenisIuranId, jenisIuran.id))
+    .where(scope.kind === 'rt' ? eq(kk.rtId, scope.rtId) : undefined)
     .orderBy(tagihan.periode);
 
   const semuaJenisIuran = await db.select().from(jenisIuran);

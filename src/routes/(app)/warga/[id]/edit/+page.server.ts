@@ -1,9 +1,10 @@
 import { db } from '$lib/server/db';
-import { warga, riwayatWarga } from '$lib/server/db/schema';
+import { warga, kk, riwayatWarga } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import { requirePermission } from '$lib/server/rbac';
+import { requireRtAccess, requireScope, scopeFromRole } from '$lib/server/scope';
 import type { PageServerLoad, Actions } from './$types';
 
 const editSchema = z.object({
@@ -20,10 +21,19 @@ const editSchema = z.object({
   alasan: z.string().min(5, 'Alasan perubahan data harus diisi minimal 5 karakter')
 });
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
   const id = Number(params.id);
   const [data] = await db.select().from(warga).where(eq(warga.id, id));
   if (!data) redirect(302, '/warga');
+
+  const scope = requireScope(scopeFromRole(locals));
+  const [pemilik] = await db
+    .select({ rtId: kk.rtId })
+    .from(kk)
+    .where(eq(kk.id, data.kkId))
+    .limit(1);
+  requireRtAccess(scope, pemilik?.rtId);
+
   return { data };
 };
 
@@ -31,6 +41,17 @@ export const actions: Actions = {
   default: async ({ params, request, locals }) => {
     requirePermission(locals, 'warga', 'update');
     const id = Number(params.id);
+
+    // Cek kepemilikan RT sebelum validasi form, supaya POST langsung ke RT
+    // lain tidak bisa mengubah data.
+    const [pemilik] = await db
+      .select({ rtId: kk.rtId })
+      .from(warga)
+      .innerJoin(kk, eq(warga.kkId, kk.id))
+      .where(eq(warga.id, id))
+      .limit(1);
+    requireRtAccess(scopeFromRole(locals), pemilik?.rtId);
+
     const formData = await request.formData();
 
     const result = editSchema.safeParse({

@@ -3,6 +3,7 @@ import { warga, kk, rt, rw } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { requirePermission } from '$lib/server/rbac';
+import { requireScope, scopeFromRole } from '$lib/server/scope';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
@@ -12,6 +13,7 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
   default: async ({ request, locals }) => {
     requirePermission(locals, 'warga', 'create');
+    const scope = requireScope(scopeFromRole(locals));
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
 
@@ -37,6 +39,16 @@ export const actions: Actions = {
     const rtMap = new Map<number, number>(); // nomorRt -> rtId
     for (const r of existingRts) {
       rtMap.set(r.nomor, r.id);
+    }
+
+    // Nomor RT tugas pengurus; dipakai untuk menolak baris milik RT lain.
+    let nomorRtTugas: number | null = null;
+    if (scope.kind === 'rt') {
+      const rtTugas = existingRts.find((r) => r.id === scope.rtId);
+      if (!rtTugas) {
+        return fail(400, { error: 'RT tugas akun ini tidak ditemukan.' });
+      }
+      nomorRtTugas = rtTugas.nomor;
     }
 
     const header = rawLines[0].toLowerCase().split(',').map((h) => h.trim().replace(/^["']|["']$/g, ''));
@@ -86,8 +98,21 @@ export const actions: Actions = {
           continue;
         }
 
-        // Resolusi RT
+        // Resolusi RT. Pengurus RT tidak boleh membuat RT baru atau mengimpor
+        // baris untuk RT lain.
+        if (nomorRtTugas !== null && nomorRt !== nomorRtTugas) {
+          errorList.push({
+            baris: lineNum,
+            pesan: `RT ${nomorRt} di luar wilayah tugas Anda (RT ${nomorRtTugas}).`
+          });
+          continue;
+        }
+
         let rtId = rtMap.get(nomorRt);
+        if (!rtId && nomorRtTugas !== null) {
+          errorList.push({ baris: lineNum, pesan: `RT ${nomorRt} tidak ditemukan.` });
+          continue;
+        }
         if (!rtId) {
           const [newRt] = await db.insert(rt).values({ nomor: nomorRt, rwId: defaultRw.id }).returning();
           rtId = newRt.id;
@@ -98,6 +123,13 @@ export const actions: Actions = {
         let kkId: number;
         const [existingKk] = await db.select().from(kk).where(eq(kk.noKk, noKk));
         if (existingKk) {
+          if (nomorRtTugas !== null && existingKk.rtId !== rtId) {
+            errorList.push({
+              baris: lineNum,
+              pesan: `No. KK "${noKk}" sudah terdaftar di RT lain.`
+            });
+            continue;
+          }
           kkId = existingKk.id;
         } else {
           const [newKk] = await db

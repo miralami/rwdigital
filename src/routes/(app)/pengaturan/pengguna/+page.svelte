@@ -19,12 +19,30 @@
     noKk: string;
   };
 
+  type TugasRt = {
+    userId: string;
+    rtId: number;
+    nomorRt: number;
+  };
+
   const daftarWarga = $derived(data.daftarWarga as WargaRingkas[]);
+  const daftarTugas = $derived((data.daftarTugas ?? []) as TugasRt[]);
   const wargaTertaut = $derived(daftarWarga.filter((w) => w.userId));
   const wargaBelumTertaut = $derived(daftarWarga.filter((w) => !w.userId));
 
   function wargaDariUser(userId: string) {
     return wargaTertaut.find((w) => w.userId === userId) ?? null;
+  }
+
+  function tugasDariUser(userId: string) {
+    return daftarTugas.find((t) => t.userId === userId) ?? null;
+  }
+
+  function isPengurusRt(role?: string | null) {
+    return (role ?? '')
+      .split(',')
+      .map((r) => r.trim())
+      .includes('pengurus_rt');
   }
 
   function roleBadge(role?: string | null) {
@@ -154,6 +172,7 @@
                 <th>Nama</th>
                 <th>Email</th>
                 <th>Role</th>
+                <th>RT tugas</th>
                 <th>Warga tertaut</th>
                 {#if data.bisaAturRole || data.bisaHapus}<th><span class="sr-only">Aksi</span></th>{/if}
               </tr>
@@ -161,6 +180,7 @@
             <tbody>
               {#each data.daftarUser as user (user.id)}
                 {@const tertaut = wargaDariUser(user.id)}
+                {@const tugas = tugasDariUser(user.id)}
                 <tr>
                   <td class="font-bold">{user.name}</td>
                   <td class="mono">{user.email}</td>
@@ -170,6 +190,37 @@
                         user.role ??
                         '—'}
                     </Badge>
+                  </td>
+                  <td>
+                    {#if isPengurusRt(user.role)}
+                      {#if tugas}
+                        <span class="tertaut">RT {String(tugas.nomorRt).padStart(2, '0')}</span>
+                      {:else}
+                        <span class="muted">Belum ditugaskan</span>
+                      {/if}
+
+                      {#if data.bisaAturRole}
+                        <form method="POST" action="?/aturRt" class="inline">
+                          <input type="hidden" name="userId" value={user.id} />
+                          <select name="rtId" class="input-base input-role" aria-label="RT tugas">
+                            {#each data.daftarRt as r}
+                              <option value={r.id} selected={tugas?.rtId === r.id}>
+                                RT {String(r.nomor).padStart(2, '0')}
+                              </option>
+                            {/each}
+                          </select>
+                          <button type="submit" class="btn btn-secondary btn-sm">Simpan</button>
+                        </form>
+                        {#if tugas}
+                          <form method="POST" action="?/lepasRt" class="inline">
+                            <input type="hidden" name="userId" value={user.id} />
+                            <button type="submit" class="btn btn-ghost btn-sm">Lepas</button>
+                          </form>
+                        {/if}
+                      {/if}
+                    {:else}
+                      <span class="muted">-</span>
+                    {/if}
                   </td>
                   <td>
                     {#if tertaut}

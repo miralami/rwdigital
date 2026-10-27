@@ -32,6 +32,19 @@ export const rt = sqliteTable('rt', {
   ...timestamps
 });
 
+// ── Penugasan pengurus RT ────────────────────────────────────────────────────
+// Satu akun `pengurus_rt` bertugas di satu RT. Tabel terpisah dipakai supaya
+// tabel `user` milik Better Auth tidak perlu diubah. Akun tanpa baris di sini
+// tidak mendapat akses data RT mana pun (fail-closed).
+export const petugasRt = sqliteTable('petugas_rt', {
+  id:     integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().unique(),     // Better Auth user.id
+  rtId:   integer('rt_id').notNull().references(() => rt.id),
+  ...timestamps
+}, (table) => [
+  index('petugas_rt_rt_id_idx').on(table.rtId)
+]);
+
 // ─── KK (Kartu Keluarga) ─────────────────────────────────────────────────────
 export const kk = sqliteTable('kk', {
   id:        integer('id').primaryKey({ autoIncrement: true }),
