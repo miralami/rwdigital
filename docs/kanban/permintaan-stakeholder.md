@@ -82,7 +82,7 @@ Klarifikasi pada hari yang sama:
 | Landing page, SOTK, visi-misi, prestasi, statistik publik | `LP-01`, `LP-02` | Selesai (landing), statistik menyusul |
 | Attachment notulen event | #23 (`EV-02`) | Backlog |
 | Saring & cari pengumuman | #24 (`EV-03`) | Backlog |
-| Kas RT terpisah | #43 (`KU-01`) | Sebagian (kas RT sudah ada, lanjut #65) |
+| Kas RT terpisah | #43 (`KU-01`) | **Selesai** — kas RT terpisah + setoran porsi RW ke RW (#65) |
 | Rekap iuran wajib RT | #42 (`KU-02`) | Sebagian (lanjut #66) |
 | Ekspor laporan keuangan RW & RT | #40 (`KU-03`) | Sebagian |
 | Portal warga (individu) | #69 | **Selesai** — tagihan, konfirmasi bayar, riwayat (online/Midtrans menyusul) |
@@ -198,13 +198,13 @@ Status: diperbaiki pada PR #62/#63 sebelum merge.
 | 3 | Menu konfigurasi RT (CRUD RT + kepengurusan) | #64 | **Selesai** |
 | 4 | Iuran K3 36k + soskem 5k + santunan 10k per KK | #66, #71 (D2) | **Selesai** (`4ee3b69`) — nominal jadi data, preset ter-seed |
 | 5 | Iuran fokus ke RW | #66, #71 (D1) | Sebagian (`#66`: scope `rw`/`rt` tersedia; D1 belum dikunci) |
-| 6 | Kas RW berasal dari sisa K3 | #65, #71 (D3) | Menunggu keputusan (porsi RW sudah jadi kolom data di #66) |
+| 6 | Kas RW berasal dari sisa K3 | #65, #71 (D3) | **Selesai mekanismenya** (`40d3f9c`) — setoran porsi RW dari kas RT; angka porsi menunggu D3 |
 | 7 | Surat RW hanya mencatat + validasi | #70 | **Selesai** (`0da0215`) |
 | 8 | Galeri di landing | #68 | **Selesai** (`678ccca`) |
 | 9 | Foto pengurus di bagan | #68 | **Selesai** (`678ccca`) |
 | 10 | Background landing bisa diganti | #68 | **Selesai** (`678ccca`) |
 | 11 | Rincian tagihan & pembayaran warga | #69 | **Selesai** (`6867606`) — portal tagihan, konfirmasi bayar, verifikasi bendahara |
-| 12 | Alur keuangan RT vs RW + tanggal pencatatan | #65, #66, #71 (D1–D4) | Menunggu keputusan (porsi & scope sudah configurable di #66) |
+| 12 | Alur keuangan RT vs RW + tanggal pencatatan | #65, #66, #71 (D1–D4) | **Selesai mekanismenya** (`40d3f9c`, `4ee3b69`) — uang RT ditahan di kas RT lalu disetor ke RW; angka & tanggal tagihan menunggu D1/D3/D4 |
 | 13 | Use case, ERD, alur akuntansi & surat | #71 (deliverable) | Menunggu keputusan |
 | 14 | Role lebih detail | #64, #73 | **Selesai** (matriks role + scoping, `b0ea533`) |
 | 15 | Data keuangan lama | #72, #71 (D5) | Menunggu keputusan |
@@ -224,7 +224,9 @@ Status: diperbaiki pada PR #62/#63 sebelum merge.
 Implementasi **iuran** sudah jalan dengan pendekatan *config-driven*: nominal, porsi RW, dan
 scope (`rw`/`rt`) disimpan sebagai data di `jenis_iuran`, dan tiap tagihan menyimpan snapshot
 nilainya. Jadi kelima keputusan di bawah tinggal mengisi angka/kebijakan, tanpa perlu ubah kode.
-**Setoran RT → RW (#65)** dan **migrasi data lama (#72)** tetap ditahan sampai D1–D5 dikunci.
+**Setoran RT → RW (#65)** juga sudah jalan: iuran RT ditahan di kas RT lalu porsi RW-nya
+dipindahkan lewat satu transaksi yang tercatat di kedua sisi. **Migrasi data lama (#72)** tetap
+ditahan sampai D5 dikunci.
 
 Pembayaran warga (#69) sudah utuh untuk **tunai & transfer** lewat konfirmasi bendahara.
 Pembayaran **online (Midtrans)** belum disambungkan ke tagihan iuran; callback-nya nanti
