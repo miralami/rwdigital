@@ -82,6 +82,15 @@ test.describe('login per role', () => {
     await expect(page.getByRole('heading', { name: 'Rincian tagihan' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Riwayat pembayaran' })).toBeVisible();
   });
+
+  test('bendahara bisa membuka setoran RT ke RW', async ({ page }) => {
+    await login(page, AKUN.bendahara);
+
+    await page.goto('/iuran/setoran');
+    await expect(page.getByRole('heading', { level: 1 })).toContainText('Setoran RT');
+    await expect(page.getByRole('heading', { name: /^Ringkasan/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Riwayat setoran' })).toBeVisible();
+  });
 });
 
 test('menu pengguna terkunci untuk role tanpa izin', async ({ page }) => {

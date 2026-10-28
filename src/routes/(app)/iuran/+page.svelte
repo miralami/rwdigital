@@ -5,6 +5,7 @@
   import Settings2 from '@lucide/svelte/icons/settings-2';
   import FilePlus2 from '@lucide/svelte/icons/file-plus-2';
   import CircleCheckBig from '@lucide/svelte/icons/circle-check-big';
+  import ArrowRightLeft from '@lucide/svelte/icons/arrow-right-left';
   import Download from '@lucide/svelte/icons/download';
   import { maskNoKk } from '$lib/format';
   import type { PageData } from './$types';
@@ -86,6 +87,10 @@
     <a href="/iuran/konfirmasi" class="btn btn-secondary">
       <CircleCheckBig size={16} />
       <span>Konfirmasi bayar</span>
+    </a>
+    <a href="/iuran/setoran" class="btn btn-secondary">
+      <ArrowRightLeft size={16} />
+      <span>Setoran RT → RW</span>
     </a>
     <a href="/iuran/jenis" class="btn btn-secondary">
       <Settings2 size={16} />
