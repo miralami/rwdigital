@@ -293,6 +293,36 @@ export const transaksiKasRt = sqliteTable('transaksi_kas_rt', {
   ...timestamps
 });
 
+// ─── Setoran porsi RW dari kas RT (KU-04) ───────────────────────────────────
+// Uang iuran RT ditahan di kas RT sampai disetorkan. Satu baris setoran
+// mencatat dua sisi sekaligus (kas RT keluar, kas RW masuk) supaya angka
+// selalu bisa ditelusuri dan pembatalan tidak pernah menghitung dua kali.
+export const setoranRt = sqliteTable('setoran_rt', {
+  id:             integer('id').primaryKey({ autoIncrement: true }),
+  rtId:           integer('rt_id').notNull().references(() => rt.id),
+  periode:        text('periode').notNull(),          // e.g. "2026-10"
+  // Snapshot saat setoran dibuat; perubahan pembayaran sesudahnya tidak
+  // mengubah setoran yang sudah tercatat.
+  totalTerkumpul: real('total_terkumpul').notNull().default(0),
+  porsiRw:        real('porsi_rw').notNull().default(0),
+  catatan:        text('catatan'),
+  bukti:          text('bukti'),
+  disetorPada:    text('disetor_pada').notNull(),     // ISO date
+  dicatatOleh:    text('dicatat_oleh').notNull(),
+  transaksiRwId:  integer('transaksi_rw_id').references(() => transaksiKas.id),
+  transaksiRtId:  integer('transaksi_rt_id').references(() => transaksiKasRt.id),
+  dibatalkan:     integer('dibatalkan', { mode: 'boolean' }).notNull().default(false),
+  alasanBatal:    text('alasan_batal'),
+  dibatalkanOleh: text('dibatalkan_oleh'),
+  ...timestamps
+}, (table) => [
+  // Satu RT hanya boleh punya satu setoran aktif per periode. Setoran yang
+  // dibatalkan tidak dihitung, jadi periode itu bisa disetor ulang.
+  uniqueIndex('setoran_rt_rt_periode_unik')
+    .on(table.rtId, table.periode)
+    .where(sql`${table.dibatalkan} = 0`)
+]);
+
 // ─── Surat-Menyurat (SF-SR-01 s/d SF-SR-07) ─────────────────────────────────
 export const surat = sqliteTable('surat', {
   id:               integer('id').primaryKey({ autoIncrement: true }),

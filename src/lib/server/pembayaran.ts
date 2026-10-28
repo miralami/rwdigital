@@ -5,6 +5,7 @@ import {
   jenisIuran,
   kk,
   transaksiKas,
+  transaksiKasRt,
   kategoriKas
 } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
@@ -88,7 +89,9 @@ export async function catatPembayaran(input: CatatPembayaranInput): Promise<Hasi
   const [detail] = await db
     .select({
       jenisNama: jenisIuran.nama,
+      scopeJenis: jenisIuran.scope,
       noKk: kk.noKk,
+      rtId: kk.rtId,
       rwId: jenisIuran.rwId,
       periode: tagihan.periode
     })
@@ -117,22 +120,40 @@ export async function catatPembayaran(input: CatatPembayaranInput): Promise<Hasi
   const status = statusTagihan(tagihanData.nominal, totalDibayar);
   await db.update(tagihan).set({ status }).where(eq(tagihan.id, input.tagihanId));
 
-  // Rekam ke kas RW supaya laporan keuangan ikut bergerak.
-  const [katIuran] = await db
-    .select()
-    .from(kategoriKas)
-    .where(eq(kategoriKas.nama, 'Iuran'))
-    .limit(1);
+  // Rekam ke kas supaya laporan keuangan ikut bergerak.
+  //
+  // Iuran ber-scope `rw` langsung masuk kas RW. Iuran ber-scope `rt` ditahan di
+  // kas RT dulu; porsi RW-nya baru pindah lewat setoran RT → RW supaya tidak
+  // dihitung dua kali (lihat `$lib/server/setoran.ts`).
+  const keterangan = `Pembayaran ${detail?.jenisNama ?? 'Iuran'} (${detail?.periode ?? tagihanData.periode}) - No. KK ${detail?.noKk ?? ''}`;
 
-  await db.insert(transaksiKas).values({
-    jenis: 'pemasukan',
-    nominal: input.jumlah,
-    keterangan: `Pembayaran ${detail?.jenisNama ?? 'Iuran'} (${detail?.periode ?? tagihanData.periode}) - No. KK ${detail?.noKk ?? ''}`,
-    kategoriId: katIuran?.id ?? null,
-    tanggal: input.dibayarPada.slice(0, 10),
-    dicatatOleh: input.operator,
-    rwId: detail?.rwId ?? 1
-  });
+  if (detail?.scopeJenis === 'rt' && detail.rtId) {
+    await db.insert(transaksiKasRt).values({
+      rtId: detail.rtId,
+      namaKas: 'Iuran RT',
+      jenis: 'pemasukan',
+      nominal: input.jumlah,
+      keterangan,
+      tanggal: input.dibayarPada.slice(0, 10),
+      dicatatOleh: input.operator
+    });
+  } else {
+    const [katIuran] = await db
+      .select()
+      .from(kategoriKas)
+      .where(eq(kategoriKas.nama, 'Iuran'))
+      .limit(1);
+
+    await db.insert(transaksiKas).values({
+      jenis: 'pemasukan',
+      nominal: input.jumlah,
+      keterangan,
+      kategoriId: katIuran?.id ?? null,
+      tanggal: input.dibayarPada.slice(0, 10),
+      dicatatOleh: input.operator,
+      rwId: detail?.rwId ?? 1
+    });
+  }
 
   return {
     status,
