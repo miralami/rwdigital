@@ -1,5 +1,6 @@
 <script lang="ts">
   import ArrowLeft from '@lucide/svelte/icons/arrow-left';
+  import Download from '@lucide/svelte/icons/download';
   import Badge from '$lib/components/Badge.svelte';
   import EmptyState from '$lib/components/EmptyState.svelte';
   import { formatRupiah, formatTanggal } from '$lib/format';
@@ -18,6 +19,33 @@
     const index = Number(bulan) - 1;
     return nama[index] ? `${nama[index]} ${tahun}` : periode;
   }
+
+  function eksporCsv() {
+    let csv = `Rekap setoran RT ke RW - ${data.periode}\n\n`;
+    csv += 'RT,Terkumpul,Porsi RW,Sudah Disetor,Sisa,Tagihan,Lunas\n';
+    for (const item of data.ringkasan) {
+      const status = item.setoranAktifId
+        ? 'sudah disetor'
+        : item.sisa > 0
+          ? 'belum disetor'
+          : 'tidak ada porsi';
+      csv += `"RT ${String(item.nomor).padStart(2, '0')}",${item.totalTerkumpul},${item.porsiRw},${item.sudahDisetor},${item.sisa},${item.jumlahTagihan},${item.jumlahLunas},"${status}"\n`;
+    }
+
+    csv += '\nRiwayat setoran\nRT,Tanggal,Porsi RW,Terkumpul,Status,Catatan\n';
+    for (const s of data.riwayat) {
+      csv += `"RT ${String(s.nomorRt).padStart(2, '0')}",${s.disetorPada},${s.porsiRw},${s.totalTerkumpul},"${s.dibatalkan ? 'dibatalkan' : 'disetor'}","${s.catatan ?? ''}"\n`;
+    }
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `setoran_rt_${data.periode}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 </script>
 
 <div class="page-container">
@@ -32,11 +60,18 @@
     bertambah dalam satu langkah, jadi kedua laporan selalu cocok.
   </p>
 
-  <form method="GET" class="filter-periode">
-    <label for="periode">Periode</label>
-    <input id="periode" name="periode" type="month" class="input-base" value={data.periode} />
-    <button type="submit" class="btn btn-secondary">Tampilkan</button>
-  </form>
+  <div class="toolbar">
+    <form method="GET" class="filter-periode">
+      <label for="periode">Periode</label>
+      <input id="periode" name="periode" type="month" class="input-base" value={data.periode} />
+      <button type="submit" class="btn btn-secondary">Tampilkan</button>
+    </form>
+
+    <button type="button" class="btn btn-secondary" onclick={eksporCsv}>
+      <Download size={16} />
+      <span>Ekspor CSV</span>
+    </button>
+  </div>
 
   {#if form?.error}
     <p class="error-banner" role="alert">{form.error}</p>
@@ -257,6 +292,14 @@
     margin: calc(var(--space-2) * -1) 0 0;
     color: var(--color-text-muted);
     font-size: var(--text-sm);
+  }
+
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--space-3);
   }
 
   .filter-periode {
