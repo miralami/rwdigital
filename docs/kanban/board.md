@@ -5,7 +5,7 @@
 > GitHub Project yang sudah terpasang** beserta **peta kartu ↔ nomor issue** (`gh` CLI belum
 > terpasang, jadi papan diisi lewat GraphQL — lihat §5).
 
-Terakhir disusun: 12 Okt 2026 · Diperbarui: 19 Okt 2026 (lihat §5.1)
+Terakhir disusun: 12 Okt 2026 · Diperbarui: 28 Okt 2026 (lihat §5.1)
 
 ---
 
@@ -111,9 +111,15 @@ Papan **sudah dibuat dan terisi** (bukan lagi panduan manual).
 | Project ID | `PVT_kwHOBS9-Ls4Bk7EG` |
 | Field Status | `PVTSSF_lAHOBS9-Ls4Bk7EGzhjp0hg` |
 | Opsi Status | `Todo`=`b3059e5f` · `In Progress`=`df686dea` · `Done`=`cd8eab33` · `Won't`=`31d91e7d` |
-| Total item | **50** (6 Epic + 38 kartu + 6 grey-out) |
+| Total item | **59** (6 Epic + 38 kartu + 6 grey-out + 9 kartu iterasi 2) |
 
-Distribusi aktual: **Done 32 · In Progress 3 · Todo 9 · Won't 6** (per 19 Okt 2026).
+Distribusi aktual: **Done 39 · In Progress 5 · Todo 9 · Won't 6** (per 28 Okt 2026).
+
+> Verifikasi 28 Okt 2026 menemukan papan sudah bergerak sejak catatan 19 Okt: **SR-03b #48** dan
+> **SR-BUG-01 #50** pindah `Todo` → `In Progress` (Track Surat). Karena itu angka awal sebelum
+> penambahan iterasi 2 adalah **Done 32 · In Progress 5 · Todo 7 · Won't 6** (50 item), bukan
+> 32/3/9/6 seperti tertulis sebelumnya. Selisih 9 item sesudahnya berasal dari kartu iterasi 2
+> (§5.1, 28 Okt 2026).
 
 > Snapshot 12 Okt 2026: Done 21 · In Progress 8 · Todo 15 · Won't 6. Selisih sepenuhnya berasal
 > dari pergerakan kartu Track Afif (`miralami`) — LP-01, LP-02, EPIC-1 & FND-06 (lihat §5.1).
@@ -207,6 +213,34 @@ Catatan:
   "as-is" di §1/§2 dokumen ini tetap **historis** (baseline 12 Okt).
 - Distribusi papan setelah pembaruan: **Done 32 · In Progress 3 · Todo 9 · Won't 6**
   (sisa In Progress: KU-02 #42, KU-03 #40, SR-01 #49).
+
+**28 Okt 2026** — penambahan **9 kartu iterasi 2** (issue `iterasi-2` yang belum ada di papan).
+7 kartu langsung `Done` karena issue-nya sudah tertutup `completed` dengan bukti PR, 2 kartu
+`Todo` karena masih menunggu keputusan bisnis klien.
+
+| Kartu | Issue | Status | Bukti |
+|---|---|---|---|
+| KU-01b Setoran RT → RW & rekonsiliasi | #65 | **Done** (closed) | PR #85 (merge `40d3f9c`) — `src/lib/server/setoran.ts`, `/iuran/setoran` |
+| KU-02b Skema iuran & generate tagihan per RT | #66 | **Done** (closed) | PR #81 (merge `4ee3b69`) — `jenis_iuran` config-driven + snapshot tagihan |
+| FND-07 CI + test harness (Vitest & Playwright) | #67 | **Done** (closed) | PR #74 (`27f2377`) + PR #80 (`3be1365`) — e2e lintas role |
+| LP-03 Landing & galeri | #68 | **Done** (closed) | PR #77 (merge `678ccca`) — pengaturan landing & galeri dari dashboard |
+| KP-06 Portal warga: rincian tagihan & pembayaran | #69 | **Done** (closed) | PR #83 (merge `6867606`) — `/portal/iuran`, `/iuran/konfirmasi` |
+| SR-02b Alur surat RW (verifikasi, nomor, cetak) | #70 | **Done** (closed) | PR #79 (merge `0da0215`) — nomor unik, timeline, filter daftar |
+| KP-07 Row-level scoping pengurus_rt | #73 | **Done** (closed) | PR #75 (merge `cc4cf92`) — `src/lib/server/scope.ts` |
+| T0-01 Keputusan bisnis iterasi 2 (D1–D5) | #71 | Todo | menunggu jawaban mitra; implementasi sudah config-driven |
+| T0-02 Import data keuangan lama | #72 | Todo | menunggu D5 (format CSV & saldo awal) |
+
+Catatan:
+- **#64 bukan issue, melainkan PR** (`6aaabcd`, RBAC per aksi + pengaturan RT/pengurus/pengguna)
+  sehingga tidak pernah masuk papan sebagai kartu. Perubahan RBAC-nya tercatat sebagai bukti di #73.
+- Verifikasi 28 Okt juga menemukan **SR-03b #48** dan **SR-BUG-01 #50** sudah `In Progress`
+  (sebelumnya tercatat `Todo`), jadi angka awal sebelum penambahan adalah 32/5/7/6.
+- Distribusi papan setelah penambahan: **Done 39 · In Progress 5 · Todo 9 · Won't 6** dengan
+  **total 59 item** (50 item lama + 9 kartu iterasi 2).
+- Belum diselaraskan (menunggu Track Keuangan): **EPIC-4 #12** masih `Todo` dan **KU-01 #43**,
+  **KU-02 #42**, **KU-03 #40** masih `In Progress`, padahal implementasinya sudah ada di `/kas`
+  (kas RT mandiri, rekap iuran, ekspor CSV/Excel). Ini dicatat sebagai temuan, bukan diubah
+  sepihak karena status kartu track lain dipegang PIC-nya.
 
 ---
 
