@@ -7,7 +7,7 @@
   import CircleCheckBig from '@lucide/svelte/icons/circle-check-big';
   import ArrowRightLeft from '@lucide/svelte/icons/arrow-right-left';
   import Download from '@lucide/svelte/icons/download';
-  import { maskNoKk } from '$lib/format';
+  import { maskNoKk, formatRupiah, formatTanggal } from '$lib/format';
   import type { PageData } from './$types';
 
   let { data } = $props<{ data: PageData }>();
@@ -42,6 +42,18 @@
       render: (row: any) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(row.porsiRw)
     },
     {
+      key: 'jatuhTempo',
+      label: 'Jatuh tempo',
+      render: (row: any) => {
+        if (!row.jatuhTempo) return '<span class="muted">—</span>';
+        const tanggal = formatTanggal(row.jatuhTempo);
+        if (row.menunggak) {
+          return `${tanggal} <span class="badge variant-danger">Menunggak</span>`;
+        }
+        return tanggal;
+      }
+    },
+    {
       key: 'status',
       label: 'Status',
       render: (row: any) => {
@@ -58,9 +70,9 @@
 
   function eksporCsv() {
     let csv = 'Rekapitulasi Tagihan Iuran Warga RW\n\n';
-    csv += 'No. KK,Alamat,Jenis Iuran,Periode,Nominal,Porsi RW,Status\n';
+    csv += 'No. KK,Alamat,Jenis Iuran,Periode,Nominal,Porsi RW,Jatuh Tempo,Menunggak,Status\n';
     for (const t of filtered) {
-      csv += `"${t.noKk}","${t.alamatKk}","${t.namaJenisIuran}","${t.periode}",${t.nominal},${t.porsiRw},"${t.status}"\n`;
+      csv += `"${t.noKk}","${t.alamatKk}","${t.namaJenisIuran}","${t.periode}",${t.nominal},${t.porsiRw},"${t.jatuhTempo ?? ''}",${t.menunggak ? 'ya' : 'tidak'},"${t.status}"\n`;
     }
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });

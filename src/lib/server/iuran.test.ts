@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { bolehDitagihKeRt, kkAktifDari, ringkasGenerate } from './iuran';
+import {
+	bolehDitagihKeRt,
+	jatuhTempoPeriode,
+	kkAktifDari,
+	menunggak,
+	ringkasGenerate
+} from './iuran';
 
 describe('kkAktifDari()', () => {
 	it('hanya menghitung KK yang punya anggota aktif', () => {
@@ -31,6 +37,35 @@ describe('bolehDitagihKeRt()', () => {
 
 	it('jenis nonaktif tidak ditagihkan', () => {
 		expect(bolehDitagihKeRt({ ...dasar, scope: 'rt', aktif: false })).toBe(false);
+	});
+});
+
+describe('jatuhTempoPeriode()', () => {
+	it('mengambil tanggal 10 pada bulan periode', () => {
+		expect(jatuhTempoPeriode('2026-10')).toBe('2026-10-10');
+	});
+
+	it('periode tidak valid tidak punya jatuh tempo', () => {
+		expect(jatuhTempoPeriode('2026-13')).toBeNull();
+		expect(jatuhTempoPeriode('oktober')).toBeNull();
+	});
+});
+
+describe('menunggak()', () => {
+	it('belum lunas dan lewat tanggal 10 dihitung menunggak', () => {
+		expect(menunggak('belum_bayar', '2026-10-10', '2026-10-11')).toBe(true);
+	});
+
+	it('tepat pada tanggal jatuh tempo belum menunggak', () => {
+		expect(menunggak('belum_bayar', '2026-10-10', '2026-10-10')).toBe(false);
+	});
+
+	it('lunas tidak pernah menunggak', () => {
+		expect(menunggak('lunas', '2026-10-10', '2026-12-31')).toBe(false);
+	});
+
+	it('tanpa jatuh tempo tidak dianggap menunggak', () => {
+		expect(menunggak('sebagian', null, '2026-12-31')).toBe(false);
 	});
 });
 

@@ -13,7 +13,7 @@ import { fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import { requirePermission } from '$lib/server/rbac';
 import { requireScope, scopeFromRole, visibleRt } from '$lib/server/scope';
-import { bolehDitagihKeRt, kkAktifDari } from '$lib/server/iuran';
+import { bolehDitagihKeRt, jatuhTempoPeriode, kkAktifDari } from '$lib/server/iuran';
 import type { PageServerLoad, Actions } from './$types';
 
 const idOpsional = z.preprocess(
@@ -167,6 +167,7 @@ export const actions: Actions = {
       .where(and(eq(tagihan.periode, periode), inArray(tagihan.jenisIuranId, jenisIds)));
 
     const kunciAda = new Set(sudahAda.map((t) => `${t.kkId}-${t.jenisIuranId}`));
+    const jatuhTempo = jatuhTempoPeriode(periode);
 
     const barisBaru = [...kkAktif.keys()].flatMap((kkId) =>
       jenisTerpilih
@@ -177,7 +178,8 @@ export const actions: Actions = {
           periode,
           nominal: jenis.nominal,
           porsiRw: jenis.porsiRw,
-          status: 'belum_bayar' as const
+          status: 'belum_bayar' as const,
+          jatuhTempo
         }))
     );
 
