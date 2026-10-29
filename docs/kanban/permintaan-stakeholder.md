@@ -196,18 +196,18 @@ Status: diperbaiki pada PR #62/#63 sebelum merge.
 | 1 | Role warga belum ada | #64 | **Selesai** (`6aaabcd`) |
 | 2 | Dropdown RT kosong | #64 | **Selesai** |
 | 3 | Menu konfigurasi RT (CRUD RT + kepengurusan) | #64 | **Selesai** |
-| 4 | Iuran K3 36k + soskem 5k + santunan 10k per KK | #66, #71 (D2) | **Selesai** (`4ee3b69`) — nominal jadi data, preset ter-seed |
-| 5 | Iuran fokus ke RW | #66, #71 (D1) | Sebagian (`#66`: scope `rw`/`rt` tersedia; D1 belum dikunci) |
-| 6 | Kas RW berasal dari sisa K3 | #65, #71 (D3) | **Selesai mekanismenya** (`40d3f9c`) — setoran porsi RW dari kas RT; angka porsi menunggu D3 |
+| 4 | Iuran K3 36k + soskem 5k + santunan 10k per KK | #66, #71 (D2) | **Selesai** (`4ee3b69`) — nominal jadi data, preset ter-seed; **nominal belum fix** (lihat `konfirmasi-stakeholder.md` D2) |
+| 5 | Iuran fokus ke RW | #66, #71 (D1) | **Sementara** — alur warga → RT → RW diterapkan; scope `rw`/`rt` tersedia, penetapan mitra menyusul |
+| 6 | Kas RW berasal dari sisa K3 | #65, #71 (D3) | **Selesai mekanismenya** (`40d3f9c`) — porsi RW Rp5.000/KK diterapkan sebagai asumsi sementara |
 | 7 | Surat RW hanya mencatat + validasi | #70 | **Selesai** (`0da0215`) |
 | 8 | Galeri di landing | #68 | **Selesai** (`678ccca`) |
 | 9 | Foto pengurus di bagan | #68 | **Selesai** (`678ccca`) |
 | 10 | Background landing bisa diganti | #68 | **Selesai** (`678ccca`) |
 | 11 | Rincian tagihan & pembayaran warga | #69 | **Selesai** (`6867606`) — portal tagihan, konfirmasi bayar, verifikasi bendahara |
-| 12 | Alur keuangan RT vs RW + tanggal pencatatan | #65, #66, #71 (D1–D4) | **Selesai mekanismenya** (`40d3f9c`, `4ee3b69`) — uang RT ditahan di kas RT lalu disetor ke RW; angka & tanggal tagihan menunggu D1/D3/D4 |
-| 13 | Use case, ERD, alur akuntansi & surat | #71 (deliverable) | Menunggu keputusan |
+| 12 | Alur keuangan RT vs RW + tanggal pencatatan | #65, #66, #71 (D1–D4) | **Selesai mekanismenya** (`40d3f9c`, `4ee3b69`) — jatuh tempo tgl 10 disimpan per tagihan; angka & tanggal masih asumsi |
+| 13 | Use case, ERD, alur akuntansi & surat | #71 (deliverable) | Sebagian — alur uang sudah terdokumentasi; diagram menunggu keputusan final |
 | 14 | Role lebih detail | #64, #73 | **Selesai** (matriks role + scoping, `b0ea533`) |
-| 15 | Data keuangan lama | #72, #71 (D5) | Menunggu keputusan |
+| 15 | Data keuangan lama | #72, #71 (D5) | Menunggu konfirmasi format CSV & tanggal saldo awal |
 
 ### 4.7 Pekerjaan teknis pendamping (bukan permintaan stakeholder)
 
@@ -232,13 +232,22 @@ Pembayaran warga (#69) sudah utuh untuk **tunai & transfer** lewat konfirmasi be
 Pembayaran **online (Midtrans)** belum disambungkan ke tagihan iuran; callback-nya nanti
 ditempelkan ke jalur `catatPembayaran` yang sama.
 
-| Kode | Pertanyaan | Usulan | Dipakai oleh |
-|---|---|---|---|
-| **D1** | Alur uang: warga → RW langsung, atau warga → RT → RW? | Warga → RT → RW | #65, #66 |
-| **D2** | Nominal per KK: K3 36k + soskem 5k + santunan 10k, atau K3 total 50k? | Sesuai catatan Zidan (sudah jadi preset di #66) | #66 |
-| **D3** | Porsi K3 yang tinggal di RT vs disetor ke RW | Persen atau nominal tetap (kolom `jenis_iuran.porsi_rw` sudah tersedia, preset 0) | #65, #66 |
-| **D4** | Tanggal tagihan, jatuh tempo, dan closing periode | Per bulan, closing akhir bulan | #66 |
-| **D5** | Format data keuangan lama & mekanisme saldo awal | CSV + transaksi pembuka | #72 |
+**Status per 28 Okt 2026:** kelima keputusan sudah diisi dengan **asumsi sementara** agar
+aplikasi bisa dipakai, tetapi **belum final**. Semua asumsi, dampaknya, dan siapa yang perlu
+mengonfirmasi dicatat di **`konfirmasi-stakeholder.md`**. Keputusan yang sudah diterapkan:
+
+| Kode | Pertanyaan | Keputusan sementara | Dasar | Status | Dipakai oleh |
+|---|---|---|---|---|---|
+| **D1** | Alur uang: warga → RW langsung, atau warga → RT → RW? | **Warga → RT → RW** (iuran ditahan RT, porsi RW disetor) | Jawaban Anda 28 Okt 2026 | Sementara, perlu penetapan mitra | #65, #66 |
+| **D2** | Nominal per KK: K3 36k + soskem 5k + santunan 10k, atau K3 total 50k? | **K3 36.000 + Soskem 5.000** bulanan, **Santunan 10.000** insidental | Catatan rapat/Zidan | **Belum fix** (preset saja) | #66 |
+| **D3** | Porsi K3 yang tinggal di RT vs disetor ke RW | **Rp5.000/KK nominal tetap** (±14% dari K3); Soskem & Santunan 0 | Usulan, mengacu praktik iuran lingkungan (besaran ditetapkan musyawarah warga) | Asumsi | #65, #66 |
+| **D4** | Tanggal tagihan, jatuh tempo, dan closing periode | Terbit awal bulan, **jatuh tempo tanggal 10**, closing akhir bulan; disimpan per tagihan di `tagihan.jatuh_tempo` | Kebiasaan iuran lingkungan/IPL | Asumsi, sudah diterapkan | #66 |
+| **D5** | Format data keuangan lama & mekanisme saldo awal | **CSV** `tanggal, keterangan, jenis, nominal, kas, kategori` + **transaksi pembuka** per tanggal cut-off | Praktik buku kas RT (Tanggal/Keterangan/Debet/Kredit/Saldo) | Asumsi, memblokir #72 | #72 |
+
+**Perlu dikonfirmasi (ringkas):** nominal D2, porsi D3, tanggal jatuh tempo D4, arti "santunan
+Rp10.000" (iuran masuk atau santunan keluar), dan bentuk data lama D5. Daftar lengkap 20+ asumsi
+lain (pembayaran online, bukti bayar, closing periode, multi-RW, dll.) ada di
+`konfirmasi-stakeholder.md`.
 
 ---
 

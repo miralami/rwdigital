@@ -88,6 +88,12 @@
                 <div>
                   <p class="tagihan-nama">{t.namaJenis}</p>
                   <p class="muted kecil">{labelPeriode(t.periode)} · {t.scopeJenis === 'rw' ? 'Iuran RW' : 'Iuran RT'}</p>
+                  {#if t.jatuhTempo}
+                    <p class="kecil" class:lewat={t.menunggak}>
+                      Jatuh tempo {formatTanggal(t.jatuhTempo)}
+                      {#if t.menunggak}<span class="badge variant-danger">Menunggak</span>{/if}
+                    </p>
+                  {/if}
                 </div>
                 <Badge variant={toneStatus(t.status)}>{LABEL_STATUS[t.status] ?? t.status}</Badge>
               </div>
@@ -299,6 +305,15 @@
 
   .kecil {
     font-size: var(--text-xs);
+  }
+
+  p.kecil {
+    margin: var(--space-1) 0 0;
+    color: var(--color-text-muted);
+  }
+
+  p.kecil.lewat {
+    color: var(--color-danger);
   }
 
   .tagihan-list,

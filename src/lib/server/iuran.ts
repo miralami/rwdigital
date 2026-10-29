@@ -44,6 +44,33 @@ export function bolehDitagihKeRt(jenis: JenisTagihan): boolean {
 	return jenis.aktif !== false && jenis.scope === 'rt';
 }
 
+/**
+ * Tanggal jatuh tempo tagihan untuk sebuah periode (D4).
+ *
+ * Kesepakatan sementara: tagihan terbit di awal bulan dan jatuh tempo tanggal
+ * 10, mengikuti kebiasaan iuran lingkungan di Indonesia. Karena tanggalnya
+ * adalah kebijakan, nilainya disimpan per tagihan (bukan dihitung ulang saat
+ * dibaca), sehingga perubahan kebijakan tidak menggeser tagihan lama.
+ */
+export function jatuhTempoPeriode(periode: string): string | null {
+	if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(periode)) return null;
+	return `${periode}-10`;
+}
+
+/**
+ * Tagihan dianggap menunggak bila belum lunas dan sudah melewati jatuh tempo.
+ * Tanggal dibandingkan sebagai string ISO (`YYYY-MM-DD`) supaya bebas zona waktu.
+ */
+export function menunggak(
+	status: string,
+	jatuhTempo: string | null | undefined,
+	hariIni: string
+): boolean {
+	if (status === 'lunas') return false;
+	if (!jatuhTempo) return false;
+	return jatuhTempo < hariIni.slice(0, 10);
+}
+
 export type RingkasanGenerate = {
 	jumlahTagihan: number;
 	totalNominal: number;

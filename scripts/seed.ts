@@ -297,7 +297,7 @@ async function seed() {
 			})
 			.returning();
 
-		// Buat tagihan periode 2026-10
+		// Buat tagihan periode 2026-10 (jatuh tempo mengikuti kebijakan D4)
 		for (let i = 0; i < kkIds.length; i++) {
 			const status = i % 2 === 0 ? 'lunas' : 'belum_bayar';
 			await db.insert(tagihan).values({
@@ -305,7 +305,8 @@ async function seed() {
 				jenisIuranId: iuranWajib.id,
 				periode: '2026-10',
 				nominal: 50000,
-				status
+				status,
+				jatuhTempo: '2026-10-10'
 			});
 		}
 		console.log('   Tagihan sampel iuran RT dibuat.');
@@ -395,12 +396,14 @@ async function seed() {
 	}
 
 	// 7c. Preset jenis iuran & paket — nominal dan porsi adalah DATA, bukan
-	// konstanta kode, supaya bendahara bisa mengubahnya tanpa deploy. Nilai
-	// awal mengikuti catatan stakeholder (K3 36k, Soskem 5k, Santunan 10k);
-	// porsi RW dibiarkan 0 karena keputusan D3 belum dikunci.
+	// konstanta kode, supaya bendahara bisa mengubahnya tanpa deploy. Nominal
+	// mengikuti catatan stakeholder (K3 36k, Soskem 5k, Santunan 10k) dan masih
+	// berstatus SEMENTARA (lihat docs/kanban/konfirmasi-stakeholder.md).
+	// Porsi RW K3 = Rp5.000/KK mengikuti keputusan sementara D3: nominal tetap
+	// supaya mudah disetor tunai, bukan persentase yang menghasilkan pecahan.
 	console.log('7c. Menyiapkan preset jenis iuran & paket...');
 	const presetJenis = [
-		{ nama: 'Iuran Keamanan (K3)', nominal: 36000, porsiRw: 0, periode: 'bulanan' as const, urutan: 1 },
+		{ nama: 'Iuran Keamanan (K3)', nominal: 36000, porsiRw: 5000, periode: 'bulanan' as const, urutan: 1 },
 		{ nama: 'Iuran Sosial Kematian (Soskem)', nominal: 5000, porsiRw: 0, periode: 'bulanan' as const, urutan: 2 },
 		{ nama: 'Santunan Kematian Warga', nominal: 10000, porsiRw: 0, periode: 'insidental' as const, urutan: 3 }
 	];

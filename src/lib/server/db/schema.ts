@@ -207,6 +207,9 @@ export const tagihan = sqliteTable('tagihan', {
   nominal:      real('nominal').notNull(),
   porsiRw:      real('porsi_rw').notNull().default(0),
   status:       text('status', { enum: ['belum_bayar', 'lunas', 'sebagian'] }).notNull().default('belum_bayar'),
+  // Tanggal jatuh tempo (D4). Disimpan per tagihan supaya perubahan kebijakan
+  // tidak menggeser tagihan yang sudah terbit. Null = belum ditetapkan.
+  jatuhTempo:   text('jatuh_tempo'),
   ...timestamps
 }, (table) => [
   // Satu KK hanya punya satu tagihan per jenis per periode. Ini yang membuat

@@ -99,6 +99,13 @@
       "when": 1793158801830,
       "tag": "0013_setoran_rt",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1793162720239,
+      "tag": "0014_jatuh_tempo_tagihan",
+      "breakpoints": true
     }
   ]
 }

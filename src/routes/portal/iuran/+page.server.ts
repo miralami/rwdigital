@@ -12,6 +12,7 @@ import { and, desc, eq, inArray } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import { hitungSisa, ringkasTagihan } from '$lib/server/pembayaran';
+import { menunggak } from '$lib/server/iuran';
 import type { PageServerLoad, Actions } from './$types';
 
 const ajukanSchema = z.object({
@@ -45,6 +46,7 @@ async function kkDariUser(userId: string | undefined) {
 
 export const load: PageServerLoad = async ({ locals }) => {
   const pemilik = await kkDariUser(locals.user?.id);
+  const hariIni = new Date().toISOString().slice(0, 10);
 
   if (!pemilik) {
     return { terhubung: false, pemilik: null, tagihan: [], ringkasan: null, riwayat: [], konfirmasi: [] };
@@ -56,6 +58,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       periode: tagihan.periode,
       nominal: tagihan.nominal,
       status: tagihan.status,
+      jatuhTempo: tagihan.jatuhTempo,
       namaJenis: jenisIuran.nama,
       scopeJenis: jenisIuran.scope
     })
@@ -103,6 +106,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       ...t,
       totalDibayar,
       sisa: hitungSisa(t.nominal, totalDibayar),
+      menunggak: menunggak(t.status, t.jatuhTempo, hariIni),
       konfirmasiMenunggu: menunggu
         ? { id: menunggu.id, jumlah: menunggu.jumlah, metodeBayar: menunggu.metodeBayar }
         : null
