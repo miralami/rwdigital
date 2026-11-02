@@ -52,7 +52,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     .where(eq(warga.id, id));
 
   if (!detail) {
-    redirect(302, '/warga');
+    redirect(302, '/kk');
   }
 
   requireRtAccess(scope, detail.rtId);

@@ -24,7 +24,7 @@ const editSchema = z.object({
 export const load: PageServerLoad = async ({ params, locals }) => {
   const id = Number(params.id);
   const [data] = await db.select().from(warga).where(eq(warga.id, id));
-  if (!data) redirect(302, '/warga');
+  if (!data) redirect(302, '/kk');
 
   const scope = requireScope(scopeFromRole(locals));
   const [pemilik] = await db
@@ -84,6 +84,6 @@ export const actions: Actions = {
       ringkasan: `Perubahan data warga: ${result.data.nama}`
     });
 
-    redirect(303, `/warga/${id}`);
+    redirect(303, `/kk/${id}`);
   }
 };

@@ -33,7 +33,7 @@ export type RouteGroup = {
 /** Surface manajemen: dashboard, data warga, kas, iuran, pengumuman, surat, pengaturan. */
 export const ADMIN_ROUTES = [
   '/dashboard',
-  '/warga',
+  '/kk',
   '/kas',
   '/iuran',
   '/pengumuman',
@@ -76,7 +76,7 @@ const MODUL_RUTE: readonly {
     prefix: '/pengaturan',
     modul: ['rt', 'pengurus', 'landing', 'user', 'peran']
   },
-  { prefix: '/warga', modul: 'warga' },
+  { prefix: '/kk', modul: 'warga' },
   { prefix: '/kas', modul: 'kas' },
   { prefix: '/iuran', modul: 'iuran' },
   { prefix: '/pengumuman', modul: 'pengumuman' },

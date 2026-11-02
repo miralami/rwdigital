@@ -18,12 +18,12 @@
 
 <div class="detail-page">
   <div class="detail-header">
-    <a href="/warga" class="back-link">
+    <a href="/kk" class="back-link">
       <ArrowLeft size={16} />
       <span>Kembali ke data warga</span>
     </a>
     <div class="header-actions">
-      <a href="/warga/{d.id}/edit" class="btn btn-secondary">
+      <a href="/kk/{d.id}/edit" class="btn btn-secondary">
         <Pencil size={15} />
         <span>Edit</span>
       </a>

@@ -80,6 +80,6 @@ export const actions: Actions = {
       kkId: newKk.id
     }).returning();
 
-    redirect(303, `/warga/${newWarga.id}`);
+    redirect(303, `/kk/${newWarga.id}`);
   }
 };

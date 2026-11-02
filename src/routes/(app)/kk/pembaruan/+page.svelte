@@ -68,7 +68,7 @@
 
 <div class="pembaruan-page">
   <div class="header-bar">
-    <a href="/warga" class="back-link">
+    <a href="/kk" class="back-link">
       <ArrowLeft size={16} />
       <span>Data Warga</span>
     </a>

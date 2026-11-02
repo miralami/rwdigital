@@ -63,8 +63,8 @@ describe('rolesOf() / tipeOf()', () => {
 
 describe('matchRouteGroup()', () => {
 	it('mengenali surface staf beserta sub-path-nya', () => {
-		expect(matchRouteGroup('/warga')?.id).toBe('staff');
-		expect(matchRouteGroup('/warga/12/edit')?.id).toBe('staff');
+		expect(matchRouteGroup('/kk')?.id).toBe('staff');
+		expect(matchRouteGroup('/kk/12/edit')?.id).toBe('staff');
 		expect(matchRouteGroup('/kas')?.id).toBe('staff');
 		expect(matchRouteGroup('/pengaturan/pengguna')?.id).toBe('staff');
 	});

@@ -105,7 +105,7 @@
     </div>
 
     <div class="form-actions">
-      <a href="/warga/{w.id}" class="btn btn-secondary">Batal</a>
+      <a href="/kk/{w.id}" class="btn btn-secondary">Batal</a>
       <button type="submit" class="btn btn-primary">Simpan perubahan</button>
     </div>
   </form>

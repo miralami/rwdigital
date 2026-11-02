@@ -28,7 +28,7 @@
 
 <div class="impor-page">
   <div class="header">
-    <a href="/warga" class="back-link">
+    <a href="/kk" class="back-link">
       <ArrowLeft size={16} />
       <span>Kembali ke data warga</span>
     </a>
@@ -65,7 +65,7 @@
       {/if}
 
       <div class="form-actions">
-        <a href="/warga" class="btn btn-secondary">Batal</a>
+        <a href="/kk" class="btn btn-secondary">Batal</a>
         <Button variant="primary" type="submit" icon={Upload}>
           Mulai Proses Impor
         </Button>

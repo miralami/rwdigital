@@ -65,7 +65,7 @@
 
 <div class="rekap-page">
   <div class="header">
-    <a href="/warga" class="back-link">
+    <a href="/kk" class="back-link">
       <ArrowLeft size={16} />
       <span>Kembali ke data warga</span>
     </a>

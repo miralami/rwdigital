@@ -35,7 +35,7 @@ export const PORTAL_PATH = '/portal';
 /** Empat menu yang muat di bottom nav mobile (5 kolom termasuk "Lainnya"). */
 export const PRIMARY_NAV_ITEMS: NavItem[] = [
   { href: '/dashboard', label: 'Beranda', shortLabel: 'Beranda', icon: House },
-  { href: '/warga', label: 'Warga', shortLabel: 'Warga', icon: Users, modul: 'warga' },
+  { href: '/kk', label: 'Keluarga', shortLabel: 'KK', icon: Users, modul: 'warga' },
   { href: '/kas', label: 'Kas RW', shortLabel: 'Kas', icon: Wallet, modul: 'kas' },
   { href: '/iuran', label: 'Iuran', shortLabel: 'Iuran', icon: Receipt, modul: 'iuran' }
 ];

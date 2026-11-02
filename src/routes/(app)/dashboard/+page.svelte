@@ -96,7 +96,7 @@
             <Button href="/kas/tambah" variant="primary" size="lg" icon={Plus} class="cell-action-primary">Catat kas</Button>
           {/if}
           {#if data.akses.warga}
-            <Button href="/warga" variant="secondary" size="lg" icon={UserPlus}>Warga</Button>
+            <Button href="/kk" variant="secondary" size="lg" icon={UserPlus}>Warga</Button>
           {/if}
         </div>
       </div>
@@ -108,7 +108,7 @@
           title="Total warga"
           value={data.stats.totalWarga}
           description="{data.stats.totalKk} KK di {data.stats.totalRt} RT"
-          href="/warga"
+          href="/kk"
         />
       </div>
     {/if}
@@ -143,7 +143,7 @@
       <div class="dash-cols dash-cols-demografi">
         <Card
           title="Grafik Demografi Penduduk"
-          actionHref="/warga/rekap"
+          actionHref="/kk/rekap"
           actionLabel="Lihat rekap lengkap"
         >
           <DonutChart
@@ -176,7 +176,7 @@
                 </div>
               {/each}
             </div>
-            <a href="/warga/rekap" class="btn btn-secondary btn-sm demografi-link">
+            <a href="/kk/rekap" class="btn btn-secondary btn-sm demografi-link">
               Lihat rekap lengkap
             </a>
           </div>

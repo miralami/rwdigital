@@ -129,7 +129,7 @@
     </section>
 
     <div class="form-actions">
-      <a href="/warga" class="btn btn-secondary">Batal</a>
+      <a href="/kk" class="btn btn-secondary">Batal</a>
       <button type="submit" class="btn btn-primary">Simpan</button>
     </div>
   </form>
@@ -137,7 +137,7 @@
 
 <style>
   .page-container {
-    max-width: 40rem;
+    max-width: none;
   }
 
   h1 {
