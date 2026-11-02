@@ -13,7 +13,7 @@ const kkSchema = z.object({
   statusHuni: z.enum(['tetap', 'kontrak', 'kos']).default('tetap')
 });
 
-const wargaSchema = z.object({
+const anggotaSchema = z.object({
   nik: z.string().min(16, 'NIK harus 16 digit').max(16, 'NIK harus 16 digit'),
   nama: z.string().min(1, 'Nama wajib diisi'),
   tempatLahir: z.string().min(1, 'Tempat lahir wajib diisi'),
@@ -38,7 +38,7 @@ export const actions: Actions = {
     const scope = requireScope(scopeFromRole(locals));
     const formData = await request.formData();
 
-    // Parse KK data
+    // Parse KK
     const kkResult = kkSchema.safeParse({
       noKk: formData.get('noKk'),
       alamat: formData.get('alamat'),
@@ -47,39 +47,63 @@ export const actions: Actions = {
     });
 
     if (!kkResult.success) {
-      return fail(400, { errors: kkResult.error.flatten().fieldErrors });
+      return fail(400, { error: 'Data KK tidak valid: ' + Object.values(kkResult.error.flatten().fieldErrors).flat().join(', ') });
     }
 
-    // Pengurus RT tidak boleh membuat KK di RT lain, termasuk lewat POST manual.
     requireRtAccess(scope, kkResult.data.rtId);
 
-    // Parse warga data
-    const wargaResult = wargaSchema.safeParse({
-      nik: formData.get('nik'),
-      nama: formData.get('nama'),
-      tempatLahir: formData.get('tempatLahir'),
-      tanggalLahir: formData.get('tanggalLahir'),
-      jenisKelamin: formData.get('jenisKelamin'),
-      agama: formData.get('agama'),
-      pendidikan: formData.get('pendidikan'),
-      pekerjaan: formData.get('pekerjaan'),
-      statusPerkawinan: formData.get('statusPerkawinan'),
-      statusHubunganKk: formData.get('statusHubunganKk')
-    });
-
-    if (!wargaResult.success) {
-      return fail(400, { errors: wargaResult.error.flatten().fieldErrors });
+    // Parse array of anggota from JSON or form fields
+    const anggotaJson = formData.get('anggotaJson');
+    let rawAnggota: any[] = [];
+    if (anggotaJson && typeof anggotaJson === 'string') {
+      try {
+        rawAnggota = JSON.parse(anggotaJson);
+      } catch {
+        return fail(400, { error: 'Format data anggota tidak valid.' });
+      }
+    } else {
+      // Fallback single warga (backward compat)
+      rawAnggota = [{
+        nik: formData.get('nik'),
+        nama: formData.get('nama'),
+        tempatLahir: formData.get('tempatLahir'),
+        tanggalLahir: formData.get('tanggalLahir'),
+        jenisKelamin: formData.get('jenisKelamin'),
+        agama: formData.get('agama'),
+        pendidikan: formData.get('pendidikan') || undefined,
+        pekerjaan: formData.get('pekerjaan') || undefined,
+        statusPerkawinan: formData.get('statusPerkawinan') || 'belum_kawin',
+        statusHubunganKk: formData.get('statusHubunganKk') || 'kepala_keluarga'
+      }];
     }
 
-    // Insert KK first
-    const [newKk] = await db.insert(kk).values(kkResult.data).returning();
+    if (rawAnggota.length === 0) {
+      return fail(400, { error: 'Minimal harus ada 1 anggota keluarga (kepala keluarga).' });
+    }
 
-    // Insert warga as kepala keluarga
-    const [newWarga] = await db.insert(warga).values({
-      ...wargaResult.data,
-      kkId: newKk.id
-    }).returning();
+    const validatedAnggota: z.infer<typeof anggotaSchema>[] = [];
+    for (let i = 0; i < rawAnggota.length; i++) {
+      const res = anggotaSchema.safeParse(rawAnggota[i]);
+      if (!res.success) {
+        return fail(400, { error: `Anggota #${i + 1} tidak valid: ${Object.values(res.error.flatten().fieldErrors).flat().join(', ')}` });
+      }
+      validatedAnggota.push(res.data);
+    }
 
-    redirect(303, `/kk/${newWarga.id}`);
+    // Insert atomic
+    try {
+      const [newKk] = await db.insert(kk).values(kkResult.data).returning();
+
+      for (const a of validatedAnggota) {
+        await db.insert(warga).values({
+          ...a,
+          kkId: newKk.id
+        });
+      }
+    } catch (err: any) {
+      return fail(400, { error: 'Gagal menyimpan: ' + (err.message || 'Duplikasi NIK atau No. KK.') });
+    }
+
+    redirect(303, '/kk');
   }
 };
