@@ -69,9 +69,17 @@ export const load: PageServerLoad = async ({ locals }) => {
     sisa: hitungSisa(b.nominalTagihan, dibayar.get(b.tagihanId) ?? 0)
   }));
 
+  const countMenunggu = daftar.filter((k) => k.status === 'menunggu').length;
+  const countDiterima = daftar.filter((k) => k.status === 'diterima').length;
+  const countDitolak = daftar.filter((k) => k.status === 'ditolak').length;
+
   return {
-    menunggu: daftar.filter((k) => k.status === 'menunggu'),
-    riwayat: daftar.filter((k) => k.status !== 'menunggu').slice(0, 20)
+    daftar,
+    counts: {
+      menunggu: countMenunggu,
+      diterima: countDiterima,
+      ditolak: countDitolak
+    }
   };
 };
 
@@ -124,26 +132,30 @@ export const actions: Actions = {
       });
     }
 
-    const operator = locals.user?.name ?? locals.user?.id ?? 'Bendahara';
+    const hariIni = new Date().toISOString().slice(0, 10);
     const sekarang = new Date().toISOString();
 
     await catatPembayaran({
       tagihanId: konfirmasi.tagihanId,
       jumlah: konfirmasi.jumlah,
       metodeBayar: konfirmasi.metodeBayar,
+      dibayarPada: hariIni,
+      operator: locals.user?.id ?? 'sistem',
       catatan: konfirmasi.catatan
-        ? `${konfirmasi.catatan} (konfirmasi #${konfirmasi.id})`
-        : `Konfirmasi portal #${konfirmasi.id}`,
-      dibayarPada: sekarang,
-      operator
+        ? `Konfirmasi warga #${konfirmasi.id}: ${konfirmasi.catatan}`
+        : `Konfirmasi warga #${konfirmasi.id}`
     });
 
     await db
       .update(konfirmasiBayar)
-      .set({ status: 'diterima', diprosesOleh: operator, diprosesPada: sekarang })
+      .set({
+        status: 'diterima',
+        diprosesOleh: locals.user?.id ?? null,
+        diprosesPada: sekarang
+      })
       .where(eq(konfirmasiBayar.id, id));
 
-    redirect(303, '/iuran/konfirmasi');
+    return { sukses: 'Konfirmasi pembayaran berhasil disetujui.' };
   },
 
   tolak: async ({ request, locals }) => {
@@ -153,19 +165,25 @@ export const actions: Actions = {
     const formData = await request.formData();
     const parsed = tolakSchema.safeParse({
       id: formData.get('id'),
-      alasanTolak: formData.get('alasanTolak') || undefined
+      alasanTolak: formData.get('alasanTolak')
     });
 
     if (!parsed.success) {
-      return fail(400, { error: parsed.error.issues[0]?.message ?? 'Data tidak valid.' });
+      return fail(400, { error: 'Alasan penolakan tidak valid.' });
     }
 
+    const { id, alasanTolak } = parsed.data;
+
     const [konfirmasi] = await db
-      .select({ id: konfirmasiBayar.id, status: konfirmasiBayar.status, rtId: kk.rtId })
+      .select({
+        id: konfirmasiBayar.id,
+        status: konfirmasiBayar.status,
+        rtId: kk.rtId
+      })
       .from(konfirmasiBayar)
       .innerJoin(tagihan, eq(konfirmasiBayar.tagihanId, tagihan.id))
       .innerJoin(kk, eq(tagihan.kkId, kk.id))
-      .where(eq(konfirmasiBayar.id, parsed.data.id));
+      .where(eq(konfirmasiBayar.id, id));
 
     if (!konfirmasi) return fail(404, { error: 'Konfirmasi tidak ditemukan.' });
     if (konfirmasi.status !== 'menunggu') {
@@ -174,19 +192,18 @@ export const actions: Actions = {
 
     requireRtAccess(scope, konfirmasi.rtId);
 
-    const operator = locals.user?.name ?? locals.user?.id ?? 'Bendahara';
+    const sekarang = new Date().toISOString();
+
     await db
       .update(konfirmasiBayar)
       .set({
         status: 'ditolak',
-        alasanTolak: parsed.data.alasanTolak || null,
-        diprosesOleh: operator,
-        diprosesPada: new Date().toISOString()
+        alasanTolak: alasanTolak || null,
+        diprosesOleh: locals.user?.id ?? null,
+        diprosesPada: sekarang
       })
-      .where(
-        and(eq(konfirmasiBayar.id, parsed.data.id), eq(konfirmasiBayar.status, 'menunggu'))
-      );
+      .where(eq(konfirmasiBayar.id, id));
 
-    redirect(303, '/iuran/konfirmasi');
+    return { sukses: 'Konfirmasi pembayaran ditolak.' };
   }
 };
