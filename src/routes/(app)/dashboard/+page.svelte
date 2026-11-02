@@ -40,7 +40,7 @@
     darurat: { label: 'Darurat', variant: 'danger' }
   };
 
-  const tunggakan = $derived(data.stats.belumBayarCount > 0);
+  const tunggakan = $derived(data.akses.iuran && data.stats.belumBayarCount > 0);
   const adaPerhatian = $derived(tunggakan || data.pengumumanTerbaru.length > 0);
   const pengumumanTerakhir = $derived(data.pengumumanTerbaru[0]?.createdAt);
 
@@ -48,13 +48,9 @@
     return now ? formatRelatif(nilai, now) : formatTanggal(nilai);
   }
 
-  // Hanya peran internal yang melihat grafik demografi (KP-03)
-  // Better Auth menyimpan role sebagai string yang bisa berkoma ("admin_rw,bendahara"),
-  // jadi pakai .includes() alih-alih strict equality.
-  const isInternal = $derived.by(() => {
-    const role = data.user?.role ?? '';
-    return role.includes('admin_rw') || role.includes('pengurus_rt') || role.includes('bendahara');
-  });
+  // Grafik demografi hanya muncul kalau akun boleh membaca modul warga.
+  const tampilkanDemografi = $derived(data.akses.warga);
+  const tampilkanPerhatian = $derived(data.akses.iuran || data.akses.pengumuman);
 
   // Segmen donat demografi untuk dashboard
   const demografiSegments = $derived([
@@ -80,57 +76,69 @@
 
   <!-- KPI: 4 sel. Di mobile sel saldo jadi hero dan sel pengumuman disembunyikan
        (datanya sudah tampil di panel "Perlu perhatian"). -->
-  <section class="kpi-grid" aria-label="Ringkasan kas, warga, iuran, dan pengumuman">
-    <div class="kpi-cell kpi-cell-hero">
-      <StatCard
-        title={data.kasLabel}
-        value={formatRupiah(data.stats.saldoKas)}
-        description="Pemasukan {formatRupiah(data.stats.totalPemasukan)}"
-        variant="hero"
-        href="/kas"
-      />
-    </div>
-
-    <div class="kpi-cell kpi-cell-actions">
-      <div class="cell-actions">
-        {#if data.bisaCatatKas}
-          <Button href="/kas/tambah" variant="primary" size="lg" icon={Plus} class="cell-action-primary">Catat kas</Button>
-        {/if}
-        <Button href="/warga" variant="secondary" size="lg" icon={UserPlus}>Warga</Button>
+  <section class="kpi-grid" aria-label="Ringkasan sesuai modul yang boleh diakses">
+    {#if data.akses.kas}
+      <div class="kpi-cell kpi-cell-hero">
+        <StatCard
+          title={data.kasLabel}
+          value={formatRupiah(data.stats.saldoKas)}
+          description="Pemasukan {formatRupiah(data.stats.totalPemasukan)}"
+          variant="hero"
+          href="/kas"
+        />
       </div>
-    </div>
+    {/if}
 
-    <div class="kpi-cell">
-      <StatCard
-        title="Total warga"
-        value={data.stats.totalWarga}
-        description="{data.stats.totalKk} KK di {data.stats.totalRt} RT"
-        href="/warga"
-      />
-    </div>
+    {#if data.bisaCatatKas || data.akses.warga}
+      <div class="kpi-cell kpi-cell-actions">
+        <div class="cell-actions">
+          {#if data.bisaCatatKas}
+            <Button href="/kas/tambah" variant="primary" size="lg" icon={Plus} class="cell-action-primary">Catat kas</Button>
+          {/if}
+          {#if data.akses.warga}
+            <Button href="/warga" variant="secondary" size="lg" icon={UserPlus}>Warga</Button>
+          {/if}
+        </div>
+      </div>
+    {/if}
 
-    <div class="kpi-cell">
-      <StatCard
-        title="Tagihan belum bayar"
-        value={data.stats.belumBayarCount}
-        description="Total {formatRupiah(data.stats.totalTagihanPending)}"
-        variant={tunggakan ? 'warning' : 'success'}
-        href="/iuran"
-      />
-    </div>
+    {#if data.akses.warga}
+      <div class="kpi-cell">
+        <StatCard
+          title="Total warga"
+          value={data.stats.totalWarga}
+          description="{data.stats.totalKk} KK di {data.stats.totalRt} RT"
+          href="/warga"
+        />
+      </div>
+    {/if}
 
-    <div class="kpi-cell kpi-cell-extra">
-      <StatCard
-        title="Pengumuman aktif"
-        value={data.pengumumanTerbaru.length}
-        description={pengumumanTerakhir ? `Terbit ${tanggalRelatif(pengumumanTerakhir)}` : 'Belum ada pengumuman'}
-        href="/pengumuman"
-      />
-    </div>
+    {#if data.akses.iuran}
+      <div class="kpi-cell">
+        <StatCard
+          title="Tagihan belum bayar"
+          value={data.stats.belumBayarCount}
+          description="Total {formatRupiah(data.stats.totalTagihanPending)}"
+          variant={tunggakan ? 'warning' : 'success'}
+          href="/iuran"
+        />
+      </div>
+    {/if}
+
+    {#if data.akses.pengumuman}
+      <div class="kpi-cell kpi-cell-extra">
+        <StatCard
+          title="Pengumuman aktif"
+          value={data.pengumumanTerbaru.length}
+          description={pengumumanTerakhir ? `Terbit ${tanggalRelatif(pengumumanTerakhir)}` : 'Belum ada pengumuman'}
+          href="/pengumuman"
+        />
+      </div>
+    {/if}
   </section>
 
-  <!-- Grafik demografi ringkas — hanya peran internal (KP-03) -->
-  {#if isInternal}
+  <!-- Grafik demografi ringkas — hanya untuk modul warga (KP-03) -->
+  {#if tampilkanDemografi}
     <section class="demografi-section" aria-label="Grafik demografi penduduk">
       <div class="dash-cols dash-cols-demografi">
         <Card
@@ -177,83 +185,89 @@
     </section>
   {/if}
 
-  <div class="dash-cols">
-    <Card
-      title={data.scopeKind === 'rt' ? 'Arus kas RT terbaru' : 'Arus kas terbaru'}
-      actionHref="/kas"
-      actionLabel="Lihat semua"
-      padded={false}
-    >
-      {#if data.transaksiTerbaru.length > 0}
-        <div class="row-list">
-          {#each data.transaksiTerbaru as tx (tx.id)}
-            <ListRow
-              href="/kas"
-              title={tx.keterangan}
-              meta={tanggalRelatif(tx.tanggal)}
-              value={formatRupiahTanda(tx.nominal, tx.jenis)}
-              valueShort={formatRupiahPendekTanda(tx.nominal, tx.jenis)}
-              icon={tx.jenis === 'pemasukan' ? ArrowDown : ArrowUp}
-              tone={tx.jenis === 'pemasukan' ? 'success' : 'danger'}
-            />
-          {/each}
-        </div>
-      {:else}
-        <EmptyState
-          compact
-          message={data.scopeKind === 'rt' ? 'Belum ada transaksi kas RT' : 'Catat transaksi kas pertama'}
-          description="Setiap pemasukan atau pengeluaran langsung memperbarui saldo kas."
+  {#if data.akses.kas || tampilkanPerhatian}
+    <div class="dash-cols">
+      {#if data.akses.kas}
+        <Card
+          title={data.scopeKind === 'rt' ? 'Arus kas RT terbaru' : 'Arus kas terbaru'}
+          actionHref="/kas"
+          actionLabel="Lihat semua"
+          padded={false}
         >
-          {#if data.bisaCatatKas}
-            <Button href="/kas/tambah" variant="primary" icon={Plus}>Catat kas</Button>
+          {#if data.transaksiTerbaru.length > 0}
+            <div class="row-list">
+              {#each data.transaksiTerbaru as tx (tx.id)}
+                <ListRow
+                  href="/kas"
+                  title={tx.keterangan}
+                  meta={tanggalRelatif(tx.tanggal)}
+                  value={formatRupiahTanda(tx.nominal, tx.jenis)}
+                  valueShort={formatRupiahPendekTanda(tx.nominal, tx.jenis)}
+                  icon={tx.jenis === 'pemasukan' ? ArrowDown : ArrowUp}
+                  tone={tx.jenis === 'pemasukan' ? 'success' : 'danger'}
+                />
+              {/each}
+            </div>
+          {:else}
+            <EmptyState
+              compact
+              message={data.scopeKind === 'rt' ? 'Belum ada transaksi kas RT' : 'Catat transaksi kas pertama'}
+              description="Setiap pemasukan atau pengeluaran langsung memperbarui saldo kas."
+            >
+              {#if data.bisaCatatKas}
+                <Button href="/kas/tambah" variant="primary" icon={Plus}>Catat kas</Button>
+              {/if}
+            </EmptyState>
           {/if}
-        </EmptyState>
+        </Card>
       {/if}
-    </Card>
 
-    <Card title="Perlu perhatian" padded={false}>
-      {#if adaPerhatian}
-        <div class="row-list">
-          {#if tunggakan}
-            <p class="group-label label-caps">Iuran menunggak</p>
-            <ListRow
-              href="/iuran"
-              title="{data.stats.belumBayarCount} tagihan belum dibayar"
-              meta="Total {formatRupiah(data.stats.totalTagihanPending)}"
-              icon={CircleAlert}
-              tone="warning"
-            />
-          {/if}
+      {#if tampilkanPerhatian}
+        <Card title="Perlu perhatian" padded={false}>
+          {#if adaPerhatian}
+            <div class="row-list">
+              {#if tunggakan}
+                <p class="group-label label-caps">Iuran menunggak</p>
+                <ListRow
+                  href="/iuran"
+                  title="{data.stats.belumBayarCount} tagihan belum dibayar"
+                  meta="Total {formatRupiah(data.stats.totalTagihanPending)}"
+                  icon={CircleAlert}
+                  tone="warning"
+                />
+              {/if}
 
-          {#if data.pengumumanTerbaru.length > 0}
-            <p class="group-label label-caps">Pengumuman aktif</p>
-            {#each data.pengumumanTerbaru as info (info.id)}
-              {@const badge = kategori[info.kategori] ?? { label: info.kategori, variant: 'default' as const }}
-              <ListRow
-                href="/pengumuman"
-                title={info.judul}
-                meta={tanggalRelatif(info.createdAt)}
-                icon={Megaphone}
-              >
-                <Badge variant={badge.variant}>{badge.label}</Badge>
-              </ListRow>
-            {/each}
+              {#if data.pengumumanTerbaru.length > 0}
+                <p class="group-label label-caps">Pengumuman aktif</p>
+                {#each data.pengumumanTerbaru as info (info.id)}
+                  {@const badge = kategori[info.kategori] ?? { label: info.kategori, variant: 'default' as const }}
+                  <ListRow
+                    href="/pengumuman"
+                    title={info.judul}
+                    meta={tanggalRelatif(info.createdAt)}
+                    icon={Megaphone}
+                  >
+                    <Badge variant={badge.variant}>{badge.label}</Badge>
+                  </ListRow>
+                {/each}
+              {/if}
+            </div>
+          {:else}
+            <EmptyState
+              compact
+              icon={CircleCheckBig}
+              message="Tidak ada yang perlu ditindaklanjuti"
+              description="Iuran lunas dan tidak ada pengumuman yang menunggu."
+            >
+              {#if data.bisaBuatPengumuman}
+                <Button href="/pengumuman/tambah" variant="primary" icon={Megaphone}>Buat pengumuman</Button>
+              {/if}
+            </EmptyState>
           {/if}
-        </div>
-      {:else}
-        <EmptyState
-          compact
-          icon={CircleCheckBig}
-          message="Tidak ada yang perlu ditindaklanjuti"
-          description="Iuran lunas dan tidak ada pengumuman yang menunggu."
-        >
-          {#if data.bisaBuatPengumuman}
-            <Button href="/pengumuman/tambah" variant="primary" icon={Megaphone}>Buat pengumuman</Button>
-          {/if}
-        </EmptyState>
+        </Card>
       {/if}
-    </Card>
-  </div>
+    </div>
+  {/if}
 </div>
 
 <style>

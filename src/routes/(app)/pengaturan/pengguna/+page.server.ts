@@ -1,19 +1,21 @@
 import { auth } from '$lib/server/auth';
 import { db } from '$lib/server/db';
-import { kk, rt, warga, petugasRt } from '$lib/server/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { kk, rt, warga, petugasRt, peran } from '$lib/server/db/schema';
+import { asc, eq, sql } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import { permissionsOf, requirePermission } from '$lib/server/rbac';
 import { normalizeRole } from '$lib/server/guard';
-import { LABEL_ROLE, ROLE_VALUES } from '$lib/roles';
+import { PERAN_DEFAULT } from '$lib/akses';
 import type { PageServerLoad, Actions } from './$types';
+
+const POLA_SLUG = /^[a-z0-9][a-z0-9_-]*$/;
 
 const buatAkunSchema = z.object({
   email: z.string().trim().email('Email tidak valid'),
   password: z.string().min(8, 'Kata sandi minimal 8 karakter'),
   name: z.string().trim().min(1, 'Nama wajib diisi').max(100, 'Nama terlalu panjang'),
-  role: z.enum(ROLE_VALUES),
+  role: z.string().regex(POLA_SLUG, 'Format role tidak valid'),
   wargaId: z.union([z.coerce.number().int().positive(), z.literal('')]).optional()
 });
 
@@ -50,6 +52,20 @@ export const load: PageServerLoad = async ({ locals, request }) => {
     noKk: string;
   }> = [];
 
+  const rolesDb = await db.select({
+    nama: peran.nama,
+    label: peran.label,
+    superadmin: peran.superadmin
+  }).from(peran).orderBy(asc(peran.urutan), asc(peran.nama));
+
+  const daftarRole = rolesDb.length > 0
+    ? rolesDb.map((r) => r.nama)
+    : PERAN_DEFAULT.map((p) => p.nama);
+
+  const labelRole: Record<string, string> = rolesDb.length > 0
+    ? Object.fromEntries(rolesDb.map((r) => [r.nama, r.label]))
+    : Object.fromEntries(PERAN_DEFAULT.map((p) => [p.nama, p.label]));
+
   if (bisaKelola) {
     try {
       const hasil = await auth.api.listUsers({
@@ -61,8 +77,6 @@ export const load: PageServerLoad = async ({ locals, request }) => {
       errorUser = pesanError(err, 'Gagal memuat daftar pengguna.');
     }
 
-    // Penugasan RT hanya relevan untuk pengurus_rt, tapi daftar RT tetap
-    // dikirim supaya admin bisa langsung memilih wilayah tugas.
     daftarRt = await db.select({ id: rt.id, nomor: rt.nomor }).from(rt).orderBy(rt.nomor);
     daftarTugas = await db
       .select({ userId: petugasRt.userId, rtId: petugasRt.rtId, nomorRt: rt.nomor })
@@ -70,8 +84,6 @@ export const load: PageServerLoad = async ({ locals, request }) => {
       .innerJoin(rt, eq(petugasRt.rtId, rt.id))
       .orderBy(rt.nomor);
 
-    // Data warga hanya dikirim ke pengelola akun. Pengurus/bendahara yang
-    // membuka halaman ini tidak perlu (dan tidak boleh) melihatnya.
     daftarWarga = await db
       .select({
         id: warga.id,
@@ -98,8 +110,8 @@ export const load: PageServerLoad = async ({ locals, request }) => {
     bisaTambah: izin.can('user', 'create'),
     bisaAturRole: izin.can('user', 'set-role'),
     bisaHapus: izin.can('user', 'delete'),
-    daftarRole: ROLE_VALUES,
-    labelRole: LABEL_ROLE
+    daftarRole,
+    labelRole
   };
 };
 
@@ -121,8 +133,19 @@ export const actions: Actions = {
     }
 
     const wargaId = hasil.data.wargaId ? Number(hasil.data.wargaId) : null;
-    // Akun yang ditautkan ke warga selalu berrole warga, apa pun pilihan form.
     const role = wargaId ? 'warga' : hasil.data.role;
+
+    // Pastikan role valid di DB atau PERAN_DEFAULT
+    const [roleFound] = await db.select({ nama: peran.nama, label: peran.label })
+      .from(peran)
+      .where(eq(peran.nama, role))
+      .limit(1);
+
+    if (!roleFound && !PERAN_DEFAULT.some((p) => p.nama === role)) {
+      return fail(400, { error: 'Role tidak dikenal di sistem.' });
+    }
+
+    const labelDisplay = roleFound?.label ?? PERAN_DEFAULT.find((p) => p.nama === role)?.label ?? role;
 
     let targetWarga: { id: number; nama: string; userId: string | null } | null = null;
     if (wargaId) {
@@ -143,7 +166,7 @@ export const actions: Actions = {
 
     let userId: string;
     try {
-      const dibuat = await auth.api.createUser({
+      const dibuat = await (auth.api as any).createUser({
         body: {
           email: hasil.data.email,
           password: hasil.data.password,
@@ -164,7 +187,7 @@ export const actions: Actions = {
     return {
       sukses: targetWarga
         ? `Akun ${hasil.data.email} dibuat dan ditautkan ke ${targetWarga.nama}.`
-        : `Akun ${hasil.data.email} dibuat dengan role ${LABEL_ROLE[role]}.`
+        : `Akun ${hasil.data.email} dibuat dengan role ${labelDisplay}.`
     };
   },
 
@@ -173,21 +196,46 @@ export const actions: Actions = {
 
     const formData = await request.formData();
     const userId = String(formData.get('userId') || '').trim();
-    const role = String(formData.get('role') || '');
+    const role = String(formData.get('role') || '').trim().toLowerCase();
 
     if (!userId) {
       return fail(400, { error: 'User ID tidak valid.' });
     }
-    if (!ROLE_VALUES.includes(role as (typeof ROLE_VALUES)[number])) {
-      return fail(400, { error: 'Role tidak dikenal.' });
+    if (!POLA_SLUG.test(role)) {
+      return fail(400, { error: 'Format role tidak valid.' });
     }
+
+    // Cek target akun
+    const [targetUser] = await db.all<{ role: string | null }>(
+      sql`SELECT role FROM user WHERE id = ${userId}`
+    );
+    if (!targetUser) {
+      return fail(404, { error: 'Akun tidak ditemukan.' });
+    }
+
+    const currentRoles = normalizeRole(targetUser.role);
+    if (currentRoles.includes('admin_rw')) {
+      return fail(400, { error: 'Akun admin_rw (superadmin) dilindungi dan tidak dapat diubah rolenya.' });
+    }
+
     if (locals.user?.id === userId) {
       return fail(400, { error: 'Tidak bisa mengubah role akun sendiri.' });
     }
 
+    const [roleFound] = await db.select({ nama: peran.nama, label: peran.label })
+      .from(peran)
+      .where(eq(peran.nama, role))
+      .limit(1);
+
+    if (!roleFound && !PERAN_DEFAULT.some((p) => p.nama === role)) {
+      return fail(400, { error: 'Role tidak dikenal di sistem.' });
+    }
+
+    const labelDisplay = roleFound?.label ?? PERAN_DEFAULT.find((p) => p.nama === role)?.label ?? role;
+
     try {
-      await auth.api.setRole({
-        body: { userId, role: role as (typeof ROLE_VALUES)[number] },
+      await (auth.api as any).setRole({
+        body: { userId, role },
         headers: request.headers
       });
     } catch (err) {
@@ -200,7 +248,7 @@ export const actions: Actions = {
     }
 
     return {
-      sukses: `Role diperbarui menjadi ${LABEL_ROLE[role as (typeof ROLE_VALUES)[number]]}.`
+      sukses: `Role diperbarui menjadi ${labelDisplay}.`
     };
   },
 
@@ -327,6 +375,18 @@ export const actions: Actions = {
     }
     if (locals.user?.id === userId) {
       return fail(400, { error: 'Tidak bisa menghapus akun sendiri.' });
+    }
+
+    const [targetUser] = await db.all<{ role: string | null }>(
+      sql`SELECT role FROM user WHERE id = ${userId}`
+    );
+    if (!targetUser) {
+      return fail(404, { error: 'Akun tidak ditemukan.' });
+    }
+
+    const targetRoles = normalizeRole(targetUser.role);
+    if (targetRoles.includes('admin_rw')) {
+      return fail(400, { error: 'Akun admin_rw (superadmin) dilindungi dan tidak dapat dihapus.' });
     }
 
     // Lepas tautan dulu supaya data warga tidak menunjuk user yang sudah hilang.

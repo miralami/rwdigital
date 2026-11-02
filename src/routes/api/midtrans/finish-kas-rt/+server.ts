@@ -4,16 +4,14 @@ import { db } from '$lib/server/db';
 import { transaksiKasRt } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { checkMidtransTransactionStatus } from '$lib/server/midtrans';
-import { rolesOf, STAFF_ROLES } from '$lib/server/guard';
+import { isStaff } from '$lib/server/guard';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
   if (!locals.user) {
     return json({ success: false, error: 'Unauthorized: Sesi login diperlukan.' }, { status: 401 });
   }
 
-  const roles = rolesOf(locals);
-  const isStaff = roles.some((role) => (STAFF_ROLES as readonly string[]).includes(role));
-  if (!isStaff) {
+  if (!isStaff(locals)) {
     return json({ success: false, error: 'Forbidden: hanya pengurus/bendahara yang boleh menyinkronkan status pembayaran.' }, { status: 403 });
   }
 

@@ -7,6 +7,7 @@ import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import { eq, isNull } from 'drizzle-orm';
 import { ac, roles } from '../src/lib/permissions';
+import { PERAN_DEFAULT } from '../src/lib/akses';
 import {
 	rw,
 	rt,
@@ -20,7 +21,8 @@ import {
 	paketIuranItem,
 	tagihan,
 	pengurus,
-	petugasRt
+	petugasRt,
+	peran
 } from '../src/lib/server/db/schema';
 
 // ─── Load .env ────────────────────────────────────────────────────────────────
@@ -84,7 +86,8 @@ const db = drizzle(client, {
 		paketIuran,
 		paketIuranItem,
 		tagihan,
-		pengurus
+		pengurus,
+		peran
 	}
 });
 
@@ -149,6 +152,33 @@ async function seed() {
 		} catch (dbErr) {
 			console.error(`   Gagal mengatur role via database: ${dbErr}`);
 		}
+	}
+
+	// 2b. Seed peran & izin default
+	// Hanya menambah role yang belum ada. Izin milik role sistem yang sudah
+	// disunting superadmin tidak ditimpa, supaya seed aman dijalankan ulang.
+	console.log('2b. Menyiapkan peran & izin default...');
+	const peranAda = await db.select({ nama: peran.nama }).from(peran);
+	const namaPeranAda = new Set(peranAda.map((p) => p.nama));
+	const peranBaru = PERAN_DEFAULT.filter((p) => !namaPeranAda.has(p.nama));
+
+	if (peranBaru.length > 0) {
+		await db.insert(peran).values(
+			peranBaru.map((p) => ({
+				nama: p.nama,
+				label: p.label,
+				deskripsi: p.deskripsi,
+				tipe: p.tipe,
+				scope: p.scope,
+				permissions: p.permissions,
+				sistem: p.sistem,
+				superadmin: p.superadmin,
+				urutan: p.urutan
+			}))
+		);
+		console.log(`   ${peranBaru.length} peran default dibuat: ${peranBaru.map((p) => p.nama).join(', ')}.`);
+	} else {
+		console.log(`   Semua ${PERAN_DEFAULT.length} peran default sudah ada.`);
 	}
 
 	// 3. Create default RW record
@@ -346,6 +376,8 @@ async function seed() {
 	const akunWargaId = await pastikanAkun('warga@rw.id', 'warga123', 'Warga Contoh', 'warga');
 	const akunPengurusId = await pastikanAkun('pengurus@rw.id', 'pengurus123', 'Pengurus RT 01', 'pengurus_rt');
 	await pastikanAkun('bendahara@rw.id', 'bendahara123', 'Bendahara RW', 'bendahara');
+	await pastikanAkun('ketua@rw.id', 'ketua123', 'Ketua RW', 'ketua_rw');
+	await pastikanAkun('sekretaris@rw.id', 'sekretaris123', 'Sekretaris RW', 'sekretaris');
 
 	// Tugaskan akun pengurus ke RT 01. Tanpa baris ini, scoping fail-closed
 	// membuat akun pengurus tidak bisa melihat data RT mana pun.
@@ -598,6 +630,8 @@ async function seed() {
 	console.log(`  ${'Email'.padEnd(20)} ${'Password'.padEnd(14)} Role`);
 	console.log(`  ${'admin@rw.id'.padEnd(20)} ${'admin123'.padEnd(14)} admin_rw`);
 	console.log(`  ${'bendahara@rw.id'.padEnd(20)} ${'bendahara123'.padEnd(14)} bendahara`);
+	console.log(`  ${'ketua@rw.id'.padEnd(20)} ${'ketua123'.padEnd(14)} ketua_rw`);
+	console.log(`  ${'sekretaris@rw.id'.padEnd(20)} ${'sekretaris123'.padEnd(14)} sekretaris`);
 	console.log(`  ${'pengurus@rw.id'.padEnd(20)} ${'pengurus123'.padEnd(14)} pengurus_rt`);
 	console.log(`  ${'warga@rw.id'.padEnd(20)} ${'warga123'.padEnd(14)} warga (tertaut ke 1 KK)`);
 }

@@ -35,6 +35,7 @@ export function getMidtransConfig(): MidtransConfig {
 export interface CreateSnapParams {
   orderId: string;
   grossAmount: number;
+  finishUrl?: string;
   customerDetails?: {
     firstName?: string;
     email?: string;
@@ -79,7 +80,7 @@ export async function createMidtransSnapTransaction(params: CreateSnapParams): P
           secure: true
         },
         callbacks: {
-          finish: `${config.appUrl || 'http://localhost:5173'}/kas`
+          finish: params.finishUrl || `${config.appUrl || 'http://localhost:5173'}/kas`
         },
         customer_details: {
           first_name: params.customerDetails?.firstName || 'Warga RT',
@@ -191,7 +192,7 @@ export async function checkMidtransTransactionStatus(orderId: string): Promise<M
   }
 
   // Simulasi hanya untuk dev/sandbox, tidak pernah untuk production.
-  if (!config.isProduction && isDummy && (orderId.startsWith('SIM-') || orderId.startsWith('KAS-RT-'))) {
+  if (!config.isProduction && isDummy && (orderId.startsWith('SIM-') || orderId.startsWith('KAS-RT-') || orderId.startsWith('IURAN-'))) {
     return {
       verified: true,
       transactionStatus: 'settlement',

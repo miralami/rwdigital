@@ -1,23 +1,63 @@
 import { describe, expect, it } from 'vitest';
-import { landingPathFor, matchRouteGroup, normalizeRole } from './guard';
+import {
+	enforceAccess,
+	landingPathFor,
+	matchRouteGroup,
+	modulForPath,
+	normalizeRole,
+	rolesOf,
+	tipeOf
+} from './guard';
+import type { RequestEvent } from '@sveltejs/kit';
+
+const lokal = (role: unknown, izin: Record<string, string[]> = {}) =>
+	({
+		user: { role },
+		izin,
+		peranAktif: normalizeRole(role),
+		scopePeran: 'all',
+		tipePeran: normalizeRole(role).some((nama) => nama === 'warga') ? 'warga' : 'staff'
+	}) as unknown as App.Locals;
 
 describe('normalizeRole()', () => {
-	it('memecah role berkoma seperti yang disimpan plugin admin Better Auth', () => {
+	it('memecah peran berkoma seperti yang disimpan plugin admin Better Auth', () => {
 		expect(normalizeRole('admin_rw,pengurus_rt')).toEqual(['admin_rw', 'pengurus_rt']);
 	});
 
-	it('menerima array dan membuang spasi', () => {
-		expect(normalizeRole([' warga ', 'bendahara'])).toEqual(['warga', 'bendahara']);
+	it('menerima array, membuang spasi, dan menormalkan huruf', () => {
+		expect(normalizeRole([' Warga ', 'Bendahara'])).toEqual(['warga', 'bendahara']);
 	});
 
-	it('membuang role tak dikenal dan duplikat', () => {
-		expect(normalizeRole(['admin_rw', 'admin_rw', 'tamu', ''])).toEqual(['admin_rw']);
+	it('menerima slug peran dinamis dan membuang nilai yang bukan slug', () => {
+		expect(normalizeRole(['admin_rw', 'admin_rw', 'ketua_lingkungan', ''])).toEqual([
+			'admin_rw',
+			'ketua_lingkungan'
+		]);
+		expect(normalizeRole(['tamu!', 'dua kata', null])).toEqual([]);
 	});
 
 	it('null/undefined menjadi daftar kosong', () => {
 		expect(normalizeRole(null)).toEqual([]);
 		expect(normalizeRole(undefined)).toEqual([]);
 		expect(normalizeRole(42)).toEqual([]);
+	});
+});
+
+describe('rolesOf() / tipeOf()', () => {
+	it('memakai peranAktif yang sudah dihidrasi hooks', () => {
+		const locals = lokal('warga');
+		expect(rolesOf(locals)).toEqual(['warga']);
+	});
+
+	it('fallback ke user.role untuk locals tiruan', () => {
+		const locals = { user: { role: 'sekretaris' } } as unknown as App.Locals;
+		expect(rolesOf(locals)).toEqual(['sekretaris']);
+		expect(tipeOf(locals)).toBe('staff');
+	});
+
+	it('peran dinamis tanpa definisi dianggap warga', () => {
+		const locals = { user: { role: 'ketua_lingkungan' } } as unknown as App.Locals;
+		expect(tipeOf(locals)).toBe('warga');
 	});
 });
 
@@ -46,8 +86,28 @@ describe('matchRouteGroup()', () => {
 	});
 });
 
+describe('modulForPath()', () => {
+	it('memetakan rute ke modul, prefix terpanjang menang', () => {
+		expect(modulForPath('/kas/tambah')).toEqual(['kas']);
+		expect(modulForPath('/pengaturan/pengguna')).toEqual(['user']);
+		expect(modulForPath('/pengaturan/peran')).toEqual(['peran']);
+		expect(modulForPath('/pengaturan')).toEqual([
+			'rt',
+			'pengurus',
+			'landing',
+			'user',
+			'peran'
+		]);
+	});
+
+	it('dashboard dan halaman publik tidak butuh modul', () => {
+		expect(modulForPath('/dashboard')).toBeNull();
+		expect(modulForPath('/')).toBeNull();
+	});
+});
+
 describe('landingPathFor()', () => {
-	const locals = (role: string) => ({ user: { role } }) as unknown as App.Locals;
+	const locals = (role: unknown) => ({ user: { role } }) as unknown as App.Locals;
 
 	it('warga mendarat di portal', () => {
 		expect(landingPathFor(locals('warga'))).toBe('/portal');
@@ -56,9 +116,41 @@ describe('landingPathFor()', () => {
 	it('staf mendarat di dashboard', () => {
 		expect(landingPathFor(locals('admin_rw'))).toBe('/dashboard');
 		expect(landingPathFor(locals('pengurus_rt'))).toBe('/dashboard');
+		expect(landingPathFor(locals('sekretaris'))).toBe('/dashboard');
 	});
 
-	it('tanpa user dianggap staf (guard lain yang menolak)', () => {
-		expect(landingPathFor({ user: null } as unknown as App.Locals)).toBe('/dashboard');
+	it('akun tanpa peran default dianggap warga', () => {
+		expect(landingPathFor({ user: null } as unknown as App.Locals)).toBe('/portal');
+	});
+});
+
+describe('enforceAccess() — izin modul', () => {
+	const ctx = (pathname: string, locals: App.Locals) =>
+		({ locals, url: new URL(`http://localhost${pathname}`) }) as unknown as RequestEvent;
+
+	function tangkap(fn: () => void): { status?: number; location?: string } {
+		try {
+			fn();
+		} catch (err) {
+			return err as { status?: number; location?: string };
+		}
+		throw new Error('seharusnya melempar');
+	}
+
+	it('staf tanpa izin kas mendapat 403 saat membuka /kas', () => {
+		const locals = lokal('pengurus_rt', { warga: ['read'], iuran: ['read'] });
+		expect(tangkap(() => enforceAccess(ctx('/kas', locals))).status).toBe(403);
+	});
+
+	it('staf dengan izin baca modul boleh lewat', () => {
+		const locals = lokal('bendahara', { kas: ['read'] });
+		expect(() => enforceAccess(ctx('/kas', locals))).not.toThrow();
+	});
+
+	it('warga di surface staf diarahkan ke portal', () => {
+		const locals = lokal('warga', {});
+		const hasil = tangkap(() => enforceAccess(ctx('/kas', locals)));
+		expect(hasil.status).toBe(302);
+		expect(hasil.location).toBe('/portal');
 	});
 });

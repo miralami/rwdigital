@@ -3,6 +3,7 @@
   import Building2 from '@lucide/svelte/icons/building-2';
   import Users from '@lucide/svelte/icons/users';
   import UserCog from '@lucide/svelte/icons/user-cog';
+  import ShieldCheck from '@lucide/svelte/icons/shield-check';
   import Images from '@lucide/svelte/icons/images';
   import ChevronRight from '@lucide/svelte/icons/chevron-right';
   import type { PageData } from './$types';
@@ -37,27 +38,31 @@
       keterangan: 'Buat akun, atur role, dan hubungkan akun warga ke data kependudukan.',
       icon: UserCog,
       boleh: data.akses.pengguna
+    },
+    {
+      href: '/pengaturan/peran',
+      judul: 'Peran & Izin',
+      keterangan: 'Buat peran baru dan tentukan modul serta aksi yang boleh dipakainya.',
+      icon: ShieldCheck,
+      boleh: data.akses.peran
     }
-  ]);
+  ].filter((item) => item.boleh));
 </script>
 
 <div class="page-container">
   <PageHeader
     title="Pengaturan"
-    subtitle="Kelola master data yang dipakai seluruh modul: wilayah RT, kepengurusan, dan akun pengguna."
+    subtitle="Kelola master data yang dipakai seluruh modul: wilayah RT, kepengurusan, peran, dan akun pengguna."
   />
 
   <div class="menu-grid">
     {#each menu as item}
       {@const Icon = item.icon}
-      <a class="menu-card" href={item.href} class:terbatas={!item.boleh}>
+      <a class="menu-card" href={item.href}>
         <span class="menu-icon"><Icon size={20} /></span>
         <span class="menu-text">
           <span class="menu-title">{item.judul}</span>
           <span class="menu-desc">{item.keterangan}</span>
-          {#if !item.boleh}
-            <span class="menu-lock">Hanya admin RW yang bisa mengubah</span>
-          {/if}
         </span>
         <span class="menu-chevron"><ChevronRight size={18} /></span>
       </a>
@@ -94,10 +99,6 @@
     box-shadow: var(--shadow-sm);
   }
 
-  .menu-card.terbatas {
-    opacity: 0.72;
-  }
-
   .menu-icon {
     display: inline-flex;
     align-items: center;
@@ -128,13 +129,6 @@
     font-size: var(--text-sm);
     line-height: var(--leading-snug);
     color: var(--color-text-muted);
-  }
-
-  .menu-lock {
-    margin-top: var(--space-1);
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--color-warning);
   }
 
   .menu-chevron {

@@ -6,7 +6,7 @@ import { dev } from '$app/environment';
 import { LibsqlDialect } from '@libsql/kysely-libsql';
 import { env } from '$env/dynamic/private';
 import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from '$env/static/private';
-import { ac, roles } from '$lib/permissions';
+import { ac } from '$lib/permissions';
 
 const trustedOrigins = [
   'https://2fdf-2001-448a-2002-1493-45ac-99c0-191b-7566.ngrok-free.app',
@@ -49,10 +49,9 @@ export const auth = betterAuth({
   },
   plugins: [
     admin({
-      // Role mapping for RW system
-      // Roles: admin_rw | pengurus_rt | bendahara | warga
+      // Admin plugin retained for superadmin user management endpoints.
+      // App permissions are dynamically managed via DB `peran` table.
       ac,
-      roles,
       defaultRole: 'warga',
       adminRoles: ['admin_rw']
     }),

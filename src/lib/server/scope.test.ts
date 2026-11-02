@@ -32,6 +32,28 @@ describe('scopeFromRole()', () => {
 	it('role gabungan memakai pandangan terluas', () => {
 		expect(scopeFromRole(locals('pengurus_rt,admin_rw', 3))).toEqual({ kind: 'all' });
 	});
+
+	it('memakai scopePeran dari database (peran dinamis)', () => {
+		const dinamis = {
+			user: { role: 'ketua_lingkungan' },
+			peranAktif: ['ketua_lingkungan'],
+			scopePeran: 'rt',
+			petugasRtId: 5
+		} as unknown as App.Locals;
+
+		expect(scopeFromRole(dinamis)).toEqual({ kind: 'rt', rtId: 5 });
+	});
+
+	it('peran dinamis ber-scope all melihat semua RT', () => {
+		const dinamis = {
+			user: { role: 'auditor' },
+			peranAktif: ['auditor'],
+			scopePeran: 'all',
+			petugasRtId: null
+		} as unknown as App.Locals;
+
+		expect(scopeFromRole(dinamis)).toEqual({ kind: 'all' });
+	});
 });
 
 describe('canAccessRt()', () => {

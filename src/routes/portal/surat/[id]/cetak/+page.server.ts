@@ -2,7 +2,7 @@ import { db } from '$lib/server/db';
 import { surat, warga, kk, rt, rw } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { error, redirect } from '@sveltejs/kit';
-import { rolesOf, STAFF_ROLES } from '$lib/server/guard';
+import { isStaff } from '$lib/server/guard';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -50,11 +50,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     throw error(404, 'Surat tidak ditemukan');
   }
 
-  const roles = rolesOf(locals);
-  const isStaff = roles.some((r) => (STAFF_ROLES as readonly string[]).includes(r));
   const isOwner = detail.userId === locals.user.id;
 
-  if (!isStaff && !isOwner) {
+  if (!isStaff(locals) && !isOwner) {
     throw error(403, 'Anda tidak berhak mengakses dokumen surat ini.');
   }
 

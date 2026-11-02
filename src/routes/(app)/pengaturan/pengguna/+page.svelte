@@ -49,7 +49,16 @@
     if (role === 'admin_rw') return 'brand';
     if (role === 'bendahara') return 'success';
     if (role === 'pengurus_rt') return 'info';
+    if (role === 'ketua_rw') return 'brand';
+    if (role === 'sekretaris') return 'info';
     return 'default';
+  }
+
+  function isAdminRw(role?: string | null) {
+    return (role ?? '')
+      .split(',')
+      .map((r) => r.trim().toLowerCase())
+      .includes('admin_rw');
   }
 </script>
 
@@ -235,13 +244,13 @@
                   </td>
                   {#if data.bisaAturRole || data.bisaHapus}
                     <td class="aksi">
-                      {#if data.bisaAturRole}
+                      {#if data.bisaAturRole && !isAdminRw(user.role)}
                         <form method="POST" action="?/ubahRole" class="inline">
                           <input type="hidden" name="userId" value={user.id} />
                           <select name="role" class="input-base input-role" aria-label="Role">
                             {#each data.daftarRole as role}
                               <option value={role} selected={(user.role ?? 'warga') === role}>
-                                {data.labelRole[role]}
+                                {data.labelRole[role] ?? role}
                               </option>
                             {/each}
                           </select>
@@ -268,7 +277,7 @@
                         </details>
                       {/if}
 
-                      {#if data.bisaHapus}
+                      {#if data.bisaHapus && !isAdminRw(user.role)}
                         <form
                           method="POST"
                           action="?/hapus"

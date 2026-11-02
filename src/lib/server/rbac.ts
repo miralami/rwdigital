@@ -1,44 +1,58 @@
 import { error, redirect } from '@sveltejs/kit';
-import { roles, type Role } from '$lib/permissions';
+import { bisaAkses, gabungIzin, normalisasiIzin, peranDefault, type Izin } from '$lib/akses';
 import { rolesOf } from './guard';
 
 /**
- * Pemeriksaan izin per-aksi (resource + action), bukan per route-group.
+ * Pemeriksaan izin per-aksi (modul + aksi), bukan per route-group.
  *
  * `$lib/server/guard.ts` hanya memutuskan boleh/tidak membuka sebuah halaman.
  * Begitu halaman terbuka, semua staf masih bisa menekan tombol apa pun di
- * dalamnya. Modul ini memakai matriks yang sama dengan `$lib/permissions.ts`
- * (didefinisikan lewat `ac.newRole`) sehingga aturan hanya ada di satu tempat.
+ * dalamnya. Modul ini memakai izin yang dimuat `hooks.server.ts` dari tabel
+ * `peran`, jadi aturan hanya ada di database + UI pengaturan peran.
  *
- * Contoh: halaman `/kas` boleh dibuka `pengurus_rt` (read-only), tapi aksi
- * "catat kas" tetap butuh `kas:create` yang tidak dimiliki role itu.
+ * Contoh: halaman `/iuran` boleh dibuka `pengurus_rt` (read-only), tapi aksi
+ * "catat pembayaran" tetap butuh `iuran:update` yang tidak dimiliki peran itu.
  */
-export function can(roleList: readonly Role[], resource: string, action: string): boolean {
-  return roleList.some((roleName) => {
-    const role = roles[roleName];
-    if (!role) return false;
-    // `authorize` menerima objek { resource: [actions] }. Satu resource saja,
-    // jadi connector OR/AND berperilaku sama.
-    return role.authorize({ [resource]: [action] } as never, 'OR').success;
-  });
+
+/**
+ * Izin efektif milik user.
+ *
+ * Normalnya `locals.izin` sudah dihitung sekali per request oleh hooks. Kalau
+ * belum ada (unit test, kode yang membangun locals tiruan), hitung dari peran
+ * default sebagai fallback. Peran dinamis tanpa baris DB tidak punya izin.
+ */
+export function izinEfektif(locals: App.Locals): Izin {
+	if (locals.izin) return normalisasiIzin(locals.izin);
+	return gabungIzin(...rolesOf(locals).map((nama) => peranDefault(nama)?.permissions));
+}
+
+/**
+ * Apakah sebuah izin mengizinkan aksi tertentu.
+ *
+ * `admin_rw` selalu penuh: kalau akun membawa peran superadmin, `locals.izin`
+ * sudah berisi seluruh izin. Fallback di sini menjaga perilaku itu walau
+ * locals dibangun manual di test.
+ */
+export function can(izin: Izin | null | undefined, resource: string, action: string): boolean {
+	return bisaAkses(normalisasiIzin(izin), resource, action);
 }
 
 /** Lempar 401/403 kalau user tidak punya izin. Dipanggil di awal setiap aksi mutasi. */
 export function requirePermission(locals: App.Locals, resource: string, action: string): void {
-  if (!locals.user) throw redirect(302, '/login');
+	if (!locals.user) throw redirect(302, '/login');
 
-  if (!can(rolesOf(locals), resource, action)) {
-    throw error(403, `Anda tidak punya izin "${action}" pada modul ${resource}.`);
-  }
+	if (!can(izinEfektif(locals), resource, action)) {
+		throw error(403, `Anda tidak punya izin "${action}" pada modul ${resource}.`);
+	}
 }
 
 /** Versi non-throwing untuk dipakai di `load()` saat menyembunyikan tombol. */
 export function permissionsOf(locals: App.Locals) {
-  const roleList = rolesOf(locals);
-  return {
-    canCreate: (resource: string) => can(roleList, resource, 'create'),
-    canUpdate: (resource: string) => can(roleList, resource, 'update'),
-    canDelete: (resource: string) => can(roleList, resource, 'delete'),
-    can: (resource: string, action: string) => can(roleList, resource, action)
-  };
+	const izin = izinEfektif(locals);
+	return {
+		canCreate: (resource: string) => can(izin, resource, 'create'),
+		canUpdate: (resource: string) => can(izin, resource, 'update'),
+		canDelete: (resource: string) => can(izin, resource, 'delete'),
+		can: (resource: string, action: string) => can(izin, resource, action)
+	};
 }

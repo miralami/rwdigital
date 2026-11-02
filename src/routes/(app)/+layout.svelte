@@ -11,16 +11,23 @@
   import ProfileBlock from '$lib/components/ProfileBlock.svelte';
   import Sheet from '$lib/components/Sheet.svelte';
   import Button from '$lib/components/Button.svelte';
-  import { BOTTOM_NAV_ITEMS, MORE_NAV_ITEMS, isNavActive } from '$lib/nav';
+  import { isNavActive, navUntuk } from '$lib/nav';
   import { formatTanggalPanjang, inisial } from '$lib/format';
+  import type { LayoutData } from './$types';
 
   let { data, children } = $props<{
-    data: { user?: { name?: string; email?: string; role?: string } };
+    data: LayoutData;
     children: import('svelte').Snippet;
   }>();
 
   let moreOpen = $state(false);
   let todayStr = $state('');
+
+  // Menu mengikuti izin dari server: modul yang tidak boleh dibaca tidak
+  // ditampilkan sama sekali, bukan cuma dinonaktifkan.
+  const nav = $derived(navUntuk(data.izin));
+  const bolehTambahWarga = $derived(Boolean(data.izin?.warga?.includes('create')));
+  const bolehCatatKas = $derived(Boolean(data.izin?.kas?.includes('create')));
 
   /**
    * Rute form di dalam route group `(app)`.
@@ -90,7 +97,7 @@
 </script>
 
 <div class="app-shell">
-  <Sidebar user={data.user} onLogout={handleLogout} />
+  <Sidebar user={data.user} izin={data.izin} onLogout={handleLogout} />
 
   <div class="app-main">
     <header class="app-header">
@@ -102,10 +109,14 @@
           {/if}
         </div>
 
-        {#if tampilkanAksiHeader}
+        {#if tampilkanAksiHeader && (bolehTambahWarga || bolehCatatKas)}
           <div class="header-actions">
-            <Button href="/warga/tambah" variant="secondary" icon={UserPlus}>Tambah warga</Button>
-            <Button href="/kas/tambah" variant="primary" icon={Plus}>Catat kas</Button>
+            {#if bolehTambahWarga}
+              <Button href="/warga/tambah" variant="secondary" icon={UserPlus}>Tambah warga</Button>
+            {/if}
+            {#if bolehCatatKas}
+              <Button href="/kas/tambah" variant="primary" icon={Plus}>Catat kas</Button>
+            {/if}
           </div>
         {/if}
 
@@ -130,9 +141,9 @@
 
   <div class="app-dock">
     <BottomNav
-      items={BOTTOM_NAV_ITEMS}
+      items={nav.bottom}
       panelOpen={moreOpen}
-      panelActivePaths={MORE_NAV_ITEMS.map((item) => item.href)}
+      panelActivePaths={nav.more.map((item) => item.href)}
       panelId="lainnya-sheet"
       onOpenPanel={() => (moreOpen = true)}
     />
@@ -146,7 +157,7 @@
   onClose={() => (moreOpen = false)}
 >
   <nav class="sheet-links" aria-label="Menu lainnya">
-    {#each MORE_NAV_ITEMS as item}
+    {#each nav.more as item}
       {@const Icon = item.icon}
       <a
         href={item.href}

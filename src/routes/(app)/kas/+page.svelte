@@ -13,7 +13,6 @@
   import Download from '@lucide/svelte/icons/download';
   import FileSpreadsheet from '@lucide/svelte/icons/file-spreadsheet';
   import Building2 from '@lucide/svelte/icons/building-2';
-  import Home from '@lucide/svelte/icons/home';
   import Receipt from '@lucide/svelte/icons/receipt';
   import CheckCircle2 from '@lucide/svelte/icons/check-circle-2';
   import Clock from '@lucide/svelte/icons/clock';
@@ -460,7 +459,7 @@
       render: (row: any) => {
         let html = `<div style="display: inline-flex; align-items: center; gap: 6px;">`;
         html += `<button type="button" class="btn btn-sm btn-secondary text-xs" data-detail-rw="${escapeHtml(row.id)}" title="Lihat detail rincian transaksi">Detail</button>`;
-        if (!row.dibatalkan) {
+        if (!row.dibatalkan && data.akses.update) {
           html += `<button type="button" class="btn btn-sm btn-secondary text-xs" style="color: var(--color-danger); border-color: color-mix(in oklab, var(--color-danger) 40%, transparent);" data-batal-rw="${escapeHtml(row.id)}" title="Batalkan transaksi">Batal</button>`;
         }
         html += `</div>`;
@@ -579,13 +578,13 @@
         const info = getStatusMidtransPending(row);
 
         // Tombol Bayar jika transaksi Midtrans pending dan belum kadaluarsa (<24 jam)
-        if (row.metodePembayaran === 'midtrans' && info?.isPending && !row.dibatalkan) {
+        if (data.akses.create && row.metodePembayaran === 'midtrans' && info?.isPending && !row.dibatalkan) {
           html += `<button type="button" class="btn-pay-rt" data-pay-rt="${escapeHtml(row.id)}" title="Buka pembayaran Midtrans (Sisa: ${escapeHtml(info.sisaWaktuStr)})">Bayar</button>`;
         }
 
         // Kebutuhan user: jika transaksi Midtrans sudah dibayar (lunas), jangan ada tombol batal!
         const isMidtransLunas = row.metodePembayaran === 'midtrans' && (row.midtransStatus === 'settlement' || row.midtransStatus === 'capture');
-        if (!row.dibatalkan && !isMidtransLunas) {
+        if (!row.dibatalkan && !isMidtransLunas && data.akses.update) {
           html += `<button type="button" class="btn btn-sm btn-secondary text-xs" style="color: var(--color-danger); border-color: color-mix(in oklab, var(--color-danger) 40%, transparent);" data-batal-rt="${escapeHtml(row.id)}" title="Batalkan transaksi">Batal</button>`;
         }
 
@@ -1100,8 +1099,8 @@
 
 <div class="kas-container">
   <PageHeader
-    title="Modul Keuangan & Kas RT"
-    subtitle="Pemisahan pembukuan kas RW dan kas per-RT berbasis rekapitulasi (Spesifik Bendahara)."
+    title="Modul Keuangan & Kas RW"
+    subtitle="Pembukuan kas RW, pos anggaran, dan rekap penerimaan iuran."
   >
     <div class="header-actions">
       <!-- Ekspor Excel & CSV Berkualitas Tinggi (KU-03) -->
@@ -1116,53 +1115,19 @@
             <span>CSV</span>
           </button>
         </div>
-        <button type="button" class="btn btn-action" onclick={() => (showModalTambahRw = true)}>
-          <Plus size={16} />
-          <span>Catat Kas RW</span>
-        </button>
-      {:else if activeTab === 'rt'}
-        <div class="export-btn-group">
-          <button type="button" class="btn btn-secondary" onclick={eksporExcelKasRt} title="Unduh format spreadsheet Microsoft Excel kas RT dengan kop & border">
-            <FileSpreadsheet size={16} class="text-success" />
-            <span>Excel (.xls)</span>
+        {#if data.akses.create}
+          <button type="button" class="btn btn-action" onclick={() => (showModalTambahRw = true)}>
+            <Plus size={16} />
+            <span>Catat Kas RW</span>
           </button>
-          <button type="button" class="btn btn-secondary" onclick={eksporCsvKasRt} title="Unduh format CSV standar kas RT UTF-8 BOM">
-            <Download size={16} />
-            <span>CSV</span>
-          </button>
-        </div>
-        <button
-          type="button"
-          class="btn btn-action"
-          onclick={() => {
-            formJenis = 'pemasukan';
-            metodeRt = 'midtrans';
-            showModalTambahRt = true;
-          }}
-        >
-          <Plus size={16} />
-          <span>Catat Kas RT</span>
-        </button>
-      {:else if activeTab === 'rekap'}
-        <div class="export-btn-group">
-          <button type="button" class="btn btn-secondary" onclick={eksporExcelRekapIuran} title="Unduh format spreadsheet Microsoft Excel rekap iuran RT">
-            <FileSpreadsheet size={16} class="text-success" />
-            <span>Excel (.xls)</span>
-          </button>
-          <button type="button" class="btn btn-secondary" onclick={eksporCsvRekapIuran} title="Unduh format CSV rekap iuran RT UTF-8 BOM">
-            <Download size={16} />
-            <span>CSV</span>
-          </button>
-        </div>
-        <button type="button" class="btn btn-action" onclick={() => (showModalSetoranRt = true)}>
-          <Receipt size={16} />
-          <span>Catat Setoran RT</span>
-        </button>
+        {/if}
       {:else if activeTab === 'kategori'}
-        <button type="button" class="btn btn-action" onclick={() => (showModalTambahKategori = true)}>
-          <Plus size={16} />
-          <span>Tambah Pos Kategori</span>
-        </button>
+        {#if data.akses.create}
+          <button type="button" class="btn btn-action" onclick={() => (showModalTambahKategori = true)}>
+            <Plus size={16} />
+            <span>Tambah Pos Kategori</span>
+          </button>
+        {/if}
       {/if}
     </div>
   </PageHeader>
@@ -1207,32 +1172,11 @@
     <button
       type="button"
       class="tab-btn"
-      class:active={activeTab === 'rt'}
-      onclick={() => (activeTab = 'rt')}
-    >
-      <Home size={18} />
-      <span>Kas RT (Mandiri per-RT — KU-01)</span>
-      <span class="tab-pill">Baru</span>
-    </button>
-
-    <button
-      type="button"
-      class="tab-btn"
-      class:active={activeTab === 'rekap'}
-      onclick={() => (activeTab = 'rekap')}
-    >
-      <Receipt size={18} />
-      <span>Rekapitulasi Iuran RT (KU-02)</span>
-    </button>
-
-    <button
-      type="button"
-      class="tab-btn"
       class:active={activeTab === 'kategori'}
       onclick={() => (activeTab = 'kategori')}
     >
       <Tags size={18} />
-      <span>Pos & Kategori (KU-04)</span>
+      <span>Pos & Kategori</span>
     </button>
   </div>
 
@@ -1649,12 +1593,14 @@
                   {/if}
                 </span>
               </div>
-              <form method="POST" action="?/hapusKategori">
-                <input type="hidden" name="id" value={kat.id} />
-                <button type="submit" class="btn-icon-danger" title="Hapus kategori">
-                  <Trash2 size={15} />
-                </button>
-              </form>
+              {#if data.akses.delete}
+                <form method="POST" action="?/hapusKategori">
+                  <input type="hidden" name="id" value={kat.id} />
+                  <button type="submit" class="btn-icon-danger" title="Hapus kategori">
+                    <Trash2 size={15} />
+                  </button>
+                </form>
+              {/if}
             </div>
           {:else}
             <p class="text-xs text-muted py-3">Belum ada pos penerimaan.</p>
@@ -1687,12 +1633,14 @@
                   {/if}
                 </span>
               </div>
-              <form method="POST" action="?/hapusKategori">
-                <input type="hidden" name="id" value={kat.id} />
-                <button type="submit" class="btn-icon-danger" title="Hapus kategori">
-                  <Trash2 size={15} />
-                </button>
-              </form>
+              {#if data.akses.delete}
+                <form method="POST" action="?/hapusKategori">
+                  <input type="hidden" name="id" value={kat.id} />
+                  <button type="submit" class="btn-icon-danger" title="Hapus kategori">
+                    <Trash2 size={15} />
+                  </button>
+                </form>
+              {/if}
             </div>
           {:else}
             <p class="text-xs text-muted py-3">Belum ada pos pengeluaran.</p>
@@ -2651,16 +2599,6 @@
     background: var(--color-surface);
     box-shadow: var(--shadow-sm);
     border-bottom: 3px solid var(--color-accent);
-  }
-
-  .tab-pill {
-    padding: 2px 6px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    background: var(--color-success-bg);
-    color: var(--color-success);
-    border-radius: var(--radius-full);
   }
 
   /* ─── Info Banner ─── */

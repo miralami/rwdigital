@@ -4,7 +4,7 @@ import { db } from '$lib/server/db';
 import { transaksiKasRt, rt, kategoriKas } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { createMidtransSnapTransaction } from '$lib/server/midtrans';
-import { rolesOf, STAFF_ROLES } from '$lib/server/guard';
+import { isStaff } from '$lib/server/guard';
 
 const NOMINAL_MAKS = 1_000_000_000; // Rp1 M — batas wajar untuk kas lingkungan
 
@@ -14,9 +14,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   }
 
   // Hanya pengurus yang boleh mencatat transaksi kas, bukan akun warga.
-  const roles = rolesOf(locals);
-  const isStaff = roles.some((role) => (STAFF_ROLES as readonly string[]).includes(role));
-  if (!isStaff) {
+  if (!isStaff(locals)) {
     return json({ success: false, error: 'Forbidden: hanya pengurus/pengurus RT/bendahara yang boleh mencatat kas RT.' }, { status: 403 });
   }
 

@@ -46,6 +46,35 @@ export const petugasRt = sqliteTable('petugas_rt', {
   index('petugas_rt_rt_id_idx').on(table.rtId)
 ]);
 
+// ─── Peran & Izin (RBAC dinamis) ─────────────────────────────────────────────
+// Sumber kebenaran izin aplikasi. Better Auth hanya menyimpan slug role di
+// `user.role`; modul ini yang menentukan modul/aksi apa yang boleh dilakukan
+// pemilik role tersebut, sehingga superadmin bisa membuat role baru tanpa
+// mengubah kode.
+//
+// - `nama`      : slug yang juga disimpan di `user.role` (mis. "ketua_rw").
+// - `tipe`      : "staff" (masuk aplikasi admin) atau "warga" (portal).
+// - `scope`     : "all" (seluruh RW), "rt" (hanya RT yang ditugaskan), "none".
+// - `permissions`: map modul → daftar aksi, mis. { "warga": ["read"] }.
+// - `sistem`    : role bawaan yang boleh diubah izinnya tapi tidak dihapus.
+// - `superadmin` : role dengan akses penuh permanen, tidak bisa diedit/dihapus.
+export const peran = sqliteTable('peran', {
+  id:          integer('id').primaryKey({ autoIncrement: true }),
+  nama:        text('nama').notNull().unique(),
+  label:       text('label').notNull(),
+  deskripsi:   text('deskripsi'),
+  tipe:        text('tipe', { enum: ['staff', 'warga'] }).notNull().default('staff'),
+  scope:       text('scope', { enum: ['all', 'rt', 'none'] }).notNull().default('none'),
+  permissions: text('permissions', { mode: 'json' })
+    .$type<Record<string, string[]>>()
+    .notNull()
+    .default({}),
+  sistem:      integer('sistem', { mode: 'boolean' }).notNull().default(false),
+  superadmin:  integer('superadmin', { mode: 'boolean' }).notNull().default(false),
+  urutan:      integer('urutan').notNull().default(0),
+  ...timestamps
+});
+
 // ─── KK (Kartu Keluarga) ─────────────────────────────────────────────────────
 export const kk = sqliteTable('kk', {
   id:        integer('id').primaryKey({ autoIncrement: true }),
@@ -228,6 +257,29 @@ export const pembayaran = sqliteTable('pembayaran', {
   dicatatOleh: text('dicatat_oleh').notNull(),  // user id
   ...timestamps
 });
+
+// Pesanan pembayaran iuran lewat Midtrans Snap. Dipisahkan dari `pembayaran`
+// karena order bisa dibuat, kedaluwarsa, atau gagal tanpa pernah menjadi
+// pembayaran resmi. Baru setelah settlement/`capture` sukses baris
+// `pembayaran` dibuat (lewat `catatPembayaran`) dan `pembayaranId` diisi.
+export const pembayaranOnline = sqliteTable('pembayaran_online', {
+  id:              integer('id').primaryKey({ autoIncrement: true }),
+  tagihanId:       integer('tagihan_id').notNull().references(() => tagihan.id),
+  userId:          text('user_id').notNull(),          // Better Auth user.id
+  orderId:         text('order_id').notNull().unique(), // order_id Midtrans
+  jumlah:          real('jumlah').notNull(),
+  status:          text('status', {
+    enum: ['pending', 'capture', 'settlement', 'deny', 'cancel', 'expire', 'failure', 'refund']
+  }).notNull().default('pending'),
+  snapToken:       text('snap_token'),
+  snapRedirectUrl: text('snap_redirect_url'),
+  paymentType:     text('payment_type'),
+  pembayaranId:    integer('pembayaran_id').references(() => pembayaran.id),
+  ...timestamps
+}, (table) => [
+  index('pembayaran_online_tagihan_idx').on(table.tagihanId),
+  index('pembayaran_online_status_idx').on(table.status)
+]);
 
 // Pengajuan konfirmasi bayar dari portal warga (biasanya tunai ke bendahara).
 // Baru menjadi `pembayaran` resmi setelah diterima bendahara, supaya status

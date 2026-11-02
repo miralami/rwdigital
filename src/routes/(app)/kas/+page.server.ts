@@ -14,7 +14,7 @@ import { eq, sql, desc, and, or } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { saveUploadedFile, UploadError } from '$lib/server/storage';
 import { getMidtransConfig } from '$lib/server/midtrans';
-import { requirePermission } from '$lib/server/rbac';
+import { permissionsOf, requirePermission } from '$lib/server/rbac';
 import { requireRtAccess, requireScope, scopeFromRole, visibleRt } from '$lib/server/scope';
 import { hitungPersentase, hitungRekapIuran, hitungSaldo } from '$lib/server/kas';
 import type { PageServerLoad, Actions } from './$types';
@@ -22,6 +22,7 @@ import type { PageServerLoad, Actions } from './$types';
 export const load: PageServerLoad = async ({ url, locals }) => {
   const midtransConfig = getMidtransConfig();
   const scope = requireScope(scopeFromRole(locals));
+  const izin = permissionsOf(locals);
 
   // Jangan menulis ke database dari GET. Cukup teruskan order id ke klien,
   // lalu klien memanggil endpoint verifikasi (POST) yang mengecek ke Midtrans.
@@ -211,6 +212,12 @@ export const load: PageServerLoad = async ({ url, locals }) => {
   const persentaseIuranRw = hitungPersentase(totalIuranTerkumpul, totalIuranTarget);
 
   return {
+    // Izin dipakai UI untuk menyembunyikan tombol yang pasti ditolak server.
+    akses: {
+      create: izin.can('kas', 'create'),
+      update: izin.can('kas', 'update'),
+      delete: izin.can('kas', 'delete')
+    },
     rwData,
     daftarRt,
     semuaKategori,

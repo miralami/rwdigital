@@ -1,32 +1,51 @@
 import { error } from '@sveltejs/kit';
+import { peranDefault, type ScopePeran } from '$lib/akses';
 import { rolesOf } from './guard';
 
 /**
- * Batas data (row-level scope) untuk pengurus RT.
+ * Batas data (row-level scope).
  *
  * Izin per-aksi (`$lib/server/rbac.ts`) hanya menjawab "boleh melakukan apa".
  * Modul ini menjawab "boleh menyentuh baris milik siapa":
  *
- * - `admin_rw` & `bendahara` → semua RT.
- * - `pengurus_rt` → hanya RT yang ditugaskan di tabel `petugas_rt`.
- * - akun pengurus_rt tanpa penugasan → tidak ada akses (fail-closed), supaya
- *   data RT lain tidak bocor hanya karena penugasan belum diisi.
+ * - `all`  → seluruh RW.
+ * - `rt`   → hanya RT yang ditugaskan di tabel `petugas_rt`.
+ * - `none` → tidak ada data staf (portal warga).
+ *
+ * Scope berasal dari kolom `scope` pada tabel `peran`, sehingga peran baru
+ * buatan superadmin otomatis punya batas data yang benar. Akun tanpa penugasan
+ * RT tetap fail-closed, supaya data RT lain tidak bocor.
  */
 export type DataScope =
 	| { kind: 'all' }
 	| { kind: 'rt'; rtId: number }
 	| { kind: 'none' };
 
-export function scopeFromRole(locals: App.Locals): DataScope {
-	const roleList = rolesOf(locals);
+const URUTAN_SCOPE: Record<ScopePeran, number> = { none: 0, rt: 1, all: 2 };
 
-	// Role dengan pandangan RW penuh. Kalau akun punya beberapa role, yang
-	// paling luas menang supaya admin yang juga pengurus RT tidak terkunci.
-	if (roleList.includes('admin_rw') || roleList.includes('bendahara')) {
-		return { kind: 'all' };
+function scopeTerluas(a: ScopePeran, b: ScopePeran): ScopePeran {
+	return URUTAN_SCOPE[b] > URUTAN_SCOPE[a] ? b : a;
+}
+
+/** Scope peran efektif: `locals.scopePeran` dari hooks, fallback peran default. */
+export function scopePeranOf(locals: App.Locals): ScopePeran {
+	if (locals.scopePeran === 'all' || locals.scopePeran === 'rt' || locals.scopePeran === 'none') {
+		return locals.scopePeran;
 	}
 
-	if (roleList.includes('pengurus_rt')) {
+	// Fallback untuk locals tiruan/unit test.
+	return rolesOf(locals).reduce<ScopePeran>(
+		(terluas, nama) => scopeTerluas(terluas, peranDefault(nama)?.scope ?? 'none'),
+		'none'
+	);
+}
+
+export function scopeFromRole(locals: App.Locals): DataScope {
+	const scope = scopePeranOf(locals);
+
+	if (scope === 'all') return { kind: 'all' };
+
+	if (scope === 'rt') {
 		const rtId = locals.petugasRtId;
 		if (typeof rtId === 'number' && Number.isInteger(rtId) && rtId > 0) {
 			return { kind: 'rt', rtId };

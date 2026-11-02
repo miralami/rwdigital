@@ -2,7 +2,7 @@ import { db } from '$lib/server/db';
 import { warga, kk, permintaanPembaruan } from '$lib/server/db/schema';
 import { eq, desc } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
-import { requireRole, STAFF_ROLES } from '$lib/server/guard';
+import { requireStaff } from '$lib/server/guard';
 import { requirePermission } from '$lib/server/rbac';
 import { requireRtAccess, requireScope, scopeFromRole } from '$lib/server/scope';
 import type { Actions, PageServerLoad } from './$types';
@@ -21,7 +21,7 @@ const TRANSISI_VALID: Record<string, readonly string[]> = {
 };
 
 export const load: PageServerLoad = async ({ locals, url }) => {
-  requireRole({ locals, url }, STAFF_ROLES);
+  requireStaff({ locals, url });
   const scope = requireScope(scopeFromRole(locals));
 
   // Daftar permintaan dengan data warga, dibatasi ke RT tugas pengurus.
@@ -55,7 +55,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 export const actions: Actions = {
   tinjau: async ({ request, locals, url }) => {
-    requireRole({ locals, url }, STAFF_ROLES);
+    requireStaff({ locals, url });
     requirePermission(locals, 'warga', 'update');
     const userId = locals.user!.id;
 

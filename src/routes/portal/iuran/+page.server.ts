@@ -6,13 +6,15 @@ import {
   tagihan,
   jenisIuran,
   pembayaran,
-  konfirmasiBayar
+  konfirmasiBayar,
+  pembayaranOnline
 } from '$lib/server/db/schema';
 import { and, desc, eq, inArray } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import { hitungSisa, ringkasTagihan } from '$lib/server/pembayaran';
 import { menunggak } from '$lib/server/iuran';
+import { getMidtransConfig } from '$lib/server/midtrans';
 import type { PageServerLoad, Actions } from './$types';
 
 const ajukanSchema = z.object({
@@ -44,12 +46,24 @@ async function kkDariUser(userId: string | undefined) {
   return baris ?? null;
 }
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, url }) => {
   const pemilik = await kkDariUser(locals.user?.id);
   const hariIni = new Date().toISOString().slice(0, 10);
+  const midtransConfig = getMidtransConfig();
+  const orderIdToSync = url.searchParams.get('order_id');
 
   if (!pemilik) {
-    return { terhubung: false, pemilik: null, tagihan: [], ringkasan: null, riwayat: [], konfirmasi: [] };
+    return {
+      terhubung: false,
+      pemilik: null,
+      tagihan: [],
+      ringkasan: null,
+      riwayat: [],
+      konfirmasi: [],
+      orderIdToSync: null,
+      midtransClientKey: midtransConfig.clientKey,
+      midtransSnapUrl: midtransConfig.snapUrl
+    };
   }
 
   const daftar = await db
@@ -131,7 +145,10 @@ export const load: PageServerLoad = async ({ locals }) => {
     tagihan: daftarTagihan,
     ringkasan,
     riwayat,
-    konfirmasi: semuaKonfirmasi
+    konfirmasi: semuaKonfirmasi,
+    orderIdToSync,
+    midtransClientKey: midtransConfig.clientKey,
+    midtransSnapUrl: midtransConfig.snapUrl
   };
 };
 

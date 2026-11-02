@@ -1,14 +1,19 @@
 <script lang="ts">
   import { page } from '$app/state';
   import ProfileBlock from './ProfileBlock.svelte';
-  import { SIDEBAR_NAV_ITEMS, isNavActive } from '$lib/nav';
+  import { SIDEBAR_NAV_ITEMS, filterNav, isNavActive } from '$lib/nav';
+  import type { Izin } from '$lib/akses';
 
   interface Props {
     user?: { name?: string; email?: string; role?: string } | null;
+    /** Izin efektif dari server; menu tanpa izin `read` disembunyikan. */
+    izin?: Izin;
     onLogout: () => void;
   }
 
-  let { user, onLogout }: Props = $props();
+  let { user, izin, onLogout }: Props = $props();
+
+  const items = $derived(filterNav(SIDEBAR_NAV_ITEMS, izin));
 </script>
 
 <aside class="sidebar">
@@ -21,7 +26,7 @@
   </div>
 
   <nav class="sidebar-nav" aria-label="Menu utama">
-    {#each SIDEBAR_NAV_ITEMS as item}
+    {#each items as item}
       {@const Icon = item.icon}
       <a
         href={item.href}
