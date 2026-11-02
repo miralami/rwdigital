@@ -36,6 +36,32 @@ export const adminRw = ac.newRole({
   landing: ['create', 'read', 'update', 'delete']
 });
 
+// Ketua RW — memantau seluruh data & menyetujui surat, tanpa keuangan.
+export const ketuaRw = ac.newRole({
+  warga: ['read'],
+  kk: ['read'],
+  rt: ['read'],
+  rw: ['read'],
+  pengumuman: ['read'],
+  iuran: ['read'],
+  kas: ['read'],
+  pengurus: ['read'],
+  surat: ['read', 'update'],
+  landing: ['read']
+});
+
+// Sekretaris — kelola kependudukan, surat, dan pengumuman.
+export const sekretaris = ac.newRole({
+  warga: ['create', 'read', 'update', 'delete'],
+  kk: ['create', 'read', 'update', 'delete'],
+  rt: ['read'],
+  rw: ['read'],
+  pengumuman: ['create', 'read', 'update', 'delete'],
+  pengurus: ['read'],
+  surat: ['create', 'read', 'update'],
+  landing: ['read']
+});
+
 // Pengurus RT — kelola data warga & KK wilayahnya, ajukan surat.
 export const pengurusRt = ac.newRole({
   warga: ['create', 'read', 'update'],
@@ -74,6 +100,8 @@ export const warga = ac.newRole({
 
 export const roles = {
   admin_rw: adminRw,
+  ketua_rw: ketuaRw,
+  sekretaris,
   pengurus_rt: pengurusRt,
   bendahara,
   warga
