@@ -7,6 +7,7 @@
   import CircleAlert from '@lucide/svelte/icons/circle-alert';
   import Megaphone from '@lucide/svelte/icons/megaphone';
   import CircleCheckBig from '@lucide/svelte/icons/circle-check-big';
+  import FileText from '@lucide/svelte/icons/file-text';
   import Baby from '@lucide/svelte/icons/baby';
   import Button from '$lib/components/Button.svelte';
   import Card from '$lib/components/Card.svelte';
@@ -74,8 +75,7 @@
     </p>
   {/if}
 
-  <!-- KPI: 4 sel. Di mobile sel saldo jadi hero dan sel pengumuman disembunyikan
-       (datanya sudah tampil di panel "Perlu perhatian"). -->
+  <!-- KPI Ringkasan Modul Terkonsolidasi -->
   <section class="kpi-grid" aria-label="Ringkasan sesuai modul yang boleh diakses">
     {#if data.akses.kas}
       <div class="kpi-cell kpi-cell-hero">
@@ -89,24 +89,11 @@
       </div>
     {/if}
 
-    {#if data.bisaCatatKas || data.akses.warga}
-      <div class="kpi-cell kpi-cell-actions">
-        <div class="cell-actions">
-          {#if data.bisaCatatKas}
-            <Button href="/kas/tambah" variant="primary" size="lg" icon={Plus} class="cell-action-primary">Catat kas</Button>
-          {/if}
-          {#if data.akses.warga}
-            <Button href="/kk" variant="secondary" size="lg" icon={UserPlus}>Warga</Button>
-          {/if}
-        </div>
-      </div>
-    {/if}
-
     {#if data.akses.warga}
       <div class="kpi-cell">
         <StatCard
-          title="Total warga"
-          value={data.stats.totalWarga}
+          title="Kependudukan"
+          value="{data.stats.totalWarga} Jiwa"
           description="{data.stats.totalKk} KK di {data.stats.totalRt} RT"
           href="/kk"
         />
@@ -116,11 +103,23 @@
     {#if data.akses.iuran}
       <div class="kpi-cell">
         <StatCard
-          title="Tagihan belum bayar"
+          title="Tagihan Iuran"
           value={data.stats.belumBayarCount}
-          description="Total {formatRupiah(data.stats.totalTagihanPending)}"
+          description="Tunggakan {formatRupiah(data.stats.totalTagihanPending)}"
           variant={tunggakan ? 'warning' : 'success'}
           href="/iuran"
+        />
+      </div>
+    {/if}
+
+    {#if data.akses.surat}
+      <div class="kpi-cell">
+        <StatCard
+          title="Surat Menunggu"
+          value={data.stats.suratPendingCount}
+          description={data.stats.suratPendingCount > 0 ? 'Perlu tindakan pengurus' : 'Semua surat telah diproses'}
+          variant={data.stats.suratPendingCount > 0 ? 'warning' : 'default'}
+          href="/surat"
         />
       </div>
     {/if}
@@ -128,7 +127,7 @@
     {#if data.akses.pengumuman}
       <div class="kpi-cell kpi-cell-extra">
         <StatCard
-          title="Pengumuman aktif"
+          title="Pengumuman Aktif"
           value={data.pengumumanTerbaru.length}
           description={pengumumanTerakhir ? `Terbit ${tanggalRelatif(pengumumanTerakhir)}` : 'Belum ada pengumuman'}
           href="/pengumuman"
@@ -310,20 +309,6 @@
     min-width: 0;
   }
 
-  /* Aksi utama mobile: melingkar di bawah hero, melebar 2 kolom. */
-  .kpi-cell-actions {
-    grid-column: 1 / -1;
-    display: none;
-  }
-
-  .cell-actions {
-    display: flex;
-    gap: var(--space-2);
-    width: 100%;
-  }
-  .cell-actions :global(.cell-action-primary) { flex: 1 1 auto; }
-  .cell-actions :global(.btn) { flex: 0 0 auto; }
-
   .kpi-cell-extra { display: none; }
 
   /* ─── Demografi ─── */
@@ -453,6 +438,5 @@
 
   @media (max-width: 1023px) {
     .kpi-cell-hero { grid-column: 1 / -1; }
-    .kpi-cell-actions { display: flex; }
   }
 </style>

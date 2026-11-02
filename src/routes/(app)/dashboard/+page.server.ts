@@ -1,5 +1,5 @@
 import { db } from '$lib/server/db';
-import { warga, kk, rt, transaksiKas, transaksiKasRt, tagihan, pengumuman } from '$lib/server/db/schema';
+import { warga, kk, rt, transaksiKas, transaksiKasRt, tagihan, pengumuman, surat } from '$lib/server/db/schema';
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { hitungBucketUsia } from '$lib/server/usia';
 import { hitungSaldo } from '$lib/server/kas';
@@ -32,6 +32,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     warga: izin.can('warga', 'read'),
     kas: izin.can('kas', 'read'),
     iuran: izin.can('iuran', 'read'),
+    surat: izin.can('surat', 'read'),
     pengumuman: izin.can('pengumuman', 'read')
   };
 
@@ -134,7 +135,19 @@ export const load: PageServerLoad = async ({ locals }) => {
       .where(batasWarga);
   }
 
-  // 4. Pengumuman tetap tingkat RW — informasi berlaku untuk semua warga.
+  // 4. Pengajuan Surat Pengantar menunggu proses
+  let suratPendingCount = 0;
+  if (akses.surat) {
+    const [sc] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(surat)
+      .innerJoin(warga, eq(surat.wargaId, warga.id))
+      .innerJoin(kk, eq(warga.kkId, kk.id))
+      .where(and(eq(surat.status, 'diajukan'), batasWarga));
+    suratPendingCount = Number(sc?.count ?? 0);
+  }
+
+  // 5. Pengumuman tetap tingkat RW — informasi berlaku untuk semua warga.
   const pengumumanTerbaru = akses.pengumuman
     ? await db
         .select({
@@ -230,7 +243,8 @@ export const load: PageServerLoad = async ({ locals }) => {
       totalPengeluaran: ringkasanKas.pengeluaran,
       belumBayarCount: tagihanSummary?.belumBayarCount ?? 0,
       lunasCount: tagihanSummary?.lunasCount ?? 0,
-      totalTagihanPending: tagihanSummary?.totalTagihanPending ?? 0
+      totalTagihanPending: tagihanSummary?.totalTagihanPending ?? 0,
+      suratPendingCount
     },
     pengumumanTerbaru,
     transaksiTerbaru,

@@ -23,26 +23,18 @@ Dalam ketiadaan wawancara, regulasi resmi menjadi dasar utama penentuan scope �
 
 > Feature set ini ditetapkan tanpa wawancara mitra (tidak memungkinkan), berdasarkan analisis regulasi resmi (UU Desa 6/2014, Permendagri 18/2018) dan plausibility untuk implementasi capstone.
 
-### Core MVP (Confirmed — Berdasarkan laporan.md)
+### Core MVP & High Priority (Status Terkini: Selesai / Implemented)
 
-| # | Fitur | Dasar Hukum / Regulasi | Status |
+| # | Fitur | Cakupan Implementasi | Status |
 |---|---|---|---|
-| 1 | Manajemen Kependudukan | Facilitative duty — RW bantu pendataan warga (Permendagri 18/2018) | Sudah ada (perlu penyempurnaan) |
-| 2 | Surat-Menyurat | Pelayanan administrasi warga (SF-SR-01..07) | Dalam perancangan / scaffolding |
-| 3 | Kas RW | Dana swadaya masyarakat diakui | Sudah ada (perlu penyempurnaan) |
-| 4 | Kas RT | Dana swadaya masyarakat per RT (uang sosial, kematian, dll.) | Baru — tambahan MVP |
-| 5 | Iuran | Dana swadaya masyarakat | Sudah ada (perlu penyempurnaan) |
-| 6 | Pengumuman & Event | Distribusi informasi = fungsi resmi | Perluasan: event time-based + attachment |
-| 7 | Landing Page & Dashboard Statistik | Analisis data internal + profil RW publik | Baru — MVP |
-
-### High Priority (Phase 2)
-
-| # | Fitur | Dasar Hukum | Status |
-|---|---|---|---|
-| 8 | Aspirasi & Pengaduan | Fungsi resmi — Permendagri 18/2018 | Belum ada |
-| 9 | Notifikasi | Pendukung fungsi distribusi informasi | Belum ada |
-| 10 | Angka Kelahiran / Produktif / Pensiun (Computed Stats) | Turunan data kependudukan | Belum ada |
-| 11 | Statistik Event (Kehadiran) | Analisis data internal | Belum ada |
+| 1 | Manajemen Kependudukan (KK-First) | Entry `/kk` dengan rekap demografi, pengelompokan anggota KK expandable, alur input atomik buat KK dulu baru anggota, badge antrean permintaan pembaruan data | ✅ Selesai (Full) |
+| 2 | Surat-Menyurat (Otoritas RT) | Pengajuan surat portal, persetujuan eksklusif Pengurus RT (RW monitoring), TTD digital RT tersemat otomatis di cetak PDF | ✅ Selesai (Full) |
+| 3 | Kas RW & Kas RT | Pembukuan kas 2 level, alokasi porsi kas, integrasi Midtrans online, audit trail void | ✅ Selesai (Full) |
+| 4 | Iuran Warga & Setoran RT | Dashboard KPI atas, hirarki 2 level (RW rekap agregat vs RT per-KK), alur setoran RT ke RW, konfirmasi bayar terpadu, auto-billing tagihan bulanan | ✅ Selesai (Full) |
+| 5 | Pengumuman & Informasi | Pemicu berkala (mingguan, bulanan, interval hari), foto sampul (thumbnail), galeri multi-foto kegiatan, notifikasi broadcast | ✅ Selesai (Full) |
+| 6 | Notifikasi & Otentikasi | Model notifikasi multi-channel (in-app, email, push), drawer notifikasi di portal, klaim akun mandiri warga via verifikasi NIK/KK/Tgl Lahir, pendaftaran email & reset password | ✅ Selesai (Full) |
+| 7 | Pengaturan & RBAC Dinamis | Tabbed UI pengguna & role di `/pengaturan/pengguna`, perizinan dinamis DB, delegasi penugasan RT, kelola TTD digital RT di modal RT | ✅ Selesai (Full) |
+| 8 | Beranda & Konsolidasi KPI | Dasbor ringkasan KPI 5 modul terpadu tanpa tombol aksi redundan, grafik demografi donat | ✅ Selesai (Full) |
 
 ### Medium (Phase 3)
 
