@@ -32,3 +32,6 @@ local.db-shm
 /playwright-report
 /blob-report
 /playwright/.cache
+
+/static/uploads/surat
+local.db.bak
