@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 const UPLOAD_ROOT = join(process.cwd(), 'static', 'uploads');
 
-export type UploadFolder = 'kas' | 'surat' | 'pengurus' | 'landing' | 'ttd';
+export type UploadFolder = 'kas' | 'surat' | 'pengurus' | 'landing' | 'ttd' | 'pengumuman';
 
 /** Batas ukuran per folder. Dipakai juga oleh form untuk menampilkan hint. */
 export const UPLOAD_MAX_BYTES: Record<UploadFolder, number> = {
@@ -11,7 +11,8 @@ export const UPLOAD_MAX_BYTES: Record<UploadFolder, number> = {
   surat: 10 * 1024 * 1024,
   pengurus: 2 * 1024 * 1024,
   landing: 5 * 1024 * 1024,
-  ttd: 2 * 1024 * 1024
+  ttd: 2 * 1024 * 1024,
+  pengumuman: 10 * 1024 * 1024
 };
 
 /**
@@ -40,6 +41,10 @@ const ALLOWED: Record<UploadFolder, { mimes: readonly string[]; exts: readonly s
     exts: ['jpg', 'jpeg', 'png', 'webp']
   },
   ttd: {
+    mimes: ['image/jpeg', 'image/png', 'image/webp'],
+    exts: ['jpg', 'jpeg', 'png', 'webp']
+  },
+  pengumuman: {
     mimes: ['image/jpeg', 'image/png', 'image/webp'],
     exts: ['jpg', 'jpeg', 'png', 'webp']
   }

@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
-import { warga, kk, rt } from '$lib/server/db/schema';
-import { eq } from 'drizzle-orm';
+import { warga, kk, rt, notifikasi } from '$lib/server/db/schema';
+import { eq, desc } from 'drizzle-orm';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals }) => {
@@ -20,8 +20,21 @@ export const load: LayoutServerLoad = async ({ locals }) => {
         .limit(1)
     : [];
 
+  const daftarNotifikasi = userId
+    ? await db
+        .select()
+        .from(notifikasi)
+        .where(eq(notifikasi.userId, userId))
+        .orderBy(desc(notifikasi.createdAt))
+        .limit(10)
+    : [];
+
+  const unreadNotifCount = daftarNotifikasi.filter((n) => !n.dibaca).length;
+
   return {
     user: locals.user,
-    wargaInfo: linked ?? null
+    wargaInfo: linked ?? null,
+    notifikasi: daftarNotifikasi,
+    unreadNotifCount
   };
 };

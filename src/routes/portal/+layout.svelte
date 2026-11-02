@@ -6,23 +6,36 @@
   import BottomNav from '$lib/components/BottomNav.svelte';
   import ProfileBlock from '$lib/components/ProfileBlock.svelte';
   import Sheet from '$lib/components/Sheet.svelte';
+  import Bell from '@lucide/svelte/icons/bell';
+  import CheckCheck from '@lucide/svelte/icons/check-check';
   import {
     PORTAL_NAV_ITEMS,
     PORTAL_SECTION_HREF,
     PORTAL_SECTIONS,
     type PortalSection
   } from '$lib/nav';
-  import { formatTanggalPanjang, inisial } from '$lib/format';
+  import { formatTanggalPanjang, inisial, formatTanggal } from '$lib/format';
 
   let { data, children } = $props<{
     data: {
       user?: { name?: string; email?: string; role?: string };
       wargaInfo?: { nama: string; nik: string; noKk: string; nomorRt: number } | null;
+      notifikasi?: Array<any>;
+      unreadNotifCount?: number;
     };
     children: import('svelte').Snippet;
   }>();
 
   let profilOpen = $state(false);
+  let notifOpen = $state(false);
+  let notifList = $state<any[]>([]);
+  let unreadCount = $state<number>(0);
+
+  $effect(() => {
+    notifList = data.notifikasi ?? [];
+    unreadCount = data.unreadNotifCount ?? 0;
+  });
+
   let todayStr = $state('');
   /** Section beranda yang sedang terlihat — dipakai untuk status aktif nav. */
   let section = $state<PortalSection>('beranda');
@@ -57,6 +70,26 @@
     };
   });
 
+  async function markAllRead() {
+    await fetch('/api/notifikasi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    notifList = notifList.map((n) => ({ ...n, dibaca: true }));
+    unreadCount = 0;
+  }
+
+  async function markItemRead(id: number) {
+    await fetch('/api/notifikasi', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    notifList = notifList.map((n) => (n.id === id ? { ...n, dibaca: true } : n));
+    unreadCount = Math.max(0, unreadCount - 1);
+  }
+
   async function handleLogout() {
     await signOut();
     goto('/login');
@@ -75,16 +108,30 @@
         {/if}
       </div>
 
-      <button
-        type="button"
-        class="portal-avatar"
-        aria-label="Buka profil"
-        aria-expanded={profilOpen}
-        aria-controls="portal-profil"
-        onclick={() => (profilOpen = true)}
-      >
-        {inisial(data.user?.name)}
-      </button>
+      <div class="portal-header-actions">
+        <button
+          type="button"
+          class="portal-icon-btn"
+          aria-label="Pemberitahuan"
+          onclick={() => (notifOpen = true)}
+        >
+          <Bell size={20} />
+          {#if unreadCount > 0}
+            <span class="header-notif-badge">{unreadCount}</span>
+          {/if}
+        </button>
+
+        <button
+          type="button"
+          class="portal-avatar"
+          aria-label="Buka profil"
+          aria-expanded={profilOpen}
+          aria-controls="portal-profil"
+          onclick={() => (profilOpen = true)}
+        >
+          {inisial(data.user?.name)}
+        </button>
+      </div>
     </div>
   </header>
 
@@ -158,6 +205,50 @@
   {/snippet}
 </Sheet>
 
+<Sheet open={notifOpen} id="portal-notifikasi" title="Pemberitahuan Warga" onClose={() => (notifOpen = false)}>
+  <div class="notif-drawer-content">
+    <div class="notif-top-bar">
+      <span class="notif-summary">
+        {unreadCount > 0 ? `${unreadCount} belum dibaca` : 'Semua sudah dibaca'}
+      </span>
+      {#if unreadCount > 0}
+        <button type="button" class="btn-mark-all" onclick={markAllRead}>
+          <CheckCheck size={14} />
+          <span>Tandai Semua Dibaca</span>
+        </button>
+      {/if}
+    </div>
+
+    {#if notifList.length === 0}
+      <div class="notif-empty">
+        <Bell size={32} class="empty-icon" />
+        <p class="empty-text">Belum ada pemberitahuan baru.</p>
+      </div>
+    {:else}
+      <div class="notif-items-list">
+        {#each notifList as n (n.id)}
+          <div class="notif-card" class:notif-unread={!n.dibaca}>
+            <div class="notif-header-line">
+              <span class="notif-title">{n.judul}</span>
+              <span class="notif-time">{formatTanggal(n.createdAt)}</span>
+            </div>
+            <p class="notif-pesan">{n.pesan}</p>
+            {#if !n.dibaca}
+              <button
+                type="button"
+                class="btn-mark-single"
+                onclick={() => markItemRead(n.id)}
+              >
+                Tandai dibaca
+              </button>
+            {/if}
+          </div>
+        {/each}
+      </div>
+    {/if}
+  </div>
+</Sheet>
+
 <style>
   .portal-shell {
     display: flex;
@@ -208,6 +299,158 @@
     font-size: var(--text-sm);
     line-height: 1.3;
     color: var(--color-text-muted);
+  }
+
+  .portal-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .portal-icon-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--tap-min);
+    height: var(--tap-min);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .portal-icon-btn:hover {
+    color: var(--color-text);
+    background: var(--color-surface-muted);
+  }
+
+  .header-notif-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: var(--color-danger);
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.2rem;
+    border: 2px solid var(--color-surface);
+  }
+
+  .notif-drawer-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .notif-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .notif-summary {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  .btn-mark-all {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    color: var(--color-brand-600);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .btn-mark-all:hover {
+    text-decoration: underline;
+  }
+
+  .notif-empty {
+    padding: var(--space-6) 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+  }
+
+  .notif-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .notif-card {
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-muted);
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .notif-card.notif-unread {
+    background: var(--color-surface);
+    border-left: 3px solid var(--color-brand-600);
+  }
+
+  .notif-header-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .notif-title {
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .notif-time {
+    font-size: var(--text-2xs);
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+
+  .notif-pesan {
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    line-height: var(--leading-relaxed);
+  }
+
+  .btn-mark-single {
+    align-self: flex-end;
+    font-size: var(--text-2xs);
+    color: var(--color-brand-600);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-top: var(--space-1);
+  }
+
+  .btn-mark-single:hover {
+    text-decoration: underline;
   }
 
   .portal-avatar {

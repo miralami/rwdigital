@@ -39,16 +39,24 @@ export const load: PageServerLoad = async ({ locals }) => {
       judul: pengumuman.judul,
       isi: pengumuman.isi,
       kategori: pengumuman.kategori,
+      thumbnailUrl: pengumuman.thumbnailUrl,
+      lampiranUrls: pengumuman.lampiranUrls,
+      periodeUlang: pengumuman.periodeUlang,
       createdAt: pengumuman.createdAt
     })
     .from(pengumuman)
     .where(eq(pengumuman.ditampilkan, true))
     .orderBy(desc(pengumuman.createdAt))
-    .limit(5);
+    .limit(10);
 
   const listPengumuman = rawPengumuman.map(p => ({
     id: String(p.id),
     judul: p.judul,
+    isi: p.isi,
+    kategori: p.kategori,
+    thumbnailUrl: p.thumbnailUrl,
+    lampiranUrls: p.lampiranUrls ? JSON.parse(p.lampiranUrls) : [],
+    periodeUlang: p.periodeUlang,
     tanggal: p.createdAt
   }));
 

@@ -179,11 +179,30 @@ export const pengumuman = sqliteTable('pengumuman', {
   tanggalMulaiEvent:   text('tanggal_mulai_event'),
   tanggalSelesaiEvent: text('tanggal_selesai_event'),
   lokasi:              text('lokasi'),
+  periodeUlang:        text('periode_ulang', { enum: ['sekali', 'mingguan', 'bulanan', 'kustom'] }).notNull().default('sekali'),
+  intervalHari:        integer('interval_hari'),
+  thumbnailUrl:        text('thumbnail_url'),
+  lampiranUrls:        text('lampiran_urls'), // JSON array of string URLs
   ditampilkan:         integer('ditampilkan', { mode: 'boolean' }).notNull().default(true),
   rwId:                integer('rw_id').notNull().references(() => rw.id),
   dibuatOleh:          text('dibuat_oleh').notNull(), // user id from better-auth
   ...timestamps
 });
+
+// ─── Notifikasi Sistem (In-app, Email, Push) ──────────────────────────────────
+export const notifikasi = sqliteTable('notifikasi', {
+  id:        integer('id').primaryKey({ autoIncrement: true }),
+  userId:    text('user_id').notNull(),
+  judul:     text('judul').notNull(),
+  pesan:     text('pesan').notNull(),
+  tipe:      text('tipe', { enum: ['info', 'sukses', 'peringatan', 'bahaya'] }).notNull().default('info'),
+  tautan:    text('tautan'),
+  dibaca:    integer('dibaca', { mode: 'boolean' }).notNull().default(false),
+  channel:   text('channel', { enum: ['in_app', 'email', 'push'] }).notNull().default('in_app'),
+  ...timestamps
+}, (table) => [
+  index('notifikasi_user_idx').on(table.userId)
+]);
 
 // ─── Iuran (jenis/tagihan periodik) ──────────────────────────────────────────
 export const jenisIuran = sqliteTable('jenis_iuran', {

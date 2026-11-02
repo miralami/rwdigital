@@ -34,7 +34,12 @@ export const auth = betterAuth({
     }),
     type: 'sqlite'
   },
-  emailAndPassword: { enabled: true },
+  emailAndPassword: {
+    enabled: true,
+    sendResetPassword: async ({ user, url }) => {
+      console.log(`[Email Service] Password reset email sent to ${user.email}: ${url}`);
+    }
+  },
   session: {
     expiresIn: 60 * 60, // 60 menit (target NFRA-09)
     updateAge: 15 * 60

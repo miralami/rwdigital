@@ -1,8 +1,10 @@
 import { db } from '$lib/server/db';
-import { pengumuman, rw } from '$lib/server/db/schema';
+import { pengumuman, rw, notifikasi, warga } from '$lib/server/db/schema';
 import { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
 import { requirePermission } from '$lib/server/rbac';
+import { saveUploadedFile, UploadError } from '$lib/server/storage';
+import { eq, isNotNull } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 
 const pengumumanSchema = z
@@ -15,6 +17,8 @@ const pengumumanSchema = z
     tanggalMulaiEvent: z.string().optional(),
     tanggalSelesaiEvent: z.string().optional(),
     lokasi: z.string().optional(),
+    periodeUlang: z.enum(['sekali', 'mingguan', 'bulanan', 'kustom']).default('sekali'),
+    intervalHari: z.coerce.number().int().positive().optional(),
     ditampilkan: z.boolean()
   })
   .refine(
@@ -60,6 +64,8 @@ export const actions: Actions = {
       tanggalMulaiEvent: formData.get('tanggalMulaiEvent') ? String(formData.get('tanggalMulaiEvent')).trim() : undefined,
       tanggalSelesaiEvent: formData.get('tanggalSelesaiEvent') ? String(formData.get('tanggalSelesaiEvent')).trim() : undefined,
       lokasi: formData.get('lokasi') ? String(formData.get('lokasi')).trim() : undefined,
+      periodeUlang: (formData.get('periodeUlang')?.toString() ?? 'sekali') as any,
+      intervalHari: formData.get('intervalHari') ? Number(formData.get('intervalHari')) : undefined,
       ditampilkan: formData.get('ditampilkan') === 'on'
     };
 
@@ -72,9 +78,39 @@ export const actions: Actions = {
       });
     }
 
+    // Handle Uploads
+    let thumbnailUrl: string | null = null;
+    const thumbnailFile = formData.get('thumbnail') as File | null;
+    if (thumbnailFile && thumbnailFile.size > 0) {
+      try {
+        thumbnailUrl = await saveUploadedFile(thumbnailFile, 'pengumuman');
+      } catch (err) {
+        if (err instanceof UploadError) {
+          return fail(400, { errors: { thumbnail: [err.message] }, values: rawValues });
+        }
+        throw err;
+      }
+    }
+
+    const lampiranUrls: string[] = [];
+    const lampiranFiles = formData.getAll('lampiran') as File[];
+    for (const f of lampiranFiles) {
+      if (f && f.size > 0) {
+        try {
+          const url = await saveUploadedFile(f, 'pengumuman');
+          if (url) lampiranUrls.push(url);
+        } catch (err) {
+          if (err instanceof UploadError) {
+            return fail(400, { errors: { lampiran: [err.message] }, values: rawValues });
+          }
+          throw err;
+        }
+      }
+    }
+
     const [rwData] = await db.select().from(rw).limit(1);
 
-    await db.insert(pengumuman).values({
+    const [baru] = await db.insert(pengumuman).values({
       judul: result.data.judul,
       isi: result.data.isi,
       kategori: result.data.kategori,
@@ -83,10 +119,37 @@ export const actions: Actions = {
       tanggalMulaiEvent: result.data.tanggalMulaiEvent ?? null,
       tanggalSelesaiEvent: result.data.tanggalSelesaiEvent ?? null,
       lokasi: result.data.lokasi ?? null,
+      periodeUlang: result.data.periodeUlang,
+      intervalHari: result.data.intervalHari ?? null,
+      thumbnailUrl,
+      lampiranUrls: lampiranUrls.length > 0 ? JSON.stringify(lampiranUrls) : null,
       ditampilkan: result.data.ditampilkan,
       rwId: rwData?.id ?? 1,
       dibuatOleh: locals.user?.name ?? locals.user?.id ?? 'Pengurus'
-    });
+    }).returning();
+
+    // Broadcast in-app & push notification to linked warga
+    if (result.data.ditampilkan) {
+      const usersWarga = await db
+        .select({ userId: warga.userId })
+        .from(warga)
+        .where(isNotNull(warga.userId));
+
+      const notifRows = usersWarga
+        .filter((w) => w.userId)
+        .map((w) => ({
+          userId: w.userId!,
+          judul: `Pengumuman: ${result.data.judul}`,
+          pesan: result.data.isi.slice(0, 140),
+          tipe: result.data.kategori === 'darurat' ? ('bahaya' as const) : ('info' as const),
+          tautan: '/portal#pengumuman',
+          channel: 'in_app' as const
+        }));
+
+      if (notifRows.length > 0) {
+        await db.insert(notifikasi).values(notifRows);
+      }
+    }
 
     redirect(303, '/pengumuman');
   }
