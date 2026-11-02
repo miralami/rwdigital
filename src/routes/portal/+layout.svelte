@@ -15,7 +15,10 @@
   import { formatTanggalPanjang, inisial } from '$lib/format';
 
   let { data, children } = $props<{
-    data: { user?: { name?: string; email?: string; role?: string } };
+    data: {
+      user?: { name?: string; email?: string; role?: string };
+      wargaInfo?: { nama: string; nik: string; noKk: string; nomorRt: number } | null;
+    };
     children: import('svelte').Snippet;
   }>();
 
@@ -100,10 +103,56 @@
   </main>
 </div>
 
-<Sheet open={profilOpen} id="portal-profil" title="Profil" onClose={() => (profilOpen = false)}>
-  <p class="profil-note">
-    Data iuran dan pembayaran Anda akan tampil di sini setelah terhubung ke data warga.
-  </p>
+<Sheet open={profilOpen} id="portal-profil" title="Profil Akun Warga" onClose={() => (profilOpen = false)}>
+  <div class="profil-drawer-content">
+    <div class="profil-user-box">
+      <div class="profil-avatar-big">{inisial(data.user?.name)}</div>
+      <div class="profil-user-meta">
+        <p class="profil-user-name">{data.user?.name ?? 'Warga'}</p>
+        <p class="profil-user-email">{data.user?.email ?? '—'}</p>
+      </div>
+    </div>
+
+    {#if data.wargaInfo}
+      <div class="profil-linked-card">
+        <span class="linked-title">Terhubung ke Data Kependudukan</span>
+        <div class="linked-grid">
+          <div>
+            <span class="label-mini">Nama KTP</span>
+            <span class="val-mini">{data.wargaInfo.nama}</span>
+          </div>
+          <div>
+            <span class="label-mini">Wilayah</span>
+            <span class="val-mini">RT {String(data.wargaInfo.nomorRt).padStart(2, '0')}</span>
+          </div>
+          <div>
+            <span class="label-mini">No. KK</span>
+            <span class="val-mini mono">{data.wargaInfo.noKk}</span>
+          </div>
+        </div>
+      </div>
+    {:else}
+      <p class="profil-note">
+        Akun ini belum ditautkan ke NIK warga. Hubungi pengurus RT/RW untuk sinkronisasi.
+      </p>
+    {/if}
+
+    <div class="profil-quick-links">
+      <a href="/portal/perbaruan" class="quick-link-item" onclick={() => (profilOpen = false)}>
+        <span>Pembaruan Data Kependudukan</span>
+        <span class="arrow">&rarr;</span>
+      </a>
+      <a href="/portal/surat/ajukan" class="quick-link-item" onclick={() => (profilOpen = false)}>
+        <span>Pengajuan Surat Pengantar</span>
+        <span class="arrow">&rarr;</span>
+      </a>
+      <a href="/portal/iuran" class="quick-link-item" onclick={() => (profilOpen = false)}>
+        <span>Tagihan &amp; Pembayaran Iuran</span>
+        <span class="arrow">&rarr;</span>
+      </a>
+    </div>
+  </div>
+
   {#snippet footer()}
     <ProfileBlock user={data.user} onLogout={handleLogout} />
   {/snippet}
@@ -182,6 +231,114 @@
     margin: 0;
     font-size: var(--text-sm);
     line-height: var(--leading-normal);
+    color: var(--color-text-muted);
+  }
+
+  .profil-drawer-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .profil-user-box {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--color-surface-muted);
+    border-radius: var(--radius-lg);
+  }
+
+  .profil-avatar-big {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--radius-full);
+    background: var(--color-brand-600);
+    color: white;
+    font-size: var(--text-base);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .profil-user-name {
+    margin: 0;
+    font-size: var(--text-base);
+    font-weight: 700;
+  }
+
+  .profil-user-email {
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+
+  .profil-linked-card {
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+
+  .linked-title {
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-brand-600);
+    display: block;
+    margin-bottom: var(--space-2);
+  }
+
+  .linked-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .label-mini {
+    display: block;
+    font-size: var(--text-2xs);
+    color: var(--color-text-muted);
+  }
+
+  .val-mini {
+    font-size: var(--text-xs);
+    font-weight: 600;
+  }
+
+  .profil-quick-links {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+  }
+
+  .quick-link-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--color-border);
+    transition: background-color 0.15s ease;
+  }
+
+  .quick-link-item:last-child {
+    border-bottom: none;
+  }
+
+  .quick-link-item:hover {
+    background-color: var(--color-surface-muted);
+  }
+
+  .arrow {
     color: var(--color-text-muted);
   }
 

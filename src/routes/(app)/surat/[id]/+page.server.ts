@@ -94,13 +94,17 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
   return {
     detail,
-    bisaProses: izin.can('surat', 'update')
+    bisaProses: izin.can('surat', 'update') && scope.kind === 'rt'
   };
 };
 
 export const actions: Actions = {
   verifikasi: async ({ params, locals }) => {
     requirePermission(locals, 'surat', 'update');
+    const scope = requireScope(scopeFromRole(locals));
+    if (scope.kind !== 'rt') {
+      return fail(403, { error: 'Hanya Pengurus RT yang berhak memverifikasi surat pengantar. Pihak RW hanya berhak memantau.' });
+    }
     const id = Number(params.id);
     if (!Number.isInteger(id) || id <= 0) {
       return fail(400, { error: 'ID surat tidak valid.' });
@@ -133,6 +137,10 @@ export const actions: Actions = {
 
   setujui: async ({ params, locals }) => {
     requirePermission(locals, 'surat', 'update');
+    const scope = requireScope(scopeFromRole(locals));
+    if (scope.kind !== 'rt') {
+      return fail(403, { error: 'Hanya Pengurus RT yang berhak menyetujui surat pengantar. Pihak RW hanya berhak memantau.' });
+    }
     const id = Number(params.id);
 
     if (!Number.isInteger(id) || id <= 0) {
@@ -207,6 +215,10 @@ export const actions: Actions = {
 
   tolak: async ({ params, request, locals }) => {
     requirePermission(locals, 'surat', 'update');
+    const scope = requireScope(scopeFromRole(locals));
+    if (scope.kind !== 'rt') {
+      return fail(403, { error: 'Hanya Pengurus RT yang berhak menolak surat pengantar.' });
+    }
     const id = Number(params.id);
     if (!Number.isInteger(id) || id <= 0) {
       return fail(400, { error: 'ID surat tidak valid.' });

@@ -125,8 +125,12 @@
         <div class="ttd-kolom">
           <p>Mengetahui,</p>
           <p class="jabatan">Ketua RT {s.nomorRt}</p>
-          <div class="ttd-space"></div>
-          <p class="nama-pejabat">( ........................................ )</p>
+          <div class="ttd-space">
+            {#if s.ttdRtUrl}
+              <img src={s.ttdRtUrl} alt="TTD Elektronik Ketua RT" class="ttd-img" />
+            {/if}
+          </div>
+          <p class="nama-pejabat">{s.namaKetuaRt ? `( ${s.namaKetuaRt} )` : '( ........................................ )'}</p>
         </div>
 
         <div class="ttd-kolom">
@@ -295,6 +299,15 @@
 
   .ttd-space {
     height: 5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ttd-img {
+    max-height: 4.5rem;
+    max-width: 10rem;
+    object-fit: contain;
   }
 
   .nama-pejabat {
