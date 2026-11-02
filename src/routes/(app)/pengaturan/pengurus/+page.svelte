@@ -3,12 +3,16 @@
   import Badge from '$lib/components/Badge.svelte';
   import ArrowLeft from '@lucide/svelte/icons/arrow-left';
   import Plus from '@lucide/svelte/icons/plus';
+  import Pencil from '@lucide/svelte/icons/pencil';
+  import Modal from '$lib/components/Modal.svelte';
   import type { PageData } from './$types';
 
   let { data, form } = $props<{
     data: PageData;
     form?: { error?: string; sukses?: string };
   }>();
+
+  let editingItem = $state<any>(null);
 
   function wilayah(nomorRt: number | null) {
     return nomorRt === null ? 'RW' : `RT ${String(nomorRt).padStart(2, '0')}`;
@@ -159,81 +163,14 @@
                 <td class="num">{item.urutan}</td>
                 <td class="aksi">
                   {#if data.bisaUbah}
-                    <details class="ubah">
-                      <summary class="btn btn-secondary btn-sm">Ubah</summary>
-                      <form
-                        method="POST"
-                        action="?/ubah"
-                        enctype="multipart/form-data"
-                        class="ubah-form"
-                      >
-                        <input type="hidden" name="id" value={item.id} />
-
-                        <div class="field">
-                          <label for={`rt-${item.id}`}>Wilayah</label>
-                          <select id={`rt-${item.id}`} name="rtId" class="input-base">
-                            <option value="" selected={item.rtId === null}>Pengurus RW</option>
-                            {#each data.daftarRt as rtItem}
-                              <option value={rtItem.id} selected={item.rtId === rtItem.id}>
-                                RT {String(rtItem.nomor).padStart(2, '0')}
-                              </option>
-                            {/each}
-                          </select>
-                        </div>
-
-                        <div class="field">
-                          <label for={`jabatan-${item.id}`}>Jabatan</label>
-                          <input
-                            id={`jabatan-${item.id}`}
-                            name="jabatan"
-                            class="input-base"
-                            type="text"
-                            value={item.jabatan}
-                            maxlength="60"
-                            required
-                          />
-                        </div>
-
-                        <div class="field">
-                          <label for={`nama-${item.id}`}>Nama</label>
-                          <input
-                            id={`nama-${item.id}`}
-                            name="nama"
-                            class="input-base"
-                            type="text"
-                            value={item.nama}
-                            maxlength="100"
-                            required
-                          />
-                        </div>
-
-                        <div class="field">
-                          <label for={`urutan-${item.id}`}>Urutan</label>
-                          <input
-                            id={`urutan-${item.id}`}
-                            name="urutan"
-                            class="input-base"
-                            type="number"
-                            min="0"
-                            max="999"
-                            value={item.urutan}
-                          />
-                        </div>
-
-                        <div class="field">
-                          <label for={`foto-${item.id}`}>Ganti foto</label>
-                          <input
-                            id={`foto-${item.id}`}
-                            name="foto"
-                            class="input-base"
-                            type="file"
-                            accept="image/jpeg,image/png,image/webp"
-                          />
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-sm">Simpan</button>
-                      </form>
-                    </details>
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-sm"
+                      onclick={() => (editingItem = item)}
+                    >
+                      <Pencil size={14} />
+                      <span>Ubah</span>
+                    </button>
                   {/if}
 
                   {#if data.bisaHapus}
@@ -257,6 +194,86 @@
     {/if}
   </div>
 </div>
+
+{#if editingItem}
+  <Modal open={true} title={`Ubah Pengurus: ${editingItem.nama}`} onClose={() => (editingItem = null)}>
+    <form
+      method="POST"
+      action="?/ubah"
+      enctype="multipart/form-data"
+      class="modal-edit-form"
+    >
+      <input type="hidden" name="id" value={editingItem.id} />
+
+      <div class="field">
+        <label for="edit-rt">Wilayah</label>
+        <select id="edit-rt" name="rtId" class="input-base">
+          <option value="" selected={editingItem.rtId === null}>Pengurus RW</option>
+          {#each data.daftarRt as rtItem}
+            <option value={rtItem.id} selected={editingItem.rtId === rtItem.id}>
+              RT {String(rtItem.nomor).padStart(2, '0')}
+            </option>
+          {/each}
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="edit-jabatan">Jabatan <span class="required">*</span></label>
+        <input
+          id="edit-jabatan"
+          name="jabatan"
+          class="input-base"
+          type="text"
+          value={editingItem.jabatan}
+          maxlength="60"
+          required
+        />
+      </div>
+
+      <div class="field">
+        <label for="edit-nama">Nama Lengkap <span class="required">*</span></label>
+        <input
+          id="edit-nama"
+          name="nama"
+          class="input-base"
+          type="text"
+          value={editingItem.nama}
+          maxlength="100"
+          required
+        />
+      </div>
+
+      <div class="field">
+        <label for="edit-urutan">Urutan Tampil</label>
+        <input
+          id="edit-urutan"
+          name="urutan"
+          class="input-base"
+          type="number"
+          min="0"
+          max="999"
+          value={editingItem.urutan}
+        />
+      </div>
+
+      <div class="field">
+        <label for="edit-foto">Ganti Foto (opsional)</label>
+        <input
+          id="edit-foto"
+          name="foto"
+          class="input-base"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+        />
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick={() => (editingItem = null)}>Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </form>
+  </Modal>
+{/if}
 
 <style>
   .page-container {
@@ -405,35 +422,6 @@
     flex-wrap: wrap;
   }
 
-  .ubah {
-    position: relative;
-  }
-
-  .ubah > summary {
-    list-style: none;
-    cursor: pointer;
-  }
-
-  .ubah > summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .ubah[open] > summary {
-    margin-bottom: var(--space-3);
-  }
-
-  .ubah-form {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
-    gap: var(--space-2);
-    align-items: end;
-    padding: var(--space-3);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    background: var(--color-surface-muted);
-    min-width: min(34rem, 70vw);
-  }
-
   .btn-sm {
     min-height: var(--tap-min);
     padding-inline: var(--space-3);
@@ -446,5 +434,20 @@
 
   .btn-hapus:hover {
     background: var(--color-danger-bg);
+  }
+
+  .modal-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
   }
 </style>

@@ -3,7 +3,6 @@
   import Building2 from '@lucide/svelte/icons/building-2';
   import Users from '@lucide/svelte/icons/users';
   import UserCog from '@lucide/svelte/icons/user-cog';
-  import ShieldCheck from '@lucide/svelte/icons/shield-check';
   import Images from '@lucide/svelte/icons/images';
   import ChevronRight from '@lucide/svelte/icons/chevron-right';
   import type { PageData } from './$types';
@@ -14,7 +13,7 @@
     {
       href: '/pengaturan/rt',
       judul: 'Konfigurasi RT',
-      keterangan: 'Tambah, ubah, dan hapus wilayah RT beserta jumlah KK-nya.',
+      keterangan: 'Tambah, ubah, dan hapus wilayah RT. Jumlah KK terhitung otomatis dari data kependudukan.',
       icon: Building2,
       boleh: data.akses.rt
     },
@@ -34,17 +33,10 @@
     },
     {
       href: '/pengaturan/pengguna',
-      judul: 'Pengguna & Role',
-      keterangan: 'Buat akun, atur role, dan hubungkan akun warga ke data kependudukan.',
+      judul: 'Pengguna & Hak Akses',
+      keterangan: 'Kelola akun pengguna, penugasan RT, serta konfigurasi matriks peran dan izin.',
       icon: UserCog,
-      boleh: data.akses.pengguna
-    },
-    {
-      href: '/pengaturan/peran',
-      judul: 'Peran & Izin',
-      keterangan: 'Buat peran baru dan tentukan modul serta aksi yang boleh dipakainya.',
-      icon: ShieldCheck,
-      boleh: data.akses.peran
+      boleh: data.akses.pengguna || data.akses.peran
     }
   ].filter((item) => item.boleh));
 </script>

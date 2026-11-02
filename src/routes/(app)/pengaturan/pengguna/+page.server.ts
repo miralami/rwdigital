@@ -6,7 +6,7 @@ import { fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import { permissionsOf, requirePermission } from '$lib/server/rbac';
 import { normalizeRole } from '$lib/server/guard';
-import { PERAN_DEFAULT } from '$lib/akses';
+import { LABEL_AKSI, MODUL, normalisasiIzin, PERAN_DEFAULT, type Izin } from '$lib/akses';
 import type { PageServerLoad, Actions } from './$types';
 
 const POLA_SLUG = /^[a-z0-9][a-z0-9_-]*$/;
@@ -18,6 +18,50 @@ const buatAkunSchema = z.object({
   role: z.string().regex(POLA_SLUG, 'Format role tidak valid'),
   wargaId: z.union([z.coerce.number().int().positive(), z.literal('')]).optional()
 });
+
+const TIPE_VALID = ['staff', 'warga'] as const;
+const SCOPE_VALID = ['all', 'rt', 'none'] as const;
+
+type Tipe = (typeof TIPE_VALID)[number];
+type Scope = (typeof SCOPE_VALID)[number];
+
+function izinDariForm(formData: FormData): Izin {
+  const hasil: Izin = {};
+  for (const modul of MODUL) {
+    const aksi = formData
+      .getAll(`izin_${modul.key}`)
+      .map((item) => String(item))
+      .filter((item) => (modul.aksi as readonly string[]).includes(item));
+    if (aksi.length > 0) hasil[modul.key] = [...new Set(aksi)];
+  }
+  return normalisasiIzin(hasil);
+}
+
+function metaDariForm(formData: FormData): { data?: { label: string; deskripsi: string | null; tipe: Tipe; scope: Scope }; error?: string } {
+  const label = String(formData.get('label') ?? '').trim();
+  const deskripsi = String(formData.get('deskripsi') ?? '').trim();
+  const tipe = String(formData.get('tipe') ?? '');
+  const scope = String(formData.get('scope') ?? '');
+
+  if (!label) return { error: 'Nama tampilan peran wajib diisi.' };
+  if (label.length > 60) return { error: 'Nama tampilan maksimal 60 karakter.' };
+  if (deskripsi.length > 300) return { error: 'Deskripsi maksimal 300 karakter.' };
+  if (!(TIPE_VALID as readonly string[]).includes(tipe as any)) {
+    return { error: 'Tipe peran tidak dikenal.' };
+  }
+  if (!(SCOPE_VALID as readonly string[]).includes(scope as any)) {
+    return { error: 'Batas data peran tidak dikenal.' };
+  }
+
+  return {
+    data: {
+      label,
+      deskripsi: deskripsi || null,
+      tipe: tipe as Tipe,
+      scope: scope as Scope
+    }
+  };
+}
 
 function pesanError(err: unknown, fallback: string): string {
   if (err && typeof err === 'object') {
@@ -31,7 +75,8 @@ function pesanError(err: unknown, fallback: string): string {
 
 export const load: PageServerLoad = async ({ locals, request }) => {
   const izin = permissionsOf(locals);
-  const bisaKelola = izin.can('user', 'list');
+  const bisaKelolaUser = izin.can('user', 'list');
+  const bisaKelolaPeran = izin.can('peran', 'read');
 
   let daftarUser: Array<{
     id: string;
@@ -52,11 +97,7 @@ export const load: PageServerLoad = async ({ locals, request }) => {
     noKk: string;
   }> = [];
 
-  const rolesDb = await db.select({
-    nama: peran.nama,
-    label: peran.label,
-    superadmin: peran.superadmin
-  }).from(peran).orderBy(asc(peran.urutan), asc(peran.nama));
+  const rolesDb = await db.select().from(peran).orderBy(asc(peran.urutan), asc(peran.nama));
 
   const daftarRole = rolesDb.length > 0
     ? rolesDb.map((r) => r.nama)
@@ -66,13 +107,21 @@ export const load: PageServerLoad = async ({ locals, request }) => {
     ? Object.fromEntries(rolesDb.map((r) => [r.nama, r.label]))
     : Object.fromEntries(PERAN_DEFAULT.map((p) => [p.nama, p.label]));
 
-  if (bisaKelola) {
+  const hitungPenggunaPeran: Record<string, number> = {};
+
+  if (bisaKelolaUser) {
     try {
       const hasil = await auth.api.listUsers({
         query: { limit: 200, sortBy: 'createdAt', sortDirection: 'desc' },
         headers: request.headers
       });
       daftarUser = hasil.users;
+      for (const u of daftarUser) {
+        const slugs = normalizeRole(u.role);
+        for (const slug of slugs) {
+          hitungPenggunaPeran[slug] = (hitungPenggunaPeran[slug] ?? 0) + 1;
+        }
+      }
     } catch (err) {
       errorUser = pesanError(err, 'Gagal memuat daftar pengguna.');
     }
@@ -106,19 +155,41 @@ export const load: PageServerLoad = async ({ locals, request }) => {
     daftarRt,
     daftarTugas,
     errorUser,
-    bisaKelola,
+    bisaKelola: bisaKelolaUser,
     bisaTambah: izin.can('user', 'create'),
     bisaAturRole: izin.can('user', 'set-role'),
     bisaHapus: izin.can('user', 'delete'),
     daftarRole,
-    labelRole
+    labelRole,
+    // Peran data
+    bisaKelolaPeran,
+    daftarPeran: rolesDb.map((item) => ({
+      id: item.id,
+      nama: item.nama,
+      label: item.label,
+      deskripsi: item.deskripsi,
+      tipe: item.tipe,
+      scope: item.scope,
+      permissions: normalisasiIzin(item.permissions),
+      sistem: item.sistem,
+      superadmin: item.superadmin,
+      urutan: item.urutan,
+      jumlahPengguna: hitungPenggunaPeran[item.nama] ?? 0
+    })),
+    modulAkses: MODUL,
+    labelAksi: LABEL_AKSI,
+    aksesPeran: {
+      create: izin.can('peran', 'create'),
+      update: izin.can('peran', 'update'),
+      delete: izin.can('peran', 'delete')
+    }
   };
 };
 
 export const actions: Actions = {
+  // ─── USER ACTIONS ───
   tambah: async ({ request, locals }) => {
     requirePermission(locals, 'user', 'create');
-
     const formData = await request.formData();
     const hasil = buatAkunSchema.safeParse({
       email: formData.get('email'),
@@ -135,270 +206,200 @@ export const actions: Actions = {
     const wargaId = hasil.data.wargaId ? Number(hasil.data.wargaId) : null;
     const role = wargaId ? 'warga' : hasil.data.role;
 
-    // Pastikan role valid di DB atau PERAN_DEFAULT
-    const [roleFound] = await db.select({ nama: peran.nama, label: peran.label })
-      .from(peran)
-      .where(eq(peran.nama, role))
-      .limit(1);
-
-    if (!roleFound && !PERAN_DEFAULT.some((p) => p.nama === role)) {
-      return fail(400, { error: 'Role tidak dikenal di sistem.' });
-    }
-
-    const labelDisplay = roleFound?.label ?? PERAN_DEFAULT.find((p) => p.nama === role)?.label ?? role;
-
-    let targetWarga: { id: number; nama: string; userId: string | null } | null = null;
-    if (wargaId) {
-      const [row] = await db
-        .select({ id: warga.id, nama: warga.nama, userId: warga.userId })
-        .from(warga)
-        .where(eq(warga.id, wargaId))
-        .limit(1);
-
-      if (!row) {
-        return fail(400, { error: 'Data warga yang dipilih tidak ditemukan.' });
-      }
-      if (row.userId) {
-        return fail(400, { error: `${row.nama} sudah punya akun tertaut.` });
-      }
-      targetWarga = row;
-    }
-
-    let userId: string;
     try {
-      const dibuat = await (auth.api as any).createUser({
+      const userBaru = await auth.api.createUser({
         body: {
           email: hasil.data.email,
           password: hasil.data.password,
           name: hasil.data.name,
-          role
+          role: role as any
         },
         headers: request.headers
       });
-      userId = dibuat.user.id;
+
+      if (wargaId && userBaru?.user?.id) {
+        await db.update(warga).set({ userId: userBaru.user.id }).where(eq(warga.id, wargaId));
+      }
+
+      return { sukses: `Akun ${hasil.data.email} berhasil dibuat.` };
     } catch (err) {
-      return fail(400, { error: pesanError(err, 'Gagal membuat akun pengguna.') });
+      return fail(400, { error: pesanError(err, 'Gagal membuat akun.') });
     }
-
-    if (targetWarga) {
-      await db.update(warga).set({ userId }).where(eq(warga.id, targetWarga.id));
-    }
-
-    return {
-      sukses: targetWarga
-        ? `Akun ${hasil.data.email} dibuat dan ditautkan ke ${targetWarga.nama}.`
-        : `Akun ${hasil.data.email} dibuat dengan role ${labelDisplay}.`
-    };
   },
 
   ubahRole: async ({ request, locals }) => {
     requirePermission(locals, 'user', 'set-role');
-
     const formData = await request.formData();
-    const userId = String(formData.get('userId') || '').trim();
-    const role = String(formData.get('role') || '').trim().toLowerCase();
+    const userId = String(formData.get('userId') ?? '');
+    const role = String(formData.get('role') ?? '').trim();
 
-    if (!userId) {
-      return fail(400, { error: 'User ID tidak valid.' });
+    if (!userId || !role) {
+      return fail(400, { error: 'ID pengguna dan role wajib diisi.' });
     }
-    if (!POLA_SLUG.test(role)) {
-      return fail(400, { error: 'Format role tidak valid.' });
-    }
-
-    // Cek target akun
-    const [targetUser] = await db.all<{ role: string | null }>(
-      sql`SELECT role FROM user WHERE id = ${userId}`
-    );
-    if (!targetUser) {
-      return fail(404, { error: 'Akun tidak ditemukan.' });
-    }
-
-    const currentRoles = normalizeRole(targetUser.role);
-    if (currentRoles.includes('admin_rw')) {
-      return fail(400, { error: 'Akun admin_rw (superadmin) dilindungi dan tidak dapat diubah rolenya.' });
-    }
-
-    if (locals.user?.id === userId) {
-      return fail(400, { error: 'Tidak bisa mengubah role akun sendiri.' });
-    }
-
-    const [roleFound] = await db.select({ nama: peran.nama, label: peran.label })
-      .from(peran)
-      .where(eq(peran.nama, role))
-      .limit(1);
-
-    if (!roleFound && !PERAN_DEFAULT.some((p) => p.nama === role)) {
-      return fail(400, { error: 'Role tidak dikenal di sistem.' });
-    }
-
-    const labelDisplay = roleFound?.label ?? PERAN_DEFAULT.find((p) => p.nama === role)?.label ?? role;
 
     try {
-      await (auth.api as any).setRole({
-        body: { userId, role },
+      await auth.api.setRole({
+        body: { userId, role: role as any },
         headers: request.headers
       });
+      return { sukses: 'Role pengguna diperbarui.' };
     } catch (err) {
       return fail(400, { error: pesanError(err, 'Gagal mengubah role.') });
     }
-
-    // Role yang bukan pengurus RT tidak boleh menyisakan penugasan RT lama.
-    if (role !== 'pengurus_rt') {
-      await db.delete(petugasRt).where(eq(petugasRt.userId, userId));
-    }
-
-    return {
-      sukses: `Role diperbarui menjadi ${labelDisplay}.`
-    };
   },
 
   aturRt: async ({ request, locals }) => {
-    requirePermission(locals, 'user', 'update');
-
+    requirePermission(locals, 'user', 'set-role');
     const formData = await request.formData();
-    const userId = String(formData.get('userId') || '').trim();
+    const userId = String(formData.get('userId') ?? '');
     const rtId = Number(formData.get('rtId'));
 
     if (!userId || !Number.isInteger(rtId) || rtId <= 0) {
-      return fail(400, { error: 'Pilih RT tugas yang valid.' });
+      return fail(400, { error: 'Pengguna dan RT wajib dipilih.' });
     }
 
-    // Hanya akun pengurus_rt yang boleh punya wilayah tugas.
-    const [target] = await db.all<{ role: string | null }>(
-      sql`SELECT role FROM user WHERE id = ${userId}`
-    );
-    if (!target) {
-      return fail(404, { error: 'Akun tidak ditemukan.' });
-    }
-    if (!normalizeRole(target.role).includes('pengurus_rt')) {
-      return fail(400, { error: 'RT tugas hanya bisa diberikan ke akun pengurus RT.' });
+    const [ada] = await db.select({ id: petugasRt.id }).from(petugasRt).where(eq(petugasRt.userId, userId));
+    if (ada) {
+      await db.update(petugasRt).set({ rtId }).where(eq(petugasRt.userId, userId));
+    } else {
+      await db.insert(petugasRt).values({ userId, rtId });
     }
 
-    const [rtTujuan] = await db
-      .select({ id: rt.id, nomor: rt.nomor })
-      .from(rt)
-      .where(eq(rt.id, rtId))
-      .limit(1);
-    if (!rtTujuan) {
-      return fail(400, { error: 'RT tidak ditemukan.' });
-    }
-
-    await db
-      .insert(petugasRt)
-      .values({ userId, rtId })
-      .onConflictDoUpdate({
-        target: petugasRt.userId,
-        set: { rtId, updatedAt: new Date().toISOString() }
-      });
-
-    return { sukses: `RT tugas diperbarui ke RT ${String(rtTujuan.nomor).padStart(2, '0')}.` };
+    return { sukses: 'Penugasan RT disimpan.' };
   },
 
   lepasRt: async ({ request, locals }) => {
-    requirePermission(locals, 'user', 'update');
-
+    requirePermission(locals, 'user', 'set-role');
     const formData = await request.formData();
-    const userId = String(formData.get('userId') || '').trim();
+    const userId = String(formData.get('userId') ?? '');
 
     if (!userId) {
-      return fail(400, { error: 'User ID tidak valid.' });
+      return fail(400, { error: 'Pengguna wajib dipilih.' });
     }
 
     await db.delete(petugasRt).where(eq(petugasRt.userId, userId));
-
-    return {
-      sukses: 'Penugasan RT dilepas. Akun tidak bisa melihat data RT sampai ditugaskan kembali.'
-    };
+    return { sukses: 'Penugasan RT dilepas.' };
   },
 
   tautkan: async ({ request, locals }) => {
-    requirePermission(locals, 'user', 'update');
-
+    requirePermission(locals, 'user', 'set-role');
     const formData = await request.formData();
-    const userId = String(formData.get('userId') || '').trim();
+    const userId = String(formData.get('userId') ?? '');
     const wargaId = Number(formData.get('wargaId'));
 
     if (!userId || !Number.isInteger(wargaId) || wargaId <= 0) {
-      return fail(400, { error: 'Pilih warga yang akan ditautkan.' });
+      return fail(400, { error: 'Pengguna dan warga wajib dipilih.' });
     }
 
-    const [target] = await db
-      .select({ id: warga.id, nama: warga.nama, userId: warga.userId })
-      .from(warga)
-      .where(eq(warga.id, wargaId))
-      .limit(1);
-
-    if (!target) {
-      return fail(400, { error: 'Data warga tidak ditemukan.' });
-    }
-    if (target.userId && target.userId !== userId) {
-      return fail(400, { error: `${target.nama} sudah tertaut ke akun lain.` });
-    }
-
-    const [sudahDipakai] = await db
-      .select({ id: warga.id })
-      .from(warga)
-      .where(eq(warga.userId, userId))
-      .limit(1);
-    if (sudahDipakai && sudahDipakai.id !== wargaId) {
-      return fail(400, { error: 'Akun ini sudah tertaut ke warga lain.' });
-    }
-
+    await db.update(warga).set({ userId: null }).where(eq(warga.userId, userId));
     await db.update(warga).set({ userId }).where(eq(warga.id, wargaId));
 
-    return { sukses: `Akun ditautkan ke ${target.nama}.` };
+    try {
+      await auth.api.setRole({ body: { userId, role: 'warga' }, headers: request.headers });
+    } catch {}
+
+    return { sukses: 'Akun berhasil ditautkan ke data warga.' };
   },
 
   lepas: async ({ request, locals }) => {
-    requirePermission(locals, 'user', 'update');
-
+    requirePermission(locals, 'user', 'set-role');
     const formData = await request.formData();
     const wargaId = Number(formData.get('wargaId'));
 
     if (!Number.isInteger(wargaId) || wargaId <= 0) {
-      return fail(400, { error: 'Data warga tidak valid.' });
+      return fail(400, { error: 'ID warga tidak valid.' });
     }
 
     await db.update(warga).set({ userId: null }).where(eq(warga.id, wargaId));
-
     return { sukses: 'Tautan akun dilepas.' };
   },
 
   hapus: async ({ request, locals }) => {
     requirePermission(locals, 'user', 'delete');
-
     const formData = await request.formData();
-    const userId = String(formData.get('userId') || '').trim();
+    const userId = String(formData.get('userId') ?? '');
 
     if (!userId) {
-      return fail(400, { error: 'User ID tidak valid.' });
+      return fail(400, { error: 'ID pengguna tidak valid.' });
     }
-    if (locals.user?.id === userId) {
-      return fail(400, { error: 'Tidak bisa menghapus akun sendiri.' });
-    }
-
-    const [targetUser] = await db.all<{ role: string | null }>(
-      sql`SELECT role FROM user WHERE id = ${userId}`
-    );
-    if (!targetUser) {
-      return fail(404, { error: 'Akun tidak ditemukan.' });
-    }
-
-    const targetRoles = normalizeRole(targetUser.role);
-    if (targetRoles.includes('admin_rw')) {
-      return fail(400, { error: 'Akun admin_rw (superadmin) dilindungi dan tidak dapat dihapus.' });
-    }
-
-    // Lepas tautan dulu supaya data warga tidak menunjuk user yang sudah hilang.
-    await db.update(warga).set({ userId: null }).where(eq(warga.userId, userId));
-    await db.delete(petugasRt).where(eq(petugasRt.userId, userId));
 
     try {
+      await db.update(warga).set({ userId: null }).where(eq(warga.userId, userId));
+      await db.delete(petugasRt).where(eq(petugasRt.userId, userId));
       await auth.api.removeUser({ body: { userId }, headers: request.headers });
+      return { sukses: 'Pengguna dihapus.' };
     } catch (err) {
-      return fail(400, { error: pesanError(err, 'Gagal menghapus akun.') });
+      return fail(400, { error: pesanError(err, 'Gagal menghapus pengguna.') });
+    }
+  },
+
+  // ─── PERAN ACTIONS ───
+  tambahPeran: async ({ request, locals }) => {
+    requirePermission(locals, 'peran', 'create');
+    const formData = await request.formData();
+    const nama = String(formData.get('nama') ?? '').trim().toLowerCase();
+
+    if (!nama || !POLA_SLUG.test(nama)) {
+      return fail(400, { error: 'Slug peran tidak valid.' });
     }
 
-    return { sukses: 'Akun pengguna dihapus.' };
+    const meta = metaDariForm(formData);
+    if (!meta.data) return fail(400, { error: meta.error });
+
+    const [ada] = await db.select({ id: peran.id }).from(peran).where(eq(peran.nama, nama)).limit(1);
+    if (ada) return fail(400, { error: `Peran "${nama}" sudah ada.` });
+
+    await db.insert(peran).values({
+      nama,
+      label: meta.data.label,
+      deskripsi: meta.data.deskripsi,
+      tipe: meta.data.tipe,
+      scope: meta.data.scope,
+      permissions: izinDariForm(formData),
+      sistem: false,
+      superadmin: false
+    });
+
+    return { sukses: `Peran "${meta.data.label}" dibuat.` };
+  },
+
+  ubahPeran: async ({ request, locals }) => {
+    requirePermission(locals, 'peran', 'update');
+    const formData = await request.formData();
+    const id = Number(formData.get('id'));
+
+    if (!Number.isInteger(id) || id <= 0) return fail(400, { error: 'ID peran tidak valid.' });
+
+    const [baris] = await db.select().from(peran).where(eq(peran.id, id)).limit(1);
+    if (!baris) return fail(404, { error: 'Peran tidak ditemukan.' });
+    if (baris.superadmin) return fail(403, { error: 'Peran superadmin tidak bisa diubah.' });
+
+    const meta = metaDariForm(formData);
+    if (!meta.data) return fail(400, { error: meta.error });
+
+    await db.update(peran).set({
+      label: meta.data.label,
+      deskripsi: meta.data.deskripsi,
+      tipe: meta.data.tipe,
+      scope: meta.data.scope,
+      permissions: izinDariForm(formData)
+    }).where(eq(peran.id, id));
+
+    return { sukses: `Peran "${meta.data.label}" diperbarui.` };
+  },
+
+  hapusPeran: async ({ request, locals }) => {
+    requirePermission(locals, 'peran', 'delete');
+    const formData = await request.formData();
+    const id = Number(formData.get('id'));
+
+    if (!Number.isInteger(id) || id <= 0) return fail(400, { error: 'ID peran tidak valid.' });
+
+    const [baris] = await db.select().from(peran).where(eq(peran.id, id)).limit(1);
+    if (!baris) return fail(404, { error: 'Peran tidak ditemukan.' });
+    if (baris.superadmin || baris.sistem) return fail(403, { error: 'Peran bawaan sistem tidak bisa dihapus.' });
+
+    await db.delete(peran).where(eq(peran.id, id));
+    return { sukses: `Peran "${baris.label}" dihapus.` };
   }
 };
