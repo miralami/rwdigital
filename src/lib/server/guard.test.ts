@@ -21,16 +21,16 @@ const lokal = (role: unknown, izin: Record<string, string[]> = {}) =>
 
 describe('normalizeRole()', () => {
 	it('memecah peran berkoma seperti yang disimpan plugin admin Better Auth', () => {
-		expect(normalizeRole('admin_rw,pengurus_rt')).toEqual(['admin_rw', 'pengurus_rt']);
+		expect(normalizeRole('pengurus_rw,pengurus_rt')).toEqual(['pengurus_rw', 'pengurus_rt']);
 	});
 
 	it('menerima array, membuang spasi, dan menormalkan huruf', () => {
-		expect(normalizeRole([' Warga ', 'Bendahara'])).toEqual(['warga', 'bendahara']);
+		expect(normalizeRole([' Warga ', 'Pengurus_RW'])).toEqual(['warga', 'pengurus_rw']);
 	});
 
 	it('menerima slug peran dinamis dan membuang nilai yang bukan slug', () => {
-		expect(normalizeRole(['admin_rw', 'admin_rw', 'ketua_lingkungan', ''])).toEqual([
-			'admin_rw',
+		expect(normalizeRole(['pengurus_rw', 'pengurus_rw', 'ketua_lingkungan', ''])).toEqual([
+			'pengurus_rw',
 			'ketua_lingkungan'
 		]);
 		expect(normalizeRole(['tamu!', 'dua kata', null])).toEqual([]);
@@ -50,8 +50,8 @@ describe('rolesOf() / tipeOf()', () => {
 	});
 
 	it('fallback ke user.role untuk locals tiruan', () => {
-		const locals = { user: { role: 'sekretaris' } } as unknown as App.Locals;
-		expect(rolesOf(locals)).toEqual(['sekretaris']);
+		const locals = { user: { role: 'pengurus_rw' } } as unknown as App.Locals;
+		expect(rolesOf(locals)).toEqual(['pengurus_rw']);
 		expect(tipeOf(locals)).toBe('staff');
 	});
 
@@ -114,9 +114,9 @@ describe('landingPathFor()', () => {
 	});
 
 	it('staf mendarat di dashboard', () => {
-		expect(landingPathFor(locals('admin_rw'))).toBe('/dashboard');
+		expect(landingPathFor(locals('pengurus_rw'))).toBe('/dashboard');
 		expect(landingPathFor(locals('pengurus_rt'))).toBe('/dashboard');
-		expect(landingPathFor(locals('sekretaris'))).toBe('/dashboard');
+		expect(landingPathFor(locals('superadmin'))).toBe('/dashboard');
 	});
 
 	it('akun tanpa peran default dianggap warga', () => {
@@ -143,8 +143,23 @@ describe('enforceAccess() — izin modul', () => {
 	});
 
 	it('staf dengan izin baca modul boleh lewat', () => {
-		const locals = lokal('bendahara', { kas: ['read'] });
+		const locals = lokal('pengurus_rw', { kas: ['read'] });
 		expect(() => enforceAccess(ctx('/kas', locals))).not.toThrow();
+	});
+
+	it('Pengurus RT tidak boleh membuka area Pengaturan meski punya izin baca RT', () => {
+		const locals = lokal('pengurus_rt', {
+			rt: ['read'],
+			pengurus: ['read'],
+			user: ['create']
+		});
+		expect(tangkap(() => enforceAccess(ctx('/pengaturan', locals))).status).toBe(403);
+		expect(tangkap(() => enforceAccess(ctx('/pengaturan/rt', locals))).status).toBe(403);
+	});
+
+	it('pemegang user:list boleh membuka area Pengaturan', () => {
+		const locals = lokal('pengurus_rw', { user: ['list'], rt: ['read'] });
+		expect(() => enforceAccess(ctx('/pengaturan', locals))).not.toThrow();
 	});
 
 	it('warga di surface staf diarahkan ke portal', () => {

@@ -46,13 +46,24 @@ export const petugasRt = sqliteTable('petugas_rt', {
   index('petugas_rt_rt_id_idx').on(table.rtId)
 ]);
 
+// ── Tanda tangan elektronik per akun pengurus ───────────────────────────────
+// Disimpan terpisah dari tabel `user` Better Auth. Satu akun pengurus punya
+// satu gambar TTD; snapshot URL-nya disalin ke surat saat menandatangani agar
+// dokumen lama tidak berubah ketika gambar diganti.
+export const ttdPejabat = sqliteTable('ttd_pejabat', {
+  id:        integer('id').primaryKey({ autoIncrement: true }),
+  userId:    text('user_id').notNull().unique(),  // Better Auth user.id
+  url:       text('url').notNull(),               // /uploads/ttd/...
+  ...timestamps
+});
+
 // ─── Peran & Izin (RBAC dinamis) ─────────────────────────────────────────────
 // Sumber kebenaran izin aplikasi. Better Auth hanya menyimpan slug role di
 // `user.role`; modul ini yang menentukan modul/aksi apa yang boleh dilakukan
 // pemilik role tersebut, sehingga superadmin bisa membuat role baru tanpa
 // mengubah kode.
 //
-// - `nama`      : slug yang juga disimpan di `user.role` (mis. "ketua_rw").
+// - `nama`      : slug yang juga disimpan di `user.role` (mis. "pengurus_rw").
 // - `tipe`      : "staff" (masuk aplikasi admin) atau "warga" (portal).
 // - `scope`     : "all" (seluruh RW), "rt" (hanya RT yang ditugaskan), "none".
 // - `permissions`: map modul → daftar aksi, mis. { "warga": ["read"] }.
@@ -185,9 +196,13 @@ export const pengumuman = sqliteTable('pengumuman', {
   lampiranUrls:        text('lampiran_urls'), // JSON array of string URLs
   ditampilkan:         integer('ditampilkan', { mode: 'boolean' }).notNull().default(true),
   rwId:                integer('rw_id').notNull().references(() => rw.id),
+  // null = pengumuman tingkat RW (berlaku semua RT); terisi = khusus RT itu.
+  rtId:                integer('rt_id').references(() => rt.id),
   dibuatOleh:          text('dibuat_oleh').notNull(), // user id from better-auth
   ...timestamps
-});
+}, (table) => [
+  index('pengumuman_rt_id_idx').on(table.rtId)
+]);
 
 // ─── Notifikasi Sistem (In-app, Email, Push) ──────────────────────────────────
 export const notifikasi = sqliteTable('notifikasi', {
@@ -400,24 +415,40 @@ export const setoranRt = sqliteTable('setoran_rt', {
 // ─── Surat-Menyurat (SF-SR-01 s/d SF-SR-07) ─────────────────────────────────
 export const surat = sqliteTable('surat', {
   id:               integer('id').primaryKey({ autoIncrement: true }),
-  // Nomor hanya diisi saat surat disetujui. UNIQUE menjaga agar dua surat
-  // tidak pernah mendapat nomor yang sama walau ada pengajuan bersamaan.
+  // Nomor hanya diisi saat seluruh TTD yang diminta selesai (status terbit).
+  // UNIQUE menjaga agar dua surat tidak pernah mendapat nomor yang sama.
   nomorSurat:       text('nomor_surat').unique(),
   jenis:            text('jenis').notNull(),         // e.g. "skck", "sktm", "domisili", "usaha", "kematian", "umum"
   keperluan:        text('keperluan').notNull(),
   keterangan:       text('keterangan'),
   dokumenSyarat:    text('dokumen_syarat'),          // path lokal file berkas persyaratan
   status:           text('status', {
-    enum: ['diajukan', 'diverifikasi', 'disetujui', 'ditolak']
+    enum: ['diajukan', 'menunggu_ttd', 'terbit', 'ditolak']
   }).notNull().default('diajukan'),
   catatanPengurus:  text('catatan_pengurus'),        // alasan tolak atau catatan verifikasi
+  // Permintaan tanda tangan dari warga saat mengajukan surat.
+  butuhTtdRt:       integer('butuh_ttd_rt', { mode: 'boolean' }).notNull().default(false),
+  butuhTtdRw:       integer('butuh_ttd_rw', { mode: 'boolean' }).notNull().default(false),
+  // Snapshot tanda tangan: URL gambar + identitas pejabat saat menandatangani.
+  ttdRtUrl:         text('ttd_rt_url'),
+  ttdRtOleh:        text('ttd_rt_oleh'),             // user id penanda tangan RT
+  ttdRtPada:        text('ttd_rt_pada'),             // ISO datetime
+  ttdRtNama:        text('ttd_rt_nama'),
+  ttdRtJabatan:     text('ttd_rt_jabatan'),
+  ttdRwUrl:         text('ttd_rw_url'),
+  ttdRwOleh:        text('ttd_rw_oleh'),             // user id penanda tangan RW
+  ttdRwPada:        text('ttd_rw_pada'),             // ISO datetime
+  ttdRwNama:        text('ttd_rw_nama'),
+  ttdRwJabatan:     text('ttd_rw_jabatan'),
+  // Jejak proses: verifikasi diisi saat pihak pertama menandatangani, lalu
+  // disetujui/terbit saat semua TTD yang diminta lengkap.
   diverifikasiOleh: text('diverifikasi_oleh'),       // user id pengurus RT/RW
-  disetujuiOleh:    text('disetujui_oleh'),          // user id Admin RW
+  disetujuiOleh:    text('disetujui_oleh'),          // user id pihak terakhir
   tanggalTerbit:    text('tanggal_terbit'),          // ISO date
-  // Jejak waktu tiap perpindahan status, dipakai timeline di halaman detail.
   diverifikasiPada: text('diverifikasi_pada'),       // ISO datetime
   disetujuiPada:    text('disetujui_pada'),          // ISO datetime
   ditolakPada:      text('ditolak_pada'),            // ISO datetime
+  ditolakOleh:      text('ditolak_oleh'),            // user id penolak
   wargaId:          integer('warga_id').notNull().references(() => warga.id),
   ...timestamps
 });

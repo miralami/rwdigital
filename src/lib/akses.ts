@@ -222,14 +222,16 @@ export interface PeranDefault {
 /**
  * Role bawaan yang di-seed ke tabel `peran`.
  *
- * `admin_rw` adalah superadmin: izinnya selalu penuh dan tidak bisa diubah
- * lewat UI. Role lain boleh disunting superadmin kapan saja.
+ * Hanya ada empat peran: superadmin, pengurus RW, pengurus RT, dan warga.
+ * `superadmin` adalah peran dengan akses penuh permanen; akunnya belum dibuat
+ * sampai pembahasannya final. `pengurus_rw` juga penuh, tetapi bukan
+ * superadmin sehingga masih bisa diubah lewat UI.
  */
 export const PERAN_DEFAULT: readonly PeranDefault[] = [
   {
-    nama: 'admin_rw',
-    label: 'Admin RW',
-    deskripsi: 'Superadmin: akses penuh ke seluruh modul dan pengaturan sistem.',
+    nama: 'superadmin',
+    label: 'Superadmin',
+    deskripsi: 'Superadmin: akses penuh permanen ke seluruh sistem.',
     tipe: 'staff',
     scope: 'all',
     permissions: izinPenuh(),
@@ -238,81 +240,40 @@ export const PERAN_DEFAULT: readonly PeranDefault[] = [
     urutan: 0
   },
   {
-    nama: 'ketua_rw',
-    label: 'Ketua RW',
-    deskripsi: 'Memantau seluruh data dan menyetujui surat. Tidak mengelola keuangan.',
+    nama: 'pengurus_rw',
+    label: 'Pengurus RW',
+    deskripsi: 'Akses penuh ke seluruh modul, termasuk Kas RW dan Pengaturan.',
     tipe: 'staff',
     scope: 'all',
-    permissions: {
-      ...izinBacaSemua(),
-      surat: ['read', 'update']
-    },
+    permissions: izinPenuh(),
     sistem: true,
     superadmin: false,
     urutan: 1
   },
   {
-    nama: 'sekretaris',
-    label: 'Sekretaris',
-    deskripsi: 'Mengelola kependudukan, surat, dan pengumuman.',
+    nama: 'pengurus_rt',
+    label: 'Pengurus RT',
+    deskripsi:
+      'Mengelola seluruh modul untuk RT-nya, kecuali Pengaturan. Kas RW hanya dibaca.',
     tipe: 'staff',
-    scope: 'all',
+    scope: 'rt',
     permissions: {
-      warga: ['read', 'create', 'update', 'delete'],
-      kk: ['read', 'create', 'update', 'delete'],
+      warga: ['create', 'read', 'update', 'delete'],
+      kk: ['create', 'read', 'update', 'delete'],
       rt: ['read'],
       rw: ['read'],
-      pengumuman: ['read', 'create', 'update', 'delete'],
-      surat: ['read', 'create', 'update'],
+      pengumuman: ['create', 'read', 'update', 'delete'],
+      iuran: ['create', 'read', 'update', 'delete'],
+      kas: ['create', 'read', 'update', 'delete'],
       pengurus: ['read'],
-      landing: ['read']
+      surat: ['create', 'read', 'update'],
+      landing: ['read'],
+      // Hanya untuk membuat akun portal warga dari halaman detail KK.
+      user: ['create']
     },
     sistem: true,
     superadmin: false,
     urutan: 2
-  },
-  {
-    nama: 'bendahara',
-    label: 'Bendahara',
-    deskripsi: 'Mengelola kas RW, iuran, tagihan, dan konfirmasi pembayaran.',
-    tipe: 'staff',
-    scope: 'all',
-    permissions: {
-      warga: ['read'],
-      kk: ['read'],
-      rt: ['read'],
-      rw: ['read'],
-      pengumuman: ['read'],
-      surat: ['read'],
-      iuran: ['read', 'create', 'update', 'delete'],
-      kas: ['read', 'create', 'update', 'delete'],
-      pengurus: ['read'],
-      landing: ['read']
-    },
-    sistem: true,
-    superadmin: false,
-    urutan: 3
-  },
-  {
-    nama: 'pengurus_rt',
-    label: 'Pengurus RT',
-    deskripsi: 'Mengelola warga & KK di RT-nya, mengajukan surat. Kas RW tidak terlihat.',
-    tipe: 'staff',
-    scope: 'rt',
-    permissions: {
-      warga: ['read', 'create', 'update'],
-      kk: ['read', 'create', 'update'],
-      rt: ['read'],
-      rw: ['read'],
-      pengumuman: ['read'],
-      surat: ['read', 'create'],
-      iuran: ['read'],
-      pengurus: ['read'],
-      landing: ['read']
-    },
-    sistem: true,
-    superadmin: false,
-    urutan: 4
   },
   {
     nama: 'warga',

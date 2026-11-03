@@ -81,6 +81,11 @@
         <div class="card-header">
           <div class="card-meta">
             <Badge variant={getKategoriVariant(p.kategori)} dot>{p.kategori}</Badge>
+            {#if p.rtId}
+              <Badge variant="brand">RT {String(p.nomorRt ?? '').padStart(2, '0')}</Badge>
+            {:else}
+              <Badge variant="default">RW</Badge>
+            {/if}
             {#if p.tanggalMulaiEvent}
               {@const status = statusEvent(p.tanggalMulaiEvent, p.tanggalSelesaiEvent)}
               {#if status}

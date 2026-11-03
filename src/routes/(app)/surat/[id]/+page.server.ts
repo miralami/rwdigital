@@ -1,15 +1,34 @@
 import { db } from '$lib/server/db';
-import { surat, warga, kk, rt, rw } from '$lib/server/db/schema';
-import { and, count, eq, like } from 'drizzle-orm';
+import {
+  surat,
+  warga,
+  kk,
+  rt,
+  rw,
+  pengurus,
+  ttdPejabat,
+  notifikasi
+} from '$lib/server/db/schema';
+import { and, count, eq, isNull, like } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { permissionsOf, requirePermission } from '$lib/server/rbac';
 import { requireRtAccess, requireScope, scopeFromRole } from '$lib/server/scope';
+import {
+  bolehMenandatangani,
+  bolehMenolak,
+  dimintaTtd,
+  pihakTtdDariScope,
+  sudahTtd,
+  type PihakTtd
+} from '$lib/server/surat-ttd';
 import type { PageServerLoad, Actions } from './$types';
 
 const BULAN_INDO = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ];
+
+type Pihak = PihakTtd;
 
 /** Pesan error SQLite saat nomor surat bentrok dengan baris lain. */
 function bentrokNomor(err: unknown): boolean {
@@ -28,6 +47,12 @@ async function suratDenganWilayah(id: number) {
       status: surat.status,
       nomorSurat: surat.nomorSurat,
       tanggalTerbit: surat.tanggalTerbit,
+      butuhTtdRt: surat.butuhTtdRt,
+      butuhTtdRw: surat.butuhTtdRw,
+      ttdRtPada: surat.ttdRtPada,
+      ttdRwPada: surat.ttdRwPada,
+      diverifikasiOleh: surat.diverifikasiOleh,
+      wargaUserId: warga.userId,
       rtId: kk.rtId,
       rtNomor: rt.nomor,
       rwNama: rw.nama
@@ -40,6 +65,88 @@ async function suratDenganWilayah(id: number) {
     .where(eq(surat.id, id));
 
   return row ?? null;
+}
+
+/**
+ * Identitas penanda tangan diambil dari data `pengurus`, bukan dari nama akun
+ * login. Gambar TTD berasal dari akun yang menekan tombol; URL-nya disalin ke
+ * surat sebagai snapshot supaya dokumen lama tidak berubah saat TTD diganti.
+ */
+async function identitasPenandaTangan(pihak: Pihak, rtId: number, locals: App.Locals) {
+  const userId = locals.user?.id ?? 'system';
+  const [ttd] = await db
+    .select({ url: ttdPejabat.url })
+    .from(ttdPejabat)
+    .where(eq(ttdPejabat.userId, userId))
+    .limit(1);
+
+  if (pihak === 'rt') {
+    const [ketua] = await db
+      .select({ nama: pengurus.nama, jabatan: pengurus.jabatan })
+      .from(pengurus)
+      .where(
+        and(
+          eq(pengurus.rtId, rtId),
+          eq(pengurus.aktif, true),
+          like(pengurus.jabatan, 'Ketua RT%')
+        )
+      )
+      .orderBy(pengurus.urutan)
+      .limit(1);
+
+    const [fallback] =
+      ketua?.nama
+        ? [ketua]
+        : await db
+            .select({ nama: pengurus.nama, jabatan: pengurus.jabatan })
+            .from(pengurus)
+            .where(and(eq(pengurus.rtId, rtId), eq(pengurus.aktif, true)))
+            .orderBy(pengurus.urutan)
+            .limit(1);
+
+    return {
+      nama: fallback?.nama ?? locals.user?.name ?? 'Ketua RT',
+      jabatan: fallback?.jabatan ?? `Ketua RT ${String(rtId).padStart(2, '0')}`,
+      url: ttd?.url ?? null
+    };
+  }
+
+  const [ketuaRw] = await db
+    .select({ nama: pengurus.nama, jabatan: pengurus.jabatan })
+    .from(pengurus)
+    .where(
+      and(
+        isNull(pengurus.rtId),
+        eq(pengurus.aktif, true),
+        like(pengurus.jabatan, 'Ketua RW%')
+      )
+    )
+    .orderBy(pengurus.urutan)
+    .limit(1);
+
+  return {
+    nama: ketuaRw?.nama ?? locals.user?.name ?? 'Ketua RW',
+    jabatan: ketuaRw?.jabatan ?? 'Ketua RW',
+    url: ttd?.url ?? null
+  };
+}
+
+/** Notifikasi in-app untuk pemohon setiap kali status surat berubah. */
+async function kirimNotifikasi(
+  userId: string | null | undefined,
+  judul: string,
+  pesan: string,
+  tipe: 'info' | 'sukses' | 'bahaya' = 'info'
+) {
+  if (!userId) return;
+  await db.insert(notifikasi).values({
+    userId,
+    judul,
+    pesan,
+    tipe,
+    tautan: '/portal#surat',
+    channel: 'in_app'
+  });
 }
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -57,6 +164,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       dokumenSyarat: surat.dokumenSyarat,
       status: surat.status,
       catatanPengurus: surat.catatanPengurus,
+      butuhTtdRt: surat.butuhTtdRt,
+      butuhTtdRw: surat.butuhTtdRw,
+      ttdRtUrl: surat.ttdRtUrl,
+      ttdRtPada: surat.ttdRtPada,
+      ttdRtNama: surat.ttdRtNama,
+      ttdRtJabatan: surat.ttdRtJabatan,
+      ttdRwUrl: surat.ttdRwUrl,
+      ttdRwPada: surat.ttdRwPada,
+      ttdRwNama: surat.ttdRwNama,
+      ttdRwJabatan: surat.ttdRwJabatan,
       diverifikasiOleh: surat.diverifikasiOleh,
       disetujuiOleh: surat.disetujuiOleh,
       tanggalTerbit: surat.tanggalTerbit,
@@ -92,19 +209,38 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
   requireRtAccess(scope, detail.rtId);
 
+  const pihak = pihakTtdDariScope(scope);
+  const bisa = izin.can('surat', 'update');
+  // Aturan TTD dipusatkan di surat-ttd.ts: hanya pihak yang diminta yang
+  // mendapat tombol. Pengurus RW tetap bisa membaca surat tanpa TTD RW.
+  const bisaTtd = bisa && bolehMenandatangani(pihak, detail);
+  const bisaTolak = bisa && bolehMenolak(pihak, detail);
+
+  const [ttdAkun] = locals.user
+    ? await db
+        .select({ url: ttdPejabat.url })
+        .from(ttdPejabat)
+        .where(eq(ttdPejabat.userId, locals.user.id))
+        .limit(1)
+    : [];
+
   return {
     detail,
-    bisaProses: izin.can('surat', 'update') && scope.kind === 'rt'
+    pihak,
+    bisaTtd,
+    bisaTolak,
+    bisaCetak: detail.status === 'terbit',
+    punyaTtd: Boolean(ttdAkun?.url)
   };
 };
 
 export const actions: Actions = {
-  verifikasi: async ({ params, locals }) => {
+  tandatangani: async ({ params, locals }) => {
     requirePermission(locals, 'surat', 'update');
     const scope = requireScope(scopeFromRole(locals));
-    if (scope.kind !== 'rt') {
-      return fail(403, { error: 'Hanya Pengurus RT yang berhak memverifikasi surat pengantar. Pihak RW hanya berhak memantau.' });
-    }
+    const pihak = pihakTtdDariScope(scope);
+    if (!pihak) return fail(403, { error: 'Akun ini tidak berhak menandatangani surat.' });
+
     const id = Number(params.id);
     if (!Number.isInteger(id) || id <= 0) {
       return fail(400, { error: 'ID surat tidak valid.' });
@@ -113,79 +249,93 @@ export const actions: Actions = {
     const data = await suratDenganWilayah(id);
     if (!data) return fail(404, { error: 'Surat tidak ditemukan.' });
 
-    requireRtAccess(scopeFromRole(locals), data.rtId);
+    requireRtAccess(scope, data.rtId);
 
-    // Idempoten: klik dua kali tidak mengubah apa pun.
-    if (data.status === 'diverifikasi' || data.status === 'disetujui') {
-      return { success: true };
-    }
-    if (data.status !== 'diajukan') {
-      return fail(400, { error: 'Surat yang sudah ditolak tidak bisa diverifikasi ulang.' });
+    // Idempoten: surat yang sudah terbit tidak diproses ulang.
+    if (data.status === 'terbit') return { success: true, nomorSurat: data.nomorSurat };
+    if (data.status === 'ditolak') {
+      return fail(400, { error: 'Surat yang sudah ditolak tidak bisa ditandatangani.' });
     }
 
-    await db
-      .update(surat)
-      .set({
-        status: 'diverifikasi',
-        diverifikasiOleh: locals.user?.id ?? 'system',
-        diverifikasiPada: new Date().toISOString()
-      })
-      .where(and(eq(surat.id, id), eq(surat.status, 'diajukan')));
-
-    return { success: true };
-  },
-
-  setujui: async ({ params, locals }) => {
-    requirePermission(locals, 'surat', 'update');
-    const scope = requireScope(scopeFromRole(locals));
-    if (scope.kind !== 'rt') {
-      return fail(403, { error: 'Hanya Pengurus RT yang berhak menyetujui surat pengantar. Pihak RW hanya berhak memantau.' });
-    }
-    const id = Number(params.id);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      return fail(400, { error: 'ID surat tidak valid.' });
-    }
-
-    const data = await suratDenganWilayah(id);
-    if (!data) return fail(404, { error: 'Surat tidak ditemukan.' });
-
-    requireRtAccess(scopeFromRole(locals), data.rtId);
-
-    // Idempoten: surat yang sudah terbit tidak diberi nomor baru.
-    if (data.status === 'disetujui' && data.nomorSurat) {
-      return { success: true, nomorSurat: data.nomorSurat };
-    }
-    if (data.status !== 'diverifikasi') {
-      return fail(400, {
+    // Hanya pihak yang dicentang warga yang boleh menandatangani. Pengurus
+    // RW tetap dapat membaca surat yang tidak meminta TTD RW, tetapi aksi
+    // ini harus ditolak di server, bukan hanya disembunyikan di UI.
+    if (!dimintaTtd(pihak, data)) {
+      return fail(403, {
         error:
-          data.status === 'diajukan'
-            ? 'Verifikasi berkas terlebih dahulu sebelum menerbitkan surat.'
-            : 'Surat yang sudah ditolak tidak bisa disetujui.'
+          pihak === 'rt'
+            ? 'Surat ini tidak meminta tanda tangan RT.'
+            : 'Surat ini tidak meminta tanda tangan RW.'
       });
     }
+    if (sudahTtd(pihak, data)) return { success: true };
 
+    const identitas = await identitasPenandaTangan(pihak, data.rtId, locals);
     const sekarang = new Date();
+    const waktu = sekarang.toISOString();
+    const userId = locals.user?.id ?? 'system';
+
+    const rtSelesai = data.butuhTtdRt ? (pihak === 'rt' ? true : Boolean(data.ttdRtPada)) : true;
+    const rwSelesai = data.butuhTtdRw ? (pihak === 'rw' ? true : Boolean(data.ttdRwPada)) : true;
+    const lengkap = rtSelesai && rwSelesai;
+
+    const tandaTangan =
+      pihak === 'rt'
+        ? {
+            ttdRtUrl: identitas.url,
+            ttdRtOleh: userId,
+            ttdRtPada: waktu,
+            ttdRtNama: identitas.nama,
+            ttdRtJabatan: identitas.jabatan
+          }
+        : {
+            ttdRwUrl: identitas.url,
+            ttdRwOleh: userId,
+            ttdRwPada: waktu,
+            ttdRwNama: identitas.nama,
+            ttdRwJabatan: identitas.jabatan
+          };
+
+    const dasar = {
+      ...tandaTangan,
+      // Verifikasi pertama dicatat sebagai jejak; TTD tetap bisa berjalan
+      // paralel, jadi pihak kedua tidak menimpa jejak ini.
+      diverifikasiOleh: data.diverifikasiOleh ?? userId,
+      diverifikasiPada: data.diverifikasiOleh ? undefined : waktu
+    };
+
+    if (!lengkap) {
+      await db
+        .update(surat)
+        .set({ ...dasar, status: 'menunggu_ttd' })
+        .where(eq(surat.id, id));
+
+      await kirimNotifikasi(
+        data.wargaUserId,
+        'Surat sedang ditandatangani',
+        `Surat Anda sudah ditandatangani oleh ${identitas.jabatan} dan menunggu pihak lain.`,
+        'info'
+      );
+
+      return { success: true, status: 'menunggu_ttd' };
+    }
+
+    // Semua TTD yang diminta lengkap → nomor baru terbit di langkah ini.
     const bln = BULAN_INDO[sekarang.getMonth()];
     const thn = sekarang.getFullYear();
-    const tanggalTerbit = sekarang.toISOString().slice(0, 10);
+    const tanggalTerbit = waktu.slice(0, 10);
     const prefixPeriode = `${thn}-${String(sekarang.getMonth() + 1).padStart(2, '0')}`;
 
-    // Nomor urut dihitung dari surat terbit pada bulan & tahun yang sama.
     const [hitungan] = await db
       .select({ jumlah: count() })
       .from(surat)
-      .where(and(eq(surat.status, 'disetujui'), like(surat.tanggalTerbit, `${prefixPeriode}%`)));
+      .where(and(eq(surat.status, 'terbit'), like(surat.tanggalTerbit, `${prefixPeriode}%`)));
     const urutAwal = Number(hitungan?.jumlah ?? 0);
 
-    // Nomor RW diambil dari nama (mis. "RW 01"), fallback ke id RW.
     const rwNumber = /(\d+)/.exec(data.rwNama ?? '')?.[1] ?? '1';
     const nomorRw = rwNumber.padStart(2, '0');
     const nomorRt = String(data.rtNomor).padStart(2, '0');
 
-    // Indeks UNIQUE pada `nomor_surat` adalah pengaman terakhir. Kalau ada
-    // pengajuan lain yang menyetujui di detik yang sama, urutan digeser satu
-    // sampai nomor benar-benar bebas.
     for (let percobaan = 0; percobaan < 25; percobaan += 1) {
       const urut = urutAwal + 1 + percobaan;
       const nomorSurat = `${nomorRt}/${nomorRw}/${bln}/${thn}/${String(urut).padStart(5, '0')}`;
@@ -194,31 +344,39 @@ export const actions: Actions = {
         await db
           .update(surat)
           .set({
-            status: 'disetujui',
+            ...dasar,
+            status: 'terbit',
             nomorSurat,
-            disetujuiOleh: locals.user?.id ?? 'system',
-            disetujuiPada: sekarang.toISOString(),
+            disetujuiOleh: userId,
+            disetujuiPada: waktu,
             tanggalTerbit
           })
-          .where(and(eq(surat.id, id), eq(surat.status, 'diverifikasi')));
+          .where(eq(surat.id, id));
 
-        return { success: true, nomorSurat };
+        await kirimNotifikasi(
+          data.wargaUserId,
+          'Surat telah terbit',
+          `Surat Anda sudah lengkap ditandatangani. Nomor: ${nomorSurat}.`,
+          'sukses'
+        );
+
+        return { success: true, nomorSurat, status: 'terbit' };
       } catch (err) {
         if (!bentrokNomor(err)) throw err;
       }
     }
 
     return fail(409, {
-      error: 'Gagal menentukan nomor surat yang unik. Coba terbitkan ulang.'
+      error: 'Gagal menentukan nomor surat yang unik. Coba tandatangani ulang.'
     });
   },
 
   tolak: async ({ params, request, locals }) => {
     requirePermission(locals, 'surat', 'update');
     const scope = requireScope(scopeFromRole(locals));
-    if (scope.kind !== 'rt') {
-      return fail(403, { error: 'Hanya Pengurus RT yang berhak menolak surat pengantar.' });
-    }
+    const pihak = pihakTtdDariScope(scope);
+    if (!pihak) return fail(403, { error: 'Akun ini tidak berhak menolak surat.' });
+
     const id = Number(params.id);
     if (!Number.isInteger(id) || id <= 0) {
       return fail(400, { error: 'ID surat tidak valid.' });
@@ -227,16 +385,29 @@ export const actions: Actions = {
     const data = await suratDenganWilayah(id);
     if (!data) return fail(404, { error: 'Surat tidak ditemukan.' });
 
-    requireRtAccess(scopeFromRole(locals), data.rtId);
+    requireRtAccess(scope, data.rtId);
 
-    if (data.status === 'disetujui' || data.status === 'ditolak') {
+    if (data.status === 'terbit' || data.status === 'ditolak') {
       return fail(400, {
-        error: 'Surat yang sudah disetujui atau ditolak tidak bisa diubah lagi.'
+        error: 'Surat yang sudah terbit atau ditolak tidak bisa diubah lagi.'
+      });
+    }
+
+    // Hanya pihak yang diminta menandatangani yang berhak menolak. Pengurus
+    // RW tetap bisa melihat surat yang tidak meminta TTD RW, tetapi tidak
+    // bisa menolaknya.
+    if (!dimintaTtd(pihak, data)) {
+      return fail(403, {
+        error:
+          pihak === 'rt'
+            ? 'Surat ini tidak meminta tanda tangan RT.'
+            : 'Surat ini tidak meminta tanda tangan RW.'
       });
     }
 
     const formData = await request.formData();
     const alasan = String(formData.get('catatan') || 'Dokumen persyaratan tidak lengkap').trim();
+    const userId = locals.user?.id ?? 'system';
 
     await db
       .update(surat)
@@ -244,10 +415,18 @@ export const actions: Actions = {
         status: 'ditolak',
         catatanPengurus: alasan,
         ditolakPada: new Date().toISOString(),
+        ditolakOleh: userId,
         // Surat yang ditolak tidak boleh membawa nomor.
         nomorSurat: null
       })
-      .where(and(eq(surat.id, id), eq(surat.status, data.status)));
+      .where(eq(surat.id, id));
+
+    await kirimNotifikasi(
+      data.wargaUserId,
+      'Pengajuan surat ditolak',
+      `Surat Anda ditolak. Alasan: ${alasan}`,
+      'bahaya'
+    );
 
     return { success: true };
   }

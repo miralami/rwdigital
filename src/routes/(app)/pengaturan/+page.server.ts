@@ -16,6 +16,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       rt: izin.can('rt', 'read'),
       pengurus: izin.can('pengurus', 'read'),
       landing: izin.can('landing', 'read'),
+      ttd: izin.can('surat', 'update'),
       // Plugin admin Better Auth memakai `list` untuk daftar akun, bukan `read`.
       pengguna: izin.can('user', 'list'),
       peran: izin.can('peran', 'read')

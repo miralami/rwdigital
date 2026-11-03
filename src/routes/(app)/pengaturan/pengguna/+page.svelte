@@ -61,19 +61,17 @@
   }
 
   function roleBadge(role?: string | null) {
-    if (role === 'admin_rw') return 'brand';
-    if (role === 'bendahara') return 'success';
+    if (role === 'superadmin') return 'brand';
+    if (role === 'pengurus_rw') return 'brand';
     if (role === 'pengurus_rt') return 'info';
-    if (role === 'ketua_rw') return 'brand';
-    if (role === 'sekretaris') return 'info';
     return 'default';
   }
 
-  function isAdminRw(role?: string | null) {
-    return (role ?? '')
+  function isAdminUtama(role?: string | null) {
+    const daftar = (role ?? '')
       .split(',')
-      .map((r) => r.trim().toLowerCase())
-      .includes('admin_rw');
+      .map((r) => r.trim().toLowerCase());
+    return daftar.includes('superadmin') || daftar.includes('pengurus_rw');
   }
 </script>
 
@@ -310,7 +308,7 @@
                     </td>
                     {#if data.bisaAturRole || data.bisaHapus}
                       <td class="aksi">
-                        {#if data.bisaAturRole && !isAdminRw(user.role)}
+                        {#if data.bisaAturRole && !isAdminUtama(user.role)}
                           <form method="POST" action="?/ubahRole" class="inline">
                             <input type="hidden" name="userId" value={user.id} />
                             <select name="role" class="input-base input-role" aria-label="Role">
@@ -343,7 +341,7 @@
                           </details>
                         {/if}
 
-                        {#if data.bisaHapus && !isAdminRw(user.role)}
+                        {#if data.bisaHapus && !isAdminUtama(user.role)}
                           <form
                             method="POST"
                             action="?/hapus"

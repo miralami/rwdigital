@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import { requirePermission } from '$lib/server/rbac';
+import { requireScope, scopeFromRole } from '$lib/server/scope';
 import type { PageServerLoad, Actions } from './$types';
 
 const editSchema = z
@@ -43,17 +44,29 @@ const editSchema = z
     }
   );
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
   const id = Number(params.id);
+  const scope = requireScope(scopeFromRole(locals));
   const [data] = await db.select().from(pengumuman).where(eq(pengumuman.id, id));
   if (!data) redirect(302, '/pengumuman');
+  if (scope.kind === 'rt' && data.rtId !== scope.rtId) {
+    redirect(302, '/pengumuman');
+  }
   return { data };
 };
 
 export const actions: Actions = {
   default: async ({ params, request, locals }) => {
     requirePermission(locals, 'pengumuman', 'update');
+    const scope = requireScope(scopeFromRole(locals));
     const id = Number(params.id);
+
+    const [lama] = await db.select().from(pengumuman).where(eq(pengumuman.id, id));
+    if (!lama) return fail(404, { error: 'Pengumuman tidak ditemukan.' });
+    if (scope.kind === 'rt' && lama.rtId !== scope.rtId) {
+      return fail(403, { error: 'Anda hanya boleh mengubah pengumuman RT sendiri.' });
+    }
+
     const formData = await request.formData();
 
     const rawValues = {

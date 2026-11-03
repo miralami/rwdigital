@@ -211,7 +211,7 @@ export const actions: Actions = {
       .limit(1);
 
     if (menunggu) {
-      return fail(400, { error: 'Sudah ada konfirmasi yang menunggu diproses bendahara.' });
+      return fail(400, { error: 'Sudah ada konfirmasi yang menunggu diproses pengurus.' });
     }
 
     await db.insert(konfirmasiBayar).values({

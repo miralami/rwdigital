@@ -59,7 +59,10 @@ export const auth = betterAuth({
       ac,
       roles,
       defaultRole: 'warga',
-      adminRoles: ['admin_rw']
+      // Pengurus RW memegang seluruh modul termasuk pengelolaan akun, jadi ia
+      // perlu diakui sebagai admin oleh plugin Better Auth. Superadmin tetap
+      // disiapkan sebagai peran tertinggi saat akunnya dibuat nanti.
+      adminRoles: ['superadmin', 'pengurus_rw']
     }),
     sveltekitCookies(getRequestEvent) // must be last
   ]

@@ -6,8 +6,8 @@ const izin = (...roles: string[]) =>
 	gabungIzin(...roles.map((nama) => peranDefault(nama)?.permissions));
 
 describe('can() — matriks izin per aksi', () => {
-	it('admin_rw punya akses penuh ke modul inti', () => {
-		const admin = izinPenuh();
+	it('pengurus_rw punya akses penuh ke modul inti', () => {
+		const admin = izin('pengurus_rw');
 
 		expect(can(admin, 'warga', 'create')).toBe(true);
 		expect(can(admin, 'warga', 'delete')).toBe(true);
@@ -18,36 +18,25 @@ describe('can() — matriks izin per aksi', () => {
 		expect(can(admin, 'peran', 'delete')).toBe(true);
 	});
 
-	it('pengurus_rt mengelola warga RT-nya dan tidak menyentuh kas', () => {
+	it('superadmin punya izin penuh yang sama', () => {
+		const akses = izin('superadmin');
+		expect(akses).toEqual(izinPenuh());
+	});
+
+	it('pengurus_rt mengelola modul RT-nya, termasuk Kas RT, tanpa Pengaturan', () => {
 		const akses = izin('pengurus_rt');
 
 		expect(can(akses, 'warga', 'create')).toBe(true);
-		expect(can(akses, 'warga', 'delete')).toBe(false);
-		expect(can(akses, 'kas', 'read')).toBe(false);
-		expect(can(akses, 'kas', 'create')).toBe(false);
-		expect(can(akses, 'iuran', 'read')).toBe(true);
-		expect(can(akses, 'iuran', 'create')).toBe(false);
-		expect(can(akses, 'user', 'list')).toBe(false);
-	});
-
-	it('bendahara mengelola keuangan, tapi data warga hanya dibaca', () => {
-		const akses = izin('bendahara');
-
-		expect(can(akses, 'iuran', 'create')).toBe(true);
-		expect(can(akses, 'kas', 'update')).toBe(true);
-		expect(can(akses, 'warga', 'read')).toBe(true);
-		expect(can(akses, 'warga', 'update')).toBe(false);
-		expect(can(akses, 'warga', 'delete')).toBe(false);
-	});
-
-	it('ketua_rw membaca semua modul dan boleh menyetujui surat', () => {
-		const akses = izin('ketua_rw');
-
-		expect(can(akses, 'warga', 'read')).toBe(true);
+		expect(can(akses, 'warga', 'delete')).toBe(true);
 		expect(can(akses, 'kas', 'read')).toBe(true);
+		expect(can(akses, 'kas', 'create')).toBe(true);
+		expect(can(akses, 'iuran', 'create')).toBe(true);
+		expect(can(akses, 'pengumuman', 'create')).toBe(true);
 		expect(can(akses, 'surat', 'update')).toBe(true);
-		expect(can(akses, 'surat', 'delete')).toBe(false);
-		expect(can(akses, 'warga', 'create')).toBe(false);
+		// Pengaturan tetap milik RW; `user:create` hanya untuk membuat akun warga.
+		expect(can(akses, 'user', 'create')).toBe(true);
+		expect(can(akses, 'user', 'list')).toBe(false);
+		expect(can(akses, 'peran', 'read')).toBe(false);
 	});
 
 	it('warga hanya boleh membaca pengumuman/iuran dan mengajukan surat', () => {
@@ -67,7 +56,7 @@ describe('can() — matriks izin per aksi', () => {
 	});
 
 	it('gabungan role memakai OR: cukup satu role yang mengizinkan', () => {
-		const akses = izin('warga', 'bendahara');
+		const akses = izin('warga', 'pengurus_rt');
 
 		expect(can(akses, 'kas', 'create')).toBe(true);
 		expect(can(akses, 'surat', 'create')).toBe(true);

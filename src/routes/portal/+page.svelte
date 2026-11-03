@@ -242,10 +242,10 @@
                   <span class="surat-title">Surat {s.jenis.toUpperCase()}</span>
                   {#if s.status === 'diajukan'}
                     <Badge variant="warning">Diajukan</Badge>
-                  {:else if s.status === 'diverifikasi'}
-                    <Badge variant="brand">Diverifikasi</Badge>
-                  {:else if s.status === 'disetujui'}
-                    <Badge variant="success">Disetujui</Badge>
+                  {:else if s.status === 'menunggu_ttd'}
+                    <Badge variant="brand">Menunggu TTD</Badge>
+                  {:else if s.status === 'terbit'}
+                    <Badge variant="success">Terbit</Badge>
                   {:else}
                     <Badge variant="danger">Ditolak</Badge>
                   {/if}
@@ -261,17 +261,23 @@
                 {/if}
               </div>
 
-              {#if s.status === 'disetujui'}
-                <a
-                  href="/portal/surat/{s.id}/cetak"
-                  target="_blank"
-                  rel="noreferrer"
-                  class="btn btn-secondary btn-sm"
-                >
+              <div class="surat-actions">
+                <a href="/portal/surat/{s.id}" class="btn btn-secondary btn-sm">
                   <FileText size={14} />
-                  <span>Unduh PDF</span>
+                  <span>Lihat Detail &amp; Proses</span>
                 </a>
-              {/if}
+                {#if s.status === 'terbit'}
+                  <a
+                    href="/portal/surat/{s.id}/cetak?unduh=1"
+                    target="_blank"
+                    rel="noreferrer"
+                    class="btn btn-primary btn-sm"
+                  >
+                    <FileText size={14} />
+                    <span>Unduh PDF</span>
+                  </a>
+                {/if}
+              </div>
             </div>
           {/each}
         </div>
@@ -588,6 +594,13 @@
 
   .surat-row:last-child {
     border-bottom: none;
+  }
+
+  .surat-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
   }
 
   .surat-info {

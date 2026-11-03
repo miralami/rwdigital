@@ -10,7 +10,6 @@ import { test, expect, type Page } from '@playwright/test';
 
 const AKUN = {
   admin: { email: 'admin@rw.id', password: 'admin123' },
-  bendahara: { email: 'bendahara@rw.id', password: 'bendahara123' },
   pengurus: { email: 'pengurus@rw.id', password: 'pengurus123' },
   warga: { email: 'warga@rw.id', password: 'warga123' }
 } as const;
@@ -39,19 +38,12 @@ test('tamu diarahkan ke login saat membuka halaman internal', async ({ page }) =
 });
 
 test.describe('login per role', () => {
-  test('admin RW mendarat di dashboard dengan kas RW', async ({ page }) => {
+  test('pengurus RW mendarat di dashboard dengan kas RW', async ({ page }) => {
     await login(page, AKUN.admin);
 
     await expect(page).toHaveURL(/\/dashboard/);
     await expect(page.getByText('Saldo kas RW')).toBeVisible();
     await expect(page.getByText(/Menampilkan data/)).toHaveCount(0);
-  });
-
-  test('bendahara melihat kas RW dan tidak dibatasi RT', async ({ page }) => {
-    await login(page, AKUN.bendahara);
-
-    await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByText('Saldo kas RW')).toBeVisible();
   });
 
   test('pengurus RT melihat data RT tugasnya saja', async ({ page }) => {
@@ -83,8 +75,8 @@ test.describe('login per role', () => {
     await expect(page.getByRole('heading', { name: 'Riwayat pembayaran' })).toBeVisible();
   });
 
-  test('bendahara bisa membuka setoran RT ke RW', async ({ page }) => {
-    await login(page, AKUN.bendahara);
+  test('pengurus RW bisa membuka setoran RT ke RW', async ({ page }) => {
+    await login(page, AKUN.admin);
 
     await page.goto('/iuran/setoran');
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Setoran RT');
@@ -93,10 +85,9 @@ test.describe('login per role', () => {
   });
 });
 
-test('menu pengguna terkunci untuk role tanpa izin', async ({ page }) => {
+test('area Pengaturan tertutup untuk pengurus RT', async ({ page }) => {
   await login(page, AKUN.pengurus);
-  await page.goto('/pengaturan/pengguna');
+  const response = await page.goto('/pengaturan/pengguna');
 
-  await expect(page).toHaveURL(/\/pengaturan\/pengguna/);
-  await expect(page.getByText('Hanya admin RW yang bisa mengelola akun pengguna.')).toBeVisible();
+  expect(response?.status()).toBe(403);
 });

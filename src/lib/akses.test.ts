@@ -16,20 +16,30 @@ describe('akses — katalog modul & izin default', () => {
 		}
 	});
 
-	it('admin_rw adalah satu-satunya superadmin dengan izin penuh', () => {
+	it('hanya superadmin yang ditandai superadmin', () => {
 		const superadmin = PERAN_DEFAULT.filter((p) => p.superadmin);
 
-		expect(superadmin.map((p) => p.nama)).toEqual(['admin_rw']);
+		expect(superadmin.map((p) => p.nama)).toEqual(['superadmin']);
 		expect(superadmin[0].permissions).toEqual(izinPenuh());
 		expect(superadmin[0].scope).toBe('all');
 	});
 
-	it('pengurus_rt dibatasi ke RT dan tidak melihat kas RW', () => {
+	it('pengurus_rw mendapat izin penuh tanpa status superadmin', () => {
+		const peran = peranDefault('pengurus_rw');
+
+		expect(peran?.superadmin).toBe(false);
+		expect(peran?.scope).toBe('all');
+		expect(peran?.permissions).toEqual(izinPenuh());
+	});
+
+	it('pengurus_rt dibatasi ke RT dan tidak membuka Pengaturan', () => {
 		const peran = peranDefault('pengurus_rt');
 
 		expect(peran?.scope).toBe('rt');
-		expect(bisaAkses(peran?.permissions, 'kas', 'read')).toBe(false);
+		expect(bisaAkses(peran?.permissions, 'kas', 'read')).toBe(true);
 		expect(bisaAkses(peran?.permissions, 'warga', 'update')).toBe(true);
+		expect(bisaAkses(peran?.permissions, 'user', 'list')).toBe(false);
+		expect(bisaAkses(peran?.permissions, 'peran', 'read')).toBe(false);
 	});
 
 	it('warga hanya mendapat izin portal', () => {

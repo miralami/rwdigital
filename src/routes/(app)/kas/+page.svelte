@@ -1115,14 +1115,14 @@
             <span>CSV</span>
           </button>
         </div>
-        {#if data.akses.create}
+        {#if data.akses.kelolaRw}
           <button type="button" class="btn btn-action" onclick={() => (showModalTambahRw = true)}>
             <Plus size={16} />
             <span>Catat Kas RW</span>
           </button>
         {/if}
       {:else if activeTab === 'kategori'}
-        {#if data.akses.create}
+        {#if data.akses.kelolaKategori}
           <button type="button" class="btn btn-action" onclick={() => (showModalTambahKategori = true)}>
             <Plus size={16} />
             <span>Tambah Pos Kategori</span>
@@ -1400,7 +1400,7 @@
       <div class="banner-content">
         <h4 class="banner-title">Model Rekapitulasi Penerimaan Iuran RT (KU-02)</h4>
         <p class="banner-text">
-          Pergeseran fokus dari sistem tagihan murni perorangan menjadi <strong>rekapitulasi penerimaan kolektif iuran wajib per-RT</strong>. Memudahkan bendahara RT menyetorkan himpunan iuran warga ke tingkat RW dengan akuntabilitas fisik yang jelas.
+          Pergeseran fokus dari sistem tagihan murni perorangan menjadi <strong>rekapitulasi penerimaan kolektif iuran wajib per-RT</strong>. Memudahkan pengurus RT menyetorkan himpunan iuran warga ke tingkat RW dengan akuntabilitas fisik yang jelas.
         </p>
       </div>
     </div>
@@ -1425,7 +1425,7 @@
       <StatCard
         title="Tingkat Kepatuhan RW"
         value={`${data.persentaseIuranRw}%`}
-        description={data.persentaseIuranRw >= 75 ? 'Tingkat partisipasi tinggi' : 'Perlu tindak lanjut bendahara RT'}
+        description={data.persentaseIuranRw >= 75 ? 'Tingkat partisipasi tinggi' : 'Perlu tindak lanjut pengurus RT'}
         icon={CheckCircle2}
         variant={data.persentaseIuranRw >= 75 ? 'success' : 'warning'}
       />
@@ -1503,16 +1503,20 @@
                   {formatRupiah(r.targetNominal)}
                 </td>
                 <td class="text-center">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-secondary text-xs"
-                    onclick={() => {
-                      targetSetoranRtId = r.rtId;
-                      showModalSetoranRt = true;
-                    }}
-                  >
-                    Setor Iuran
-                  </button>
+                  {#if data.akses.setorRt}
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-secondary text-xs"
+                      onclick={() => {
+                        targetSetoranRtId = r.rtId;
+                        showModalSetoranRt = true;
+                      }}
+                    >
+                      Setor Iuran
+                    </button>
+                  {:else}
+                    <span class="text-xs text-muted">—</span>
+                  {/if}
                 </td>
               </tr>
             {:else}
@@ -1593,7 +1597,7 @@
                   {/if}
                 </span>
               </div>
-              {#if data.akses.delete}
+              {#if data.akses.kelolaKategori}
                 <form method="POST" action="?/hapusKategori">
                   <input type="hidden" name="id" value={kat.id} />
                   <button type="submit" class="btn-icon-danger" title="Hapus kategori">
@@ -1633,7 +1637,7 @@
                   {/if}
                 </span>
               </div>
-              {#if data.akses.delete}
+              {#if data.akses.kelolaKategori}
                 <form method="POST" action="?/hapusKategori">
                   <input type="hidden" name="id" value={kat.id} />
                   <button type="submit" class="btn-icon-danger" title="Hapus kategori">

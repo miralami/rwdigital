@@ -278,7 +278,7 @@
                   <span>
                     Konfirmasi {formatRupiah(t.konfirmasiMenunggu.jumlah)} ({LABEL_METODE[
                       t.konfirmasiMenunggu.metodeBayar
-                    ] ?? t.konfirmasiMenunggu.metodeBayar}) menunggu verifikasi bendahara.
+                    ] ?? t.konfirmasiMenunggu.metodeBayar}) menunggu verifikasi pengurus.
                   </span>
                   <form method="POST" action="?/batalkan">
                     <input type="hidden" name="id" value={t.konfirmasiMenunggu.id} />
@@ -318,7 +318,7 @@
                       <div class="field">
                         <label for="metode-{t.id}">Metode</label>
                         <select id="metode-{t.id}" name="metodeBayar" class="input-base">
-                          <option value="tunai">Tunai ke bendahara</option>
+                          <option value="tunai">Tunai ke pengurus</option>
                           <option value="transfer">Transfer bank</option>
                         </select>
                       </div>
@@ -349,7 +349,7 @@
         <Card>
           <EmptyState
             message="Belum ada pembayaran"
-            description="Pembayaran yang sudah diverifikasi bendahara atau lunas online akan tercatat di sini."
+            description="Pembayaran yang sudah diverifikasi pengurus atau lunas online akan tercatat di sini."
             icon={Receipt}
           />
         </Card>

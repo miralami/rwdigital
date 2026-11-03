@@ -26,9 +26,9 @@ Akses berbasis role, didefinisikan sekali di [`src/lib/permissions.ts`](src/lib/
 
 | Role | Akses |
 |---|---|
-| `admin_rw` | Penuh ke semua modul |
-| `pengurus_rt` | Kelola warga & KK, baca modul lain, ajukan surat |
-| `bendahara` | Penuh ke kas & iuran, baca data warga |
+| `superadmin` | Izin penuh (peran sistem, belum dipakai di seed) |
+| `pengurus_rw` | Penuh ke semua modul, termasuk Pengaturan & Kas RW |
+| `pengurus_rt` | Kelola data & Kas RT wilayahnya; Kas RW hanya baca; tanpa Pengaturan |
 | `warga` | Baca pengumuman & iuran sendiri, ajukan surat |
 
 Klasifikasi rute dan role yang boleh mengaksesnya berada di [`src/lib/server/guard.ts`](src/lib/server/guard.ts) — dipakai `hooks.server.ts`, layout, dan login, supaya ketiganya tidak bisa berbeda pendapat. Role yang mendarat di group orang lain diarahkan ke landing miliknya, bukan diberi 403 (warga yang mengetik `/dashboard` diarahkan ke `/portal`).

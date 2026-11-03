@@ -1,10 +1,9 @@
 import { db } from '$lib/server/db';
-import { surat, warga, kk, rt, rw, pengurus } from '$lib/server/db/schema';
-import { and, eq } from 'drizzle-orm';
+import { surat, warga, kk, rt, rw } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
 import { error, redirect } from '@sveltejs/kit';
 import { isStaff } from '$lib/server/guard';
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { requireRtAccess, requireScope, scopeFromRole } from '$lib/server/scope';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -23,6 +22,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       keterangan: surat.keterangan,
       status: surat.status,
       tanggalTerbit: surat.tanggalTerbit,
+      butuhTtdRt: surat.butuhTtdRt,
+      butuhTtdRw: surat.butuhTtdRw,
+      ttdRtUrl: surat.ttdRtUrl,
+      ttdRtNama: surat.ttdRtNama,
+      ttdRtJabatan: surat.ttdRtJabatan,
+      ttdRwUrl: surat.ttdRwUrl,
+      ttdRwNama: surat.ttdRwNama,
+      ttdRwJabatan: surat.ttdRwJabatan,
       wargaId: warga.id,
       userId: warga.userId,
       namaWarga: warga.nama,
@@ -55,30 +62,22 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
   const isOwner = detail.userId === locals.user.id;
 
-  if (!isStaff(locals) && !isOwner) {
+  // Staf boleh membuka dokumen ini sesuai wilayahnya: RW melihat semua surat,
+  // pengurus RT hanya surat dari RT tugasnya. Warga hanya surat miliknya.
+  if (isStaff(locals)) {
+    const scope = requireScope(scopeFromRole(locals));
+    requireRtAccess(scope, detail.rtId);
+  } else if (!isOwner) {
     throw error(403, 'Anda tidak berhak mengakses dokumen surat ini.');
   }
 
-  // Cari data Ketua RT untuk tanda tangan
-  const [ketuaRt] = await db
-    .select({
-      nama: pengurus.nama,
-      fotoUrl: pengurus.fotoUrl
-    })
-    .from(pengurus)
-    .where(and(eq(pengurus.rtId, detail.rtId), eq(pengurus.aktif, true)))
-    .limit(1);
+  // Cetak hanya dibuka setelah seluruh pihak yang diminta selesai TTD.
+  if (detail.status !== 'terbit') {
+    throw error(
+      400,
+      'Surat belum bisa dicetak. Surat baru terbit setelah semua tanda tangan yang diminta lengkap.'
+    );
+  }
 
-  // Cek apakah ada file TTD elektronik RT
-  const ttdFileName = `ttd-rt-${String(detail.nomorRt).padStart(2, '0')}.png`;
-  const ttdPath = join(process.cwd(), 'static', 'uploads', 'ttd', ttdFileName);
-  const ttdUrl = existsSync(ttdPath) ? `/uploads/ttd/${ttdFileName}` : null;
-
-  return {
-    detail: {
-      ...detail,
-      namaKetuaRt: ketuaRt?.nama ?? null,
-      ttdRtUrl: ttdUrl
-    }
-  };
+  return { detail };
 };

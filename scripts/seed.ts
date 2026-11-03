@@ -5,7 +5,7 @@ import { admin } from 'better-auth/plugins';
 import { LibsqlDialect } from '@libsql/kysely-libsql';
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
-import { eq, isNull } from 'drizzle-orm';
+import { eq, inArray, isNull } from 'drizzle-orm';
 import { ac, roles } from '../src/lib/permissions';
 import { PERAN_DEFAULT } from '../src/lib/akses';
 import {
@@ -63,7 +63,7 @@ const auth = betterAuth({
 			ac,
 			roles,
 			defaultRole: 'warga',
-			adminRoles: ['admin_rw']
+			adminRoles: ['superadmin', 'pengurus_rw']
 		})
 	]
 });
@@ -94,7 +94,7 @@ const db = drizzle(client, {
 // ─── Seed config ─────────────────────────────────────────────────────────────
 const ADMIN_EMAIL = 'admin@rw.id';
 const ADMIN_PASSWORD = 'admin123';
-const ADMIN_NAME = 'Admin RW';
+const ADMIN_NAME = 'Pengurus RW';
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 async function seed() {
@@ -131,24 +131,24 @@ async function seed() {
 		throw e;
 	}
 
-	// 2. Set admin role
-	console.log('2. Mengatur role admin_rw...');
+	// 2. Set role pengurus RW
+	console.log('2. Mengatur role pengurus_rw...');
 	try {
 		await auth.api.setRole({
 			body: {
 				userId,
-				role: 'admin_rw'
+				role: 'pengurus_rw'
 			},
 			headers: new Headers()
 		});
-		console.log('   Role admin_rw berhasil diatur.');
+		console.log('   Role pengurus_rw berhasil diatur.');
 	} catch (e) {
 		try {
 			await client.execute({
 				sql: 'UPDATE user SET role = ? WHERE id = ?',
-				args: ['admin_rw', userId]
+				args: ['pengurus_rw', userId]
 			});
-			console.log('   Role admin_rw berhasil diatur via database.');
+			console.log('   Role pengurus_rw berhasil diatur via database.');
 		} catch (dbErr) {
 			console.error(`   Gagal mengatur role via database: ${dbErr}`);
 		}
@@ -158,6 +158,17 @@ async function seed() {
 	// Hanya menambah role yang belum ada. Izin milik role sistem yang sudah
 	// disunting superadmin tidak ditimpa, supaya seed aman dijalankan ulang.
 	console.log('2b. Menyiapkan peran & izin default...');
+	// Struktur lama punya lima peran staf. Seed sekarang hanya mengenal empat
+	// peran; sisa peran lama dibersihkan supaya daftar di UI tidak menyesatkan.
+	const PERAN_LAMA = ['admin_rw', 'ketua_rw', 'sekretaris', 'bendahara'];
+	await db.delete(peran).where(inArray(peran.nama, PERAN_LAMA));
+
+	// Akun demo lama juga tidak dipakai lagi. Akun `admin@rw.id` dipertahankan
+	// (hanya perannya berubah menjadi pengurus_rw).
+	await client.execute({
+		sql: "DELETE FROM user WHERE email IN ('ketua@rw.id', 'sekretaris@rw.id', 'bendahara@rw.id')"
+	});
+
 	const peranAda = await db.select({ nama: peran.nama }).from(peran);
 	const namaPeranAda = new Set(peranAda.map((p) => p.nama));
 	const peranBaru = PERAN_DEFAULT.filter((p) => !namaPeranAda.has(p.nama));
@@ -375,9 +386,6 @@ async function seed() {
 
 	const akunWargaId = await pastikanAkun('warga@rw.id', 'warga123', 'Warga Contoh', 'warga');
 	const akunPengurusId = await pastikanAkun('pengurus@rw.id', 'pengurus123', 'Pengurus RT 01', 'pengurus_rt');
-	await pastikanAkun('bendahara@rw.id', 'bendahara123', 'Bendahara RW', 'bendahara');
-	await pastikanAkun('ketua@rw.id', 'ketua123', 'Ketua RW', 'ketua_rw');
-	await pastikanAkun('sekretaris@rw.id', 'sekretaris123', 'Sekretaris RW', 'sekretaris');
 
 	// Tugaskan akun pengurus ke RT 01. Tanpa baris ini, scoping fail-closed
 	// membuat akun pengurus tidak bisa melihat data RT mana pun.
@@ -628,11 +636,8 @@ async function seed() {
 	console.log('\n=== Seed selesai ===');
 	console.log('\nCredentials:');
 	console.log(`  ${'Email'.padEnd(20)} ${'Password'.padEnd(14)} Role`);
-	console.log(`  ${'admin@rw.id'.padEnd(20)} ${'admin123'.padEnd(14)} admin_rw`);
-	console.log(`  ${'bendahara@rw.id'.padEnd(20)} ${'bendahara123'.padEnd(14)} bendahara`);
-	console.log(`  ${'ketua@rw.id'.padEnd(20)} ${'ketua123'.padEnd(14)} ketua_rw`);
-	console.log(`  ${'sekretaris@rw.id'.padEnd(20)} ${'sekretaris123'.padEnd(14)} sekretaris`);
-	console.log(`  ${'pengurus@rw.id'.padEnd(20)} ${'pengurus123'.padEnd(14)} pengurus_rt`);
+	console.log(`  ${'admin@rw.id'.padEnd(20)} ${'admin123'.padEnd(14)} pengurus_rw`);
+	console.log(`  ${'pengurus@rw.id'.padEnd(20)} ${'pengurus123'.padEnd(14)} pengurus_rt (RT 01)`);
 	console.log(`  ${'warga@rw.id'.padEnd(20)} ${'warga123'.padEnd(14)} warga (tertaut ke 1 KK)`);
 }
 

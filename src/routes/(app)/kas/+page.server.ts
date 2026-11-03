@@ -213,10 +213,16 @@ export const load: PageServerLoad = async ({ url, locals }) => {
 
   return {
     // Izin dipakai UI untuk menyembunyikan tombol yang pasti ditolak server.
+    // `kelolaRw`/`kelolaKategori`/`setorRt` sengaja mensyaratkan scope `all`:
+    // Pengurus RT hanya mengelola Kas RT miliknya, bukan Kas RW, kategori
+    // global, atau setoran RT ke RW.
     akses: {
       create: izin.can('kas', 'create'),
       update: izin.can('kas', 'update'),
-      delete: izin.can('kas', 'delete')
+      delete: izin.can('kas', 'delete'),
+      kelolaRw: scope.kind === 'all' && izin.can('kas', 'create'),
+      kelolaKategori: scope.kind === 'all' && izin.can('kas', 'create'),
+      setorRt: scope.kind === 'all' && izin.can('kas', 'create')
     },
     rwData,
     daftarRt,
@@ -253,6 +259,9 @@ export const actions: Actions = {
   // ─── Aksi Kas RW ─────────────────────────────────────────────────────────
   tambahKasRw: async ({ request, locals }) => {
     requirePermission(locals, 'kas', 'create');
+    if (scopeFromRole(locals).kind !== 'all') {
+      return fail(403, { errorKasRw: 'Hanya Pengurus RW yang dapat mencatat Kas RW.' });
+    }
     const formData = await request.formData();
     const jenis = String(formData.get('jenis')) as 'pemasukan' | 'pengeluaran';
     const nominal = Number(formData.get('nominal'));
@@ -295,6 +304,9 @@ export const actions: Actions = {
 
   batalkanKasRw: async ({ request, locals }) => {
     requirePermission(locals, 'kas', 'update');
+    if (scopeFromRole(locals).kind !== 'all') {
+      return fail(403, { errorKasRw: 'Hanya Pengurus RW yang dapat membatalkan Kas RW.' });
+    }
     const formData = await request.formData();
     const id = Number(formData.get('transaksiId'));
     const alasan = String(formData.get('alasan') || 'Koreksi pembukuan kas RW').trim();
@@ -407,6 +419,12 @@ export const actions: Actions = {
   // ─── Aksi Rekapitulasi Setoran Iuran RT (KU-02) ───────────────────────────
   catatSetoranRt: async ({ request, locals }) => {
     requirePermission(locals, 'kas', 'create');
+    // Setoran RT ke RW menambah saldo Kas RW, jadi hanya boleh dicatat RW.
+    if (scopeFromRole(locals).kind !== 'all') {
+      return fail(403, {
+        errorSetoran: 'Hanya Pengurus RW yang dapat mencatat setoran RT ke RW.'
+      });
+    }
     const formData = await request.formData();
     const rtId = Number(formData.get('rtId'));
     const periode = String(formData.get('periode') || '').trim();
@@ -525,6 +543,9 @@ export const actions: Actions = {
   // ─── Aksi Kategori Kas (KU-04) ────────────────────────────────────────────
   tambahKategori: async ({ request, locals }) => {
     requirePermission(locals, 'kas', 'create');
+    if (scopeFromRole(locals).kind !== 'all') {
+      return fail(403, { errorKategori: 'Hanya Pengurus RW yang dapat mengelola kategori kas.' });
+    }
     const formData = await request.formData();
     const nama = String(formData.get('nama') || '').trim();
     const jenis = String(formData.get('jenis')) as 'pemasukan' | 'pengeluaran';
@@ -548,6 +569,9 @@ export const actions: Actions = {
 
   hapusKategori: async ({ request, locals }) => {
     requirePermission(locals, 'kas', 'delete');
+    if (scopeFromRole(locals).kind !== 'all') {
+      return fail(403, { errorHapusKategori: 'Hanya Pengurus RW yang dapat mengelola kategori kas.' });
+    }
     const formData = await request.formData();
     const id = Number(formData.get('id'));
 

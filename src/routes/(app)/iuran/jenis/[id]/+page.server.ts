@@ -4,6 +4,7 @@ import { asc, eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
 import { requirePermission } from '$lib/server/rbac';
+import { requireScope, scopeFromRole } from '$lib/server/scope';
 import { bacaFormJenis, jenisSchema } from '$lib/server/iuran-schema';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -11,21 +12,39 @@ const ubahSchema = jenisSchema.extend({
   id: z.coerce.number().int().positive('ID jenis iuran tidak valid')
 });
 
-export const load: PageServerLoad = async ({ params }) => {
+function milikRt(
+  row: { scope: string; rtId: number | null },
+  scope: ReturnType<typeof scopeFromRole>
+): boolean {
+  return (
+    scope.kind === 'all' ||
+    (scope.kind === 'rt' && row.scope === 'rt' && row.rtId === scope.rtId)
+  );
+}
+
+export const load: PageServerLoad = async ({ params, locals }) => {
   const id = Number(params.id);
   if (!Number.isInteger(id) || id <= 0) redirect(302, '/iuran/jenis');
 
+  const scope = requireScope(scopeFromRole(locals));
   const [detail] = await db.select().from(jenisIuran).where(eq(jenisIuran.id, id));
   if (!detail) redirect(302, '/iuran/jenis');
 
-  const daftarRt = await db.select({ id: rt.id, nomor: rt.nomor }).from(rt).orderBy(asc(rt.nomor));
+  // Pengurus RT tidak boleh membuka halaman ubah milik RW / RT lain.
+  if (!milikRt(detail, scope)) redirect(302, '/iuran/jenis');
 
-  return { detail, daftarRt };
+  const daftarRt =
+    scope.kind === 'rt'
+      ? await db.select({ id: rt.id, nomor: rt.nomor }).from(rt).where(eq(rt.id, scope.rtId))
+      : await db.select({ id: rt.id, nomor: rt.nomor }).from(rt).orderBy(asc(rt.nomor));
+
+  return { detail, daftarRt, scopeKind: scope.kind };
 };
 
 export const actions: Actions = {
   default: async ({ params, request, locals }) => {
     requirePermission(locals, 'iuran', 'update');
+    const scope = requireScope(scopeFromRole(locals));
 
     const result = ubahSchema.safeParse({
       ...bacaFormJenis(await request.formData()),
@@ -38,13 +57,25 @@ export const actions: Actions = {
 
     const { id, ...nilai } = result.data;
 
+    const [lama] = await db.select().from(jenisIuran).where(eq(jenisIuran.id, id)).limit(1);
+    if (!lama) return fail(404, { error: 'Jenis iuran tidak ditemukan.' });
+    if (!milikRt(lama, scope)) {
+      return fail(403, { error: 'Anda hanya boleh mengubah jenis iuran milik RT sendiri.' });
+    }
+
     // Nominal & porsi baru hanya dipakai tagihan berikutnya. Tagihan yang
     // sudah terbit menyimpan snapshot sendiri (lihat komentar di schema).
     await db
       .update(jenisIuran)
       .set({
         ...nilai,
-        rtId: nilai.scope === 'rt' ? (nilai.rtId ?? null) : null,
+        scope: scope.kind === 'rt' ? 'rt' : nilai.scope,
+        rtId:
+          scope.kind === 'rt'
+            ? scope.rtId
+            : nilai.scope === 'rt'
+              ? (nilai.rtId ?? null)
+              : null,
         updatedAt: new Date().toISOString()
       })
       .where(eq(jenisIuran.id, id));

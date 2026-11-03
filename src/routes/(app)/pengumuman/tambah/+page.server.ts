@@ -1,10 +1,11 @@
 import { db } from '$lib/server/db';
-import { pengumuman, rw, notifikasi, warga } from '$lib/server/db/schema';
+import { pengumuman, rw, notifikasi, warga, kk } from '$lib/server/db/schema';
 import { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
 import { requirePermission } from '$lib/server/rbac';
+import { requireScope, scopeFromRole } from '$lib/server/scope';
 import { saveUploadedFile, UploadError } from '$lib/server/storage';
-import { eq, isNotNull } from 'drizzle-orm';
+import { and, eq, isNotNull } from 'drizzle-orm';
 import type { PageServerLoad, Actions } from './$types';
 
 const pengumumanSchema = z
@@ -53,6 +54,10 @@ export const load: PageServerLoad = async () => {
 export const actions: Actions = {
   default: async ({ request, locals }) => {
     requirePermission(locals, 'pengumuman', 'create');
+    // Pengumuman RW berlaku global (rtId null); pengumuman Pengurus RT selalu
+    // terkunci ke RT tugasnya, tidak bisa memilih RT lain.
+    const scope = requireScope(scopeFromRole(locals));
+    const rtId = scope.kind === 'rt' ? scope.rtId : null;
     const formData = await request.formData();
 
     const rawValues = {
@@ -125,15 +130,23 @@ export const actions: Actions = {
       lampiranUrls: lampiranUrls.length > 0 ? JSON.stringify(lampiranUrls) : null,
       ditampilkan: result.data.ditampilkan,
       rwId: rwData?.id ?? 1,
+      rtId,
       dibuatOleh: locals.user?.name ?? locals.user?.id ?? 'Pengurus'
     }).returning();
 
-    // Broadcast in-app & push notification to linked warga
+    // Broadcast in-app & push notification to linked warga — hanya warga di RT
+    // yang bersangkutan kalau pengumuman ini milik satu RT.
     if (result.data.ditampilkan) {
-      const usersWarga = await db
-        .select({ userId: warga.userId })
-        .from(warga)
-        .where(isNotNull(warga.userId));
+      const usersWarga = rtId
+        ? await db
+            .select({ userId: warga.userId })
+            .from(warga)
+            .innerJoin(kk, eq(warga.kkId, kk.id))
+            .where(and(eq(kk.rtId, rtId), isNotNull(warga.userId)))
+        : await db
+            .select({ userId: warga.userId })
+            .from(warga)
+            .where(isNotNull(warga.userId));
 
       const notifRows = usersWarga
         .filter((w) => w.userId)
