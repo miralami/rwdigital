@@ -29,7 +29,7 @@ export function izinEfektif(locals: App.Locals): Izin {
 /**
  * Apakah sebuah izin mengizinkan aksi tertentu.
  *
- * `admin_rw` selalu penuh: kalau akun membawa peran superadmin, `locals.izin`
+ * `superadmin` selalu penuh: kalau akun membawa peran superadmin, `locals.izin`
  * sudah berisi seluruh izin. Fallback di sini menjaga perilaku itu walau
  * locals dibangun manual di test.
  */

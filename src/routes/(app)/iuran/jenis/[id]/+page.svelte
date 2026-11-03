@@ -58,24 +58,32 @@
 
     <div class="field">
       <label for="scope">Ditagih oleh</label>
-      <select id="scope" name="scope" class="input-base">
-        <option value="rt" selected={d.scope === 'rt'}>RT (dibagi per wilayah)</option>
-        <option value="rw" selected={d.scope === 'rw'}>RW langsung (tidak lewat RT)</option>
-      </select>
+      {#if data.scopeKind === 'rt'}
+        <input type="hidden" name="scope" value="rt" />
+        <input type="hidden" name="rtId" value={data.daftarRt[0]?.id ?? ''} />
+        <p class="field-hint">Jenis iuran ini tetap milik RT Anda.</p>
+      {:else}
+        <select id="scope" name="scope" class="input-base">
+          <option value="rt" selected={d.scope === 'rt'}>RT (dibagi per wilayah)</option>
+          <option value="rw" selected={d.scope === 'rw'}>RW langsung (tidak lewat RT)</option>
+        </select>
+      {/if}
     </div>
 
-    <div class="field">
-      <label for="rtId">Pemilik RT (opsional)</label>
-      <select id="rtId" name="rtId" class="input-base">
-        <option value="" selected={d.rtId === null}>Semua RT</option>
-        {#each data.daftarRt as wilayah (wilayah.id)}
-          <option value={wilayah.id} selected={d.rtId === wilayah.id}>
-            RT {String(wilayah.nomor).padStart(2, '0')}
-          </option>
-        {/each}
-      </select>
-      <span class="field-hint">Kosongkan bila jenis ini berlaku untuk semua RT.</span>
-    </div>
+    {#if data.scopeKind !== 'rt'}
+      <div class="field">
+        <label for="rtId">Pemilik RT (opsional)</label>
+        <select id="rtId" name="rtId" class="input-base">
+          <option value="" selected={d.rtId === null}>Semua RT</option>
+          {#each data.daftarRt as wilayah (wilayah.id)}
+            <option value={wilayah.id} selected={d.rtId === wilayah.id}>
+              RT {String(wilayah.nomor).padStart(2, '0')}
+            </option>
+          {/each}
+        </select>
+        <span class="field-hint">Kosongkan bila jenis ini berlaku untuk semua RT.</span>
+      </div>
+    {/if}
 
     <div class="field">
       <label for="periode">Periode</label>

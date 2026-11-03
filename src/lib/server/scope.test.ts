@@ -11,9 +11,9 @@ const locals = (role: string, petugasRtId: number | null = null) =>
 	({ user: { role }, petugasRtId }) as unknown as App.Locals;
 
 describe('scopeFromRole()', () => {
-	it('admin_rw dan bendahara melihat semua RT', () => {
-		expect(scopeFromRole(locals('admin_rw'))).toEqual({ kind: 'all' });
-		expect(scopeFromRole(locals('bendahara'))).toEqual({ kind: 'all' });
+	it('pengurus_rw melihat semua RT', () => {
+		expect(scopeFromRole(locals('pengurus_rw'))).toEqual({ kind: 'all' });
+		expect(scopeFromRole(locals('superadmin'))).toEqual({ kind: 'all' });
 	});
 
 	it('pengurus_rt dibatasi ke RT tugasnya', () => {
@@ -30,7 +30,7 @@ describe('scopeFromRole()', () => {
 	});
 
 	it('role gabungan memakai pandangan terluas', () => {
-		expect(scopeFromRole(locals('pengurus_rt,admin_rw', 3))).toEqual({ kind: 'all' });
+		expect(scopeFromRole(locals('pengurus_rt,pengurus_rw', 3))).toEqual({ kind: 'all' });
 	});
 
 	it('memakai scopePeran dari database (peran dinamis)', () => {

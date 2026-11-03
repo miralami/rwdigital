@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { warga, kk, rt, transaksiKas, transaksiKasRt, tagihan, pengumuman, surat } from '$lib/server/db/schema';
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, isNull, or, sql } from 'drizzle-orm';
 import { hitungBucketUsia } from '$lib/server/usia';
 import { hitungSaldo } from '$lib/server/kas';
 import { permissionsOf } from '$lib/server/rbac';
@@ -147,7 +147,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     suratPendingCount = Number(sc?.count ?? 0);
   }
 
-  // 5. Pengumuman tetap tingkat RW — informasi berlaku untuk semua warga.
+  // 5. Pengumuman: RW global + pengumuman RT sendiri untuk pengurus RT.
   const pengumumanTerbaru = akses.pengumuman
     ? await db
         .select({
@@ -157,7 +157,14 @@ export const load: PageServerLoad = async ({ locals }) => {
           createdAt: pengumuman.createdAt
         })
         .from(pengumuman)
-        .where(eq(pengumuman.ditampilkan, true))
+        .where(
+          and(
+            eq(pengumuman.ditampilkan, true),
+            scope.kind === 'rt'
+              ? or(isNull(pengumuman.rtId), eq(pengumuman.rtId, scope.rtId))
+              : undefined
+          )
+        )
         .orderBy(desc(pengumuman.createdAt))
         .limit(4)
     : [];

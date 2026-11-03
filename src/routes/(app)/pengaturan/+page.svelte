@@ -4,6 +4,7 @@
   import Users from '@lucide/svelte/icons/users';
   import UserCog from '@lucide/svelte/icons/user-cog';
   import Images from '@lucide/svelte/icons/images';
+  import Signature from '@lucide/svelte/icons/signature';
   import ChevronRight from '@lucide/svelte/icons/chevron-right';
   import type { PageData } from './$types';
 
@@ -30,6 +31,13 @@
       keterangan: 'Atur latar hero, sambutan, profil RW, dan foto galeri halaman publik.',
       icon: Images,
       boleh: data.akses.landing
+    },
+    {
+      href: '/pengaturan/ttd',
+      judul: 'Tanda Tangan Elektronik',
+      keterangan: 'Unggah gambar TTD Pengurus RW yang dipakai saat menandatangani surat warga.',
+      icon: Signature,
+      boleh: data.akses.ttd
     },
     {
       href: '/pengaturan/pengguna',

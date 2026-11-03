@@ -4,8 +4,6 @@ import { and, eq, ne, sql } from 'drizzle-orm';
 import { fail } from '@sveltejs/kit';
 import { z } from 'zod';
 import { permissionsOf, requirePermission } from '$lib/server/rbac';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
 import type { PageServerLoad, Actions } from './$types';
 
 const rtSchema = z.object({
@@ -42,15 +40,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     .from(rt)
     .orderBy(rt.nomor);
 
-  const daftarRt = rows.map((r) => {
-    const ttdFileName = `ttd-rt-${String(r.nomor).padStart(2, '0')}.png`;
-    const ttdPath = join(process.cwd(), 'static', 'uploads', 'ttd', ttdFileName);
-    return {
-      ...r,
-      hasTtd: existsSync(ttdPath),
-      ttdUrl: existsSync(ttdPath) ? `/uploads/ttd/${ttdFileName}` : null
-    };
-  });
+  const daftarRt = rows.map((r) => ({ ...r }));
 
   return {
     daftarRt,
@@ -81,29 +71,6 @@ export const actions: Actions = {
     await db.insert(rt).values({ nomor: hasil.data.nomor, rwId });
 
     return { sukses: `RT ${String(hasil.data.nomor).padStart(2, '0')} ditambahkan.` };
-  },
-
-  uploadTtd: async ({ request, locals }) => {
-    requirePermission(locals, 'rt', 'update');
-
-    const formData = await request.formData();
-    const nomor = Number(formData.get('nomor'));
-    const file = formData.get('ttd') as File;
-
-    if (!nomor || !Number.isInteger(nomor) || nomor <= 0) {
-      return fail(400, { error: 'Nomor RT tidak valid.' });
-    }
-    if (!file || file.size === 0) {
-      return fail(400, { error: 'Pilih file tanda tangan (PNG/JPG).' });
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const dir = join(process.cwd(), 'static', 'uploads', 'ttd');
-    mkdirSync(dir, { recursive: true });
-    const targetPath = join(dir, `ttd-rt-${String(nomor).padStart(2, '0')}.png`);
-    writeFileSync(targetPath, buffer);
-
-    return { sukses: `Tanda tangan digital Ketua RT ${String(nomor).padStart(2, '0')} berhasil diunggah.` };
   },
 
   ubah: async ({ request, locals }) => {

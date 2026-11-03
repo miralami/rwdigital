@@ -74,12 +74,30 @@
         ></textarea>
       </FormField>
 
+      <fieldset class="ttd-fieldset">
+        <legend>Pihak yang perlu menandatangani <span class="required">*</span></legend>
+        <p class="ttd-hint">
+          Pilih minimal satu. Surat baru terbit setelah semua pihak yang dipilih selesai
+          memverifikasi dan menandatangani.
+        </p>
+        <label class="ttd-option">
+          <input type="checkbox" name="butuhTtdRt" checked />
+          <span>Pengurus RT (surat pengantar tingkat RT)</span>
+        </label>
+        <label class="ttd-option">
+          <input type="checkbox" name="butuhTtdRw" />
+          <span>Pengurus RW (pengesahan tingkat RW)</span>
+        </label>
+        {#if form?.errors?.butuhTtdRt?.[0]}
+          <span class="field-error">{form.errors.butuhTtdRt[0]}</span>
+        {/if}
+      </fieldset>
+
       <FormField
         label="Unggah Berkas / Dokumen Persyaratan (Opsional)"
         name="berkasSyarat"
         hint="Unggah foto KTP, Kartu Keluarga, atau pengantar pengurus RT (format JPG/PNG/WEBP/PDF, maks 10MB)."
-      >
-        <input
+      >        <input
           type="file"
           name="berkasSyarat"
           id="berkasSyarat"
@@ -149,6 +167,47 @@
   .form-body {
     display: flex;
     flex-direction: column;
+  }
+
+  .ttd-fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .ttd-fieldset legend {
+    padding: 0 var(--space-1);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .ttd-hint {
+    margin: 0;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+
+  .ttd-option {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+    cursor: pointer;
+  }
+
+  .ttd-option input[type='checkbox'] {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: var(--color-accent);
+  }
+
+  .field-error {
+    font-size: var(--text-xs);
+    color: var(--color-danger);
   }
 
   .error-banner {

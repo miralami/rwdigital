@@ -102,9 +102,9 @@ export function formatRelatif(
 }
 
 const ROLE_LABELS: Record<string, string> = {
-  admin_rw: 'Admin RW',
+  superadmin: 'Superadmin',
+  pengurus_rw: 'Pengurus RW',
   pengurus_rt: 'Pengurus RT',
-  bendahara: 'Bendahara',
   warga: 'Warga'
 };
 

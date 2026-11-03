@@ -74,11 +74,15 @@
                     {/if}
                   </td>
                   <td class="cell-aksi">
-                    <a href="/iuran/jenis/{j.id}" class="btn btn-ghost btn-ubah">Ubah</a>
-                    <form method="POST" action="?/hapus">
-                      <input type="hidden" name="id" value={j.id} />
-                      <button type="submit" class="btn btn-ghost btn-hapus">Hapus</button>
-                    </form>
+                    {#if j.bisaKelola}
+                      <a href="/iuran/jenis/{j.id}" class="btn btn-ghost btn-ubah">Ubah</a>
+                      <form method="POST" action="?/hapus">
+                        <input type="hidden" name="id" value={j.id} />
+                        <button type="submit" class="btn btn-ghost btn-hapus">Hapus</button>
+                      </form>
+                    {:else}
+                      <span class="text-xs text-muted">Dikelola RW</span>
+                    {/if}
                   </td>
                 </tr>
               {/each}
@@ -134,21 +138,32 @@
         </div>
         <div class="field">
           <label for="scope">Ditagih oleh</label>
-          <select id="scope" name="scope" class="input-base">
-            <option value="rt" selected>RT (dibagi per wilayah)</option>
-            <option value="rw">RW langsung (tidak lewat RT)</option>
-          </select>
+          {#if data.scopeKind === 'rt'}
+            <input type="hidden" name="scope" value="rt" />
+            <input type="hidden" name="rtId" value={data.daftarRt[0]?.id ?? ''} />
+            <p class="field-hint">
+              Pengurus RT hanya dapat membuat jenis iuran untuk
+              <strong>RT {data.daftarRt[0]?.nomor ? String(data.daftarRt[0].nomor).padStart(2, '0') : 'sendiri'}</strong>.
+            </p>
+          {:else}
+            <select id="scope" name="scope" class="input-base">
+              <option value="rt" selected>RT (dibagi per wilayah)</option>
+              <option value="rw">RW langsung (tidak lewat RT)</option>
+            </select>
+          {/if}
         </div>
-        <div class="field">
-          <label for="rtId">Pemilik RT (opsional)</label>
-          <select id="rtId" name="rtId" class="input-base">
-            <option value="">Semua RT</option>
-            {#each data.daftarRt as wilayah (wilayah.id)}
-              <option value={wilayah.id}>RT {String(wilayah.nomor).padStart(2, '0')}</option>
-            {/each}
-          </select>
-          <span class="field-hint">Kosongkan bila jenis ini berlaku untuk semua RT.</span>
-        </div>
+        {#if data.scopeKind !== 'rt'}
+          <div class="field">
+            <label for="rtId">Pemilik RT (opsional)</label>
+            <select id="rtId" name="rtId" class="input-base">
+              <option value="">Semua RT</option>
+              {#each data.daftarRt as wilayah (wilayah.id)}
+                <option value={wilayah.id}>RT {String(wilayah.nomor).padStart(2, '0')}</option>
+              {/each}
+            </select>
+            <span class="field-hint">Kosongkan bila jenis ini berlaku untuk semua RT.</span>
+          </div>
+        {/if}
         <div class="field">
           <label for="periode">Periode</label>
           <select id="periode" name="periode" class="input-base">

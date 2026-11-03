@@ -20,6 +20,8 @@ export const LOGIN = '/login';
 export const DASHBOARD = '/dashboard';
 /** Portal warga — dipakai juga oleh lane desain, jangan diubah sepihak. */
 export const WARGA_PORTAL = '/portal';
+/** Area administratif; hanya pemegang `user:list` yang boleh membukanya. */
+export const PENGATURAN_PREFIX = '/pengaturan';
 
 // ─── Klasifikasi rute ────────────────────────────────────────────────────────
 export type RouteGroupId = 'staff' | 'warga';
@@ -193,6 +195,15 @@ export function requireStaff(ctx: GuardContext) {
 export function enforceAccess(ctx: GuardContext): void {
   const { pathname } = ctx.url;
   const group = matchRouteGroup(pathname);
+
+  // Pengaturan adalah area administratif: hanya akun yang boleh mengelola
+  // pengguna (memegang `user:list`) yang boleh masuk. Pengecekan ini sengaja
+  // lebih ketat daripada izin modul per halaman supaya Pengurus RT — yang
+  // punya `rt:read`/`pengurus:read` untuk kebutuhan tampilan — tidak bisa
+  // membuka area Pengaturan sama sekali.
+  if (matchesPrefix(pathname, [PENGATURAN_PREFIX]) && !bolehBukaModul(ctx.locals.izin, 'user')) {
+    throw error(403, 'Anda tidak punya akses ke area Pengaturan.');
+  }
 
   if (!group) {
     // Di luar daftar route group: auth-only, seperti sebelumnya.

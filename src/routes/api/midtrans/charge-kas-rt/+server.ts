@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
   // Hanya pengurus yang boleh mencatat transaksi kas, bukan akun warga.
   if (!isStaff(locals)) {
-    return json({ success: false, error: 'Forbidden: hanya pengurus/pengurus RT/bendahara yang boleh mencatat kas RT.' }, { status: 403 });
+    return json({ success: false, error: 'Forbidden: hanya pengurus RW/RT yang boleh mencatat kas RT.' }, { status: 403 });
   }
 
   try {

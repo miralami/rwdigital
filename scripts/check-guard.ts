@@ -1,5 +1,5 @@
 // Self-check logika guard — tanpa framework, tanpa dependency baru.
-//   node --experimental-strip-types scripts/check-guard.ts
+//   npx tsx scripts/check-guard.ts
 import assert from 'node:assert/strict';
 import {
   matchRouteGroup,
@@ -31,8 +31,8 @@ for (const prefix of ADMIN_ROUTES) {
 // Peran: string tunggal, koma (format Better Auth), array, slug dinamis, dan
 // nilai yang bukan slug. Peran dinamis yang tidak ada di DB akan fail-closed
 // di lapisan izin, bukan di sini.
-assert.deepEqual(normalizeRole('bendahara'), ['bendahara']);
-assert.deepEqual(normalizeRole(' admin_rw , warga '), ['admin_rw', 'warga']);
+assert.deepEqual(normalizeRole('pengurus_rw'), ['pengurus_rw']);
+assert.deepEqual(normalizeRole(' pengurus_rw , warga '), ['pengurus_rw', 'warga']);
 assert.deepEqual(normalizeRole(['pengurus_rt']), ['pengurus_rt']);
 assert.deepEqual(normalizeRole('ketua_lingkungan'), ['ketua_lingkungan']);
 assert.deepEqual(normalizeRole(undefined), []);
@@ -42,7 +42,7 @@ assert.deepEqual(normalizeRole('dua kata'), []);
 // Landing: warga -> portal, staff -> dashboard.
 const session = (role: unknown) => ({ user: { role } }) as App.Locals;
 assert.equal(landingPathFor(session('warga')), '/portal');
-assert.equal(landingPathFor(session('admin_rw')), '/dashboard');
+assert.equal(landingPathFor(session('pengurus_rw')), '/dashboard');
 assert.equal(landingPathFor(session(undefined)), '/portal');
 
 console.log('guard self-check: ok');

@@ -12,7 +12,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
   }
 
   if (!isStaff(locals)) {
-    return json({ success: false, error: 'Forbidden: hanya pengurus/bendahara yang boleh menyinkronkan status pembayaran.' }, { status: 403 });
+    return json({ success: false, error: 'Forbidden: hanya pengurus RW/RT yang boleh menyinkronkan status pembayaran.' }, { status: 403 });
   }
 
   try {
