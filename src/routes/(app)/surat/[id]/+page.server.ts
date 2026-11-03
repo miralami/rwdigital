@@ -282,7 +282,9 @@ export const actions: Actions = {
     const [detail] = await db
       .select({
         rtNomor: rt.nomor,
-        rwId: rw.id,
+        rwNama: rw.nama,
+        statusSurat: surat.status,
+        nomorSuratLama: surat.nomorSurat
       })
       .from(surat)
       .innerJoin(warga, eq(surat.wargaId, warga.id))
@@ -291,17 +293,38 @@ export const actions: Actions = {
       .innerJoin(rw, eq(rt.rwId, rw.id))
       .where(eq(surat.id, id));
 
-    // Nomor urut mulai dari 1 (MVP: setiap disetujui di bulan/thn berbeda akan punya nomor unik
-    // karena combined dengan bulan/thn; untuk menghindari duplicate bisa dicek di admin panel)
-    const urut = 1;
+    if (!detail) {
+      return fail(404, { error: 'Surat tidak ditemukan.' });
+    }
 
-    const bln = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-                  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'][sekarang.getMonth()];
+    // Idempoten: surat yang sudah disetujui tidak diberi nomor baru.
+    if (detail.statusSurat === 'disetujui' && detail.nomorSuratLama) {
+      return { success: true, nomorSurat: detail.nomorSuratLama };
+    }
+
+    const sekarang = new Date();
+    const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                       'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    const bln = bulanIndo[sekarang.getMonth()];
     const thn = sekarang.getFullYear();
+    const tanggalTerbit = sekarang.toISOString().slice(0, 10);
 
-    const nomorSurat = `${detail.rtNomor}/${String(detail.rwId).padStart(2, '0')}/${bln}/${thn}/${String(urut).padStart(5, '0')}`;
+    // Nomor urut dihitung dari surat yang sudah terbit pada bulan & tahun yang sama,
+    // supaya tidak semua surat mendapat nomor urut 00001.
+    const prefixPeriode = `${thn}-${String(sekarang.getMonth() + 1).padStart(2, '0')}`;
+    const [hitungan] = await db
+      .select({ jumlah: count() })
+      .from(surat)
+      .where(and(eq(surat.status, 'disetujui'), like(surat.tanggalTerbit, `${prefixPeriode}%`)));
+    const urut = Number(hitungan?.jumlah ?? 0) + 1;
 
-await db
+    // Nomor RW diambil dari nama (mis. "RW 01"), fallback ke id RW.
+    const rwNumber = /(\d+)/.exec(detail.rwNama ?? '')?.[1] ?? '1';
+    const nomorRw = rwNumber.padStart(2, '0');
+
+    const nomorSurat = `${String(detail.rtNomor).padStart(2, '0')}/${nomorRw}/${bln}/${thn}/${String(urut).padStart(5, '0')}`;
+
+    await db
       .update(surat)
       .set({
         status: 'disetujui',

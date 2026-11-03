@@ -81,8 +81,8 @@ export const actions: Actions = {
 <<<<<<< HEAD
     // Validasi: maksimal 10MB per berkas, total berkas <= 5MB
     if (berkasSyarat && berkasSyarat.size > 0) {
-      const totalSize = berkasSyarat.size;
-      if (totalSize > 10 * 1024 * 1024) {
+      const maksBerkas = 10 * 1024 * 1024;
+      if (berkasSyarat.size > maksBerkas) {
         return fail(400, { error: 'Ukuran berkas melebihi 10MB' });
       }
       dokumenPath = await saveUploadedFile(berkasSyarat, 'surat');
