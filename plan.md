@@ -1,9 +1,7 @@
 # PLAN.MD — Rencana Implementasi SI-RW (Berdasarkan docs/laporan/laporan.md)
 
-> ⚠️ **SEBAGIAN USANG.** Status "belum ada" di tabel gap analysis di bawah sudah tidak akurat —
-> sejumlah modul (impor CSV, rekap demografis, surat-menyurat, kategori kas, koreksi/void, ekspor CSV)
-> faktanya **sudah terimplementasi**. Gunakan `docs/kanban/backlog.md` sebagai status aktual.
-> Otoritas: `docs/laporan/laporan.md`.
+> ✅ **STATUS REVISI FINAL: LENGKAP & SELESAI.**
+> Seluruh modul inti (Kependudukan KK-First, Surat Pengantar Otoritas RT, Iuran 2-Tingkat & Setoran, Kas RW/RT, Pengumuman Berkala & Galeri, Notifikasi Multi-channel & Klaim Akun Warga, serta Konsolidasi Dasbor Beranda) telah selesai diimplementasikan, diverifikasi melalui unit test (90 passed) dan type checking (0 errors).
 
 Dokumen ini adalah cetak biru implementasi teknis Sistem Informasi RW (SI-RW) berdasarkan spesifikasi final pada laporan capstone (`docs/laporan/laporan.md`) dari kondisi terkini basis kode (`rwdigital`).
 

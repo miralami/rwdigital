@@ -26,3 +26,12 @@ vite.config.ts.timestamp-*
 local.db
 local.db-wal
 local.db-shm
+
+# Playwright
+/test-results
+/playwright-report
+/blob-report
+/playwright/.cache
+
+/static/uploads/surat
+local.db.bak

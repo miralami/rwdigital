@@ -12,12 +12,17 @@
 		"db:seed": "npx tsx scripts/seed.ts",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test": "vitest run",
+		"test:watch": "vitest",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui"
 	},
 	"engines": {
 		"node": ">=22.6"
 	},
 	"devDependencies": {
+		"@playwright/test": "^1.64.1",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
@@ -25,7 +30,8 @@
 		"svelte": "^5.56.1",
 		"svelte-check": "^4.6.0",
 		"typescript": "^6.0.3",
-		"vite": "^8.0.16"
+		"vite": "^8.0.16",
+		"vitest": "^5.0.5"
 	},
 	"dependencies": {
 		"@libsql/client": "^0.18.0",
@@ -34,6 +40,8 @@
 		"@tailwindcss/vite": "^4.3.3",
 		"better-auth": "^1.7.6",
 		"drizzle-orm": "^0.45.3",
+		"html2canvas-pro": "^2.6.0",
+		"jspdf": "^4.2.1",
 		"sveltekit-superforms": "^2.30.2",
 		"tailwindcss": "^4.3.3",
 		"zod": "^4.6.7"

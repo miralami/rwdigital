@@ -467,35 +467,41 @@ ID	Nama Fungsi	Deskripsi	Aktor
 SF-SR-01	Ajukan Surat	Warga dapat mengajukan permohonan surat (SKCK, SKTM, keterangan domisili, dan jenis lainnya) melalui sistem. Formulir pengajuan disesuaikan dengan jenis surat, dan data kependudukan warga diisi otomatis dari modul kependudukan.	Warga, pengurus_rt
 SF-SR-02	Unggah Persyaratan	Warga dapat mengunggah dokumen persyaratan yang dibutuhkan untuk setiap jenis surat. Sistem memvalidasi format dan ukuran berkas yang diunggah.	Warga, pengurus_rt
 SF-SR-03	Pantau Status Pengajuan	Warga dapat memantau status pengajuan surat secara real-time melalui halaman riwayat pengajuan tanpa perlu menghubungi pengurus.	Warga
-SF-SR-04	Verifikasi Pengajuan	Pengurus memeriksa kelengkapan data dan dokumen persyaratan pengajuan. Pengurus dapat mengubah status pengajuan menjadi Diverifikasi atau Ditolak disertai catatan alasan.	Admin_rw, pengurus_rt
-SF-SR-05	Setujui dan Terbitkan Surat	Admin RW menyetujui pengajuan yang telah diverifikasi dan menerbitkan surat. Sistem mencatat nomor surat, tanggal penerbitan, dan menyimpan riwayat surat secara permanen.	Admin_rw
-SF-SR-06	Unduh Surat	Warga dapat mengunduh surat yang telah diterbitkan dalam format PDF setelah pengajuan disetujui.	Warga
-SF-SR-07	Lihat Riwayat Surat	Pengurus dapat melihat seluruh riwayat pengajuan dan penerbitan surat beserta statusnya. Warga hanya dapat melihat riwayat pengajuan miliknya sendiri.	Admin_rw, pengurus_rt, warga
+SF-SR-04	Verifikasi Pengajuan	Pengurus RT memeriksa kelengkapan data dan dokumen persyaratan pengajuan surat warga di wilayahnya. Pengurus RT dapat memverifikasi atau menolak pengajuan disertai catatan alasan. Pengurus RW hanya berhak memantau.	pengurus_rt
+SF-SR-05	Setujui dan Terbitkan Surat	Pengurus RT menyetujui pengajuan yang telah diverifikasi dan menerbitkan surat resmi dengan penomoran otomatis dan stempel/tanda tangan elektronik Ketua RT yang tersemat otomatis.	pengurus_rt
+SF-SR-06	Unduh Surat	Warga dapat mengunduh atau mencetak surat yang telah disetujui dalam format PDF/cetak standar resmi yang telah memuat TTD elektronik RT.	Warga, pengurus_rt
+SF-SR-07	Lihat Riwayat Surat	Pengurus dapat melihat riwayat pengajuan surat sesuai lingkup wilayahnya (RT untuk wilayahnya, RW untuk seluruh wilayah). Warga hanya dapat melihat riwayat pengajuan miliknya sendiri.	admin_rw, pengurus_rt, warga
 
-Tabel 8 Spesifikasi Fungsional Modul Keuangan (Kas RW)
+Tabel 8 Spesifikasi Fungsional Modul Keuangan (Kas RW & Kas RT)
 ID	Nama Fungsi	Deskripsi	Aktor
-SF-KS-01	Catat Pemasukan	Bendahara dapat mencatat transaksi pemasukan kas RW meliputi sumber dana, nominal, tanggal, dan keterangan. Sistem memperbarui saldo kas secara otomatis.	admin_rw, bendahara
-SF-KS-02	Catat Pengeluaran	Bendahara dapat mencatat transaksi pengeluaran kas RW meliputi kategori pengeluaran, nominal, tanggal, bukti transaksi, dan keterangan. Sistem memperbarui saldo kas secara otomatis.	admin_rw, bendahara
-SF-KS-03	Unggah Bukti Transaksi	Bendahara dapat mengunggah berkas bukti transaksi (foto kuitansi, nota) untuk setiap entri transaksi.	admin_rw, bendahara
-SF-KS-04	Lihat Saldo Kas	Pengguna yang berwenang dapat melihat saldo kas RW terkini beserta ringkasan transaksi terakhir pada dasbor.	admin_rw, bendahara
-SF-KS-05	Laporan Keuangan Per Periode	Sistem menghasilkan laporan keuangan berisi ringkasan pemasukan, pengeluaran, dan saldo berdasarkan periode yang dipilih (bulanan, tahunan). Laporan dapat diekspor ke format CSV.	admin_rw, bendahara
-SF-KS-06	Audit Trail Transaksi	Setiap transaksi mencatat identitas pengguna yang mencatat dan waktu pencatatan. Riwayat transaksi tidak dapat dihapus, hanya dapat dilakukan koreksi dengan mencatat alasan.	admin_rw
+SF-KS-01	Catat Pemasukan	Bendahara RW atau Pengurus RT dapat mencatat transaksi pemasukan kas sesuai lingkupnya meliputi sumber dana, nominal, tanggal, dan keterangan. Sistem memperbarui saldo kas secara otomatis.	admin_rw, bendahara, pengurus_rt
+SF-KS-02	Catat Pengeluaran	Bendahara RW atau Pengurus RT dapat mencatat transaksi pengeluaran kas sesuai lingkupnya meliputi kategori pengeluaran, nominal, tanggal, bukti transaksi, dan keterangan. Sistem memperbarui saldo kas secara otomatis.	admin_rw, bendahara, pengurus_rt
+SF-KS-03	Unggah Bukti Transaksi	Pengurus dapat mengunggah berkas bukti transaksi (foto kuitansi, nota) untuk setiap entri transaksi kas.	admin_rw, bendahara, pengurus_rt
+SF-KS-04	Lihat Saldo Kas	Pengguna yang berwenang dapat melihat saldo kas terkini beserta ringkasan transaksi terakhir pada dasbor beranda.	admin_rw, bendahara, pengurus_rt
+SF-KS-05	Laporan Keuangan Per Periode	Sistem menghasilkan laporan keuangan berisi ringkasan pemasukan, pengeluaran, dan saldo berdasarkan periode yang dipilih (bulanan, tahunan). Laporan dapat diekspor ke format CSV.	admin_rw, bendahara, pengurus_rt
+SF-KS-06	Audit Trail Transaksi	Setiap transaksi mencatat identitas pengguna yang mencatat dan waktu pencatatan. Transaksi tidak dapat dihapus permanen, melainkan dibatalkan (void) dengan pencatatan alasan.	admin_rw, bendahara, pengurus_rt
 
 Tabel 9 Spesifikasi Fungsional Modul Iuran Warga
 ID	Nama Fungsi	Deskripsi	Aktor
-SF-IU-01	Kelola Jenis Iuran	Admin dapat membuat, mengubah, dan menonaktifkan jenis iuran (iuran bulanan, keamanan, kebersihan, dll.) beserta nominal dan periode pembayaran.	admin_rw, bendahara
-SF-IU-02	Buat Tagihan Iuran	Sistem dapat membuat tagihan iuran untuk seluruh warga aktif atau kelompok tertentu secara massal berdasarkan jenis iuran yang telah dikonfigurasi.	admin_rw, bendahara
-SF-IU-03	Catat Pembayaran Manual	Bendahara dapat mencatat pembayaran iuran yang diterima secara tunai atau transfer manual beserta tanggal dan metode pembayaran.	admin_rw, bendahara
-SF-IU-04	Pembayaran via QRIS	Warga dapat melakukan pembayaran iuran melalui kode QRIS yang ditampilkan sistem. Status tagihan diperbarui otomatis setelah konfirmasi dari payment gateway diterima.	warga
-SF-IU-05	Lihat Status Iuran	Warga dapat melihat daftar tagihan iuran miliknya beserta status pembayaran (Belum Bayar, Lunas) dan riwayat pembayaran.	warga
-SF-IU-06	Rekap Pembayaran Iuran	Sistem menghasilkan rekap pembayaran iuran per periode yang menampilkan status pembayaran seluruh warga. Rekap dapat diekspor ke format CSV.	admin_rw, bendahara
+SF-IU-01	Kelola Jenis Iuran & Alokasi Porsi	Admin/Bendahara dapat membuat, mengubah, dan menonaktifkan jenis iuran bulanan beserta penetapan porsi kas RW dan porsi kas RT tanpa perantara paket iuran statis.	admin_rw, bendahara
+SF-IU-02	Penerbitan Tagihan Otomatis (Auto-Billing)	Sistem secara otomatis menerbitkan tagihan bulanan aktif untuk seluruh KK yang berstatus aktif saat modul dibuka pada periode berjalan.	Sistem (otomatis)
+SF-IU-03	Catat Pembayaran Manual & Konfirmasi	Pengurus RT atau Bendahara dapat mencatat pembayaran langsung atau memverifikasi bukti bayar transfer warga melalui panel Konfirmasi Pembayaran berantarmuka status tab (Menunggu, Diterima, Ditolak).	admin_rw, bendahara, pengurus_rt
+SF-IU-04	Pembayaran via QRIS & Online	Warga dapat melakukan pembayaran tagihan iuran secara mandiri melalui QRIS/Virtual Account Midtrans dengan pembaruan status real-time via webhook.	warga
+SF-IU-05	Hierarki 2 Tingkat & Rekapitulasi Setoran	Sistem menyajikan pengawasan 2 tingkat: tingkat RW menampilkan rekap agregat penerimaan per-RT dan status setoran ke kas RW, sedangkan tingkat RT menampilkan rincian tagihan per-KK.	admin_rw, bendahara, pengurus_rt
+SF-IU-06	Alur Setoran RT ke RW	Pengurus RT dapat mencatat dan mengunggah bukti penyetoran porsi kas RW dari iuran warga yang terkumpul, dan Bendahara RW mengonfirmasi penerimaan setoran tersebut.	admin_rw, bendahara, pengurus_rt
 
 Tabel 10 Spesifikasi Fungsional Modul Pengumuman dan Informasi
 ID	Nama Fungsi	Deskripsi	Aktor
-SF-PG-01	Buat Pengumuman	Admin atau pengurus yang berwenang dapat membuat pengumuman baru meliputi judul, isi, kategori (kegiatan, jadwal, informasi umum), dan tanggal mulai serta berakhir tampil.	admin_rw
-SF-PG-02	Ubah dan Arsipkan Pengumuman	Admin dapat mengubah konten pengumuman yang sudah diterbitkan atau mengarsipkan pengumuman yang sudah tidak relevan tanpa penghapusan permanen.	admin_rw
-SF-PG-03	Lihat Pengumuman	Seluruh pengguna yang sudah login dapat melihat daftar pengumuman aktif. Pengumuman ditampilkan berurutan berdasarkan tanggal terbaru.	admin_rw, pengurus_rt, bendahara, warga
-SF-PG-04	Cari Pengumuman	Pengguna dapat mencari pengumuman berdasarkan kata kunci atau menyaring berdasarkan kategori dan rentang tanggal.	admin_rw, pengurus_rt, bendahara, warga
+SF-PG-01	Buat Pengumuman & Jadwal Berkala	Admin RW dapat membuat pengumuman dengan konfigurasi pemicu berkala (mingguan, bulanan, kustom) serta melampirkan foto sampul (thumbnail) dan galeri dokumentasi foto kegiatan.	admin_rw
+SF-PG-02	Ubah dan Arsipkan Pengumuman	Admin dapat memperbarui informasi pengumuman atau menyembunyikannya dari portal warga tanpa menghapus arsip.	admin_rw
+SF-PG-03	Lihat Pengumuman & Galeri	Pengguna dan warga dapat melihat daftar pengumuman aktif, thumbnail, jadwal perulangan, dan membuka galeri foto kegiatan.	admin_rw, pengurus_rt, bendahara, warga
+SF-PG-04	Notifikasi Pengumuman & Siaran	Sistem secara otomatis menyiarkan notifikasi in-app kepada seluruh akun warga yang tertaut saat pengumuman penting diterbitkan.	Sistem (otomatis)
+
+Tabel 10A Spesifikasi Fungsional Modul Notifikasi dan Manajemen Akun
+ID	Nama Fungsi	Deskripsi	Aktor
+SF-NT-01	Pusat Notifikasi Warga	Warga dapat melihat daftar pemberitahuan in-app terkait status surat, pengumuman, dan konfirmasi tagihan serta menandai notifikasi telah dibaca.	warga
+SF-NT-02	Klaim Akun Kependudukan	Warga yang datanya telah tercatat dapat mengaktifkan akun secara mandiri dengan memvalidasi NIK, No. KK, dan tanggal lahir, serta mendaftarkan alamat email pribadi yang valid.	warga
+SF-NT-03	Pemulihan Kata Sandi via Email	Pengguna yang lupa kata sandi dapat meminta tautan pemulihan kata sandi yang dikirimkan secara otomatis ke alamat email terdaftar.	warga, pengurus
 3.4.	 Batasan Asumsi
 Perancangan Sistem Informasi RW ini didasarkan pada beberapa asumsi yang dianggap berlaku selama proses perancangan, sebagai berikut:
 1.	Asumsi tentang struktur organisasi mitra. 

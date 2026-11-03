@@ -1,7 +1,6 @@
 <script lang="ts">
   import ArrowLeft from '@lucide/svelte/icons/arrow-left';
   import Check from '@lucide/svelte/icons/check';
-  import FileCheck from '@lucide/svelte/icons/file-check';
   import X from '@lucide/svelte/icons/x';
   import FileText from '@lucide/svelte/icons/file-text';
   import Download from '@lucide/svelte/icons/download';
@@ -14,6 +13,80 @@
   const s = $derived(data.detail);
 
   let showModalTolak = $state(false);
+
+  /**
+   * Timeline status mengikuti alur baru: pengajuan → TTD RT/RW (paralel) →
+   * terbit. Hanya langkah TTD yang benar-benar diminta yang ditampilkan.
+   */
+  const linimasa = $derived.by(() => {
+    const langkah: {
+      judul: string;
+      waktu: string;
+      selesai: boolean;
+      nada: 'netral' | 'sukses' | 'bahaya';
+    }[] = [
+      {
+        judul: 'Pengajuan diterima',
+        waktu: formatTanggal(s.createdAt),
+        selesai: true,
+        nada: 'netral'
+      }
+    ];
+
+    if (s.butuhTtdRt) {
+      langkah.push({
+        judul: `Tanda tangan ${s.ttdRtJabatan ?? `Ketua RT ${s.nomorRt}`}`,
+        waktu: s.ttdRtPada ? tanggalWaktu(s.ttdRtPada) : '—',
+        selesai: Boolean(s.ttdRtPada),
+        nada: 'netral'
+      });
+    }
+
+    if (s.butuhTtdRw) {
+      langkah.push({
+        judul: `Tanda tangan ${s.ttdRwJabatan ?? 'Ketua RW'}`,
+        waktu: s.ttdRwPada ? tanggalWaktu(s.ttdRwPada) : '—',
+        selesai: Boolean(s.ttdRwPada),
+        nada: 'netral'
+      });
+    }
+
+    if (s.status === 'terbit') {
+      langkah.push({
+        judul: 'Surat terbit & bernomor',
+        waktu: tanggalWaktu(s.disetujuiPada ?? s.tanggalTerbit),
+        selesai: true,
+        nada: 'sukses'
+      });
+    } else if (s.status === 'ditolak') {
+      langkah.push({
+        judul: 'Ditolak',
+        waktu: tanggalWaktu(s.ditolakPada),
+        selesai: true,
+        nada: 'bahaya'
+      });
+    } else {
+      langkah.push({
+        judul: 'Penerbitan surat',
+        waktu: '—',
+        selesai: false,
+        nada: 'netral'
+      });
+    }
+
+    return langkah;
+  });
+
+  /** Tanggal + jam singkat, mis. "28 Okt 2026, 14.05". */
+  function tanggalWaktu(nilai: string | null): string {
+    if (!nilai) return '—';
+    const d = new Date(nilai);
+    if (Number.isNaN(d.getTime())) return '—';
+    const jam = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit' })
+      .format(d)
+      .replace(':', '.');
+    return `${formatTanggal(d)}, ${jam}`;
+  }
 </script>
 
 <div class="surat-detail-page">
@@ -32,13 +105,16 @@
       </div>
 
       <div class="actions">
-        {#if s.status === 'diajukan'}
-          <form method="POST" action="?/verifikasi">
+        {#if data.bisaTtd}
+          <form method="POST" action="?/tandatangani">
             <button type="submit" class="btn btn-primary">
               <Check size={16} />
-              <span>Verifikasi Berkas</span>
+              <span>Verifikasi &amp; Tanda Tangani</span>
             </button>
           </form>
+        {/if}
+
+        {#if data.bisaTolak}
           <button
             type="button"
             class="btn btn-danger"
@@ -47,22 +123,9 @@
             <X size={16} />
             <span>Tolak</span>
           </button>
-        {:else if s.status === 'diverifikasi'}
-          <form method="POST" action="?/setujui">
-            <button type="submit" class="btn btn-primary">
-              <FileCheck size={16} />
-              <span>Setujui & Terbitkan Surat</span>
-            </button>
-          </form>
-          <button
-            type="button"
-            class="btn btn-danger"
-            onclick={() => (showModalTolak = true)}
-          >
-            <X size={16} />
-            <span>Tolak</span>
-          </button>
-        {:else if s.status === 'disetujui'}
+        {/if}
+
+        {#if data.bisaCetak}
           <a
             href="/portal/surat/{s.id}/cetak"
             target="_blank"
@@ -81,11 +144,11 @@
     <div class="status-banner">
       <span class="label-caps">Status Permohonan:</span>
       {#if s.status === 'diajukan'}
-        <Badge variant="warning">Diajukan (Menunggu Verifikasi)</Badge>
-      {:else if s.status === 'diverifikasi'}
-        <Badge variant="brand">Diverifikasi (Siap Diterbitkan)</Badge>
-      {:else if s.status === 'disetujui'}
-        <Badge variant="success">Disetujui & Diterbitkan</Badge>
+        <Badge variant="warning">Diajukan (Menunggu Tanda Tangan)</Badge>
+      {:else if s.status === 'menunggu_ttd'}
+        <Badge variant="brand">Menunggu Tanda Tangan</Badge>
+      {:else if s.status === 'terbit'}
+        <Badge variant="success">Terbit</Badge>
       {:else}
         <Badge variant="danger">Ditolak</Badge>
       {/if}
@@ -95,11 +158,74 @@
       {/if}
     </div>
 
+    {#if data.pihak === 'rw' && !s.butuhTtdRw}
+      <div class="alert-info">
+        Pengurus RW tetap dapat membaca surat ini, tetapi tidak diminta menandatangani.
+      </div>
+    {:else if data.pihak === 'rt' && !s.butuhTtdRt}
+      <div class="alert-info">
+        Pengurus RT tetap dapat membaca surat ini, tetapi tidak diminta menandatangani.
+      </div>
+    {/if}
+
+    {#if s.butuhTtdRt || s.butuhTtdRw}
+      <div class="ttd-summary">
+        {#if s.butuhTtdRt}
+          <div class="ttd-item" class:done={Boolean(s.ttdRtPada)}>
+            <span class="ttd-role">{s.ttdRtJabatan ?? `Ketua RT ${s.nomorRt}`}</span>
+            <span class="ttd-state">
+              {#if s.ttdRtPada}
+                Ditandatangani {s.ttdRtNama ?? ''} • {tanggalWaktu(s.ttdRtPada)}
+              {:else}
+                Belum ditandatangani
+              {/if}
+            </span>
+            {#if s.ttdRtUrl}
+              <img src={s.ttdRtUrl} alt="TTD RT" class="ttd-thumb" />
+            {/if}
+          </div>
+        {/if}
+
+        {#if s.butuhTtdRw}
+          <div class="ttd-item" class:done={Boolean(s.ttdRwPada)}>
+            <span class="ttd-role">{s.ttdRwJabatan ?? 'Ketua RW'}</span>
+            <span class="ttd-state">
+              {#if s.ttdRwPada}
+                Ditandatangani {s.ttdRwNama ?? ''} • {tanggalWaktu(s.ttdRwPada)}
+              {:else}
+                Belum ditandatangani
+              {/if}
+            </span>
+            {#if s.ttdRwUrl}
+              <img src={s.ttdRwUrl} alt="TTD RW" class="ttd-thumb" />
+            {/if}
+          </div>
+        {/if}
+      </div>
+    {/if}
+
     {#if s.catatanPengurus}
       <div class="alert-catatan">
         <strong>Catatan Pengurus:</strong> {s.catatanPengurus}
       </div>
     {/if}
+
+    <ol class="timeline" aria-label="Riwayat status surat">
+      {#each linimasa as langkah, i (langkah.judul)}
+        <li
+          class="timeline-item"
+          class:selesai={langkah.selesai}
+          class:sukses={langkah.nada === 'sukses'}
+          class:bahaya={langkah.nada === 'bahaya'}
+        >
+          <span class="timeline-dot" aria-hidden="true">{i + 1}</span>
+          <span class="timeline-text">
+            <strong>{langkah.judul}</strong>
+            <span class="timeline-waktu">{langkah.waktu}</span>
+          </span>
+        </li>
+      {/each}
+    </ol>
 
     <dl class="info-grid">
       <div class="info-item">
@@ -299,11 +425,121 @@
     font-size: var(--text-sm);
   }
 
+  .alert-info {
+    margin-bottom: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--color-brand-50, oklch(0.97 0.02 250));
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    font-size: var(--text-sm);
+  }
+
+  .ttd-summary {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .ttd-item {
+    display: grid;
+    grid-template-columns: minmax(8rem, auto) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+  }
+
+  .ttd-item.done {
+    border-style: solid;
+    border-color: color-mix(in oklab, var(--color-success) 35%, transparent);
+    background: var(--color-success-bg);
+  }
+
+  .ttd-role {
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .ttd-state {
+    color: var(--color-text-muted);
+  }
+
+  .ttd-thumb {
+    max-height: 3rem;
+    max-width: 8rem;
+    object-fit: contain;
+  }
+
   .section-title {
     margin: 0 0 var(--space-4);
     font-size: var(--text-lg);
     font-weight: 600;
     color: var(--color-text-primary);
+  }
+
+  /* ─── Timeline status ─────────────────────────────────────────────── */
+  .timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-5);
+    padding: 0;
+    list-style: none;
+  }
+
+  .timeline-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    color: var(--color-text-muted);
+  }
+
+  .timeline-dot {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    border: 2px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: var(--text-xs);
+    font-weight: 700;
+  }
+
+  .timeline-item.selesai .timeline-dot {
+    border-color: var(--color-brand-600);
+    background: var(--color-brand-600);
+    color: #fff;
+  }
+
+  .timeline-item.sukses .timeline-dot {
+    border-color: var(--color-success);
+    background: var(--color-success);
+  }
+
+  .timeline-item.bahaya .timeline-dot {
+    border-color: var(--color-danger);
+    background: var(--color-danger);
+  }
+
+  .timeline-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .timeline-item.selesai .timeline-text strong {
+    color: var(--color-text-primary);
+  }
+
+  .timeline-waktu {
+    font-size: var(--text-xs);
   }
 
   .info-grid {

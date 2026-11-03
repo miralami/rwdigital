@@ -3,6 +3,7 @@ import { kategoriKas, rw } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { z } from 'zod';
+import { requirePermission } from '$lib/server/rbac';
 import type { PageServerLoad, Actions } from './$types';
 
 const kategoriSchema = z.object({
@@ -16,7 +17,8 @@ export const load: PageServerLoad = async () => {
 };
 
 export const actions: Actions = {
-  tambah: async ({ request }) => {
+  tambah: async ({ request, locals }) => {
+    requirePermission(locals, 'kas', 'create');
     const formData = await request.formData();
     const result = kategoriSchema.safeParse({
       nama: formData.get('nama'),
@@ -37,7 +39,8 @@ export const actions: Actions = {
     redirect(303, '/kas/kategori');
   },
 
-  hapus: async ({ request }) => {
+  hapus: async ({ request, locals }) => {
+    requirePermission(locals, 'kas', 'delete');
     const formData = await request.formData();
     const id = Number(formData.get('id'));
     if (id) {

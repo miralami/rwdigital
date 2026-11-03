@@ -55,3 +55,36 @@ export interface AgendaPublik {
   hari: string;
   bulan: string;
 }
+
+/** Konfigurasi landing page yang bisa diubah pengurus tanpa deploy. */
+export interface PengaturanLandingPublik {
+  heroJudul: string;
+  heroSubjudul: string;
+  /** Warna hex (#0f172a) atau path gambar (/uploads/landing/...). */
+  heroBackground: string;
+  sambutan: string;
+  namaKetua: string;
+  fotoKetua: string | null;
+  visi: string;
+  misi: string[];
+  sejarah: string;
+  kontak: { alamat: string; telepon: string; email: string };
+}
+
+/** Satu foto pada galeri landing page. */
+export interface GaleriPublik {
+  id: number;
+  judul: string;
+  keterangan: string | null;
+  fotoUrl: string;
+}
+
+/** Pengurus aktif yang ditampilkan di bagan landing page. */
+export interface PengurusPublik {
+  id: number;
+  jabatan: string;
+  nama: string;
+  fotoUrl: string | null;
+  nomorRt: number | null;
+  urutan: number;
+}

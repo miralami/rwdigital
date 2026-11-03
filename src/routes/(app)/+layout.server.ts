@@ -8,5 +8,12 @@ import { enforceAccess } from '$lib/server/guard';
 // maupun di luar.
 export const load: LayoutServerLoad = async ({ locals, url }) => {
   enforceAccess({ locals, url });
-  return { user: locals.user };
+  return {
+    user: locals.user,
+    // Izin dipakai browser untuk menyaring menu dan tombol. Isinya bukan data
+    // rahasia — hanya modul/aksi yang memang boleh dipakai akun ini.
+    izin: locals.izin,
+    tipePeran: locals.tipePeran,
+    peranAktif: locals.peranAktif
+  };
 };

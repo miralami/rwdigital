@@ -2,17 +2,24 @@ import { db } from '$lib/server/db';
 import { warga, surat } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
-import { saveUploadedFile } from '$lib/server/storage';
+import { saveUploadedFile, UploadError } from '$lib/server/storage';
 import { z } from 'zod';
 import type { PageServerLoad, Actions } from './$types';
 
-const ajukanSuratSchema = z.object({
-  jenis: z.enum(['skck', 'sktm', 'domisili', 'usaha', 'umum'], {
-    message: 'Pilih jenis surat yang valid'
-  }),
-  keperluan: z.string().min(5, 'Keperluan harus diisi minimal 5 karakter'),
-  keterangan: z.string().optional()
-});
+const ajukanSuratSchema = z
+  .object({
+    jenis: z.enum(['skck', 'sktm', 'domisili', 'usaha', 'umum'], {
+      message: 'Pilih jenis surat yang valid'
+    }),
+    keperluan: z.string().min(5, 'Keperluan harus diisi minimal 5 karakter'),
+    keterangan: z.string().optional(),
+    butuhTtdRt: z.boolean(),
+    butuhTtdRw: z.boolean()
+  })
+  .refine((data) => data.butuhTtdRt || data.butuhTtdRw, {
+    message: 'Pilih minimal satu pihak yang perlu menandatangani surat.',
+    path: ['butuhTtdRt']
+  });
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (!locals.user) {
@@ -59,7 +66,9 @@ export const actions: Actions = {
     const parsed = ajukanSuratSchema.safeParse({
       jenis,
       keperluan,
-      keterangan: keterangan ? String(keterangan) : undefined
+      keterangan: keterangan ? String(keterangan) : undefined,
+      butuhTtdRt: formData.get('butuhTtdRt') === 'on',
+      butuhTtdRw: formData.get('butuhTtdRw') === 'on'
     });
 
     if (!parsed.success) {
@@ -69,6 +78,7 @@ export const actions: Actions = {
     }
 
     let dokumenPath: string | null = null;
+<<<<<<< HEAD
     // Validasi: maksimal 10MB per berkas, total berkas <= 5MB
     if (berkasSyarat && berkasSyarat.size > 0) {
       const totalSize = berkasSyarat.size;
@@ -79,6 +89,17 @@ export const actions: Actions = {
       // Cek total size berkas yang sudah disimpan (simpan ada limit di server)
       // Catatan: validasi 5MB total diimplementasikan secara konseptual;
       // di sini hanya validasi per-berkas 10MB
+=======
+    // Batas ukuran: maksimal 10MB untuk satu berkas persyaratan.
+    if (berkasSyarat && berkasSyarat.size > 0) {
+      try {
+        dokumenPath = await saveUploadedFile(berkasSyarat, 'surat');
+      } catch (err) {
+        return fail(400, {
+          error: err instanceof UploadError ? err.message : 'Gagal mengunggah berkas persyaratan.'
+        });
+      }
+>>>>>>> newest
     }
 
     await db.insert(surat).values({
@@ -87,6 +108,8 @@ export const actions: Actions = {
       keterangan: parsed.data.keterangan ?? null,
       dokumenSyarat: dokumenPath,
       status: 'diajukan',
+      butuhTtdRt: parsed.data.butuhTtdRt,
+      butuhTtdRw: parsed.data.butuhTtdRw,
       wargaId: w.id
     });
 

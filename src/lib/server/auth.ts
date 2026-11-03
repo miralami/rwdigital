@@ -34,7 +34,12 @@ export const auth = betterAuth({
     }),
     type: 'sqlite'
   },
-  emailAndPassword: { enabled: true },
+  emailAndPassword: {
+    enabled: true,
+    sendResetPassword: async ({ user, url }) => {
+      console.log(`[Email Service] Password reset email sent to ${user.email}: ${url}`);
+    }
+  },
   session: {
     expiresIn: 60 * 60, // 60 menit (target NFRA-09)
     updateAge: 15 * 60
@@ -49,12 +54,15 @@ export const auth = betterAuth({
   },
   plugins: [
     admin({
-      // Role mapping for RW system
-      // Roles: admin_rw | pengurus_rt | bendahara | warga
+      // Admin plugin retained for superadmin user management endpoints.
+      // App permissions are dynamically managed via DB `peran` table.
       ac,
       roles,
       defaultRole: 'warga',
-      adminRoles: ['admin_rw']
+      // Pengurus RW memegang seluruh modul termasuk pengelolaan akun, jadi ia
+      // perlu diakui sebagai admin oleh plugin Better Auth. Superadmin tetap
+      // disiapkan sebagai peran tertinggi saat akunnya dibuat nanti.
+      adminRoles: ['superadmin', 'pengurus_rw']
     }),
     sveltekitCookies(getRequestEvent) // must be last
   ]

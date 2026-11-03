@@ -36,6 +36,83 @@
       "when": 1792312758207,
       "tag": "0004_free_selene",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1792762857710,
+      "tag": "0005_kas_rt",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1792762857720,
+      "tag": "0006_midtrans_kas_rt",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1793131704193,
+      "tag": "0007_eager_mach_iv",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1793133181237,
+      "tag": "0008_petugas_rt",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1793134416858,
+      "tag": "0009_landing_galeri",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1793135037489,
+      "tag": "0010_surat_timeline",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1793135865993,
+      "tag": "0011_iuran_config",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1793136534767,
+      "tag": "0012_konfirmasi_bayar",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1793158801830,
+      "tag": "0013_setoran_rt",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1793162720239,
+      "tag": "0014_jatuh_tempo_tagihan",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1793626486730,
+      "tag": "0015_cultured_revanche",
+      "breakpoints": true
     }
   ]
 }

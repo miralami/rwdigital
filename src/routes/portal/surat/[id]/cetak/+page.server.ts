@@ -2,7 +2,8 @@ import { db } from '$lib/server/db';
 import { surat, warga, kk, rt, rw } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { error, redirect } from '@sveltejs/kit';
-import { rolesOf, STAFF_ROLES } from '$lib/server/guard';
+import { isStaff } from '$lib/server/guard';
+import { requireRtAccess, requireScope, scopeFromRole } from '$lib/server/scope';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -21,6 +22,14 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       keterangan: surat.keterangan,
       status: surat.status,
       tanggalTerbit: surat.tanggalTerbit,
+      butuhTtdRt: surat.butuhTtdRt,
+      butuhTtdRw: surat.butuhTtdRw,
+      ttdRtUrl: surat.ttdRtUrl,
+      ttdRtNama: surat.ttdRtNama,
+      ttdRtJabatan: surat.ttdRtJabatan,
+      ttdRwUrl: surat.ttdRwUrl,
+      ttdRwNama: surat.ttdRwNama,
+      ttdRwJabatan: surat.ttdRwJabatan,
       wargaId: warga.id,
       userId: warga.userId,
       namaWarga: warga.nama,
@@ -33,6 +42,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       statusPerkawinan: warga.statusPerkawinan,
       noKk: kk.noKk,
       alamatKk: kk.alamat,
+      rtId: rt.id,
       nomorRt: rt.nomor,
       namaRw: rw.nama,
       kelurahan: rw.kelurahan,
@@ -50,12 +60,23 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     throw error(404, 'Surat tidak ditemukan');
   }
 
-  const roles = rolesOf(locals);
-  const isStaff = roles.some((r) => (STAFF_ROLES as readonly string[]).includes(r));
   const isOwner = detail.userId === locals.user.id;
 
-  if (!isStaff && !isOwner) {
+  // Staf boleh membuka dokumen ini sesuai wilayahnya: RW melihat semua surat,
+  // pengurus RT hanya surat dari RT tugasnya. Warga hanya surat miliknya.
+  if (isStaff(locals)) {
+    const scope = requireScope(scopeFromRole(locals));
+    requireRtAccess(scope, detail.rtId);
+  } else if (!isOwner) {
     throw error(403, 'Anda tidak berhak mengakses dokumen surat ini.');
+  }
+
+  // Cetak hanya dibuka setelah seluruh pihak yang diminta selesai TTD.
+  if (detail.status !== 'terbit') {
+    throw error(
+      400,
+      'Surat belum bisa dicetak. Surat baru terbit setelah semua tanda tangan yang diminta lengkap.'
+    );
   }
 
   return { detail };

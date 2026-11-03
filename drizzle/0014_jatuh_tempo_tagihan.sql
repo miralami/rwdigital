@@ -1,0 +1,1 @@
+ALTER TABLE `tagihan` ADD `jatuh_tempo` text;

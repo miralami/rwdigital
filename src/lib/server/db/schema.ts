@@ -3,7 +3,8 @@ import {
   integer,
   real,
   sqliteTable,
-  text
+  text,
+  uniqueIndex
 } from 'drizzle-orm/sqlite-core';
 import { sql } from 'drizzle-orm';
 
@@ -29,6 +30,59 @@ export const rt = sqliteTable('rt', {
   id:       integer('id').primaryKey({ autoIncrement: true }),
   nomor:    integer('nomor').notNull(),           // e.g. 01, 02
   rwId:     integer('rw_id').notNull().references(() => rw.id),
+  ...timestamps
+});
+
+// ── Penugasan pengurus RT ────────────────────────────────────────────────────
+// Satu akun `pengurus_rt` bertugas di satu RT. Tabel terpisah dipakai supaya
+// tabel `user` milik Better Auth tidak perlu diubah. Akun tanpa baris di sini
+// tidak mendapat akses data RT mana pun (fail-closed).
+export const petugasRt = sqliteTable('petugas_rt', {
+  id:     integer('id').primaryKey({ autoIncrement: true }),
+  userId: text('user_id').notNull().unique(),     // Better Auth user.id
+  rtId:   integer('rt_id').notNull().references(() => rt.id),
+  ...timestamps
+}, (table) => [
+  index('petugas_rt_rt_id_idx').on(table.rtId)
+]);
+
+// ── Tanda tangan elektronik per akun pengurus ───────────────────────────────
+// Disimpan terpisah dari tabel `user` Better Auth. Satu akun pengurus punya
+// satu gambar TTD; snapshot URL-nya disalin ke surat saat menandatangani agar
+// dokumen lama tidak berubah ketika gambar diganti.
+export const ttdPejabat = sqliteTable('ttd_pejabat', {
+  id:        integer('id').primaryKey({ autoIncrement: true }),
+  userId:    text('user_id').notNull().unique(),  // Better Auth user.id
+  url:       text('url').notNull(),               // /uploads/ttd/...
+  ...timestamps
+});
+
+// ─── Peran & Izin (RBAC dinamis) ─────────────────────────────────────────────
+// Sumber kebenaran izin aplikasi. Better Auth hanya menyimpan slug role di
+// `user.role`; modul ini yang menentukan modul/aksi apa yang boleh dilakukan
+// pemilik role tersebut, sehingga superadmin bisa membuat role baru tanpa
+// mengubah kode.
+//
+// - `nama`      : slug yang juga disimpan di `user.role` (mis. "pengurus_rw").
+// - `tipe`      : "staff" (masuk aplikasi admin) atau "warga" (portal).
+// - `scope`     : "all" (seluruh RW), "rt" (hanya RT yang ditugaskan), "none".
+// - `permissions`: map modul → daftar aksi, mis. { "warga": ["read"] }.
+// - `sistem`    : role bawaan yang boleh diubah izinnya tapi tidak dihapus.
+// - `superadmin` : role dengan akses penuh permanen, tidak bisa diedit/dihapus.
+export const peran = sqliteTable('peran', {
+  id:          integer('id').primaryKey({ autoIncrement: true }),
+  nama:        text('nama').notNull().unique(),
+  label:       text('label').notNull(),
+  deskripsi:   text('deskripsi'),
+  tipe:        text('tipe', { enum: ['staff', 'warga'] }).notNull().default('staff'),
+  scope:       text('scope', { enum: ['all', 'rt', 'none'] }).notNull().default('none'),
+  permissions: text('permissions', { mode: 'json' })
+    .$type<Record<string, string[]>>()
+    .notNull()
+    .default({}),
+  sistem:      integer('sistem', { mode: 'boolean' }).notNull().default(false),
+  superadmin:  integer('superadmin', { mode: 'boolean' }).notNull().default(false),
+  urutan:      integer('urutan').notNull().default(0),
   ...timestamps
 });
 
@@ -76,6 +130,53 @@ export const riwayatWarga = sqliteTable('riwayat_warga', {
   tanggal:    text('tanggal').notNull().default(sql`(current_timestamp)`)
 });
 
+// ─── Pengurus (bagan organisasi RW & RT) ────────────────────────────────────
+// `rtId` NULL = pengurus tingkat RW. `fotoUrl` menunjuk ke /uploads/pengurus/...
+// supaya bagan pengurus di landing page bisa menampilkan foto asli.
+export const pengurus = sqliteTable('pengurus', {
+  id:       integer('id').primaryKey({ autoIncrement: true }),
+  rtId:     integer('rt_id').references(() => rt.id),   // null = pengurus RW
+  jabatan:  text('jabatan').notNull(),                  // Ketua, Sekretaris, Bendahara, ...
+  nama:     text('nama').notNull(),
+  fotoUrl:  text('foto_url'),
+  urutan:   integer('urutan').notNull().default(0),
+  aktif:    integer('aktif', { mode: 'boolean' }).notNull().default(true),
+  ...timestamps
+}, (table) => [
+  index('pengurus_rt_id_idx').on(table.rtId)
+]);
+
+// ─── Pengaturan Landing & Galeri (LP-01) ────────────────────────────────────
+// Satu baris konfigurasi (id = 1). Nilai kosong berarti landing memakai
+// default yang tertanam di kode, sehingga instalasi baru tetap tampil utuh.
+export const pengaturanLanding = sqliteTable('pengaturan_landing', {
+  id:               integer('id').primaryKey(),
+  heroJudul:        text('hero_judul'),
+  heroSubjudul:     text('hero_subjudul'),
+  // Berupa warna hex (#0f172a) atau path gambar (/uploads/landing/...).
+  heroBackground:   text('hero_background'),
+  sambutan:         text('sambutan'),
+  namaKetua:        text('nama_ketua'),
+  fotoKetua:        text('foto_ketua'),
+  visi:             text('visi'),
+  misi:             text('misi'),          // satu poin per baris
+  sejarah:          text('sejarah'),
+  alamat:           text('alamat'),
+  telepon:          text('telepon'),
+  email:            text('email'),
+  ...timestamps
+});
+
+export const galeri = sqliteTable('galeri', {
+  id:         integer('id').primaryKey({ autoIncrement: true }),
+  judul:      text('judul').notNull(),
+  keterangan: text('keterangan'),
+  fotoUrl:    text('foto_url').notNull(),
+  urutan:     integer('urutan').notNull().default(0),
+  aktif:      integer('aktif', { mode: 'boolean' }).notNull().default(true),
+  ...timestamps
+});
+
 // ─── Pengumuman ───────────────────────────────────────────────────────────────
 export const pengumuman = sqliteTable('pengumuman', {
   id:            integer('id').primaryKey({ autoIncrement: true }),
@@ -89,32 +190,95 @@ export const pengumuman = sqliteTable('pengumuman', {
   tanggalMulaiEvent:   text('tanggal_mulai_event'),
   tanggalSelesaiEvent: text('tanggal_selesai_event'),
   lokasi:              text('lokasi'),
+  periodeUlang:        text('periode_ulang', { enum: ['sekali', 'mingguan', 'bulanan', 'kustom'] }).notNull().default('sekali'),
+  intervalHari:        integer('interval_hari'),
+  thumbnailUrl:        text('thumbnail_url'),
+  lampiranUrls:        text('lampiran_urls'), // JSON array of string URLs
   ditampilkan:         integer('ditampilkan', { mode: 'boolean' }).notNull().default(true),
   rwId:                integer('rw_id').notNull().references(() => rw.id),
+  // null = pengumuman tingkat RW (berlaku semua RT); terisi = khusus RT itu.
+  rtId:                integer('rt_id').references(() => rt.id),
   dibuatOleh:          text('dibuat_oleh').notNull(), // user id from better-auth
   ...timestamps
-});
+}, (table) => [
+  index('pengumuman_rt_id_idx').on(table.rtId)
+]);
+
+// ─── Notifikasi Sistem (In-app, Email, Push) ──────────────────────────────────
+export const notifikasi = sqliteTable('notifikasi', {
+  id:        integer('id').primaryKey({ autoIncrement: true }),
+  userId:    text('user_id').notNull(),
+  judul:     text('judul').notNull(),
+  pesan:     text('pesan').notNull(),
+  tipe:      text('tipe', { enum: ['info', 'sukses', 'peringatan', 'bahaya'] }).notNull().default('info'),
+  tautan:    text('tautan'),
+  dibaca:    integer('dibaca', { mode: 'boolean' }).notNull().default(false),
+  channel:   text('channel', { enum: ['in_app', 'email', 'push'] }).notNull().default('in_app'),
+  ...timestamps
+}, (table) => [
+  index('notifikasi_user_idx').on(table.userId)
+]);
 
 // ─── Iuran (jenis/tagihan periodik) ──────────────────────────────────────────
 export const jenisIuran = sqliteTable('jenis_iuran', {
   id:       integer('id').primaryKey({ autoIncrement: true }),
   nama:     text('nama').notNull(),             // e.g. "Iuran Keamanan", "Kebersihan"
   nominal:  real('nominal').notNull(),
+  // Bagian RW dari tiap tagihan (nominal tetap per KK). Nilai ini adalah
+  // konfigurasi data, bukan konstanta kode, sehingga porsi bisa diubah
+  // kapan saja tanpa menyentuh tagihan lama (lihat snapshot di `tagihan`).
+  porsiRw:  real('porsi_rw').notNull().default(0),
   periode:  text('periode', { enum: ['bulanan', 'tahunan', 'insidental'] }).notNull().default('bulanan'),
+  // Siapa yang menagih: 'rw' = langsung RW ke warga, 'rt' = lewat RT.
+  // Hanya jenis ber-scope 'rt' yang boleh digenerate per RT. Default 'rt'
+  // supaya data lama (yang selama ini ditagih lewat RT) tetap bisa digenerate.
+  scope:    text('scope', { enum: ['rw', 'rt'] }).notNull().default('rt'),
+  rtId:     integer('rt_id').references(() => rt.id), // pemilik bila scope 'rt'; null = semua RT
+  urutan:   integer('urutan').notNull().default(0),
   aktif:    integer('aktif', { mode: 'boolean' }).notNull().default(true),
   rwId:     integer('rw_id').notNull().references(() => rw.id),
   ...timestamps
 });
+
+// Paket = preset beberapa jenis iuran yang biasa ditagih bersamaan
+// (mis. K3 + Soskem + Santunan). Isinya data, bukan kode.
+export const paketIuran = sqliteTable('paket_iuran', {
+  id:         integer('id').primaryKey({ autoIncrement: true }),
+  nama:       text('nama').notNull(),
+  keterangan: text('keterangan'),
+  aktif:      integer('aktif', { mode: 'boolean' }).notNull().default(true),
+  rwId:       integer('rw_id').notNull().references(() => rw.id),
+  ...timestamps
+});
+
+export const paketIuranItem = sqliteTable('paket_iuran_item', {
+  id:           integer('id').primaryKey({ autoIncrement: true }),
+  paketId:      integer('paket_id').notNull().references(() => paketIuran.id, { onDelete: 'cascade' }),
+  jenisIuranId: integer('jenis_iuran_id').notNull().references(() => jenisIuran.id),
+  urutan:       integer('urutan').notNull().default(0)
+}, (table) => [
+  uniqueIndex('paket_iuran_item_unik').on(table.paketId, table.jenisIuranId)
+]);
 
 export const tagihan = sqliteTable('tagihan', {
   id:           integer('id').primaryKey({ autoIncrement: true }),
   kkId:         integer('kk_id').notNull().references(() => kk.id),
   jenisIuranId: integer('jenis_iuran_id').notNull().references(() => jenisIuran.id),
   periode:      text('periode').notNull(),      // e.g. "2025-01"
+  // Snapshot saat tagihan dibuat: perubahan nominal/porsi di jenis_iuran
+  // tidak boleh mengubah tagihan yang sudah terbit.
   nominal:      real('nominal').notNull(),
+  porsiRw:      real('porsi_rw').notNull().default(0),
   status:       text('status', { enum: ['belum_bayar', 'lunas', 'sebagian'] }).notNull().default('belum_bayar'),
+  // Tanggal jatuh tempo (D4). Disimpan per tagihan supaya perubahan kebijakan
+  // tidak menggeser tagihan yang sudah terbit. Null = belum ditetapkan.
+  jatuhTempo:   text('jatuh_tempo'),
   ...timestamps
-});
+}, (table) => [
+  // Satu KK hanya punya satu tagihan per jenis per periode. Ini yang membuat
+  // generate ulang idempoten, termasuk saat dua permintaan berjalan bersamaan.
+  uniqueIndex('tagihan_kk_jenis_periode_unik').on(table.kkId, table.jenisIuranId, table.periode)
+]);
 
 export const pembayaran = sqliteTable('pembayaran', {
   id:          integer('id').primaryKey({ autoIncrement: true }),
@@ -128,11 +292,55 @@ export const pembayaran = sqliteTable('pembayaran', {
   ...timestamps
 });
 
-// ─── Kas RW ───────────────────────────────────────────────────────────────────
+// Pesanan pembayaran iuran lewat Midtrans Snap. Dipisahkan dari `pembayaran`
+// karena order bisa dibuat, kedaluwarsa, atau gagal tanpa pernah menjadi
+// pembayaran resmi. Baru setelah settlement/`capture` sukses baris
+// `pembayaran` dibuat (lewat `catatPembayaran`) dan `pembayaranId` diisi.
+export const pembayaranOnline = sqliteTable('pembayaran_online', {
+  id:              integer('id').primaryKey({ autoIncrement: true }),
+  tagihanId:       integer('tagihan_id').notNull().references(() => tagihan.id),
+  userId:          text('user_id').notNull(),          // Better Auth user.id
+  orderId:         text('order_id').notNull().unique(), // order_id Midtrans
+  jumlah:          real('jumlah').notNull(),
+  status:          text('status', {
+    enum: ['pending', 'capture', 'settlement', 'deny', 'cancel', 'expire', 'failure', 'refund']
+  }).notNull().default('pending'),
+  snapToken:       text('snap_token'),
+  snapRedirectUrl: text('snap_redirect_url'),
+  paymentType:     text('payment_type'),
+  pembayaranId:    integer('pembayaran_id').references(() => pembayaran.id),
+  ...timestamps
+}, (table) => [
+  index('pembayaran_online_tagihan_idx').on(table.tagihanId),
+  index('pembayaran_online_status_idx').on(table.status)
+]);
+
+// Pengajuan konfirmasi bayar dari portal warga (biasanya tunai ke bendahara).
+// Baru menjadi `pembayaran` resmi setelah diterima bendahara, supaya status
+// tagihan di portal dan di halaman staf selalu berasal dari sumber yang sama.
+export const konfirmasiBayar = sqliteTable('konfirmasi_bayar', {
+  id:           integer('id').primaryKey({ autoIncrement: true }),
+  tagihanId:    integer('tagihan_id').notNull().references(() => tagihan.id),
+  jumlah:       real('jumlah').notNull(),
+  metodeBayar:  text('metode_bayar', { enum: ['tunai', 'transfer'] }).notNull().default('tunai'),
+  catatan:      text('catatan'),
+  status:       text('status', { enum: ['menunggu', 'diterima', 'ditolak'] }).notNull().default('menunggu'),
+  diajukanOleh: text('diajukan_oleh').notNull(),  // user id warga
+  diprosesOleh: text('diproses_oleh'),
+  diprosesPada: text('diproses_pada'),
+  alasanTolak:  text('alasan_tolak'),
+  ...timestamps
+}, (table) => [
+  index('konfirmasi_bayar_tagihan_idx').on(table.tagihanId),
+  index('konfirmasi_bayar_status_idx').on(table.status)
+]);
+
+// ─── Kas RW & Kas RT (KU-01 s/d KU-04) ──────────────────────────────────────
 export const kategoriKas = sqliteTable('kategori_kas', {
   id:    integer('id').primaryKey({ autoIncrement: true }),
   nama:  text('nama').notNull(),
   jenis: text('jenis', { enum: ['pemasukan', 'pengeluaran'] }).notNull(),
+  scope: text('scope', { enum: ['semua', 'rw', 'rt'] }).notNull().default('semua'),
   rwId:  integer('rw_id').notNull().references(() => rw.id)
 });
 
@@ -152,21 +360,95 @@ export const transaksiKas = sqliteTable('transaksi_kas', {
   ...timestamps
 });
 
+export const transaksiKasRt = sqliteTable('transaksi_kas_rt', {
+  id:             integer('id').primaryKey({ autoIncrement: true }),
+  rtId:           integer('rt_id').notNull().references(() => rt.id),
+  namaKas:        text('nama_kas').notNull().default('Kas Sosial Kematian'), // e.g. "Kas Sosial Kematian", "Kas Rukun Kematian", "Kas Operasional RT"
+  jenis:          text('jenis', { enum: ['pemasukan', 'pengeluaran'] }).notNull(),
+  nominal:        real('nominal').notNull(),
+  keterangan:     text('keterangan').notNull(),
+  kategoriId:     integer('kategori_id').references(() => kategoriKas.id),
+  tanggal:        text('tanggal').notNull(),        // ISO date
+  bukti:          text('bukti'),                    // file path/URL lokal
+  dicatatOleh:    text('dicatat_oleh').notNull(),   // user id
+  dibatalkan:     integer('dibatalkan', { mode: 'boolean' }).notNull().default(false),
+  alasanBatal:    text('alasan_batal'),
+  dibatalkanOleh: text('dibatalkan_oleh'),
+  metodePembayaran: text('metode_pembayaran').notNull().default('tunai'),
+  midtransOrderId:  text('midtrans_order_id'),
+  midtransPaymentType: text('midtrans_payment_type'),
+  midtransStatus:   text('midtrans_status'),
+  snapToken:        text('snap_token'),
+  ...timestamps
+});
+
+// ─── Setoran porsi RW dari kas RT (KU-04) ───────────────────────────────────
+// Uang iuran RT ditahan di kas RT sampai disetorkan. Satu baris setoran
+// mencatat dua sisi sekaligus (kas RT keluar, kas RW masuk) supaya angka
+// selalu bisa ditelusuri dan pembatalan tidak pernah menghitung dua kali.
+export const setoranRt = sqliteTable('setoran_rt', {
+  id:             integer('id').primaryKey({ autoIncrement: true }),
+  rtId:           integer('rt_id').notNull().references(() => rt.id),
+  periode:        text('periode').notNull(),          // e.g. "2026-10"
+  // Snapshot saat setoran dibuat; perubahan pembayaran sesudahnya tidak
+  // mengubah setoran yang sudah tercatat.
+  totalTerkumpul: real('total_terkumpul').notNull().default(0),
+  porsiRw:        real('porsi_rw').notNull().default(0),
+  catatan:        text('catatan'),
+  bukti:          text('bukti'),
+  disetorPada:    text('disetor_pada').notNull(),     // ISO date
+  dicatatOleh:    text('dicatat_oleh').notNull(),
+  transaksiRwId:  integer('transaksi_rw_id').references(() => transaksiKas.id),
+  transaksiRtId:  integer('transaksi_rt_id').references(() => transaksiKasRt.id),
+  dibatalkan:     integer('dibatalkan', { mode: 'boolean' }).notNull().default(false),
+  alasanBatal:    text('alasan_batal'),
+  dibatalkanOleh: text('dibatalkan_oleh'),
+  ...timestamps
+}, (table) => [
+  // Satu RT hanya boleh punya satu setoran aktif per periode. Setoran yang
+  // dibatalkan tidak dihitung, jadi periode itu bisa disetor ulang.
+  uniqueIndex('setoran_rt_rt_periode_unik')
+    .on(table.rtId, table.periode)
+    .where(sql`${table.dibatalkan} = 0`)
+]);
+
 // ─── Surat-Menyurat (SF-SR-01 s/d SF-SR-07) ─────────────────────────────────
 export const surat = sqliteTable('surat', {
   id:               integer('id').primaryKey({ autoIncrement: true }),
-  nomorSurat:       text('nomor_surat'),
+  // Nomor hanya diisi saat seluruh TTD yang diminta selesai (status terbit).
+  // UNIQUE menjaga agar dua surat tidak pernah mendapat nomor yang sama.
+  nomorSurat:       text('nomor_surat').unique(),
   jenis:            text('jenis').notNull(),         // e.g. "skck", "sktm", "domisili", "usaha", "kematian", "umum"
   keperluan:        text('keperluan').notNull(),
   keterangan:       text('keterangan'),
   dokumenSyarat:    text('dokumen_syarat'),          // path lokal file berkas persyaratan
   status:           text('status', {
-    enum: ['diajukan', 'diverifikasi', 'disetujui', 'ditolak']
+    enum: ['diajukan', 'menunggu_ttd', 'terbit', 'ditolak']
   }).notNull().default('diajukan'),
   catatanPengurus:  text('catatan_pengurus'),        // alasan tolak atau catatan verifikasi
+  // Permintaan tanda tangan dari warga saat mengajukan surat.
+  butuhTtdRt:       integer('butuh_ttd_rt', { mode: 'boolean' }).notNull().default(false),
+  butuhTtdRw:       integer('butuh_ttd_rw', { mode: 'boolean' }).notNull().default(false),
+  // Snapshot tanda tangan: URL gambar + identitas pejabat saat menandatangani.
+  ttdRtUrl:         text('ttd_rt_url'),
+  ttdRtOleh:        text('ttd_rt_oleh'),             // user id penanda tangan RT
+  ttdRtPada:        text('ttd_rt_pada'),             // ISO datetime
+  ttdRtNama:        text('ttd_rt_nama'),
+  ttdRtJabatan:     text('ttd_rt_jabatan'),
+  ttdRwUrl:         text('ttd_rw_url'),
+  ttdRwOleh:        text('ttd_rw_oleh'),             // user id penanda tangan RW
+  ttdRwPada:        text('ttd_rw_pada'),             // ISO datetime
+  ttdRwNama:        text('ttd_rw_nama'),
+  ttdRwJabatan:     text('ttd_rw_jabatan'),
+  // Jejak proses: verifikasi diisi saat pihak pertama menandatangani, lalu
+  // disetujui/terbit saat semua TTD yang diminta lengkap.
   diverifikasiOleh: text('diverifikasi_oleh'),       // user id pengurus RT/RW
-  disetujuiOleh:    text('disetujui_oleh'),          // user id Admin RW
+  disetujuiOleh:    text('disetujui_oleh'),          // user id pihak terakhir
   tanggalTerbit:    text('tanggal_terbit'),          // ISO date
+  diverifikasiPada: text('diverifikasi_pada'),       // ISO datetime
+  disetujuiPada:    text('disetujui_pada'),          // ISO datetime
+  ditolakPada:      text('ditolak_pada'),            // ISO datetime
+  ditolakOleh:      text('ditolak_oleh'),            // user id penolak
   wargaId:          integer('warga_id').notNull().references(() => warga.id),
   ...timestamps
 });

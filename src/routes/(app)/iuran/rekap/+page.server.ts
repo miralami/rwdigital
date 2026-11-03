@@ -1,10 +1,13 @@
 import { db } from '$lib/server/db';
 import { tagihan, jenisIuran, kk, rt, pembayaran } from '$lib/server/db/schema';
 import { eq, desc, sql } from 'drizzle-orm';
+import { requireScope, scopeFromRole } from '$lib/server/scope';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async () => {
-  // Semua tagihan dengan data terkait
+export const load: PageServerLoad = async ({ locals }) => {
+  const scope = requireScope(scopeFromRole(locals));
+
+  // Semua tagihan dengan data terkait, dibatasi ke RT tugas pengurus.
   const semuaTagihan = await db
     .select({
       id: tagihan.id,
@@ -20,6 +23,7 @@ export const load: PageServerLoad = async () => {
     .innerJoin(jenisIuran, eq(tagihan.jenisIuranId, jenisIuran.id))
     .innerJoin(kk, eq(tagihan.kkId, kk.id))
     .innerJoin(rt, eq(kk.rtId, rt.id))
+    .where(scope.kind === 'rt' ? eq(kk.rtId, scope.rtId) : undefined)
     .orderBy(desc(tagihan.periode), desc(tagihan.id));
 
   // Summary stats

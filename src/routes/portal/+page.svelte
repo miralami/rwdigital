@@ -9,6 +9,7 @@
   import Users from '@lucide/svelte/icons/users';
   import User from '@lucide/svelte/icons/user';
   import ClipboardEdit from '@lucide/svelte/icons/clipboard-edit';
+  import Repeat from '@lucide/svelte/icons/repeat';
   import Card from '$lib/components/Card.svelte';
   import ListRow from '$lib/components/ListRow.svelte';
   import Button from '$lib/components/Button.svelte';
@@ -21,8 +22,6 @@
   import type { PageData } from './$types';
 
   let { data } = $props<{ data: PageData }>();
-
-  let catatanQris = $state(false);
 
   const belumBayar = $derived(data.iuran?.status === 'belum_bayar');
 
@@ -87,19 +86,20 @@
               variant="primary"
               size="lg"
               fullWidth
+              href="/portal/iuran"
               icon={QrCode}
-              onclick={() => (catatanQris = true)}
             >
-              Bayar dengan QRIS
+              Lihat tagihan &amp; bayar
             </Button>
-            {#if catatanQris}
-              <p class="iuran-note" role="status">
-                Pembayaran QRIS sedang disiapkan bersama mitra RW dan penyedia pembayaran.
-                Untuk saat ini pembayaran dapat diserahkan tunai ke Bendahara atau transfer bank.
-              </p>
-            {/if}
+            <p class="iuran-note">
+              Rincian semua tagihan, konfirmasi pembayaran tunai/transfer, dan riwayat pembayaran
+              ada di halaman Tagihan &amp; pembayaran.
+            </p>
           {:else}
             <p class="iuran-meta">Iuran untuk periode ini telah berstatus lunas.</p>
+            <Button variant="secondary" size="md" fullWidth href="/portal/iuran">
+              Lihat semua tagihan
+            </Button>
           {/if}
         </div>
       </Card>
@@ -242,10 +242,10 @@
                   <span class="surat-title">Surat {s.jenis.toUpperCase()}</span>
                   {#if s.status === 'diajukan'}
                     <Badge variant="warning">Diajukan</Badge>
-                  {:else if s.status === 'diverifikasi'}
-                    <Badge variant="brand">Diverifikasi</Badge>
-                  {:else if s.status === 'disetujui'}
-                    <Badge variant="success">Disetujui</Badge>
+                  {:else if s.status === 'menunggu_ttd'}
+                    <Badge variant="brand">Menunggu TTD</Badge>
+                  {:else if s.status === 'terbit'}
+                    <Badge variant="success">Terbit</Badge>
                   {:else}
                     <Badge variant="danger">Ditolak</Badge>
                   {/if}
@@ -261,17 +261,23 @@
                 {/if}
               </div>
 
-              {#if s.status === 'disetujui'}
-                <a
-                  href="/portal/surat/{s.id}/cetak"
-                  target="_blank"
-                  rel="noreferrer"
-                  class="btn btn-secondary btn-sm"
-                >
+              <div class="surat-actions">
+                <a href="/portal/surat/{s.id}" class="btn btn-secondary btn-sm">
                   <FileText size={14} />
-                  <span>Unduh PDF</span>
+                  <span>Lihat Detail &amp; Proses</span>
                 </a>
-              {/if}
+                {#if s.status === 'terbit'}
+                  <a
+                    href="/portal/surat/{s.id}/cetak?unduh=1"
+                    target="_blank"
+                    rel="noreferrer"
+                    class="btn btn-primary btn-sm"
+                  >
+                    <FileText size={14} />
+                    <span>Unduh PDF</span>
+                  </a>
+                {/if}
+              </div>
             </div>
           {/each}
         </div>
@@ -290,9 +296,45 @@
   <section id="info" aria-labelledby="info-judul">
     <Card title="Pengumuman RW" padded={false}>
       {#if data.pengumuman.length > 0}
-        <div class="rows">
+        <div class="pengumuman-list">
           {#each data.pengumuman as info (info.id)}
-            <ListRow title={info.judul} meta={formatTanggal(info.tanggal)} icon={Megaphone} />
+            <article class="pengumuman-card">
+              {#if info.thumbnailUrl}
+                <div class="pengumuman-thumb-wrap">
+                  <img src={info.thumbnailUrl} alt={info.judul} class="pengumuman-thumb" />
+                </div>
+              {/if}
+              <div class="pengumuman-content">
+                <div class="pengumuman-badges">
+                  <Badge variant={info.kategori === 'darurat' ? 'danger' : info.kategori === 'kegiatan' ? 'brand' : info.kategori === 'keuangan' ? 'success' : 'default'}>
+                    {info.kategori.toUpperCase()}
+                  </Badge>
+                  {#if info.periodeUlang && info.periodeUlang !== 'sekali'}
+                    <span class="badge-periodic">
+                      <Repeat size={12} />
+                      <span>{info.periodeUlang}</span>
+                    </span>
+                  {/if}
+                  <span class="pengumuman-date">{formatTanggal(info.tanggal)}</span>
+                </div>
+
+                <h3 class="pengumuman-title">{info.judul}</h3>
+                <p class="pengumuman-isi">{info.isi}</p>
+
+                {#if info.lampiranUrls && info.lampiranUrls.length > 0}
+                  <div class="pengumuman-gallery">
+                    <span class="gallery-label">Dokumentasi ({info.lampiranUrls.length} foto)</span>
+                    <div class="gallery-grid">
+                      {#each info.lampiranUrls as url}
+                        <a href={url} target="_blank" rel="noreferrer" class="gallery-item">
+                          <img src={url} alt="Dokumentasi" class="gallery-img" />
+                        </a>
+                      {/each}
+                    </div>
+                  </div>
+                {/if}
+              </div>
+            </article>
           {/each}
         </div>
       {:else}
@@ -554,6 +596,13 @@
     border-bottom: none;
   }
 
+  .surat-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
   .surat-info {
     display: flex;
     flex-direction: column;
@@ -639,6 +688,127 @@
     font-size: var(--text-sm);
     line-height: var(--leading-normal);
     color: var(--color-text-muted);
+  }
+
+  /* ─── Pengumuman Card & Gallery ─── */
+  .pengumuman-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pengumuman-card {
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--color-border);
+    overflow: hidden;
+  }
+
+  .pengumuman-card:last-child {
+    border-bottom: none;
+  }
+
+  .pengumuman-thumb-wrap {
+    width: 100%;
+    max-height: 14rem;
+    overflow: hidden;
+    background: var(--color-surface-muted);
+  }
+
+  .pengumuman-thumb {
+    width: 100%;
+    height: 100%;
+    max-height: 14rem;
+    object-fit: cover;
+    display: block;
+  }
+
+  .pengumuman-content {
+    padding: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .pengumuman-badges {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .badge-periodic {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-full);
+    background: var(--color-brand-50);
+    color: var(--color-brand-700);
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    text-transform: capitalize;
+  }
+
+  .pengumuman-date {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    margin-left: auto;
+  }
+
+  .pengumuman-title {
+    margin: 0;
+    font-size: var(--text-base);
+    font-weight: 700;
+    color: var(--color-text);
+  }
+
+  .pengumuman-isi {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-muted);
+    white-space: pre-line;
+  }
+
+  .pengumuman-gallery {
+    margin-top: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .gallery-label {
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-text-muted);
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+    gap: var(--space-2);
+  }
+
+  .gallery-item {
+    aspect-ratio: 1;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    display: block;
+    background: var(--color-surface-muted);
+  }
+
+  .gallery-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+  }
+
+  .gallery-item:hover .gallery-img {
+    transform: scale(1.05);
   }
 
   @media (min-width: 768px) {

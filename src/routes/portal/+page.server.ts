@@ -1,6 +1,6 @@
 import { db } from '$lib/server/db';
 import { warga, kk, rt, tagihan, jenisIuran, pembayaran, pengumuman, surat } from '$lib/server/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, and, isNull, or } from 'drizzle-orm';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
@@ -22,6 +22,7 @@ export const load: PageServerLoad = async ({ locals }) => {
           statusHubunganKk: warga.statusHubunganKk,
           kkId: warga.kkId,
           noKk: kk.noKk,
+          rtId: kk.rtId,
           nomorRt: rt.nomor,
           alamat: kk.alamat,
           statusHuni: kk.statusHuni
@@ -32,23 +33,39 @@ export const load: PageServerLoad = async ({ locals }) => {
         .where(eq(warga.userId, userId))
     : [];
 
-  // Pengumuman aktif dari DB
+  // Pengumuman aktif dari DB. Warga melihat pengumuman RW (rtId null) dan
+  // pengumuman RT-nya sendiri; akun tanpa data warga hanya melihat yang RW.
   const rawPengumuman = await db
     .select({
       id: pengumuman.id,
       judul: pengumuman.judul,
       isi: pengumuman.isi,
       kategori: pengumuman.kategori,
+      thumbnailUrl: pengumuman.thumbnailUrl,
+      lampiranUrls: pengumuman.lampiranUrls,
+      periodeUlang: pengumuman.periodeUlang,
       createdAt: pengumuman.createdAt
     })
     .from(pengumuman)
-    .where(eq(pengumuman.ditampilkan, true))
+    .where(
+      and(
+        eq(pengumuman.ditampilkan, true),
+        linkedWarga
+          ? or(isNull(pengumuman.rtId), eq(pengumuman.rtId, linkedWarga.rtId))
+          : isNull(pengumuman.rtId)
+      )
+    )
     .orderBy(desc(pengumuman.createdAt))
-    .limit(5);
+    .limit(10);
 
   const listPengumuman = rawPengumuman.map(p => ({
     id: String(p.id),
     judul: p.judul,
+    isi: p.isi,
+    kategori: p.kategori,
+    thumbnailUrl: p.thumbnailUrl,
+    lampiranUrls: p.lampiranUrls ? JSON.parse(p.lampiranUrls) : [],
+    periodeUlang: p.periodeUlang,
     tanggal: p.createdAt
   }));
 

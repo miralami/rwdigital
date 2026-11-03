@@ -1,11 +1,48 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
-import { warga, kk, rt, pengumuman } from '$lib/server/db/schema';
+import { warga, kk, rt, pengumuman, pengaturanLanding, galeri, pengurus } from '$lib/server/db/schema';
 import { and, asc, desc, eq, gte, isNotNull, sql } from 'drizzle-orm';
 import { landingPathFor } from '$lib/server/guard';
 import { hitungBucketUsia } from '$lib/server/usia';
-import type { AgendaPublik, PengumumanPublik, StatistikPublik } from '$lib/types';
+import type {
+  AgendaPublik,
+  GaleriPublik,
+  PengaturanLandingPublik,
+  PengumumanPublik,
+  PengurusPublik,
+  StatistikPublik
+} from '$lib/types';
+/**
+ * Default konten landing. Dipakai kalau baris `pengaturan_landing` belum ada
+ * atau kolomnya kosong, sehingga instalasi baru tetap menampilkan halaman utuh.
+ */
+const DEFAULT_LANDING: PengaturanLandingPublik = {
+  heroJudul: 'RW 06 Kota Baru',
+  heroSubjudul:
+    'Warga terhubung, lingkungan tertata. Pantau pengumuman, layanan surat, dan data kependudukan RW 06 dalam satu tempat.',
+  heroBackground: '',
+  sambutan:
+    'Selamat datang di portal RW 06. Portal ini kami hadirkan agar informasi lingkungan mudah diakses warga — dari pengumuman, layanan surat, sampai data kependudukan.',
+  namaKetua: 'Nama Ketua RW',
+  fotoKetua: null,
+  visi:
+    'Mewujudkan RW 06 sebagai lingkungan yang aman, bersih, rukun, dan mandiri melalui pelayanan administrasi yang transparan serta partisipasi aktif seluruh warga.',
+  misi: [
+    'Menyelenggarakan administrasi kependudukan yang tertib, akurat, dan mudah diakses warga.',
+    'Mendorong transparansi dan akuntabilitas pengelolaan kas serta iuran lingkungan.',
+    'Meningkatkan keamanan, kebersihan, dan ketertiban lingkungan secara bergotong royong.',
+    'Memberdayakan pemuda, posyandu, dan kegiatan sosial-keagamaan warga.',
+    'Membangun komunikasi dan penyampaian informasi RW yang cepat dan merata.'
+  ],
+  sejarah:
+    'RW 06 terbentuk seiring pertumbuhan permukiman di Kelurahan Kota Baru, Kecamatan Bekasi Barat. Dari lingkungan perumahan yang dikelola secara swadaya, warga secara bertahap membangun struktur pengurus RT dan RW, mengembangkan kegiatan sosial, keamanan lingkungan (siskamling), posyandu, serta pengelolaan iuran lingkungan. Kini RW 06 menaungi sejumlah RT dengan tata kelola yang terus dibenahi menuju pelayanan yang lebih modern dan transparan.',
+  kontak: {
+    alamat: 'Balai RW 06, Kelurahan Kota Baru, Kecamatan Bekasi Barat, Kota Bekasi',
+    telepon: '0812-0000-0000',
+    email: 'rw06@kotabaru.id'
+  }
+};
 
 const BULAN_SINGKAT = [
   'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
@@ -160,5 +197,79 @@ export const load: PageServerLoad = async ({ locals }) => {
       ...komponenTanggal(a.tanggalMulai)
     }));
 
-  return { tahunIni, statistik, pengumumanTerbaru, agenda };
+  // 6. Konfigurasi landing + galeri + pengurus (bisa diubah lewat /pengaturan).
+  const [landingRow] = await db
+    .select()
+    .from(pengaturanLanding)
+    .where(eq(pengaturanLanding.id, 1))
+    .limit(1);
+
+  const pengaturan: PengaturanLandingPublik = {
+    heroJudul: landingRow?.heroJudul?.trim() || DEFAULT_LANDING.heroJudul,
+    heroSubjudul: landingRow?.heroSubjudul?.trim() || DEFAULT_LANDING.heroSubjudul,
+    heroBackground: landingRow?.heroBackground?.trim() || DEFAULT_LANDING.heroBackground,
+    sambutan: landingRow?.sambutan?.trim() || DEFAULT_LANDING.sambutan,
+    namaKetua: landingRow?.namaKetua?.trim() || DEFAULT_LANDING.namaKetua,
+    fotoKetua: landingRow?.fotoKetua || null,
+    visi: landingRow?.visi?.trim() || DEFAULT_LANDING.visi,
+    misi: landingRow?.misi?.trim()
+      ? landingRow.misi
+          .split('\n')
+          .map((baris) => baris.trim())
+          .filter(Boolean)
+      : DEFAULT_LANDING.misi,
+    sejarah: landingRow?.sejarah?.trim() || DEFAULT_LANDING.sejarah,
+    kontak: {
+      alamat: landingRow?.alamat?.trim() || DEFAULT_LANDING.kontak.alamat,
+      telepon: landingRow?.telepon?.trim() || DEFAULT_LANDING.kontak.telepon,
+      email: landingRow?.email?.trim() || DEFAULT_LANDING.kontak.email
+    }
+  };
+
+  const galeriRows = await db
+    .select({
+      id: galeri.id,
+      judul: galeri.judul,
+      keterangan: galeri.keterangan,
+      fotoUrl: galeri.fotoUrl
+    })
+    .from(galeri)
+    .where(eq(galeri.aktif, true))
+    .orderBy(asc(galeri.urutan), asc(galeri.id));
+
+  const galeriPublik: GaleriPublik[] = galeriRows;
+
+  // Pengurus RW (rtId NULL) lebih dulu, lalu pengurus RT per nomor RT.
+  const pengurusRows = await db
+    .select({
+      id: pengurus.id,
+      jabatan: pengurus.jabatan,
+      nama: pengurus.nama,
+      fotoUrl: pengurus.fotoUrl,
+      urutan: pengurus.urutan,
+      nomorRt: rt.nomor
+    })
+    .from(pengurus)
+    .leftJoin(rt, eq(pengurus.rtId, rt.id))
+    .where(eq(pengurus.aktif, true))
+    .orderBy(asc(pengurus.rtId), asc(pengurus.urutan), asc(pengurus.id));
+
+  const pengurusPublik: PengurusPublik[] = pengurusRows.map((p) => ({
+    id: p.id,
+    jabatan: p.jabatan,
+    nama: p.nama,
+    fotoUrl: p.fotoUrl,
+    nomorRt: p.nomorRt,
+    urutan: p.urutan
+  }));
+
+  return {
+    tahunIni,
+    statistik,
+    pengumumanTerbaru,
+    agenda,
+    pengaturan,
+    galeri: galeriPublik,
+    pengurus: pengurusPublik
+  };
 };

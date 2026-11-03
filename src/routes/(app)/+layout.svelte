@@ -4,63 +4,25 @@
   import { browser } from '$app/environment';
   import { goto } from '$app/navigation';
   import { signOut } from '$lib/auth-client';
-  import UserPlus from '@lucide/svelte/icons/user-plus';
-  import Plus from '@lucide/svelte/icons/plus';
   import Sidebar from '$lib/components/Sidebar.svelte';
   import BottomNav from '$lib/components/BottomNav.svelte';
   import ProfileBlock from '$lib/components/ProfileBlock.svelte';
   import Sheet from '$lib/components/Sheet.svelte';
-  import Button from '$lib/components/Button.svelte';
-  import { BOTTOM_NAV_ITEMS, MORE_NAV_ITEMS, isNavActive } from '$lib/nav';
+  import { isNavActive, navUntuk } from '$lib/nav';
   import { formatTanggalPanjang, inisial } from '$lib/format';
+  import type { LayoutData } from './$types';
 
   let { data, children } = $props<{
-    data: { user?: { name?: string; email?: string; role?: string } };
+    data: LayoutData;
     children: import('svelte').Snippet;
   }>();
 
   let moreOpen = $state(false);
   let todayStr = $state('');
 
-  /**
-   * Rute form di dalam route group `(app)`.
-   *
-   * Di seluruh rute ini halaman sudah menampilkan primary submit-nya sendiri
-   * (mis. "Simpan", "Terbitkan", "Generate tagihan"). Kalau header tetap
-   * memuat "Catat kas", satu layar jadi punya dua primary — aksen navy itu
-   * cadangan untuk aksi terminal yang tunggal.
-   *
-   * Daftar ini satu-satunya sumber kebenaran; setiap rute form baru cukup
-   * ditambah di sini, tanpa menyentuh markup. `[id]` berarti satu segmen
-   * dinamis apa pun. Rute list (dashboard, warga, kas, iuran, pengumuman)
-   * sengaja tidak ada: primary di header itu milik mereka.
-   */
-  const FORM_ROUTES: readonly string[] = [
-    '/kas/tambah',
-    '/kas/kategori',
-    '/warga/tambah',
-    '/warga/impor',
-    '/warga/[id]/edit',
-    '/surat/[id]',
-    '/iuran/generate',
-    '/iuran/jenis',
-    '/iuran/[id]/bayar',
-    '/pengumuman/tambah',
-    '/pengumuman/[id]/edit'
-  ];
-
-  /** Cocokkan pathname ke `FORM_ROUTES` per segmen, bukan `startsWith` polos. */
-  function isFormRoute(pathname: string): boolean {
-    const segments = pathname.split('/');
-    return FORM_ROUTES.some((route) => {
-      const pattern = route.split('/');
-      return pattern.length === segments.length && pattern.every((seg, i) => seg.startsWith('[') || seg === segments[i]);
-    });
-  }
-
-  // Di route form, aksi header disembunyikan sepenuhnya supaya submit halaman
-  // jadi satu-satunya primary. Navigasi tetap tersedia lewat sidebar & nav.
-  const tampilkanAksiHeader = $derived(!isFormRoute(page.url.pathname));
+  // Menu mengikuti izin dari server: modul yang tidak boleh dibaca tidak
+  // ditampilkan sama sekali, bukan cuma dinonaktifkan.
+  const nav = $derived(navUntuk(data.izin));
 
   // Dihitung setelah mount supaya format tanggal server dan browser tidak
   // pernah beda (mencegah hydration mismatch).
@@ -86,7 +48,7 @@
 </script>
 
 <div class="app-shell">
-  <Sidebar user={data.user} onLogout={handleLogout} />
+  <Sidebar user={data.user} izin={data.izin} onLogout={handleLogout} />
 
   <div class="app-main">
     <header class="app-header">
@@ -97,13 +59,6 @@
             <p class="header-date">{todayStr}</p>
           {/if}
         </div>
-
-        {#if tampilkanAksiHeader}
-          <div class="header-actions">
-            <Button href="/warga/tambah" variant="secondary" icon={UserPlus}>Tambah warga</Button>
-            <Button href="/kas/tambah" variant="primary" icon={Plus}>Catat kas</Button>
-          </div>
-        {/if}
 
         <!-- Di mobile, avatar adalah pembuka profil + menu Lainnya. -->
         <button
@@ -126,9 +81,9 @@
 
   <div class="app-dock">
     <BottomNav
-      items={BOTTOM_NAV_ITEMS}
+      items={nav.bottom}
       panelOpen={moreOpen}
-      panelActivePaths={MORE_NAV_ITEMS.map((item) => item.href)}
+      panelActivePaths={nav.more.map((item) => item.href)}
       panelId="lainnya-sheet"
       onOpenPanel={() => (moreOpen = true)}
     />
@@ -142,7 +97,7 @@
   onClose={() => (moreOpen = false)}
 >
   <nav class="sheet-links" aria-label="Menu lainnya">
-    {#each MORE_NAV_ITEMS as item}
+    {#each nav.more as item}
       {@const Icon = item.icon}
       <a
         href={item.href}
@@ -215,11 +170,6 @@
     color: var(--color-text-muted);
   }
 
-  .header-actions {
-    display: none;
-    gap: var(--space-2);
-    flex-shrink: 0;
-  }
 
   .header-avatar {
     display: inline-flex;
@@ -278,7 +228,6 @@
   @media (min-width: 1024px) {
     .app-content { padding: var(--space-6) var(--space-8) var(--space-12); }
     .app-header-inner { padding: var(--space-2) var(--space-8); }
-    .header-actions { display: flex; }
     .header-avatar { display: none; }
   }
 

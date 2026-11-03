@@ -8,11 +8,17 @@ Dibuat otomatis lewat `npm run db:seed`.
 
 | Role | Email | Kata Sandi | Deskripsi |
 |---|---|---|---|
-| `admin_rw` | `admin@rw.id` | `admin123` | Akses penuh ke seluruh modul sistem |
+| `pengurus_rw` | `admin@rw.id` | `admin123` | Pengurus RW: akses penuh ke seluruh modul, termasuk Pengaturan dan Kas RW |
+| `pengurus_rt` | `pengurus@rw.id` | `pengurus123` | Pengurus RT 01: kelola data & Kas RT wilayahnya, Kas RW hanya baca |
+| `warga` | `warga@rw.id` | `warga123` | Portal warga (tertaut ke 1 KK) |
+
+> Akun `superadmin` belum dibuat oleh seed. Peran `superadmin` sudah tersedia di
+> kode dan akan dibahas terpisah.
 
 ## Akun Warga Baru
 
-Akun warga dibuat terpusat oleh Admin RW di halaman detail warga (`/warga/[id]`):
+Akun warga dibuat dari halaman detail KK (`/kk/[id]`) oleh Pengurus RW atau
+Pengurus RT pemilik wilayah:
 
 - **Format Email Default**: `<NIK>@warga.rw` (atau custom email jika diisi)
 - **Kata Sandi Default**: `warga123`
@@ -20,7 +26,11 @@ Akun warga dibuat terpusat oleh Admin RW di halaman detail warga (`/warga/[id]`)
 
 ## Role yang Tersedia
 
-1. `admin_rw`: Administrator sistem tingkat RW
-2. `pengurus_rt`: Pengurus tingkat RT
-3. `bendahara`: Pengelola keuangan dan kas
-4. `warga`: Akun warga untuk pengajuan surat dan informasi RW
+1. `superadmin`: peran sistem dengan izin penuh (belum dipakai di seed)
+2. `pengurus_rw`: akses penuh ke seluruh modul, termasuk Pengaturan
+3. `pengurus_rt`: mengelola seluruh modul untuk RT-nya, kecuali Pengaturan; Kas RW hanya baca dan tidak boleh mencatat setoran RT ke RW
+4. `warga`: akun warga untuk pengajuan surat, tagihan, dan informasi RW/RT
+
+Role di atas adalah bawaan (seed). Superadmin dapat menambah role baru dan
+mengubah izinnya lewat **Pengaturan → Peran & Izin** selama fitur tersebut
+sudah aktif. Izin disimpan di tabel `peran`, bukan di kode.

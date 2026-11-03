@@ -1,11 +1,15 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  let { data } = $props<{ data: PageData }>();
+  let { data, form } = $props<{ data: PageData; form?: { error?: string } }>();
 </script>
 
 <div class="page-container">
   <h1>Tambah transaksi</h1>
   <p class="subtitle">Catat pemasukan atau pengeluaran kas RW.</p>
+
+  {#if form?.error}
+    <p class="error-banner" role="alert">{form.error}</p>
+  {/if}
 
   <form method="POST" enctype="multipart/form-data" class="card form-card">
     <div class="field">
@@ -101,5 +105,15 @@
     gap: var(--space-2);
     padding-top: var(--space-4);
     border-top: 1px solid var(--color-border);
+  }
+
+  .error-banner {
+    margin: 0 0 var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid color-mix(in oklab, var(--color-danger) 35%, transparent);
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger);
+    font-size: var(--text-sm);
   }
 </style>

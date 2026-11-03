@@ -30,34 +30,33 @@
     AgendaPublik,
     KategoriPengumuman,
     PengumumanPublik,
+    PengurusPublik,
     StatistikPublik
   } from '$lib/types';
   import type { PageData } from './$types';
 
   let { data } = $props<{ data: PageData }>();
 
-  // ─── Konten statis (profil RW) ──────────────────────────────────────────
-  // Sesuai batasan MVP: profil RW adalah konten statis, bukan CMS dinamis
-  // (lihat PROJECT.md — "CMS untuk Landing Page (konten statis cukup)").
-  const visi =
-    'Mewujudkan RW 06 sebagai lingkungan yang aman, bersih, rukun, dan mandiri melalui pelayanan administrasi yang transparan serta partisipasi aktif seluruh warga.';
+  // ─── Konten profil RW dari pengaturan ───────────────────────────────────
+  // Nilai default tetap ada di server ($lib/server), jadi halaman tidak pernah
+  // kosong walau pengurus belum mengisi apa pun.
+  const visi = $derived(data.pengaturan.visi);
+  const misi = $derived(data.pengaturan.misi);
+  const sejarah = $derived(data.pengaturan.sejarah);
+  const kontak = $derived(data.pengaturan.kontak);
 
-  const misi: string[] = [
-    'Menyelenggarakan administrasi kependudukan yang tertib, akurat, dan mudah diakses warga.',
-    'Mendorong transparansi dan akuntabilitas pengelolaan kas serta iuran lingkungan.',
-    'Meningkatkan keamanan, kebersihan, dan ketertiban lingkungan secara bergotong royong.',
-    'Memberdayakan pemuda, posyandu, dan kegiatan sosial-keagamaan warga.',
-    'Membangun komunikasi dan penyampaian informasi RW yang cepat dan merata.'
-  ];
+  /**
+   * Latar hero bisa berupa warna hex atau gambar unggahan. Nilai sudah
+   * divalidasi di server (hanya `#rrggbb` atau path `/uploads/landing/...`).
+   */
+  const heroStyle = $derived.by(() => {
+    const bg = data.pengaturan.heroBackground;
+    if (!bg) return '';
+    if (bg.startsWith('#')) return `background-color: ${bg};`;
+    return `background-image: linear-gradient(180deg, rgba(9, 20, 38, 0.72), rgba(9, 20, 38, 0.82)), url(${JSON.stringify(bg)}); background-size: cover; background-position: center;`;
+  });
 
-  const sejarah =
-    'RW 06 terbentuk seiring pertumbuhan permukiman di Kelurahan Kota Baru, Kecamatan Bekasi Barat. Dari lingkungan perumahan yang dikelola secara swadaya, warga secara bertahap membangun struktur pengurus RT dan RW, mengembangkan kegiatan sosial, keamanan lingkungan (siskamling), posyandu, serta pengelolaan iuran lingkungan. Kini RW 06 menaungi sejumlah RT dengan tata kelola yang terus dibenahi menuju pelayanan yang lebih modern dan transparan.';
-
-  const kontak = {
-    alamat: 'Balai RW 06, Kelurahan Kota Baru, Kecamatan Bekasi Barat, Kota Bekasi',
-    telepon: '0812-0000-0000',
-    email: 'rw06@kotabaru.id'
-  };
+  const galeri = $derived(data.galeri);
 
   // ─── Layanan cepat (hero → tindakan nyata) ───────────────────────────────
   // Semua menuju area terautentikasi; pengunjung anonim diarahkan ke /login.
@@ -76,22 +75,40 @@
   ];
 
   // ─── SOTK / bagan pengurus ──────────────────────────────────────────────
-  // Nama pengurus memakai penanda placeholder yang jelas (bukan data warga
-  // fiktif) supaya tidak disalahartikan sebagai data asli.
-  type Pengurus = { jabatan: string; nama: string };
+  // Sumber data: tabel `pengurus` (dikelola di /pengaturan/pengurus).
+  // Cast eksplisit karena tipe `PageData` hasil generik `PageServerLoad` di
+  // SvelteKit melebar ke `any` (lihat catatan di +page.server.ts).
+  const daftarPengurus = $derived(data.pengurus as PengurusPublik[]);
+  const pengurusRw = $derived(daftarPengurus.filter((p) => p.nomorRt === null));
+  const pengurusRt = $derived(
+    daftarPengurus
+      .filter((p) => p.nomorRt !== null)
+      .sort((a, b) => (a.nomorRt ?? 0) - (b.nomorRt ?? 0))
+  );
 
-  const pimpinanInti: Pengurus[] = [
-    { jabatan: 'Sekretaris', nama: 'Nama Sekretaris' },
-    { jabatan: 'Bendahara', nama: 'Nama Bendahara' }
-  ];
+  const ketuaRw = $derived(pengurusRw.find((p) => /ketua/i.test(p.jabatan)) ?? pengurusRw[0] ?? null);
+  const pimpinanInti = $derived(pengurusRw.filter((p) => p.id !== ketuaRw?.id));
+  const seksiBidang = $derived(pimpinanInti);
 
-  const seksiBidang: (Pengurus & { icon: Component<any> })[] = [
-    { jabatan: 'Seksi Keamanan', nama: 'Nama Pengurus', icon: ShieldCheck },
-    { jabatan: 'Seksi Kebersihan & Lingkungan', nama: 'Nama Pengurus', icon: Leaf },
-    { jabatan: 'Seksi Sosial & Kemasyarakatan', nama: 'Nama Pengurus', icon: Handshake },
-    { jabatan: 'Seksi Pemuda & Olahraga', nama: 'Nama Pengurus', icon: Sparkles },
-    { jabatan: 'Seksi Keagamaan', nama: 'Nama Pengurus', icon: HeartPulse }
-  ];
+  /** Ikon dekoratif per seksi; dicocokkan dari kata kunci jabatan. */
+  function ikonSeksi(jabatan: string): Component<any> {
+    const j = jabatan.toLowerCase();
+    if (j.includes('keamanan')) return ShieldCheck;
+    if (j.includes('kebersihan') || j.includes('lingkungan')) return Leaf;
+    if (j.includes('sosial') || j.includes('kemasyarakatan')) return Handshake;
+    if (j.includes('pemuda') || j.includes('olahraga')) return Sparkles;
+    if (j.includes('keagamaan')) return HeartPulse;
+    return ListChecks;
+  }
+
+  function inisial(nama: string): string {
+    return nama
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((bagian) => bagian[0]?.toUpperCase() ?? '')
+      .join('');
+  }
 
   // ─── Prestasi lingkungan ────────────────────────────────────────────────
   type Prestasi = {
@@ -151,13 +168,14 @@
     { label: 'Lansia (65+)', value: stat.usia.lansia, color: 'var(--color-warning)' }
   ]);
 
-  const navLinks = [
+  const navLinks = $derived([
     { href: '#profil', label: 'Profil' },
     { href: '#pengumuman', label: 'Pengumuman' },
     { href: '#statistik', label: 'Statistik' },
+    ...(galeri.length > 0 ? [{ href: '#galeri', label: 'Galeri' }] : []),
     { href: '#prestasi', label: 'Prestasi' },
     { href: '#struktur', label: 'Struktur' }
-  ];
+  ]);
 
   // ─── Label & warna badge kategori pengumuman ────────────────────────────
   // Satu sumber pemetaan, sama dengan halaman dashboard/pengumuman.
@@ -239,19 +257,16 @@
 
   <main id="top">
     <!-- ─── Hero (Portal Resmi) ───────────────────────────────────────── -->
-    <section class="hero" aria-labelledby="hero-title">
+    <section class="hero" aria-labelledby="hero-title" style={heroStyle}>
       <div class="container hero-grid">
         <div class="hero-copy">
           <p class="eyebrow hero-eyebrow">Portal Informasi Warga</p>
-          <h1 id="hero-title">RW 06 Kota Baru</h1>
+          <h1 id="hero-title">{data.pengaturan.heroJudul}</h1>
           <p class="hero-loc">
             <MapPin size={16} />
-            <span>Kelurahan Kota Baru · Kec. Bekasi Barat · Kota Bekasi</span>
+            <span>{kontak.alamat}</span>
           </p>
-          <p class="hero-lead">
-            Warga terhubung, lingkungan tertata. Pantau pengumuman, layanan surat, dan data
-            kependudukan RW 06 dalam satu tempat.
-          </p>
+          <p class="hero-lead">{data.pengaturan.heroSubjudul}</p>
           <div class="hero-actions">
             <a class="btn btn-onlight btn-lg" href="#pengumuman">
               <span>Lihat pengumuman</span>
@@ -414,23 +429,40 @@
 
         <!-- Sambutan besar: potret + kutipan utama (gaya "wajah lingkungan") -->
         <div class="sambutan">
-          <div class="ph portrait" aria-hidden="true">
-            <span class="ph-label">
-              <ImageIcon size={14} />
-              <span>Foto Ketua RW</span>
-            </span>
-          </div>
+          {#if data.pengaturan.fotoKetua}
+            <img
+              class="portrait portrait-foto"
+              src={data.pengaturan.fotoKetua}
+              alt={`Foto ${data.pengaturan.namaKetua}`}
+              loading="lazy"
+            />
+          {:else}
+            <div class="ph portrait" aria-hidden="true">
+              <span class="ph-label">
+                <ImageIcon size={14} />
+                <span>Foto Ketua RW</span>
+              </span>
+            </div>
+          {/if}
           <div class="sambutan-copy">
             <p class="eyebrow">Sambutan</p>
             <blockquote>
-              <p>
-                “Selamat datang di portal RW 06. Portal ini kami hadirkan agar informasi lingkungan
-                mudah diakses warga — dari pengumuman, layanan surat, sampai data kependudukan.”
-              </p>
+              <p>“{data.pengaturan.sambutan}”</p>
               <footer class="who">
-                <span class="avatar avatar-sm" aria-hidden="true">KR</span>
+                {#if data.pengaturan.fotoKetua}
+                  <img
+                    class="avatar avatar-sm avatar-foto"
+                    src={data.pengaturan.fotoKetua}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                {:else}
+                  <span class="avatar avatar-sm" aria-hidden="true">
+                    {inisial(data.pengaturan.namaKetua)}
+                  </span>
+                {/if}
                 <span>
-                  <b>Nama Ketua RW</b>
+                  <b>{data.pengaturan.namaKetua}</b>
                   <small>Ketua RW 06 · Kota Baru</small>
                 </span>
               </footer>
@@ -492,6 +524,31 @@
       </div>
     </section>
 
+    <!-- ─── Galeri ────────────────────────────────────────────────────── -->
+    {#if galeri.length > 0}
+      <section class="section" id="galeri" aria-labelledby="galeri-title">
+        <div class="container">
+          <header class="section-head">
+            <p class="eyebrow">Dokumentasi Lingkungan</p>
+            <h2 id="galeri-title">Galeri RW 06</h2>
+            <p class="section-sub">Kegiatan, fasilitas, dan momen kebersamaan warga.</p>
+          </header>
+
+          <div class="galeri-grid">
+            {#each galeri as foto (foto.id)}
+              <figure class="galeri-item">
+                <img src={foto.fotoUrl} alt={foto.judul} loading="lazy" />
+                <figcaption>
+                  <strong>{foto.judul}</strong>
+                  {#if foto.keterangan}<span>{foto.keterangan}</span>{/if}
+                </figcaption>
+              </figure>
+            {/each}
+          </div>
+        </div>
+      </section>
+    {/if}
+
     <!-- ─── Struktur Organisasi ───────────────────────────────────────── -->
     <section class="section" id="struktur" aria-labelledby="struktur-title">
       <div class="container">
@@ -505,38 +562,63 @@
 
         <div class="org">
           <div class="node node-lead">
+            {#if ketuaRw?.fotoUrl}
+              <img class="node-foto node-foto-lead" src={ketuaRw.fotoUrl} alt="" loading="lazy" />
+            {/if}
             <span class="node-role">Ketua RW 06</span>
-            <span class="node-name">Nama Ketua RW</span>
+            <span class="node-name">{ketuaRw?.nama ?? data.pengaturan.namaKetua}</span>
           </div>
 
-          <p class="tier-label">Pimpinan Inti</p>
-          <div class="branch">
-            {#each pimpinanInti as p (p.jabatan)}
-              <div class="node">
-                <span class="node-role">{p.jabatan}</span>
-                <span class="node-name">{p.nama}</span>
-              </div>
-            {/each}
-          </div>
+          {#if pimpinanInti.length > 0}
+            <p class="tier-label">Pimpinan Inti</p>
+            <div class="branch">
+              {#each pimpinanInti as p (p.id)}
+                <div class="node">
+                  {#if p.fotoUrl}
+                    <img class="node-foto" src={p.fotoUrl} alt="" loading="lazy" />
+                  {/if}
+                  <span class="node-role">{p.jabatan}</span>
+                  <span class="node-name">{p.nama}</span>
+                </div>
+              {/each}
+            </div>
+          {/if}
 
-          <p class="tier-label">Seksi Bidang</p>
-          <div class="branch">
-            {#each seksiBidang as s (s.jabatan)}
-              {@const SeksiIcon = s.icon}
-              <div class="node node-seksi">
-                <span class="node-icon"><SeksiIcon size={16} /></span>
-                <span class="node-role">{s.jabatan}</span>
-              </div>
-            {/each}
-          </div>
+          {#if seksiBidang.length > 0}
+            <p class="tier-label">Seksi Bidang</p>
+            <div class="branch">
+              {#each seksiBidang as s (s.id)}
+                {@const SeksiIcon = ikonSeksi(s.jabatan)}
+                <div class="node node-seksi">
+                  {#if s.fotoUrl}
+                    <img class="node-foto" src={s.fotoUrl} alt="" loading="lazy" />
+                  {:else}
+                    <span class="node-icon"><SeksiIcon size={16} /></span>
+                  {/if}
+                  <span class="node-role">{s.jabatan}</span>
+                  <span class="node-name">{s.nama}</span>
+                </div>
+              {/each}
+            </div>
+          {/if}
 
           <p class="tier-label">Kewilayahan</p>
           <div class="branch">
-            {#if stat.perRt.length > 0}
+            {#if pengurusRt.length > 0}
+              {#each pengurusRt as p (p.id)}
+                <div class="node node-rt">
+                  {#if p.fotoUrl}
+                    <img class="node-foto" src={p.fotoUrl} alt="" loading="lazy" />
+                  {/if}
+                  <span class="node-role">{p.jabatan} {String(p.nomorRt).padStart(2, '0')}</span>
+                  <span class="node-name">{p.nama}</span>
+                </div>
+              {/each}
+            {:else if stat.perRt.length > 0}
               {#each stat.perRt as r (r.nomor)}
                 <div class="node node-rt">
                   <span class="node-role">Ketua RT {String(r.nomor).padStart(2, '0')}</span>
-                  <span class="node-name">Nama Ketua RT</span>
+                  <span class="node-name">Belum diisi</span>
                 </div>
               {/each}
             {:else}
@@ -1240,6 +1322,20 @@
     max-width: 26rem;
   }
 
+  .portrait-foto {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    max-width: 26rem;
+    object-fit: cover;
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-muted);
+  }
+
+  .avatar-foto {
+    object-fit: cover;
+  }
+
   .sambutan blockquote {
     margin: 0;
   }
@@ -1453,6 +1549,58 @@
     padding-top: var(--space-2);
   }
 
+  /* ─── Galeri ─────────────────────────────────────────────────────────── */
+  .galeri-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 48rem) {
+    .galeri-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .galeri-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .galeri-item {
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  .galeri-item img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    background: var(--color-surface-muted);
+  }
+
+  .galeri-item figcaption {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-3);
+  }
+
+  .galeri-item strong {
+    font-size: var(--text-sm);
+    font-weight: 700;
+  }
+
+  .galeri-item span {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+  }
+
   /* ─── SOTK / bagan pengurus ──────────────────────────────────────────── */
   .org {
     display: flex;
@@ -1503,6 +1651,21 @@
 
   .node-seksi {
     min-width: 9.5rem;
+  }
+
+  .node-foto {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--color-border);
+  }
+
+  .node-foto-lead {
+    width: 3.25rem;
+    height: 3.25rem;
+    border: 2px solid color-mix(in oklab, #fff 55%, transparent);
   }
 
   .node-icon {
