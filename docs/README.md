@@ -18,14 +18,17 @@ docs/
 ├── laporan/
 │   ├── README.md                 indeks
 │   ├── laporan.md                ⭐ OTORITAS isi laporan
+│   ├── bab4-plan.md              rencana final Bab IV (struktur, PIC, jadwal)
+│   ├── handover-kit.md           bahan Bab IV dari repo (route, entitas, FR, uji)
+│   ├── strategi-dokumentasi.md   analisis commit/PR + framing I&I & Kanban
 │   ├── bab3-5-mekanisme.md       status porting §3.5 + flowchart
-│   ├── bab4-proses-perancangan.md  Bab IV §4.1 (siap port)
+│   ├── bab4-proses-perancangan.md  draft §4.1 lama (usang)
 │   ├── diagram-prompts.md        prompt Visual Paradigm AI
 │   ├── afifscope.md              scope kerja Afif
 │   ├── pembagian-tugas.md        pembagian tugas semua orang
+│   ├── arsip/                    arsip laporan (laporanRevisi, planAfif, pembagian)
 │   ├── referensi/                analisis-panduan · bibliography · daftar-pustaka · contohlaporan
-│   └── (arsip pindah ke docs/arsip/)
-├── arsip/                        dokumen usang (laporanRevisi, planAfif, pembagian, List feature fix)
+├── arsip/                        arsip teknis non-laporan (List feature fix.*)
 └── design-preview/               pratinjau desain landing page (Opsi A/B/C)
 ```
 
@@ -37,11 +40,11 @@ docs/
 | Siapa mengerjakan apa? | `laporan/pembagian-tugas.md` |
 | Aturan Kanban (kolom, WIP, DoR/DoD)? | `kanban/workflow.md` |
 | Isi bab laporan? | `laporan/laporan.md` |
-| Bab IV sudah ditulis? | `laporan/bab4-proses-perancangan.md` |
+| Bab IV sudah ditulis? | `laporan/bab4-plan.md` (rencana) + `laporan/handover-kit.md` (bahan) |
 | Prompt bikin diagram? | `laporan/diagram-prompts.md` |
 | Inkonsistensi yang ditemukan? | `kanban/temuan-inkonsistensi.md` |
 | Daftar pustaka? | `laporan/referensi/bibliography.md` |
-| Dokumen lama yang sudah tidak dipakai? | `arsip/` |
+| Dokumen lama yang sudah tidak dipakai? | `laporan/arsip/` (laporan) · `arsip/` (teknis) |
 
 ## Dokumen di root repo (di luar `docs/`)
 

@@ -111,9 +111,9 @@ Papan **sudah dibuat dan terisi** (bukan lagi panduan manual).
 | Project ID | `PVT_kwHOBS9-Ls4Bk7EG` |
 | Field Status | `PVTSSF_lAHOBS9-Ls4Bk7EGzhjp0hg` |
 | Opsi Status | `Todo`=`b3059e5f` · `In Progress`=`df686dea` · `Done`=`cd8eab33` · `Won't`=`31d91e7d` |
-| Total item | **59** (6 Epic + 38 kartu + 6 grey-out + 9 kartu iterasi 2) |
+| Total item | **68** (6 Epic + 43 kartu fungsional + 6 grey-out + 9 kartu iterasi 2 + 4 kartu iterasi 3); 5 kartu fungsional berasal dari audit commit lama |
 
-Distribusi aktual: **Done 39 · In Progress 5 · Todo 9 · Won't 6** (per 28 Okt 2026).
+Distribusi aktual: **Done 61 · In Progress 0 · Todo 4 · Won't 3** (per 3 Nov 2026).
 
 > Verifikasi 28 Okt 2026 menemukan papan sudah bergerak sejak catatan 19 Okt: **SR-03b #48** dan
 > **SR-BUG-01 #50** pindah `Todo` → `In Progress` (Track Surat). Karena itu angka awal sebelum
@@ -145,10 +145,13 @@ Catatan teknis:
 | EPIC-0 (Fondasi) | FND-01 #17 · FND-02 #16 · FND-03 #14 · FND-04 #15 · FND-05 #18 · FND-06 #21 |
 | EPIC-1 (Publik) | LP-01 #20 · LP-02 #19 |
 | EPIC-2 (Informasi) | EV-A #25 · EV-01 #22 · EV-02 #23 · EV-03 #24 · EV-BUG-01 #28 |
-| EPIC-3 (Kependudukan) | KP-A #26 · KP-B #27 · KP-C #29 · KP-D #30 · KP-02 #31 · KP-01 #33 · KP-03 #32 · KP-04 #34 · KP-05 #35 |
+| EPIC-3 (Keluarga/KK) | KP-A #26 · KP-B #27 · KP-C #29 · KP-D #30 · KP-02 #31 · KP-01 #33 · KP-03 #32 · KP-04 #34 · KP-05 #35 |
 | EPIC-4 (Keuangan) | KU-A #39 · KU-B #36 · KU-C #38 · KU-04 #37 · KU-D #41 · KU-02 #42 · KU-01 #43 · KU-03 #40 |
 | EPIC-5 (Surat) | SR-A #46 · SR-B #44 · SR-C #45 · SR-D #52 · SR-E #51 · SR-01 #49 · SR-03b #48 · SR-BUG-01 #50 |
 | Grey-out | W-01 #54 · W-02 #55 · W-03 #53 · W-04 #58 · W-05 #57 · W-06 #56 |
+| Iterasi 2 | KU-01b #65 · KU-02b #66 · FND-07 #67 · LP-03 #68 · KP-06 #69 · SR-02b #70 · KP-07 #73 · T0-01 #71 · T0-02 #72 |
+| Iterasi 3 | FND-08 #91 · FND-09 #92 · KP-08 #93 · KU-05 #94 |
+| Jejak lama | FND-10 #95 · FND-11 #96 · KU-06 #97 · SR-06 #98 · EV-04 #99 |
 
 Epic issue: EPIC-0 **#8** · EPIC-1 **#13** · EPIC-2 **#9** · EPIC-3 **#11** · EPIC-4 **#12** · EPIC-5 **#10**
 
@@ -242,6 +245,34 @@ Catatan:
   (kas RT mandiri, rekap iuran, ekspor CSV/Excel). Ini dicatat sebagai temuan, bukan diubah
   sepihak karena status kartu track lain dipegang PIC-nya.
 
+**3 Nov 2026** — rekonsiliasi besar setelah refactor KK-first dan iterasi fitur 2–3 Nov.
+Papan diselaraskan dengan kondisi kode `main` (merge PR #90, commit `8990720`).
+
+Perubahan yang dilakukan:
+
+| Kelompok | Aksi | Kartu / Issue |
+|---|---|---|
+| Terminologi | Rename `Kependudukan` → `Keluarga (KK)` karena alur kini KK-first (`/warga` → `/kk`) | EPIC-3 #11, KP-A #26, KP-B #27, KP-C #29, KP-02 #31, KP-01 #33, KP-03 #32, KP-04 #34, KP-05 #35 |
+| EPIC-5 tuntas | `Done` + issue ditutup | SR-01 #49 (5 jenis surat), SR-03b #48 (TTD elektronik, PR #90), SR-BUG-01 #50 (otorisasi aksi), EPIC-5 #10 |
+| EPIC-4 tuntas | `Done` + EPIC ditutup; ekspor CSV/Excel Kas RW, Kas RT, dan Rekap Iuran tersedia di `/kas` | KU-01 #43, KU-02 #42, KU-03 #40, EPIC-4 #12 |
+| Naik dari Won't | Masuk scope dan selesai | W-02 #55 (pengaturan landing + galeri), W-06 #56 (pengurus/RT/peran), W-03 #53 (Midtrans sandbox) |
+| Masih Won't | Tidak dikerjakan | W-01 #54 (absensi event), W-04 #58 (CCTV), W-05 #57 (inventaris) |
+| Kartu baru | Iterasi 3, semuanya `Done` | FND-08 #91 (RBAC dinamis + peran baru), FND-09 #92 (notifikasi + klaim akun), KP-08 #93 (refactor KK-first), KU-05 #94 (iuran 2 tingkat + Midtrans) |
+| Keputusan & data lama | `Todo` → `Done`; kartu ditutup, asumsi kerja tetap dicatat di `konfirmasi-stakeholder.md` | T0-01 #71 (D1–D5), T0-02 #72 (impor data lama) |
+| Jejak lama (audit commit) | Kartu baru `Done` untuk pekerjaan lama yang belum pernah masuk papan; satu di antaranya sudah digantikan refactor | FND-10 #95 (bootstrap DB + Docker Compose), FND-11 #96 (optimasi loading), KU-06 #97 (halaman paket iuran, UI dihapus `d18065c`), SR-06 #98 (generator PDF surat), EV-04 #99 (pengumuman berkala + galeri) |
+
+**Aturan revisi:** kartu yang sudah `Done` **tidak dibuka ulang**. Kalau ada perubahan
+kebutuhan/angka dari mitra, buat **kartu baru** (kode `R-xx` atau lanjutan `T0-…`) yang
+merujuk kartu asalnya. Tujuannya: riwayat papan tetap jujur dan jumlah kartu bertambah
+sesuai pekerjaan nyata.
+
+Sisa `Todo` (4 item): EPIC-2 #9, EV-02 #23 (lampiran PDF/dokumen; foto sudah ada),
+EV-03 #24 (filter & cari pengumuman), EV-BUG-01 #28 (masih hard-delete).
+
+Sisa `Won't` (3 item): W-01 #54, W-04 #58, W-05 #57.
+
+Distribusi akhir: **Done 61 · In Progress 0 · Todo 4 · Won't 3** (total 68 item).
+
 ---
 
 ## 6. Referensi
@@ -249,4 +280,4 @@ Catatan:
 - `docs/kanban/workflow.md` — aturan operasional
 - `docs/kanban/backlog.md` — daftar kartu & bukti
 - `docs/kanban/temuan-inkonsistensi.md` — temuan penyelarasan
-- `docs/arsip/laporanRevisi.md` — sisipan untuk `laporan.md`
+- `docs/laporan/arsip/laporanRevisi.md` — sisipan untuk `laporan.md`

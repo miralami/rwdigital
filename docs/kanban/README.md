@@ -12,7 +12,7 @@ Titik masuk penerapan Kanban untuk proyek SI-RW.
 | `permintaan-stakeholder.md` | Ledger permintaan customer/mitra & dosen per iterasi + peta ke issue (label `req-stakeholder`, `iterasi-2`) |
 | `temuan-inkonsistensi.md` | Temuan F1–F7 & arah penyelesaian |
 
-Revisi laporan (untuk dipindahkan ke `laporan.md`): `docs/arsip/laporanRevisi.md`.
+Revisi laporan (untuk dipindahkan ke `laporan.md`): `docs/laporan/arsip/laporanRevisi.md`.
 
 ## Epic ↔ PIC
 
@@ -21,8 +21,8 @@ Revisi laporan (untuk dipindahkan ke `laporan.md`): `docs/arsip/laporanRevisi.md
 | `EPIC-0` | Fondasi & Infrastruktur | Afif | `miralami` |
 | `EPIC-1` | Publik, Landing Page & Profil RW | Afif | `miralami` |
 | `EPIC-2` | Informasi, Event & Humas | Alizha | `alizha13` |
-| `EPIC-3` | Kependudukan & Dashboard Internal | Josua | `josuasahat` |
-| `EPIC-4` | Keuangan & Kas RT | Safira | `shaffiraindanazulfa` |
+| `EPIC-3` | Keluarga (KK) & Dashboard Internal | Josua | `josuasahat` |
+| `EPIC-4` | Keuangan, Kas RT & Iuran | Safira | `shaffiraindanazulfa` |
 | `EPIC-5` | Surat-Menyurat | Zidan | `elfarizidan` |
 
 > **Aturan assignee:** PIC = pemilik Epic untuk pekerjaan **upcoming** (`Todo`/`In Progress`/`Backlog`).
@@ -44,7 +44,7 @@ ada yang tertinggal, ditutup/dibuang. Konvensi judul kartu: `[T<layer>][moscow] 
 
 ## Urutan langkah
 
-1. ~~Review + setujui `docs/arsip/laporanRevisi.md`.~~ (menunggu persetujuan)
+1. ~~Review + setujui `docs/laporan/arsip/laporanRevisi.md`.~~ (menunggu persetujuan)
 2. Pindahkan potongan `[GANTI]`/`[SISIP]`/`[BARU]` ke `docs/laporan/laporan.md`.
 3. ~~Bangun GitHub Project + Issues.~~ ✅ Papan **Capstone - Gr30** sudah terisi (lihat `board.md` §5).
 4. Jalankan irama mingguan; isi metrik aliran di Bab IV.

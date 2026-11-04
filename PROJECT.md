@@ -10,18 +10,18 @@ Aplikasi digitalisasi administrasi tingkat RW (Rukun Warga), dikembangkan sebaga
 
 ## Prinsip Pengembangan
 
-Fitur dalam proyek ini ditetapkan berdasarkan **analisis regulasi resmi** (UU Desa 6/2014, Permendagri 18/2018) dan **evaluasi plausibility** untuk implementasi capstone, mengingat kondisi mitra yang memungkinkan untuk diwawancara. 
+Fitur dalam proyek ini ditetapkan berdasarkan **analisis regulasi resmi** (UU Desa 6/2014, Permendagri 18/2018) dan **evaluasi plausibility** untuk implementasi capstone. Scope awal disusun dari regulasi, lalu **disempurnakan secara bertahap melalui umpan balik pengurus RW 06** pada setiap iterasi pengembangan. 
 
 Idealnya, sebuah fitur memiliki validasi lewat:
 1. Deskripsi proses aktual mitra saat ini
 2. Kendala koncret yang dialami
 3. Dampak kendala terhadap pekerjaan pengurus atau warga
 
-Dalam ketiadaan wawancara, regulasi resmi menjadi dasar utama penentuan scope — dengan asumsi bahwa fitur yang diatur dalam tupoksi RW secara hukum adalah fitur yang paling plausible untuk dibutuhkan.
+Pada Iterasi 1, regulasi resmi menjadi dasar utama penentuan scope — dengan asumsi bahwa fitur yang diatur dalam tupoksi RW secara hukum adalah fitur yang paling plausible untuk dibutuhkan. **Iterasi 2 dan 3 kemudian menyempurnakan hasil Iterasi 1 berdasarkan revisi dan umpan balik mitra RW 06**, sehingga penambahan/perubahan fitur bersifat incremental, bukan penulisan ulang total.
 
 ## Status Fitur (Final — Berdasarkan Regulasi & Plausibility Analysis)
 
-> Feature set ini ditetapkan tanpa wawancara mitra (tidak memungkinkan), berdasarkan analisis regulasi resmi (UU Desa 6/2014, Permendagri 18/2018) dan plausibility untuk implementasi capstone.
+> Feature set ini dimulai dari analisis regulasi resmi (UU Desa 6/2014, Permendagri 18/2018), lalu **direvisi bertahap berdasarkan umpan balik pengurus RW 06** pada Iterasi 1–3. Kronologi lengkap ada di `docs/laporan/bab4-plan.md` §2 dan `docs/laporan/strategi-dokumentasi.md` §3.1.
 
 ### Core MVP & High Priority (Status Terkini: Selesai / Implemented)
 

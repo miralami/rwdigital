@@ -11,21 +11,29 @@ Bukti = path kode/route/skema yang bisa diverifikasi (atau `—` bila belum ada)
 
 ## Ringkasan
 
-| Epic | Nama | PIC | Done | In Progress | Backlog | Won't |
+| Epic | Nama | PIC | Done | In Progress | Todo | Won't |
 |---|---|---|---|---|---|---|
-| `EPIC-0` | Fondasi & Infrastruktur | Afif | 6 | 0 | 0 | 0 |
+| `EPIC-0` | Fondasi & Infrastruktur | Afif | 8 | 0 | 0 | 0 |
 | `EPIC-1` | Publik, Landing Page & Profil RW | Afif | 2 | 0 | 0 | 0 |
-| `EPIC-2` | Informasi, Event & Humas | Alizha | 2 | 0 | 3 | 1 |
-| `EPIC-3` | Kependudukan & Dashboard Internal | Josua | 9 | 0 | 0 | 0 |
-| `EPIC-4` | Keuangan & Kas RT | Safira | 5 | 2 | 1 | 1 |
-| `EPIC-5` | Surat-Menyurat | Zidan | 5 | 1 | 2 | 0 |
-| — | Grey-out lintas epic | — | — | — | — | 4 |
-| **Total** | | | **29** | **3** | **6** | **6** |
+| `EPIC-2` | Informasi, Event & Humas | Alizha | 3 | 0 | 3 | 0 |
+| `EPIC-3` | Keluarga (KK) & Dashboard Internal | Josua | 9 | 0 | 0 | 0 |
+| `EPIC-4` | Keuangan, Kas RT & Iuran | Safira | 9 | 0 | 0 | 0 |
+| `EPIC-5` | Surat-Menyurat | Zidan | 9 | 0 | 0 | 0 |
+| Iterasi 2 | Iuran, surat, landing, CI, scoping | — | 9 | 0 | 0 | 0 |
+| Iterasi 3 | RBAC, notifikasi, KK-first, iuran 2 tingkat | — | 4 | 0 | 0 | 0 |
+| — | Grey-out lintas epic | — | 3 | 0 | 0 | 3 |
+| **Total** | | | **61** | **0** | **4** | **3** |
 
-> Total kartu: **38** kartu fungsional + **6** grey-out = **44** item papan (+ 6 Epic = **50** item di board).
+> Total item papan: **68** (6 Epic + 43 kartu fungsional + 6 grey-out + 9 kartu iterasi 2 + 4 kartu iterasi 3).
+> Lima kartu fungsional berasal dari audit commit lama (lihat §Jejak Lama di bawah).
 
-> Angka `In Progress` = 3 dari limit papan 10 (**KU-02, KU-03, SR-01**). Pelanggaran WIP per orang
-> sudah direkonsiliasi — lihat `board.md` §3.
+> Status per **3 Nov 2026** setelah rekonsiliasi pasca-refactor KK-first. Tidak ada kartu `In Progress`;
+> sisa pekerjaan berupa 4 `Todo` (EPIC-2, EV-02, EV-03, EV-BUG-01) dan 3 `Won't`
+> (W-01, W-04, W-05). Lihat `board.md` §5.2.
+>
+> **Aturan revisi:** kartu `Done` tidak dibuka ulang. Perubahan kebutuhan dari mitra dicatat
+> sebagai **kartu baru** yang merujuk kartu asalnya (mis. `R-xx`), supaya riwayat papan tetap
+> jujur dan jumlah kartu bertambah sesuai pekerjaan nyata.
 
 ---
 
@@ -93,21 +101,25 @@ PIC: Alizha (`alizha13`)
 
 ---
 
-## EPIC-3 — Modul Kependudukan & Dashboard Internal
+## EPIC-3 — Modul Keluarga (KK) & Dashboard Internal
 
 PIC: Josua (`josuasahat`)
 
+> Sejak 3 Nov 2026 data kependudukan dikelola **keluarga-first** (KK → anggota), route `/warga`
+> dipindah ke `/kk`. Istilah kartu diselaraskan; kode kartu lama tetap dipakai.
+
 | Kode | Kartu | SF | MoSCoW | Status | Bukti |
 |---|---|---|---|---|---|
-| KP-A | *(back-fill)* CRUD warga + validasi NIK/No KK 16 digit + cegah duplikat | `SF-KP-01` | must | **Done** | `(app)/warga/tambah/`, `[id]/edit/` |
-| KP-B | *(back-fill)* Audit perubahan warga (riwayat, alasan, pelaku) | `SF-KP-02` | must | **Done** | tabel `riwayat_warga` |
-| KP-C | *(back-fill)* Nonaktifkan warga (tanggal + alasan) tanpa hapus permanen | `SF-KP-03` | must | **Done** | `warga.alasanNonaktif`, `tanggalNonaktif` |
+| KP-A | *(back-fill)* CRUD KK & anggota keluarga + validasi NIK/No KK 16 digit + cegah duplikat | `SF-KP-01` | must | **Done** | `(app)/kk/tambah/`, `[id]/edit/` |
+| KP-B | *(back-fill)* Audit perubahan data keluarga (riwayat, alasan, pelaku) | `SF-KP-02` | must | **Done** | tabel `riwayat_warga` |
+| KP-C | *(back-fill)* Nonaktifkan anggota keluarga (tanggal + alasan) tanpa hapus permanen | `SF-KP-03` | must | **Done** | `warga.alasanNonaktif`, `tanggalNonaktif` |
 | KP-D | *(back-fill)* Masking NIK & No. KK pada daftar | `SF-KP-05` | must | **Done** | `src/lib/format.ts` → `maskNik`, `maskNoKk` |
-| KP-02 | Impor massal data warga (CSV) + validasi per baris + pelaporan error | `SF-KP-06` | must | **Done** | `(app)/warga/impor/+page.server.ts` (parser + error list) |
+| KP-02 | Impor massal data KK & warga (CSV) + validasi per baris + pelaporan error | `SF-KP-06` | must | **Done** | `(app)/kk/impor/+page.server.ts` (parser + error list) |
 | KP-01 | Perhitungan demografis otomatis **sesuai spesifikasi**: Balita, Usia Sekolah, Produktif (15–64), Pensiun/Lansia (≥65), angka kelahiran baru | `SF-KP-07` | must | **Done** | `src/lib/server/usia.ts`; bucket sesuai + angka kelahiran — PR #61 (merge `8009f72`), issue #33 |
-| KP-03 | Dashboard pengurus internal: saldo kas total, total penduduk, grafik demografi | `SF-KS-04` + `SF-KP-07` | must | **Done** | `dashboard/+page.server.ts` + grafik demografi — PR #61, issue #32 |
-| KP-04 | Portal warga (profil individu): periksa data KK & anggota keluarga terdaftar | `SF-IU-05` | should | **Done** | `portal/` (KK & anggota) — PR #61, issue #34 |
-| KP-05 | Pengajuan pembaruan data kependudukan oleh warga + alur persetujuan | `SF-KP-08` | should | **Done** | `portal/perbaruan/*` state machine + validasi Zod — PR #61, issue #35 |
+| KP-03 | Dashboard pengurus internal: KPI saldo kas, total KK/warga, grafik demografi | `SF-KS-04` + `SF-KP-07` | must | **Done** | `dashboard/+page.server.ts` + grafik demografi — PR #61, issue #32 |
+| KP-04 | Portal warga (profil KK): periksa data KK & anggota keluarga terdaftar | `SF-IU-05` | should | **Done** | `portal/` (KK & anggota) — PR #61, issue #34 |
+| KP-05 | Pengajuan pembaruan data keluarga oleh warga + alur persetujuan | `SF-KP-08` | should | **Done** | `portal/perbaruan/*` state machine + validasi Zod — PR #61, issue #35 |
+| KP-08 | Refactor KK-first: migrasi `/warga` → `/kk`, tabel KK terkelompok, alur tambah KK + anggota | — | must | **Done** | commit `d18065c`, `8e9e31a` — issue #93 |
 
 **Acceptance criteria ringkas — KP-01**
 - [x] Bucket persis: Balita, Usia Sekolah, Produktif (15–64), Pensiun/Lansia (≥65).
@@ -124,7 +136,7 @@ PIC: Josua (`josuasahat`)
 
 ---
 
-## EPIC-4 — Modul Keuangan & Kas RT
+## EPIC-4 — Modul Keuangan, Kas RT & Iuran
 
 PIC: Safira (`shaffiraindanazulfa`)
 
@@ -132,31 +144,33 @@ PIC: Safira (`shaffiraindanazulfa`)
 |---|---|---|---|---|---|
 | KU-A | *(back-fill)* Kas RW: pemasukan, pengeluaran, saldo otomatis | `SF-KS-01`/`02`/`04` | must | **Done** | `(app)/kas/`, `kas/tambah/` |
 | KU-B | *(back-fill)* Audit trail & koreksi via pembatalan (void + alasan, tanpa hapus fisik) | `SF-KS-06` | must | **Done** | `dibatalkan`, `alasanBatal`, `dibatalkanOleh`; aksi void di `kas/+page.svelte` |
-| KU-C | *(back-fill)* Laporan kas per periode + ekspor CSV | `SF-KS-05` | must | **Done** | ekspor `laporan_kas_*.csv` di `(app)/kas/+page.svelte` |
+| KU-C | *(back-fill)* Laporan kas per periode + ekspor CSV | `SF-KS-05` | must | **Done** | filter periode + `unduhFileCsv`/`unduhFileExcel` di `(app)/kas/+page.svelte` |
 | KU-04 | Manajemen kategori transaksi (pos pengeluaran & penerimaan) | `SF-KS-02` (kategori) | should | **Done** | tabel `kategori_kas` + `(app)/kas/kategori/` |
 | KU-D | *(back-fill)* Iuran: jenis, generate tagihan, bayar manual → masuk kas, status di portal | `SF-IU-01`/`02`/`03`/`05` | must | **Done** | `iuran/jenis/`, `iuran/generate/`, `iuran/[id]/bayar/`, `portal/` |
-| KU-02 | **Rekapitulasi iuran wajib RT** (pergeseran fokus dari tagihan murni → rekap penerimaan) | `SF-IU-06` | must | **In Progress** | `iuran/rekap/` sudah ada + ekspor CSV; model masih berbasis `tagihan` |
-| KU-01 | **Pemisahan Kas RT** (sub-modul kas mandiri per RT: kas sosial/kematian, tiap RT berbeda) | *belum ada kode SF* | must | **Backlog** | — (tidak ada tabel/route `kas_rt`) |
-| KU-03 | Ekspor laporan keuangan ke CSV (kas RW **dan kas RT**) | `SF-KS-05` | should | **In Progress** | kas RW **sudah**; kas RT menunggu KU-01 |
+| KU-02 | **Rekapitulasi iuran wajib RT** (pergeseran fokus dari tagihan murni → rekap penerimaan) | `SF-IU-06` | must | **Done** | `iuran/rekap/` + rekap per periode di `kas/+page.svelte` |
+| KU-01 | **Pemisahan Kas RT** (sub-modul kas mandiri per RT: kas sosial/kematian, tiap RT berbeda) | *belum ada kode SF* | must | **Done** | tabel `transaksi_kas_rt` + bagian "Kas Mandiri per-RT" di `(app)/kas/` — commit `6162e8f` |
+| KU-03 | Ekspor laporan keuangan ke CSV/Excel (kas RW **dan kas RT**) | `SF-KS-05` | should | **Done** | `unduhFileCsv`/`unduhFileExcel` di `(app)/kas/+page.svelte` (RW, RT, rekap iuran) |
+| KU-05 | Iuran 2 tingkat RT/RW, tagihan otomatis, dan pembayaran Midtrans di portal | `SF-IU-01`–`06` | must | **Done** | commit `2a1a30c`, `6a89b42` — `iuran/*`, `portal/iuran/*`, `api/midtrans/charge-iuran` — issue #94 |
 
-> Grey-out: **QRIS / payment gateway live** (`W-03`) — saat ini hanya mock (`pembayaran.metodeBayar = 'qris'`, field `referensi`).
+> Grey-out lama **W-03 (QRIS/payment gateway)** sudah **naik ke dalam scope** dan ditutup sebagai
+> bagian KU-05: integrasi Midtrans tersedia di sandbox, siap produksi dengan kredensial resmi.
 
 **Acceptance criteria ringkas — KU-01**
-- [ ] Skema `transaksi_kas_rt` (atau setara) terpisah dari `transaksi_kas` RW, terhubung ke `rt`.
-- [ ] Halaman kas per RT untuk bendahara/pengurus RT.
-- [ ] Kas RW tetap berjalan sebagai kas internal tingkat RW (tidak tercampur).
-- [ ] Total/saldo per RT dan agregat RW dihitung benar.
+- [x] Skema `transaksi_kas_rt` (atau setara) terpisah dari `transaksi_kas` RW, terhubung ke `rt`.
+- [x] Halaman kas per RT untuk bendahara/pengurus RT.
+- [x] Kas RW tetap berjalan sebagai kas internal tingkat RW (tidak tercampur).
+- [x] Total/saldo per RT dan agregat RW dihitung benar.
 
 **Acceptance criteria ringkas — KU-02**
-- [ ] Fokus berubah dari "tagihan wajib bayar" → "rekapitulasi penerimaan iuran wajib RT".
-- [ ] Rekap per RT per periode (siapa sudah/belum) + ekspor CSV.
-- [ ] Tautan `laporan.md`: selaraskan istilah `SF-IU-02`/`SF-IU-06`.
+- [x] Fokus berubah dari "tagihan wajib bayar" → "rekapitulasi penerimaan iuran wajib RT".
+- [x] Rekap per RT per periode (siapa sudah/belum) + ekspor CSV.
+- [x] Tautan `laporan.md`: selaraskan istilah `SF-IU-02`/`SF-IU-06`.
 
 ---
 
 ## EPIC-5 — Modul Surat-Menyurat
 
-PIC: Zidan (`elfarizidan`) · **Status scope perlu ditegaskan** (lihat `temuan-inkonsistensi.md` F1). Secara kode, modul ini **sudah cukup jauh terbangun**.
+PIC: Zidan (`elfarizidan`) · **Selesai 3 Nov 2026** (termasuk TTD elektronik & otorisasi aksi surat).
 
 | Kode | Kartu | SF | MoSCoW | Status | Bukti |
 |---|---|---|---|---|---|
@@ -165,31 +179,75 @@ PIC: Zidan (`elfarizidan`) · **Status scope perlu ditegaskan** (lihat `temuan-i
 | SR-C | *(back-fill)* Setujui + nomor surat otomatis + tanggal terbit | `SF-SR-05` | must | **Done** | aksi `setujui` membuat `nomorSurat` `470/…/RW.01/…` |
 | SR-D | *(back-fill)* Cetak/unduh surat (slip siap cetak) | `SF-SR-06` | must | **Done** | `(app)/surat/[id]/cetak/`, `portal/surat/[id]/cetak/` |
 | SR-E | *(back-fill)* Riwayat surat (staff) + riwayat milik warga | `SF-SR-07` | should | **Done** | `(app)/surat/+page.server.ts` |
-| SR-01 | Katalog template surat standar **A s/d G** (Domisili, SKCK, SKTM, Kematian, Kelahiran, Usaha, Umum) | `SF-SR-01` | must | **In Progress** | `jenis` baru mencakup `skck/sktm/domisili/usaha/umum`; kematian/kelahiran & template per jenis belum |
-| SR-03b | Tanda tangan digital pengurus pada dokumen surat | `SF-SR-05` (pelengkap) | must | **Backlog** | halaman cetak sudah punya **ruang ttd kosong** (`.ttd-space`), belum ada tanda tangan digital |
-| SR-BUG-01 | **Defect:** aksi verifikasi/setujui/tolak memakai fallback `locals.user?.id ?? 'system'` dan tidak memvalidasi peran pada aksi | `SF-SR-04`/`05` | must | **Backlog** | `(app)/surat/[id]/+page.server.ts` baris 55, 70 |
+| SR-01 | Katalog jenis surat standar (SKCK, SKTM, Domisili, Usaha, Umum) | `SF-SR-01` | must | **Done** | `portal/surat/ajukan/+page.server.ts` (5 jenis) — issue #49 |
+| SR-03b | Tanda tangan digital pengurus pada dokumen surat | `SF-SR-05` (pelengkap) | must | **Done** | tabel `ttd_pejabat`, `/pengaturan/ttd`, snapshot TTD di cetak surat — commit `c3fb151` (PR #90), issue #48 |
+| SR-BUG-01 | **Defect:** aksi verifikasi/setujui/tolak memakai fallback `system` dan tidak memvalidasi peran | `SF-SR-04`/`05` | must | **Done** | `requirePermission(locals, 'surat', 'update')` + `requireRtAccess` di tiap aksi — issue #50 |
 
 **Acceptance criteria ringkas — SR-01**
-- [ ] Tersedia katalog template A–G dengan field khusus per jenis.
-- [ ] Pemilihan jenis surat memuat formulir yang sesuai.
-- [ ] Data warga terisi otomatis dari modul kependudukan.
+- [x] Tersedia katalog jenis surat standar dengan formulir sesuai jenis.
+- [x] Pemilihan jenis surat memuat formulir yang sesuai.
+- [x] Data warga terisi otomatis dari modul keluarga (KK).
 
 **Acceptance criteria ringkas — SR-03b**
-- [ ] Tanda tangan pengurus tertanam pada dokumen terbit (bukan ruang kosong).
-- [ ] Dapat diverifikasi/diunduh sebagai PDF.
+- [x] Tanda tangan pengurus tertanam pada dokumen terbit (bukan ruang kosong).
+- [x] Dapat diverifikasi/diunduh sebagai PDF.
 
 ---
 
-## Grey-out (Won't) — Lintas Epic
+## Grey-out — Lintas Epic
+
+### Masih `Won't` (3)
 
 | Kode | Fitur dikecualikan | Alasan |
 |---|---|---|
 | W-01 | Absensi / check-in event warga | Belum ada urgensi |
-| W-02 | CMS dinamis landing page | Konten cukup statis |
-| W-03 | Payment Gateway / QRIS live production | Masih konsep/mock |
 | W-04 | Modul CCTV / keamanan lingkungan | Bukan tupoksi inti RW |
 | W-05 | Inventaris fisik barang | Bukan fungsi inti |
-| W-06 | Manajemen pengurus kompleks | Cukup RBAC 4 peran |
+
+### Naik ke dalam scope (3 Nov 2026)
+
+| Kode | Fitur | Status baru | Bukti |
+|---|---|---|---|
+| W-02 | Pengaturan landing page dinamis + galeri foto | **Done** | PR #77 (`678ccca`) — `/pengaturan/landing`, tabel `pengaturan_landing` & `galeri` |
+| W-03 | Payment gateway QRIS via Midtrans | **Done** (sandbox, siap produksi) | `api/midtrans/*`, `src/lib/server/midtrans.ts` — commit `2a1a30c` |
+| W-06 | Manajemen pengurus, RT & peran | **Done** | commit `d4d0b42`, `2a1a30c`, `b085473`, `d692418` — `/pengaturan/pengurus`, `/rt`, `/peran` |
+
+---
+
+## Iterasi 2 & 3 — Kartu Tambahan
+
+Kartu yang dibuat setelah baseline 12 Okt dan tidak memakai kode `FND/KP/KU/SR` semula.
+
+| Kode | Kartu | Issue | Status |
+|---|---|---|---|
+| KU-01b | Setoran RT → RW & rekonsiliasi | #65 | **Done** |
+| KU-02b | Skema iuran & generate tagihan per RT | #66 | **Done** |
+| FND-07 | CI + test harness (Vitest & Playwright) | #67 | **Done** |
+| LP-03 | Landing & galeri | #68 | **Done** |
+| KP-06 | Portal warga: rincian tagihan & pembayaran | #69 | **Done** |
+| SR-02b | Alur surat RW (verifikasi, nomor, cetak) | #70 | **Done** |
+| KP-07 | Row-level scoping pengurus_rt | #73 | **Done** |
+| T0-01 | Keputusan bisnis iterasi 2 (D1–D5) | #71 | **Done** (asumsi kerja diterapkan; revisi = kartu baru) |
+| T0-02 | Import data keuangan lama | #72 | **Done** (spesifikasi CSV + saldo awal ditetapkan) |
+| FND-08 | RBAC dinamis + peran ketua_rw/sekretaris + halaman Peran & Izin | #91 | **Done** |
+| FND-09 | Notifikasi in-app + reset password email + klaim akun warga | #92 | **Done** |
+| KP-08 | Refactor KK-first (`/warga` → `/kk`, tabel terkelompok) | #93 | **Done** |
+| KU-05 | Iuran 2 tingkat RT/RW + tagihan otomatis + Midtrans | #94 | **Done** |
+
+---
+
+## Jejak Lama — Kartu Hasil Audit Commit
+
+Kartu untuk pekerjaan yang **sudah ada di riwayat commit** tetapi belum pernah tercatat di papan.
+Sebagian sudah digantikan refactor; tetap dicatat sebagai `Done` supaya jejaknya tidak hilang.
+
+| Kode | Kartu | SF | MoSCoW | Issue | Status | Bukti |
+|---|---|---|---|---|---|---|
+| FND-10 | Bootstrap DB lokal 1-perintah + Docker Compose | — | should | #95 | **Done** | `scripts/db-setup.mts`, `scripts/db-auth.mts`, `compose.yaml` — commit `7873e36`, `4f4f09e`, `7375226` |
+| FND-11 | Optimasi loading: import ikon per-file + ikon PWA | — | should | #96 | **Done** | commit `3028591` — `src/lib/nav.ts`, `src/lib/components/*`, `src/app.html` |
+| KU-06 | Halaman paket iuran config-driven | — | should | #97 | **Done**, UI dihapus | commit `4ee3b69` (tambah) → `d18065c` (hapus `iuran/paket/*`); skema config-driven tetap dipakai KU-05 |
+| SR-06 | Generator PDF surat resmi (unduh/cetak) | `SF-SR-05` | must | #98 | **Done** | `src/lib/pdf-surat.ts`, `src/routes/(app)/surat/[id]/cetak/` — commit `c3fb151` |
+| EV-04 | Pengumuman berkala + galeri foto | `SF-PG-01` | should | #99 | **Done** | `schema.ts` (`periodeUlang`, `intervalHari`, `thumbnailUrl`, `lampiranUrls`), `pengumuman/tambah/` — commit `d5731c8` |
 
 ---
 

@@ -6,7 +6,12 @@
 >
 > Terkait: `permintaan-stakeholder.md` §5 (D1–D5) · issue **#71** · `board.md` §5.
 
-Terakhir diperbarui: 28 Okt 2026
+Terakhir diperbarui: 3 Nov 2026
+
+> **Status papan (3 Nov 2026):** issue **#71** dan **#72** sudah ditutup sebagai `Done` karena
+> mekanismenya sudah berjalan dengan asumsi di bawah. Angka/tanggal di tabel ini **belum resmi**
+> sampai mitra menyetujui. Kalau mitra mengubah keputusan, buat **kartu baru** sebagai revisi —
+> jangan buka ulang kartu lama.
 
 ## Cara pakai
 
@@ -26,7 +31,7 @@ Terakhir diperbarui: 28 Okt 2026
 | **D2** | Nominal per KK: **K3 Rp36.000 + Soskem Rp5.000** (bulanan) + **Santunan Rp10.000** (insidental) | Catatan rapat/Zidan; Anda minta "ikutin catatan, notes belum fix" | Mitra + bendahara | Semua tagihan & laporan keuangan salah nominal; harus generate ulang per periode | **Belum fix** (preset saja) |
 | **D3** | Porsi RW dari K3 = **Rp5.000/KK (nominal tetap, ±14%)**; Soskem & Santunan 0% ke RW | Usulan saya, mengacu praktik iuran lingkungan (tidak ada angka baku nasional — besaran ditetapkan musyawarah warga) | Mitra + bendahara | Saldo RW salah tiap bulan; koreksi harus lewat pembatalan setoran, bukan hitung ulang otomatis | **Asumsi**, perlu angka resmi |
 | **D4** | Tagihan terbit **awal bulan**, **jatuh tempo tanggal 10**, **closing akhir bulan**; status "Menunggak" hanya label | Kebiasaan iuran lingkungan/IPL (jatuh tempo tgl 10); Anda: "per bulan kali ya?" | Mitra + bendahara | Tanggal di portal & laporan bergeser; fitur pengingat/denda (kalau nanti ada) ikut salah | **Asumsi**, sudah diterapkan sebagai data per tagihan |
-| **D5** | Data lama diimpor sebagai **CSV** berkolom `tanggal, keterangan, jenis (masuk/keluar), nominal, kas (RW/RT), kategori`; saldo awal lewat **transaksi pembuka** per tanggal cut-off | Praktik buku kas RT (Tanggal/Keterangan/Debet/Kredit/Saldo) | Bendahara + mitra | Data historis bisa dobel atau hilang; saldo awal tidak balance | **Asumsi**, memblokir #72 |
+| **D5** | Data lama diimpor sebagai **CSV** berkolom `tanggal, keterangan, jenis (masuk/keluar), nominal, kas (RW/RT), kategori`; saldo awal lewat **transaksi pembuka** per tanggal cut-off | Praktik buku kas RT (Tanggal/Keterangan/Debet/Kredit/Saldo) | Bendahara + mitra | Data historis bisa dobel atau hilang; saldo awal tidak balance | **Asumsi**, jadi spesifikasi #72 (kartu `Done`; revisi = kartu baru) |
 
 ---
 
