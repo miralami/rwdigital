@@ -19,11 +19,11 @@
 | K-06 | WIP limit | 1–2 kartu/orang, ≤ 10/papan; diaudit, ada pelanggaran awal | ✅ | §2.2.3.2, §3.5.1, 4.1.3d |
 | K-07 | Pengujian | **CI + Black Box**; tanpa klaim peer review | ✅ | §3.5.1, 4.1.4, 4.3 |
 | K-08 | UAT | Dengan pengurus RW 06, 23–24 Nov 2026 | ✅ | 4.1.6, Bab VI |
-| K-09 | Lokasi artefak Bab IV | Pemodelan di 4.1.2 (a–k); FR/NFR di 4.1.1d–e; 4.2 screenshot; 4.3 verifikasi | ✅ | Bab IV |
+| K-09 | Lokasi artefak Bab IV | Pemodelan di 4.1.2 (a–j, tanpa state machine); FR/NFR di 4.1.1d–e; 4.2 screenshot; 4.3 verifikasi | ✅ | Bab IV |
 | K-10 | Pembagian kerja | Per artefak, bukan per fitur; pemilik domain ≠ penulis kode | ✅ | 4.1, `pembagian-tugas.md` |
 | K-11 | Tenggat Bab IV | 26 Nov 2026 (buffer submit 27 Nov) | ✅ | jadwal |
 | K-12 | Figma | Tidak klaim Figma; sementara `design-preview/`, reverse engineer menyusul | ✅ | 4.1.2 |
-| K-13 | Batas Bab III vs IV | Bab III = spesifikasi terukur + mekanisme; diagram, flow, UI/UX, tabel NFR rinci, matriks RBAC → Bab IV | ⏳ tim | Bab III, 4.1.1e, 4.1.2e/j/k |
+| K-13 | Batas Bab III vs IV | Bab III = spesifikasi terukur + mekanisme; diagram, flow, UI/UX, tabel NFR rinci, matriks RBAC → Bab IV | ⏳ tim | Bab III, 4.1.1e, 4.1.2e/i/j |
 
 ---
 
@@ -132,7 +132,7 @@ sebagai pelengkap. Jangan menulis hasil UAT sebelum UAT terjadi.
 
 ## K-09 · Lokasi artefak Bab IV ✅
 
-Semua pemodelan (UML, ERD, BPMN, arsitektur) di **4.1.2** sebagai sub-butir a–k (TOC maks 3
+Semua pemodelan (UML, ERD, BPMN, arsitektur) di **4.1.2** sebagai sub-butir a–j (TOC maks 3
 tingkat). FR & NFR seluruhnya di **4.1.1d–e**; §3.3.4 cukup paragraf rujukan. 4.2 = screenshot
 saja. 4.3 = verifikasi per modul.
 
@@ -158,7 +158,7 @@ Tidak mengklaim Figma. Sementara pakai `docs/design-preview/`; reverse engineer 
 - Bab III **tetap** memuat *Spesifikasi Rancangan* (panduan mewajibkan), tetapi sebagai spesifikasi
   **terukur** (Tabel 3.2–3.4: fungsional per modul, non-fungsional `SP-01..15` dengan target, teknis).
 - Yang keluar dari Bab III → Bab IV: alur/flow (Gambar 3.1–3.4 lama → 4.1.2e Activity), spesifikasi
-  UI/UX (→ 4.1.2j), tabel `NFRS`/`NFRA` (→ 4.1.1e), matriks RBAC (→ 4.1.2k), nama berkas kode
+  UI/UX (→ 4.1.2i), tabel `NFRS`/`NFRA` (→ 4.1.1e), matriks RBAC (→ 4.1.2j), nama berkas kode
   (`permissions.ts`, `guard.ts`, `hooks.server.ts`) dari Bab II–III.
 - §3.5 dilengkapi subbab wajib panduan: 3.5.1 sistematika (flowchart + loop), 3.5.2 pengumpulan data,
   3.5.3 V&V, 3.5.4 timeline M5–M15, 3.5.5 komponen sistem terintegrasi.

@@ -81,9 +81,8 @@ Sub-butir huruf agar tetap 3 tingkat.
           f) Class Diagram
           g) Entity Relationship Diagram dan Kamus Data
           h) Sequence Diagram
-          i) State Machine Diagram
-          j) Perancangan Antarmuka (UI/UX)
-          k) Arsitektur Perangkat Lunak dan Kontrol Akses
+          i) Perancangan Antarmuka (UI/UX)
+          j) Arsitektur Perangkat Lunak dan Kontrol Akses
     4.1.3 Pelaksanaan Pengembangan Inkremental         (tahap 3 — diulang 3 iterasi)
           a) Iterasi 1 — MVP
           b) Iterasi 2 — Penyempurnaan Keuangan dan Portal
@@ -137,7 +136,7 @@ Format tabel NFR:
 
 | Butir | Artefak | Jml | Sumber |
 |---|---|---|---|
-| a | **BPMN to-be** (tambah lane "Sistem SI-RW", gateway validasi & RBAC) | 2–4 | turunan dari b 4.1.1 |
+| a | **BPMN to-be** (tambah lane "Sistem SI-RW", gateway validasi & RBAC) | 2–4 | alur aplikasi; dibandingkan dengan b 4.1.1 |
 | b | **ArchiMate**: (1) motivasi+bisnis, (2) aplikasi+teknologi | 2 | **baru** |
 | c | Use case diagram: 1 global (4 aktor) + per modul | 1 + 5 | `diagram-prompts.md` §3 |
 | d | Use case description: 6–8 UC kunci (nama, aktor, trigger, pre/post, normal course, sub-flow, alternate) | 6–8 tabel | **baru** |
@@ -145,9 +144,8 @@ Format tabel NFR:
 | f | **Class diagram** 13 kelas domain + relasi + operasi | 1 | **baru**, dari `schema.ts` |
 | g | **ERD** crow's foot + kamus data | 1 + 1 | prompt §2 + **baru** |
 | h | **Sequence diagram**: surat, pembayaran+webhook Midtrans, input KK-first, guard RBAC | 4 | 1 prompt ada, 3 baru |
-| i | **State machine**: status surat, tagihan, permintaan pembaruan | 2–3 | **baru** |
-| j | **UI/UX**: design token, wireframe 3 alur, hi-fi 4–6 layar, tabel prinsip interaksi | 1 + 3 + 4–6 + 1 | `docs/design-preview/` |
-| k | Arsitektur software (deployment) + tabel komponen + matriks RBAC final | 1 + 2 | prompt §6 |
+| i | **UI/UX**: design token, wireframe 3 alur, hi-fi 4–6 layar, tabel prinsip interaksi | 1 + 3 + 4–6 + 1 | `docs/design-preview/` |
+| j | Arsitektur software (deployment) + tabel komponen + matriks RBAC final | 1 + 2 | prompt §6 |
 
 Format use case description — **wajib persis seperti contoh** (dipakai dosen sebagai acuan):
 
@@ -249,8 +247,8 @@ dan Black Box. Kolom Review di papan kosong (temuan F5) → jujur saja di 4.1.4b
 | Manajemen Proyek & PL | Kanban, Epic, MoSCoW, DoD, metrik, PR | 4.1.1f, 4.1.3–4.1.6 | Sedang |
 | Pemodelan & Rekayasa Proses Bisnis | BPMN as-is & to-be | 4.1.1b, 4.1.2a | Sedang |
 | Arsitektur Enterprise | ArchiMate 2 view | 4.1.2b | Kecil |
-| APSI (UML) | Use case, activity, class, ERD, sequence, state | 4.1.2c–i | Besar |
-| Perancangan Interaksi | Token, wireframe, hi-fi, prinsip interaksi | 4.1.2j | Sedang |
+| APSI (UML) | Use case, activity, class, ERD, sequence | 4.1.2c–h | Besar |
+| Perancangan Interaksi | Token, wireframe, hi-fi, prinsip interaksi | 4.1.2i | Sedang |
 | Pengujian Implementasi | CI (unit + e2e) dan Black Box per modul | 4.1.4a, 4.3 | Besar |
 
 ---
@@ -264,7 +262,7 @@ dan Black Box. Kolom Review di papan kosong (temuan F5) → jujur saja di 4.1.4b
 | Halaman estimasi | ~35 hlm | ~55 hlm |
 
 **Belum ada sama sekali (harus dibuat):** BPMN (0) · ArchiMate (0) · Class diagram (0) ·
-Sequence (0 gambar) · State machine (0) · Use case description (0) · Wireframe/hi-fi (0 terkurasi) ·
+Sequence (0 gambar) · Use case description (0) · Wireframe/hi-fi (0 terkurasi) ·
 NFR non-keamanan (0) · Kamus data (0) · Tabel kasus uji (0) · Screenshot (0) ·
 Teori BPMN/ArchiMate/IxD di Bab II (0) · FR di Word (0).
 
@@ -280,29 +278,55 @@ Teori BPMN/ArchiMate/IxD di Bab II (0) · FR di Word (0).
 seseorang memegang satu jenis artefak untuk seluruh modul (mis. semua BPMN, semua FR), supaya tidak
 ada modul yang tercecer. Nama di bawah adalah usulan beban; tinggal dikonfirmasi.
 
-Usulan, menyeimbangkan beban: Josua & Afif tanpa kartu kode → ambil artefak berat.
+**Prinsip tanpa blocker:** setiap artefak mengambil bahan dari **sumber yang sudah ada** (aplikasi
+yang berjalan, `schema.ts`, `laporan.md`, `handover-kit.md`, hasil wawancara narsum), bukan dari
+artefak PIC lain. Konsistensi dijaga oleh satu **kerangka bersama** (§7.1) yang dibuat di hari
+pertama, bukan oleh rantai urutan pengerjaan.
 
-| Artefak | PIC | Alasan |
-|---|---|---|
-| BPMN as-is + to-be | **Josua** | Tanpa kartu kode; erat dengan analisis data/proses |
-| FR (34 fungsi, 6 tabel) | **Zidan** | Menguasai scope surat & koordinasi mitra |
-| NFR (semua kategori) | **Alizha** | PIC keamanan, sudah pegang NFR-SEC/ACC |
-| ArchiMate (2 view) | **Afif** | Lead teknis, sudah pegang arsitektur & deployment |
-| Use case diagram + description | **Zidan** | Turunan langsung FR |
-| Activity diagram (7) | **Josua** | Lanjutan BPMN yang ia pegang |
-| Class diagram | **Afif** | Dari `schema.ts` |
-| ERD + kamus data | **Afif** | Sudah pegang ERD global |
-| Sequence diagram (4) | **Safira** | Dekat dengan UI/UX & alur iuran |
-| State machine (2–3) | **Safira** | Status tagihan/surat |
-| UI/UX (token, wireframe, hi-fi) | **Safira** | PIC laporan & UI/UX |
-| Arsitektur software + RBAC | **Afif** | Lead teknis |
-| 4.1.3–4.1.5 (Kanban, DoD, metrik) | **Afif** | PIC metodologi |
-| 4.2 Screenshot per modul | **PIC modul** (kumpul ke Afif) | Harus orang yang paham layar |
-| 4.3 Black Box per modul | **Alizha** (koordinasi) + PIC modul (skenario) | Alizha PIC keamanan/pengujian |
-| Polish caption & daftar gambar | **Afif** | Konsistensi |
+### 7.1 Kerangka Bersama (Afif, ±1 jam, 6 Nov)
 
-Beban: Afif (5 artefak), Josua (2 berat), Zidan (2), Safira (4), Alizha (2). Kalau terlalu berat
-di Afif, Class Diagram bisa digeser ke Josua (sama-sama dari skema).
+Satu berkas acuan yang dipakai semua PIC, berisi:
+- Daftar aktor dan daftar modul.
+- **Daftar ID use case** (`UC-01 Masuk`, `UC-07 Mengajukan Surat`, dst.), cukup nama, tanpa
+  deskripsi, diturunkan dari route di `src/routes/(app)/` dan `handover-kit.md`.
+- Konvensi caption (`Gambar 4.x`, `Tabel 4.x`) dan penamaan berkas diagram.
+
+Aturan: nama use case **disalin persis** dari kerangka di semua artefak (FR, use case, activity,
+sequence, black box). Dengan begitu tiap PIC bisa jalan paralel sejak hari pertama.
+
+### 7.2 Pembagian
+
+| Artefak | PIC | Sumber | Alasan |
+|---|---|---|---|
+| BPMN as-is | **Zidan** | Wawancara narsum | Narasumber utama ke mitra, paling paham proses lapangan saat ini |
+| BPMN to-be | **Josua** | Alur di aplikasi yang berjalan | Analisis proses dari kondisi saat ini ke sistem usulan |
+| FR (34 fungsi, 6 tabel) | **Alizha** | SF-xx di `laporan.md` + aplikasi, dipetakan ke UC-ID | Menguasai scope modul surat dan kebutuhan mitra |
+| NFR (semua kategori) | **Alizha** | NFR-SEC/ACC yang ada + kode | PIC keamanan, sudah pegang NFR-SEC/ACC |
+| Use case diagram + description | **Alizha** | Kerangka UC-ID + aplikasi | Satu orang dengan FR agar istilah dan cakupan konsisten |
+| Activity diagram (7) | **Josua** | Menjalankan alur di aplikasi per UC-ID | Lanjutan analisis proses di level use case |
+| Kamus data | **Josua** | `schema.ts` langsung | Dokumentasi atribut dan tipe data tabel |
+| Class diagram | **Afif** | `schema.ts` | Lead teknis, pegang model domain |
+| ERD | **Afif** | `schema.ts` | Lead teknis, pegang skema basis data |
+| ArchiMate (2 view) | **Afif** | Kode + dokumen arsitektur | Lead teknis, pegang arsitektur dan deployment |
+| Arsitektur software + RBAC | **Afif** | Kode (`rbac`, `guard`, `scope`) | Lead teknis |
+| 4.1.3–4.1.5 (Kanban, DoD, metrik) | **Afif** | Papan Kanban + `git log` | PIC metodologi |
+| Sequence diagram (4) | **Safira** | Kode route/server action per UC-ID | Dekat dengan alur antarmuka dan integrasi pembayaran iuran |
+| UI/UX (token, wireframe, hi-fi) | **Safira** | Aplikasi + `docs/design-preview/` | PIC UI/UX |
+| 4.2 Screenshot per modul | **Safira** (kumpul ke Afif) | Aplikasi | Paling paham tampilan layar dari sisi UI/UX |
+| 4.3 Black Box per modul | **Zidan** | Aplikasi + kerangka UC-ID | Koordinasi validasi skenario uji dengan mitra |
+| Polish caption & daftar gambar | **Safira** | Konvensi caption §7.1 | PIC laporan, menjaga konsistensi format |
+
+Beban: Zidan (2), Alizha (3, paling berat secara isi), Josua (3), Safira (5, ringan–sedang),
+Afif (5, teknis). Zidan ringan di laporan karena porsi besarnya ada di koordinasi mitra, narsum,
+dan UAT.
+
+### 7.3 Konsekuensi
+
+- **Semua PIC harus bisa menjalankan aplikasi** (`npm run dev` + seed lokal, atau satu staging
+  bersama). Josua dan Safira dibantu setup sekali di awal.
+- **Cek konsistensi di akhir, bukan blocker di tengah:** Alizha mencocokkan FR ↔ UC ↔
+  activity/sequence ↔ black box berdasarkan UC-ID (lihat §8, 24–25 Nov).
+- Polish caption tetap di akhir, tapi ringan karena konvensi sudah dipakai sejak awal.
 
 ---
 
@@ -313,23 +337,28 @@ Mulai: Jumat, 6 November 2026. Total 3 minggu kalender, 15 hari kerja.
 
 | Tanggal | Pekerjaan | Penanggung jawab | Output |
 |---|---|---|---|
+| 6 Nov | **Kerangka bersama** (§7.1): aktor, modul, UC-ID, konvensi caption + bantu setup aplikasi lokal | Afif | Berkas kerangka |
 | 6–7 Nov | **P0**: sinkron Word ← `laporan.md` (§3.5 Kanban + loop iterasi, paragraf rujukan §3.3.4, perbaikan nomor tabel/gambar, RBAC rusak, typo) | Afif | Word = `laporan.md` |
 | 6–8 Nov | Teori Bab II: BPMN, ArchiMate, Interaction Design, Kanban/MoSCoW, UML/ERD, Black Box | Afif + Alizha | §2.2 lengkap |
-| 7–10 Nov | BPMN as-is → to-be | Josua | 4.1.1b, 4.1.2a |
-| 7–11 Nov | FR (6 tabel) + NFR (1 tabel) + MoSCoW | Zidan + Alizha | 4.1.1d–f |
-| 9–13 Nov | ArchiMate + arsitektur software + ERD + kamus data | Afif | 4.1.2b, g, k |
-| 11–14 Nov | Use case diagram + 6–8 use case description | Zidan | 4.1.2c–d |
-| 11–15 Nov | Activity diagram (7 alur) | Josua | 4.1.2e |
-| 13–17 Nov | Class diagram + sequence (4) + state machine (2–3) | Afif + Safira | 4.1.2f, h, i |
-| 14–18 Nov | UI/UX: token, 3 wireframe, 4–6 hi-fi, tabel prinsip | Safira | 4.1.2j |
-| 16–20 Nov | Screenshot per modul + paragraf fungsi | PIC modul → Afif | 4.2 |
-| 19–22 Nov | Tabel Black Box per modul + rekap + defect log + lampiran bukti CI | Alizha + PIC modul | 4.3 |
+| 7–11 Nov | BPMN as-is | Zidan | 4.1.1b |
+| 7–11 Nov | BPMN to-be | Josua | 4.1.2a |
+| 7–13 Nov | FR (6 tabel) + NFR (1 tabel) + MoSCoW | Alizha | 4.1.1d–f |
+| 7–15 Nov | Use case diagram + 6–8 use case description | Alizha | 4.1.2c–d |
+| 9–13 Nov | ArchiMate + arsitektur software + RBAC + ERD + class diagram | Afif | 4.1.2b, f, g, j |
+| 9–15 Nov | Activity diagram (7) + kamus data | Josua | 4.1.2e, g |
+| 9–15 Nov | Sequence diagram (4) | Safira | 4.1.2h |
+| 9–18 Nov | UI/UX: token, 3 wireframe, 4–6 hi-fi, tabel prinsip | Safira | 4.1.2i |
+| 12–20 Nov | Screenshot per modul + paragraf fungsi | Safira → Afif | 4.2 |
+| 12–22 Nov | Tabel Black Box per modul + rekap + defect log + lampiran bukti CI | Zidan | 4.3 |
 | **23–24 Nov** | **UAT bersama pengurus RW 06** + rekap hasil | Zidan (koordinasi) + Afif | 4.1.6a, bahan Bab VI |
-| 24–25 Nov | Polish: caption, daftar gambar/tabel, konsistensi angka, cek silang | Afif | Bab IV final |
+| 24–25 Nov | Cek konsistensi FR ↔ UC ↔ activity/sequence ↔ black box (per UC-ID) | Alizha | Daftar perbaikan |
+| 24–25 Nov | Polish: caption, daftar gambar/tabel, konsistensi angka | Safira | Bab IV final |
 | **26 Nov** | **Batas akhir Bab IV** — freeze, tidak ada tambahan | Afif | Siap submit |
 | 27 Nov | Buffer submit | Afif | — |
 
-Dependency keras: **BPMN to-be → use case → activity → sequence**. Jangan dibalik.
+**Tidak ada dependency keras antar-PIC** setelah kerangka 6 Nov: semua artefak bersumber dari
+aplikasi/kode/narsum dan memakai UC-ID yang sama (§7). Satu-satunya urutan wajib: kerangka →
+semua artefak → cek konsistensi → polish.
 Kalau satu artefak mundur >2 hari, potong ke versi **Minimum** di §6, jangan geser tenggat.
 
 ---

@@ -251,7 +251,7 @@ Metode MoSCoW adalah teknik analisis untuk mengklasifikasikan kebutuhan sistem k
 
 Pemodelan digunakan untuk menggambarkan sistem sebelum dan selama dibangun, sehingga kebutuhan, perilaku, dan struktur sistem dapat diperiksa oleh tim maupun mitra. Proses bisnis dimodelkan dengan *Business Process Model and Notation* (BPMN), notasi standar yang menggambarkan urutan aktivitas, keputusan, dan pelaku proses dalam *pool* dan *lane* (Object Management Group, 2014). BPMN dipakai untuk membandingkan proses saat ini (*as-is*) dengan proses usulan (*to-be*).
 
-Perilaku dan struktur perangkat lunak dimodelkan dengan *Unified Modeling Language* (UML). Diagram *use case* menggambarkan fungsi sistem dari sudut pandang aktor, diagram aktivitas menggambarkan alur kerja, diagram *sequence* menggambarkan urutan pesan antarkomponen, diagram kelas menggambarkan struktur objek, dan diagram *state machine* menggambarkan perubahan status suatu objek (Booch et al., 2005; Dennis et al., 2020). Struktur data dimodelkan dengan *Entity Relationship Diagram* (ERD) yang menggambarkan entitas, atribut, dan relasi antarentitas sebagai dasar perancangan basis data relasional (Chen, 1976).
+Perilaku dan struktur perangkat lunak dimodelkan dengan *Unified Modeling Language* (UML). Diagram *use case* menggambarkan fungsi sistem dari sudut pandang aktor, diagram aktivitas menggambarkan alur kerja, diagram *sequence* menggambarkan urutan pesan antarkomponen, dan diagram kelas menggambarkan struktur objek (Booch et al., 2005; Dennis et al., 2020). Struktur data dimodelkan dengan *Entity Relationship Diagram* (ERD) yang menggambarkan entitas, atribut, dan relasi antarentitas sebagai dasar perancangan basis data relasional (Chen, 1976).
 
 ### 2.2.6 Pengujian dan Evaluasi Perangkat Lunak
 
@@ -346,7 +346,7 @@ Acuan sepuluh kategori risiko keamanan aplikasi web yang paling kritis.
 
 ### 3.2.3 Standar Pemodelan
 
-Pemodelan rancangan menggunakan BPMN 2.0 untuk proses bisnis *as-is* dan *to-be* (Object Management Group, 2014), UML untuk *use case*, aktivitas, *sequence*, kelas, dan *state machine* (Booch et al., 2005), serta ERD untuk struktur basis data (Chen, 1976). Penggunaan notasi standar memungkinkan rancangan diperiksa oleh pembimbing dan dikomunikasikan kepada mitra secara konsisten.
+Pemodelan rancangan menggunakan BPMN 2.0 untuk proses bisnis *as-is* dan *to-be* (Object Management Group, 2014), UML untuk *use case*, aktivitas, *sequence*, dan kelas (Booch et al., 2005), serta ERD untuk struktur basis data (Chen, 1976). Penggunaan notasi standar memungkinkan rancangan diperiksa oleh pembimbing dan dikomunikasikan kepada mitra secara konsisten.
 
 **Tabel 3.1 Ringkasan Standar Keteknikan dan Regulasi yang Digunakan**
 
@@ -569,7 +569,7 @@ Objek permasalahan (administrasi manual RW 06) dan rancangan solusi (RW Digital)
 
 ### 4.1.2 Perancangan Sistem
 
-<!-- Butir a) BPMN to-be, b) ArchiMate, c) use case, d) use case description, f) class, g) ERD, h) sequence, i) state machine: belum ditulis. -->
+<!-- Butir a) BPMN to-be, b) ArchiMate, c) use case, d) use case description, f) class, g) ERD, h) sequence: belum ditulis. -->
 
 #### e) Activity Diagram
 
@@ -613,7 +613,7 @@ Setelah data dimasukkan, sistem secara otomatis melakukan validasi terhadap data
 
 Sebaliknya, jika data dinyatakan valid, sistem akan langsung menyimpan catatan transaksi tersebut ke dalam database, menghitung ulang akumulasi total saldo kas RW, dan merekam aktivitas pencatatan ke dalam audit trail. Setelah seluruh proses pencatatan selesai dilakukan oleh sistem, Bendahara dapat melihat pembaruan saldo beserta laporan kas RW terbaru.
 
-#### j) Perancangan Antarmuka (UI/UX)
+#### i) Perancangan Antarmuka (UI/UX)
 
 <!-- Dipindah dari Bab III §3.3.2 A–B (versi docx). Rencana: dilengkapi design token, wireframe, dan mockup dari docs/design-preview/. -->
 
@@ -629,7 +629,7 @@ Sebaliknya, jika data dinyatakan valid, sistem akan langsung menyimpan catatan t
 
 **Pencegahan Kesalahan.** Setiap formulir divalidasi sesuai jenis data yang dimasukkan, misalnya NIK harus 16 digit, nominal iuran hanya berupa angka, dan berkas unggahan harus sesuai ketentuan. Sistem juga meminta konfirmasi sebelum tindakan tertentu, seperti menghapus data atau menyetujui pengajuan.
 
-#### k) Arsitektur Perangkat Lunak dan Kontrol Akses
+#### j) Arsitektur Perangkat Lunak dan Kontrol Akses
 
 <!-- Dipindah dari Bab III §3.3.3 c (versi docx). Rencana: dicocokkan ulang dengan matriks final di kode sebelum ditempel; baris Surat dan RT & RW pada versi lama memuat duplikasi "R, R". -->
 
