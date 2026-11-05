@@ -114,7 +114,7 @@ drizzle.config.ts          ← Drizzle kit config
 
 ## Dokumen Word / SharePoint
 
-- Draft laporan: `docs/laporan/laporan.md` — kalau diminta "tulis ke Word/SharePoint", isinya ditransfer ke proposal di SharePoint, **bukan** generate `.docx` lokal.
+- Artefak laporan = `Capstone.docx`. `docs/laporan/laporan.md` adalah **cermin** teksnya (`npm run laporan:pull`, read-only ke docx). Usulan perubahan ditulis di `laporan.md` lalu direview lewat `git diff`; kalau diminta "tulis ke Word/SharePoint", isinya ditransfer ke docx, **bukan** generate `.docx` lokal.
 - Lokasi folder kerja capstone: `C:\Users\Sena\OneDrive\Kuliah\Semester 7\Capstone`
 - Dokumen proposal: `Capstone.docx` di SharePoint Telkom, diakses lewat shortcut `Capstone.docx.url` di folder tersebut (URL dibaca dari shortcut, jangan hardcode).
 - Selalu pakai skill **`capstone-word`** (`C:\Users\Sena\.agents\skills\capstone-word\SKILL.md` + `word-helper.ps1`, Word COM) untuk membaca/mengedit dokumennya — aturan keras & struktur heading ada di skill itu.

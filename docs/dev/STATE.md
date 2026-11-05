@@ -5,21 +5,21 @@
 > satu baris per item. Riwayat detail = `git log`.
 
 <!-- auto:start -->
-**updated** 2026-11-05 21:25 · **branch** `docs/metodologi-rw-digital` · **device** `DESKTOP-D0MPL84`
+**updated** 2026-11-05 21:32 · **branch** `docs/metodologi-rw-digital` · **device** `DESKTOP-D0MPL84`
 
 ### DONE (5 commit sebelum commit ini)
+- `ac01721` docs: register keputusan tunggal docs/keputusan.md (K-01..K-12)
 - `e3ec6b3` docs(laporan): reframing metodologi I&I + Kanban dan judul "Rancang Bangun RW Digital"
 - `b55328e` docs: dev-state lintas sesi + rapikan .md (5 working docs, sisanya reference/legacy)
 - `6bb2a49` docs(laporan): rencana Bab IV v3, strategi dokumentasi, dan handover kit
 - `c3fb151` feat: add electronic signature functionality and related database changes
-- `0f39446` feat(dashboard-docs): consolidate dashboard KPIs and sync capstone specifications in laporan.md, PROJECT.md, and plan.md
 <!-- auto:end -->
 
 ## ON PROGRESS
 
 - Dev-state aktif: `STATE.md` + `npm run state` dipakai mulai sesi berikutnya
 - Bab IV: mulai P0 (sinkron Word ← `laporan.md`)
-- Register keputusan `docs/keputusan.md` (K-01…K-12) — branch `docs/metodologi-rw-digital`, belum di-merge
+- `laporan.md` = cermin Capstone.docx (`npm run laporan:pull`); draf repo yang belum di Word → `keputusan.md` sisa tindakan #5 — branch `docs/metodologi-rw-digital`
 
 ## TODO
 
@@ -42,3 +42,4 @@
 - `docs/laporan/laporan.md`
 - `docs/laporan/bab4-plan.md`
 - `PROJECT.md`
+- `scripts/laporan-pull.ps1`

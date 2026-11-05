@@ -25,6 +25,13 @@ kecuali memang diminta:
 
 Keputusan lintas dokumen (judul, istilah, metodologi, iterasi, mitra, WIP, pengujian, UAT, tenggat)
 hanya ditulis di `docs/keputusan.md` dengan ID `K-xx`. Urutan kalau berubah:
-`keputusan.md` → `laporan.md` (prosa) → Word. Dokumen lain merujuk ID, **jangan menyalin isinya**.
+`keputusan.md` → usulan prosa di `laporan.md` → tempel ke Word → `npm run laporan:pull`.
+Dokumen lain merujuk ID, **jangan menyalin isinya**.
+
+## Laporan = Capstone.docx
+
+`docs/laporan/laporan.md` adalah **cermin** `Capstone.docx`, bukan sumber terpisah. Sebelum
+mengedit: `npm run laporan:pull` (kalau ada diff, itu perubahan tim di Word — commit dulu sebagai
+"sync dari docx"). Edit di `laporan.md` = usulan; `git diff` = daftar review/copas untuk pengguna.
 
 Sisanya dijelaskan di `docs/README.md`. Konvensi kode ada di `CLAUDE.md`.

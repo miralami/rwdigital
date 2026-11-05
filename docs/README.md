@@ -16,7 +16,7 @@ Dua jenis dokumen:
 | [`../AGENTS.md`](../AGENTS.md) | Aturan sesi AI: baca STATE, update, `npm run state` | saat aturan berubah |
 | [`dev/STATE.md`](dev/STATE.md) | Mini-Kanban lintas chat/device (ON PROGRESS · TODO · BLOCKED · ACTIVE FILES) | **sebelum setiap commit** |
 | [`../PROJECT.md`](../PROJECT.md) | Scope fitur, aktor, status modul | saat fitur/scope berubah |
-| [`laporan/laporan.md`](laporan/laporan.md) | ⭐ Otoritas isi laporan (Bab I–VII) | saat keputusan laporan berubah |
+| [`laporan/laporan.md`](laporan/laporan.md) | Cermin teks `Capstone.docx` (artefak asli). Edit = usulan; `git diff` = daftar review/copas | `npm run laporan:pull` sebelum & sesudah tempel ke Word |
 | [`laporan/bab4-plan.md`](laporan/bab4-plan.md) | Rencana Bab IV: struktur, isi subbab, PIC per artefak, jadwal (keputusan → `keputusan.md`) | saat rencana Bab IV bergerak |
 
 Sisanya **tidak** perlu disentuh tiap commit.

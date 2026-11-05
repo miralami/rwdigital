@@ -18,7 +18,8 @@
 		"test:e2e": "playwright test",
 		"test:e2e:ui": "playwright test --ui",
 		"state": "node scripts/state.mjs",
-		"state:check": "node scripts/state.mjs --check"
+		"state:check": "node scripts/state.mjs --check",
+		"laporan:pull": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/laporan-pull.ps1"
 	},
 	"engines": {
 		"node": ">=22.6"

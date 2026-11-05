@@ -1,6 +1,6 @@
 # PROJECT.md — RW Digital (Sistem Informasi RW)
 
-> **Otoritas tertinggi proyek: `docs/laporan/laporan.md`.** Dokumen ini (dan `docs/arsip/plan.md`,
+> **Otoritas tertinggi proyek: `Capstone.docx`** (cermin teks: `docs/laporan/laporan.md`, keputusan: `docs/keputusan.md`). Dokumen ini (dan `docs/arsip/plan.md`,
 > `docs/checklist.md`) adalah dokumen pendukung yang diselaraskan ke laporan.
 > Status pengerjaan aktual per modul: `docs/kanban/backlog.md`.
 
@@ -135,7 +135,7 @@ Data eksternal (mis. statistik penetrasi internet nasional, adopsi QRIS nasional
 ## Referensi
 
 - `CLAUDE.md` — panduan kerja untuk Claude Code di repo ini
-- `docs/laporan/laporan.md` — laporan capstone (otoritas tertinggi)
+- `docs/laporan/laporan.md` — cermin teks `Capstone.docx` (artefak asli)
 - `docs/kanban/backlog.md` — status pengerjaan aktual per modul
 - `docs/checklist.md` — checklist fitur untuk presentasi ke RW
 

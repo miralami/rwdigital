@@ -1,7 +1,7 @@
 # Register Keputusan — RW Digital
 
 > **Satu-satunya tempat keputusan lintas dokumen.** Kalau sebuah keputusan berubah, ubah **di sini
-> dulu**, lalu turunkan ke `laporan/laporan.md` (prosa) → Word. Dokumen lain (`bab4-plan.md`,
+> dulu**, lalu tulis usulan prosanya di `laporan/laporan.md` (cermin docx) → tempel ke Word. Dokumen lain (`bab4-plan.md`,
 > `strategi-dokumentasi.md`, `PROJECT.md`, `kanban/*`) **hanya merujuk ID** (`K-03`), tidak
 > menyalin isinya.
 >
@@ -158,4 +158,13 @@ Tidak mengklaim Figma. Sementara pakai `docs/design-preview/`; reverse engineer 
 2. Konfirmasi nama PIC di `bab4-plan.md` §7 (terutama Josua & Safira).
 3. Lampirkan bukti run CI (K-07).
 4. Jadwalkan UAT (K-08) lewat Zidan.
-5. Sinkronkan `laporan.md` → Capstone.docx (skill `capstone-word`) setelah K-01 diputuskan.
+5. **Draf repo yang belum ada di Word** (per tarikan 5 Nov 2026; teks lengkap:
+   `git show ac01721:docs/laporan/laporan.md`). Putuskan mana yang masuk docx:
+   - Judul baru (K-01) — docx masih `(Judul)`
+   - §1.2.1–1.2.3 (Fishbone, solusi, solusi dipilih) · §1.3 Perumusan Masalah
+   - §2.2.1 SI-RW · §2.2.2 PWA · §2.2.3 I&I / Kanban / MoSCoW (K-03) · §2.2.6 UML & ERD · §2.2.7 tech stack & pengujian
+   - §3.2.1 regulasi lembaga kemasyarakatan · §3.3.4 Spesifikasi Fungsional
+   - §3.5.1–3.5.5 (docx masih punya versi lama §3.5 tanpa subbab) · §3.1 butir 2 (K-05)
+   - Daftar Pustaka (+ Larman & Basili 2003)
+   - Sebaliknya, docx punya §2.2.3 "Teori Software Engineering dan Arsitektur Perangkat Lunak" yang tidak ada di draf repo.
+6. Docx berisi **daftar isi berulang** (±3 blok TOC di awal) — rapikan di Word.
