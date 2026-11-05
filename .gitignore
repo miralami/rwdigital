@@ -35,3 +35,5 @@ local.db-shm
 
 /static/uploads/surat
 local.db.bak
+# Lembar copas laporan (sementara, dibuat npm run laporan:usulan)
+docs/laporan/usulan.md

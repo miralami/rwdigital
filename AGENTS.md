@@ -30,8 +30,16 @@ Dokumen lain merujuk ID, **jangan menyalin isinya**.
 
 ## Laporan = Capstone.docx
 
-`docs/laporan/laporan.md` adalah **cermin** `Capstone.docx`, bukan sumber terpisah. Sebelum
-mengedit: `npm run laporan:pull` (kalau ada diff, itu perubahan tim di Word — commit dulu sebagai
-"sync dari docx"). Edit di `laporan.md` = usulan; `git diff` = daftar review/copas untuk pengguna.
+`docs/laporan/laporan.md` adalah **cermin** `Capstone.docx`, bukan sumber terpisah.
+Setiap kali pengguna minta "update laporan" / "diff", jalankan alur ini **tanpa ditanya**:
+
+1. `npm run laporan:pull` — tarik docx (read-only) dan auto-commit `sync(docx)` kalau berubah.
+   Ditolak kalau `laporan.md` punya perubahan belum di-commit → commit usulan dulu.
+2. Edit `laporan.md` di posisi yang sesuai struktur docx (usulan).
+3. Commit usulan: `docs(laporan): usulan <topik>`.
+4. `npm run laporan:usulan` → `docs/laporan/usulan.md` (gitignored): lembar copas per lokasi
+   (GANTI/SISIPKAN/HAPUS + teks bersih). Beri tahu pengguna jumlah usulan & tautkan file ini.
+5. Setelah pengguna menempel ke Word → `npm run laporan:pull` lagi; ia melaporkan baris usulan
+   yang belum masuk Word.
 
 Sisanya dijelaskan di `docs/README.md`. Konvensi kode ada di `CLAUDE.md`.

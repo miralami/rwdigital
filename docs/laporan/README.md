@@ -21,6 +21,11 @@
 | `referensi/` | `analisis-panduan.md` · `bibliography.md` (dipakai) · `daftar-pustaka.md` · `contohlaporan.md` |
 | `arsip/` | Dokumen laporan usang (lihat `arsip/README.md`) |
 
+## Alur copas ke Word
+
+`npm run laporan:pull` → (Claude menulis usulan di `laporan.md` + commit) → `npm run laporan:usulan`
+→ buka **`usulan.md`**, tempel tiap blok ke Word (Ctrl+Shift+V) → `npm run laporan:pull` lagi.
+
 ## Peta copas ke Word
 
 | Bagian Word | Sumber | Status |

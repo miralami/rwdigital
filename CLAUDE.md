@@ -58,6 +58,10 @@ npx drizzle-kit migrate
 # belum tersambung ke script mana pun — `db:setup`/`db:auth` hanya menerima URL
 # `file:`, jadi jangan arahkan TURSO_DATABASE_URL ke 127.0.0.1:8080.
 
+# Laporan: tarik Capstone.docx -> laporan.md (cermin), lalu buat lembar copas usulan
+npm run laporan:pull
+npm run laporan:usulan
+
 # Build production
 npm run build
 ```

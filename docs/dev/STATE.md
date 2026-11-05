@@ -5,14 +5,14 @@
 > satu baris per item. Riwayat detail = `git log`.
 
 <!-- auto:start -->
-**updated** 2026-11-05 21:32 · **branch** `docs/metodologi-rw-digital` · **device** `DESKTOP-D0MPL84`
+**updated** 2026-11-05 21:40 · **branch** `docs/metodologi-rw-digital` · **device** `DESKTOP-D0MPL84`
 
 ### DONE (5 commit sebelum commit ini)
+- `f0628c0` docs(laporan): laporan.md jadi cermin Capstone.docx + npm run laporan:pull
 - `ac01721` docs: register keputusan tunggal docs/keputusan.md (K-01..K-12)
 - `e3ec6b3` docs(laporan): reframing metodologi I&I + Kanban dan judul "Rancang Bangun RW Digital"
 - `b55328e` docs: dev-state lintas sesi + rapikan .md (5 working docs, sisanya reference/legacy)
 - `6bb2a49` docs(laporan): rencana Bab IV v3, strategi dokumentasi, dan handover kit
-- `c3fb151` feat: add electronic signature functionality and related database changes
 <!-- auto:end -->
 
 ## ON PROGRESS
