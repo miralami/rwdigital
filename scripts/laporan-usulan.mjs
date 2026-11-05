@@ -23,12 +23,11 @@ const norm = (s) => {
 	}
 	return t;
 };
-// Teks Word untuk di-copy: markup dibuang, sel tabel dipisah tab.
-const plain = (raw) => {
-	const t = raw.trim();
-	if (t.startsWith('|')) return t.replace(/^\||\|$/g, '').split('|').map((c) => c.replace(/\*/g, '').trim()).join('\t');
-	return t.replace(/\*/g, '').replace(/^(#{1,6}\s+|>\s*|[-+]\s+|\d+[.)]\s+)/, '').trim();
-};
+// Blok usulan ditulis sebagai Markdown (bukan blok kode) supaya bold/italic/tabel ikut saat
+// disalin dari tampilan render. Baris daftar & tabel tetap rapat; paragraf dipisah baris kosong.
+const isListish = (raw) => /^(\|| *[-+] |\d+[.)] )/.test(raw);
+const blockOf = (g) =>
+	g.map((x, k) => (k === 0 ? '' : isListish(x.raw) && isListish(g[k - 1].raw) ? '\n' : '\n\n') + x.raw).join('');
 const clip = (s, n = 90) => (s.length > n ? s.slice(0, n) + '…' : s);
 const HEAD_CERMIN = /^(BAB\s+[IVX]+\b|\d+(\.\d+)+\.?\s+\S|DAFTAR PUSTAKA|ABSTRAK|LAMPIRAN)/i;
 
@@ -108,7 +107,7 @@ const out = [
 	'',
 	`> Dibuat ${new Date().toLocaleString('sv-SE').slice(0, 16)} dari perbandingan \`laporan.md\` vs \`cermin.txt\` ` +
 		'(cermin Word terakhir). File sementara (gitignored) — jangan diedit; edit `laporan.md` lalu jalankan ulang `npm run laporan:usulan`.',
-	'> Cara tempel: salin blok teks, di Word **Ctrl+Shift+V** (Keep Text Only). Baris berisi tab = tabel → *Insert → Table → Convert Text to Table*.',
+	'> Cara tempel: salin dari tampilan render (bukan blok kode), lalu di Word Ctrl+V biasa — bold, italic, dan tabel ikut.',
 	'> Selesai menempel? Jalankan `npm run laporan:pull` — ia memberi tahu baris usulan yang belum masuk Word.',
 	''
 ];
@@ -120,7 +119,7 @@ addGroups.forEach((g, k) => {
 	for (let i = first - 1; i >= 0; i--) if (!changed[i].add) { prev = changed[i].n; break; }
 	out.push(`### ${k + 1}. ${headingAboveMd(first)}`, '');
 	out.push(`**Setelah paragraf:** «${clip(prev || 'awal dokumen')}»`, '');
-	out.push('```text', g.map((x) => plain(x.raw)).join('\n'), '```', '');
+	out.push(blockOf(g), '');
 });
 
 out.push(`## B. Hapus / ganti di Word (${delGroups.length} lokasi)`, '');

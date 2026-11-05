@@ -56,6 +56,8 @@ Setiap kali pengguna minta "update laporan" / "diff", jalankan alur ini **tanpa 
 - Satu paragraf = satu baris (jangan dipotong per baris). Antarparagraf dipisah baris kosong.
 - Daftar: `1.` untuk nomor, `-` untuk butir. Huruf `a.`/`b.` ditulis di teks.
 - Tabel: Markdown `| … |` dengan baris header (isi sel persis seperti di Word).
+- Bold dan italic dipakai bebas (label, caption, istilah asing, judul buku). `usulan.md` menulisnya
+  sebagai Markdown, jadi ikut saat disalin dari tampilan render ke Word. Sinkronisasi mengabaikannya.
 - Gambar: komentar `<!-- [Gambar x.y — tempel di Word] -->` lalu caption `**Gambar x.y** …`.
 - Komentar `<!-- … -->` dan baris pemisah tabel diabaikan perbandingan.
 - Daftar isi, nomor halaman, daftar gambar/tabel: **tidak ditulis** (dibuat Word).
