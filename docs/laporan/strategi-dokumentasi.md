@@ -75,41 +75,9 @@ bukan history-nya (jangan rewrite git).
 
 ## 3. Reframing yang Jujur dan Justru Lebih Kuat
 
-### 3.1 Framing: siklus Iterative & Incremental, Kanban sebagai pengelola alur kerja
+### 3.1 Framing → `../keputusan.md` K-03 & K-04
 
-**Jangan ganti metodenya — ganti framing-nya.** Kanban bukan SDLC penuh, jadi secara akademik
-paling rapi kalau dipasangkan dengan siklus pengembangan. Rumusan yang dipakai:
-
-> Pengembangan Sistem Informasi RW dilaksanakan dalam siklus ***iterative and incremental***.
-> Setiap iterasi menghasilkan penambahan atau penyempurnaan fitur yang tetap berfungsi.
-> **Arah setiap iterasi ditentukan oleh umpan balik pengurus RW 06 terhadap hasil iterasi
-> sebelumnya**, sehingga revisi terjadi bertahap. Di dalam setiap iterasi, alur kerja dikendalikan
-> melalui **papan Kanban enam tahap** dan prioritisasi **MoSCoW**. Siklus berjalan dalam tiga
-> gelombang: **Iterasi 1 (MVP)**, **Iterasi 2 (penyempurnaan keuangan dan portal)**, dan
-> **Iterasi 3 (RBAC, notifikasi, dan konsolidasi kependudukan)**. Kanban diadopsi pada minggu ketiga
-> dan menjadi alat kendali utama sejak Iterasi 2.
-
-Mengapa ini yang dipilih (dan bukan yang lain):
-
-| Opsi | Bukti yang kita punya | Risiko klaim | Biaya ubah |
-|---|---|---|---|
-| **I&I + Kanban** (dipakai) | Papan GitHub Projects, issue = kartu, MoSCoW, WIP, dua gelombang iterasi nyata | Rendah — justru paling cocok | Kecil: judul §2.2.3 + 1 paragraf + panah loop §3.5.1 |
-| Kanban saja (sekarang) | Sama, tapi iterasi 2/3 tidak punya tempat | Rendah | 0 |
-| Scrum | Tidak ada sprint planning/review/retro, PO/SM | **Tinggi** — harus mengarang 4 jenis artefak | Besar |
-| Waterfall | Terbantah: 12.229 baris kode 28 Sep, dokumen desain belakangan | **Sangat tinggi** | Sangat besar |
-| Prototyping / RAD | Fase awal memang build-first | Sedang — harus jelaskan kenapa desain menyusul | Sedang |
-
-Efeknya ke narasi fase (tetap dipakai, tapi sebagai **isi iterasi**, bukan sebagai "kematangan
-proses yang naik"):
-
-- Iterasi 1 menjelaskan kenapa 21 kartu `Done` berasal dari back-fill dan kenapa papan baru
-  diadopsi 12 Okt;
-- Iterasi 2 & 3 menjelaskan lonjakan 29 → 61 kartu tanpa perlu klaim "Kanban sejak awal";
-- MK **Manajemen Proyek & PL** tetap kuat karena ada retrospektif + perbaikan berkesinambungan;
-- sejalan dengan §4.1.6b yang sudah menulis rekonstruksi as-is.
-
-**Yang harus dihindari:** menyebut Scrum hanya karena ada iterasi; menyebut Waterfall hanya karena
-urutan bab I–VII linear; dan kalimat "Kanban sejak awal".
+Rumusan, alasan pemilihan (tabel opsi), dan bukti iterasi dipindah ke register keputusan.
 
 ### 3.2 Peran: pemilik domain ≠ penulis kode
 
@@ -176,27 +144,14 @@ Alizha bisa menyusun tabel uji, Safira bisa memetakan layar.
 | Bab | Konsekuensi dari temuan ini |
 |---|---|
 | **III** | §3.5 harus versi Kanban (bukan 7 tahap generik) + **panah loop "Iterasi berikutnya"** dari tahap 6 ke tahap 1, karena tanpa loop klaim I&I tidak terlihat. §3.3.4 FR: satu paragraf rujukan ke 4.1.1d (FR seluruhnya di Bab IV) |
-| **II** | Wajib tambah teori: BPMN, ArchiMate, Interaction Design, Kanban/MoSCoW, UML/ERD, Black Box. Tanpa ini, artefak Bab IV tanpa dasar. **§2.2.3 diganti judul** menjadi "Siklus Iterative & Incremental dan Kanban sebagai Metode Pengelolaan Alur Kerja" |
-| **Abstrak** | Tambah satu klausa: *"dengan Kanban sebagai metode pengelolaan alur kerja dalam siklus iteratif-incremental"* |
+| **II** | Wajib tambah teori: BPMN, ArchiMate, Interaction Design, Kanban/MoSCoW, UML/ERD, Black Box. Tanpa ini, artefak Bab IV tanpa dasar. §2.2.3 sudah dipecah menjadi IID / Kanban / MoSCoW (K-03) |
+| **Judul/Abstrak** | Lihat K-01 (judul baru menunggu pembimbing; fallback = klausa di abstrak) |
 | **V** | Biaya bisa dihitung dari **data commit** (rentang waktu, jumlah commit per fase, jam kerja) — jauh lebih kredibel daripada angka karangan. Ini nilai plus |
 | **VI** | UAT adalah bukti **validasi**. **Mitra RW 06 masih dapat diakses** dan revisi tiap iterasi memang berasal dari mereka, jadi UAT dijadwalkan **23–24 Nov 2026**. Siapkan berita acara + rekap temuan; pertimbangkan SUS sebagai pelengkap |
 | **VII** | Kesimpulan harus cocok: 61/68 kartu selesai, 4 Todo, 3 Won't — bukan "seluruh sistem selesai" |
 
 ---
 
-## 6. Status Keputusan
+## 6. Status Keputusan → `../keputusan.md`
 
-Semua keputusan inti sudah final:
-
-| Keputusan | Nilai |
-|---|---|
-| Framing | **I&I + Kanban** (§3.1) |
-| Lokasi FR & NFR | **Seluruhnya di Bab IV** (4.1.1d–e) |
-| Pembagian kerja | **Per artefak**, bukan per fitur |
-| Pengujian | **CI + Black Box**; tanpa klaim peer review |
-| UAT | **Pengurus RW 06**, 23–24 Nov 2026 |
-| Tenggat Bab IV | **26 Nov 2026** |
-| Handover kit | **Sudah digenerate** → `handover-kit.md` |
-
-Sisa tindakan (bukan keputusan): konfirmasi nama PIC, lampirkan bukti run CI, dan jadwalkan UAT
-lewat Zidan.
+Semua keputusan (K-01 … K-12) dan sisa tindakan ada di register keputusan.

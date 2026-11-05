@@ -6,8 +6,9 @@
 
 | File | Isi |
 |---|---|
-| `laporan.md` | ⭐ Otoritas isi laporan (Bab I–VII). §3.5 sudah versi Kanban |
-| `bab4-plan.md` | Rencana final Bab IV: framing I&I + Kanban, struktur 4.1.1–4.1.6, PIC per artefak, jadwal 6–26 Nov 2026 |
+| `../keputusan.md` | ⭐ Register keputusan (judul, metodologi, iterasi, dll.) — ubah di sini dulu |
+| `laporan.md` | Otoritas **isi/prosa** laporan (Bab I–VII), diturunkan dari `keputusan.md` |
+| `bab4-plan.md` | Rencana Bab IV: struktur 4.1.1–4.1.6, isi subbab, PIC per artefak, jadwal 6–26 Nov 2026 |
 
 ## Reference
 

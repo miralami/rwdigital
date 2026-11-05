@@ -8,21 +8,8 @@
 
 Aplikasi digitalisasi administrasi tingkat RW (Rukun Warga), dikembangkan sebagai capstone project bersama mitra RW nyata. Tujuannya membantu pengurus RW mengelola data kependudukan, keuangan kas, iuran warga, informasi/pengumuman, dan (berpotensi) surat-menyurat — secara terpusat, menggantikan proses yang saat ini tersebar di WhatsApp, dokumen fisik, dan spreadsheet terpisah per RT.
 
-**Nama produk:** **RW Digital** (dipakai di judul laporan, manifest PWA, dan Bab III–IV).
-"SI-RW" dipakai hanya untuk konsep umum sistem informasi tingkat RW (teori Bab II).
-
-**Judul laporan (usulan 5 Nov 2026, menunggu persetujuan pembimbing):** *Rancang Bangun RW Digital:
-Sistem Informasi Administrasi Rukun Warga Berbasis Web Menggunakan Metode Iterative and Incremental
-Development (Studi Kasus: RW 06 Kelurahan Kota Baru, Kota Bekasi).*
-
-## Metodologi Pengembangan
-
-- **Model proses:** Iterative and Incremental Development. Incremental = modul dibangun dan
-  diintegrasikan bertahap; iterative = implementasi yang sudah ada dievaluasi dan dirombak bila
-  perlu (contoh: arsitektur Kas RT mandiri → setoran RT ke RW → satu payment gateway ke RW).
-- **Manajemen kerja:** Kanban (GitHub Projects/Issues, PIC per kartu, feature branch + PR, CI).
-- **Prioritisasi:** MoSCoW.
-- Tidak mengklaim Scrum/Agile formal, sprint, atau peer code review tanpa bukti.
+**Nama produk:** **RW Digital**. Judul laporan, istilah, dan metodologi (I&I + Kanban + MoSCoW)
+diputuskan di [`docs/keputusan.md`](docs/keputusan.md) — K-01, K-02, K-03.
 
 ## Prinsip Pengembangan
 
@@ -37,7 +24,7 @@ Pada Iterasi 1, regulasi resmi menjadi dasar utama penentuan scope — dengan as
 
 ## Status Fitur (Final — Berdasarkan Regulasi & Plausibility Analysis)
 
-> Feature set ini dimulai dari analisis regulasi resmi (UU Desa 6/2014, Permendagri 18/2018), lalu **direvisi bertahap berdasarkan umpan balik pengurus RW 06** pada Iterasi 1–3. Kronologi lengkap ada di `docs/laporan/bab4-plan.md` §2 dan `docs/laporan/strategi-dokumentasi.md` §3.1.
+> Feature set ini dimulai dari analisis regulasi resmi (UU Desa 6/2014, Permendagri 18/2018), lalu **direvisi bertahap berdasarkan umpan balik pengurus RW 06** pada Iterasi 1–3. Kronologi iterasi ada di `docs/keputusan.md` K-04.
 
 ### Core MVP & High Priority (Status Terkini: Selesai / Implemented)
 

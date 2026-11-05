@@ -2,18 +2,22 @@
 
 Dua jenis dokumen:
 
-- **Working (5 file)** — wajib dibaca & di-update. Kalau ada yang basi, itu bug.
+- **Keputusan (1 file)** — [`keputusan.md`](keputusan.md): judul, istilah, metodologi, iterasi,
+  mitra, WIP, pengujian, UAT, tenggat. **Ubah keputusan di sini dulu**, dokumen lain hanya merujuk
+  ID-nya (`K-03`).
+- **Working (6 file)** — wajib dibaca & di-update. Kalau ada yang basi, itu bug.
 - **Reference / Legacy** — dibaca saat butuh, tidak perlu di-update tiap commit.
 
 ## 1. Working docs (update tiap commit)
 
 | File | Isi | Kapan di-update |
 |---|---|---|
+| [`keputusan.md`](keputusan.md) | ⭐ Register keputusan K-01 … K-12 (satu sumber) | **saat keputusan apa pun berubah** |
 | [`../AGENTS.md`](../AGENTS.md) | Aturan sesi AI: baca STATE, update, `npm run state` | saat aturan berubah |
 | [`dev/STATE.md`](dev/STATE.md) | Mini-Kanban lintas chat/device (ON PROGRESS · TODO · BLOCKED · ACTIVE FILES) | **sebelum setiap commit** |
 | [`../PROJECT.md`](../PROJECT.md) | Scope fitur, aktor, status modul | saat fitur/scope berubah |
 | [`laporan/laporan.md`](laporan/laporan.md) | ⭐ Otoritas isi laporan (Bab I–VII) | saat keputusan laporan berubah |
-| [`laporan/bab4-plan.md`](laporan/bab4-plan.md) | Rencana Bab IV: struktur, PIC per artefak, jadwal, keputusan | saat rencana Bab IV bergerak |
+| [`laporan/bab4-plan.md`](laporan/bab4-plan.md) | Rencana Bab IV: struktur, isi subbab, PIC per artefak, jadwal (keputusan → `keputusan.md`) | saat rencana Bab IV bergerak |
 
 Sisanya **tidak** perlu disentuh tiap commit.
 
@@ -29,7 +33,7 @@ Sisanya **tidak** perlu disentuh tiap commit.
 | [`kanban/konfirmasi-stakeholder.md`](kanban/konfirmasi-stakeholder.md) | Asumsi yang perlu dikonfirmasi ke mitra |
 | [`kanban/temuan-inkonsistensi.md`](kanban/temuan-inkonsistensi.md) | Temuan F1–F7 & arah penyelesaian |
 | [`laporan/handover-kit.md`](laporan/handover-kit.md) | Bahan Bab IV dari repo: 41 route, 26 tabel, peta FR, inventaris uji |
-| [`laporan/strategi-dokumentasi.md`](laporan/strategi-dokumentasi.md) | Bukti commit/PR, klaim vs realita, framing I&I + Kanban |
+| [`laporan/strategi-dokumentasi.md`](laporan/strategi-dokumentasi.md) | Bukti commit/PR, klaim vs realita, peran per orang |
 | [`laporan/pembagian-tugas.md`](laporan/pembagian-tugas.md) | Siapa mengerjakan apa (kartu, sub-bab, artefak) |
 | [`laporan/diagram-prompts.md`](laporan/diagram-prompts.md) | Prompt Visual Paradigm AI untuk semua diagram |
 | [`laporan/referensi/`](laporan/referensi/) | `analisis-panduan` · `bibliography` (dipakai) · `daftar-pustaka` (lengkap) · `contohlaporan` |

@@ -15,10 +15,16 @@ Kalau bekerja dari device lain: `git pull --rebase` dulu sebelum mengedit `STATE
 
 ## Dokumen yang boleh diubah
 
-Hanya 5 file ini yang berstatus *working* — selain itu **reference/legacy**, jangan diperbarui
+Hanya 6 file ini yang berstatus *working* — selain itu **reference/legacy**, jangan diperbarui
 kecuali memang diminta:
 
-`AGENTS.md` · `docs/dev/STATE.md` · `PROJECT.md` · `docs/laporan/laporan.md` ·
+`docs/keputusan.md` · `AGENTS.md` · `docs/dev/STATE.md` · `PROJECT.md` · `docs/laporan/laporan.md` ·
 `docs/laporan/bab4-plan.md`
+
+## Keputusan = satu tempat
+
+Keputusan lintas dokumen (judul, istilah, metodologi, iterasi, mitra, WIP, pengujian, UAT, tenggat)
+hanya ditulis di `docs/keputusan.md` dengan ID `K-xx`. Urutan kalau berubah:
+`keputusan.md` → `laporan.md` (prosa) → Word. Dokumen lain merujuk ID, **jangan menyalin isinya**.
 
 Sisanya dijelaskan di `docs/README.md`. Konvensi kode ada di `CLAUDE.md`.

@@ -121,6 +121,7 @@ drizzle.config.ts          ← Drizzle kit config
 
 ## Referensi
 
+- `docs/keputusan.md` — **register keputusan** (judul, istilah, metodologi, iterasi, dll.); ubah di sini dulu
 - `PROJECT.md` — konteks produk, scope fitur, dan status tiap modul
 - `docs/laporan/laporan.md` — laporan capstone
 - `docs/checklist.md` — checklist fitur untuk presentasi ke RW
