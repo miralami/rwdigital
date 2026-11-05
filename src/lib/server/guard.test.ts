@@ -162,6 +162,29 @@ describe('enforceAccess() — izin modul', () => {
 		expect(() => enforceAccess(ctx('/pengaturan', locals))).not.toThrow();
 	});
 
+	it('tamu tanpa sesi di /pengaturan diarahkan ke login, bukan 403', () => {
+		const locals = { user: null, izin: {} } as unknown as App.Locals;
+		const hasil = tangkap(() => enforceAccess(ctx('/pengaturan', locals)));
+		expect(hasil.status).toBe(302);
+		expect(hasil.location).toMatch(/^\/login/);
+	});
+
+	it('warga di /pengaturan diarahkan ke portal, bukan 403', () => {
+		const hasil = tangkap(() => enforceAccess(ctx('/pengaturan', lokal('warga', {}))));
+		expect(hasil.status).toBe(302);
+		expect(hasil.location).toBe('/portal');
+	});
+
+	it('portal iuran/surat tetap butuh izin modul (fail-closed)', () => {
+		const tanpaIzin = lokal('peran_asing', {});
+		expect(tangkap(() => enforceAccess(ctx('/portal/iuran', tanpaIzin))).status).toBe(403);
+		expect(tangkap(() => enforceAccess(ctx('/portal/surat/ajukan', tanpaIzin))).status).toBe(403);
+
+		const wargaBiasa = lokal('warga', { iuran: ['read'], surat: ['read', 'create'] });
+		expect(() => enforceAccess(ctx('/portal/iuran', wargaBiasa))).not.toThrow();
+		expect(() => enforceAccess(ctx('/portal/surat/ajukan', wargaBiasa))).not.toThrow();
+	});
+
 	it('warga di surface staf diarahkan ke portal', () => {
 		const locals = lokal('warga', {});
 		const hasil = tangkap(() => enforceAccess(ctx('/kas', locals)));

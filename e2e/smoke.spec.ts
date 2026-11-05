@@ -15,7 +15,9 @@ const AKUN = {
 } as const;
 
 async function login(page: Page, akun: { email: string; password: string }) {
-  await page.goto('/login');
+  // Tunggu hidrasi selesai; kalau form diisi lebih dulu, Svelte mengosongkan
+  // input saat hidrasi dan login tidak pernah terkirim (flaky di mode dev).
+  await page.goto('/login', { waitUntil: 'networkidle' });
   await page.getByLabel('Alamat Email').fill(akun.email);
   await page.getByLabel('Kata Sandi').fill(akun.password);
   await page.getByRole('button', { name: /Masuk ke Sistem/ }).click();

@@ -139,8 +139,17 @@ export const load: PageServerLoad = async ({ locals }) => {
     }))
   };
 
+  // Jendela tayang pengumuman (EV-01): yang belum mulai / sudah lewat tidak
+  // publik. `substr` karena kolom bisa berisi tanggal saja atau tanggal+jam.
+  const hariIni = new Date().toISOString().slice(0, 10);
+  const sedangTayang = and(
+    eq(pengumuman.ditampilkan, true),
+    sql`(${pengumuman.tanggalMulai} IS NULL OR substr(${pengumuman.tanggalMulai}, 1, 10) <= ${hariIni})`,
+    sql`(${pengumuman.tanggalSelesai} IS NULL OR substr(${pengumuman.tanggalSelesai}, 1, 10) >= ${hariIni})`
+  );
+
   // 4. Pengumuman aktif terbaru untuk modul "Pengumuman & Agenda".
-  //    Hanya yang ditandai tampil; murni informasi publik, tanpa data pribadi.
+  //    Hanya yang sedang tayang; murni informasi publik, tanpa data pribadi.
   const pengumumanRows = await db
     .select({
       id: pengumuman.id,
@@ -150,7 +159,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       createdAt: pengumuman.createdAt
     })
     .from(pengumuman)
-    .where(eq(pengumuman.ditampilkan, true))
+    .where(sedangTayang)
     .orderBy(desc(pengumuman.createdAt))
     .limit(4);
 
@@ -162,27 +171,27 @@ export const load: PageServerLoad = async ({ locals }) => {
     ...komponenTanggal(p.createdAt)
   }));
 
-  // 5. Agenda mendatang — diturunkan dari pengumuman yang punya tanggal mulai
-  //    di masa depan (tidak ada tabel Event terpisah di MVP). Perbandingan
-  //    string aman karena tanggal disimpan sebagai ISO "YYYY-MM-DD".
-  const hariIni = new Date().toISOString().slice(0, 10);
+  // 5. Agenda mendatang — pengumuman sedang tayang yang punya tanggal KEGIATAN
+  //    (`tanggalMulaiEvent`) hari ini atau setelahnya. Bukan `tanggalMulai`:
+  //    itu tanggal mulai tayang; memakainya membuat pengumuman terjadwal bocor
+  //    ke publik, sementara kegiatan yang sudah tayang tidak pernah muncul.
   const agendaRows = await db
     .select({
       id: pengumuman.id,
       judul: pengumuman.judul,
       isi: pengumuman.isi,
       kategori: pengumuman.kategori,
-      tanggalMulai: pengumuman.tanggalMulai
+      tanggalMulai: pengumuman.tanggalMulaiEvent
     })
     .from(pengumuman)
     .where(
       and(
-        eq(pengumuman.ditampilkan, true),
-        isNotNull(pengumuman.tanggalMulai),
-        gte(pengumuman.tanggalMulai, hariIni)
+        sedangTayang,
+        isNotNull(pengumuman.tanggalMulaiEvent),
+        gte(sql`substr(${pengumuman.tanggalMulaiEvent}, 1, 10)`, hariIni)
       )
     )
-    .orderBy(asc(pengumuman.tanggalMulai))
+    .orderBy(asc(pengumuman.tanggalMulaiEvent))
     .limit(3);
 
   const agenda: AgendaPublik[] = agendaRows

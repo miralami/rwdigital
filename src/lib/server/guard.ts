@@ -82,7 +82,11 @@ const MODUL_RUTE: readonly {
   { prefix: '/kas', modul: 'kas' },
   { prefix: '/iuran', modul: 'iuran' },
   { prefix: '/pengumuman', modul: 'pengumuman' },
-  { prefix: '/surat', modul: 'surat' }
+  { prefix: '/surat', modul: 'surat' },
+  // Portal warga: data dibatasi per KK pemilik akun, tetapi izin modul tetap
+  // dicek supaya peran tak dikenal / izin yang dicabut lewat UI tidak lolos.
+  { prefix: '/portal/iuran', modul: 'iuran' },
+  { prefix: '/portal/surat', modul: 'surat' }
 ];
 
 /** Modul yang dibutuhkan sebuah pathname, atau null kalau halaman bebas modul. */
@@ -196,15 +200,6 @@ export function enforceAccess(ctx: GuardContext): void {
   const { pathname } = ctx.url;
   const group = matchRouteGroup(pathname);
 
-  // Pengaturan adalah area administratif: hanya akun yang boleh mengelola
-  // pengguna (memegang `user:list`) yang boleh masuk. Pengecekan ini sengaja
-  // lebih ketat daripada izin modul per halaman supaya Pengurus RT — yang
-  // punya `rt:read`/`pengurus:read` untuk kebutuhan tampilan — tidak bisa
-  // membuka area Pengaturan sama sekali.
-  if (matchesPrefix(pathname, [PENGATURAN_PREFIX]) && !bolehBukaModul(ctx.locals.izin, 'user')) {
-    throw error(403, 'Anda tidak punya akses ke area Pengaturan.');
-  }
-
   if (!group) {
     // Di luar daftar route group: auth-only, seperti sebelumnya.
     if (matchesPrefix(pathname, PROTECTED)) requireUser(ctx);
@@ -217,6 +212,16 @@ export function enforceAccess(ctx: GuardContext): void {
     // Warga yang mengetik surface staf diarahkan ke portalnya sendiri, bukan
     // diberi 403 — mereka memang punya "rumah" lain.
     throw redirect(302, WARGA_PORTAL);
+  }
+
+  // Pengaturan adalah area administratif: hanya akun yang boleh mengelola
+  // pengguna (memegang `user:list`) yang boleh masuk. Pengecekan ini sengaja
+  // lebih ketat daripada izin modul per halaman supaya Pengurus RT — yang
+  // punya `rt:read`/`pengurus:read` untuk kebutuhan tampilan — tidak bisa
+  // membuka area Pengaturan sama sekali. Dijalankan setelah cek sesi dan
+  // redirect warga supaya tamu tetap ke /login dan warga tetap ke portal.
+  if (matchesPrefix(pathname, [PENGATURAN_PREFIX]) && !bolehBukaModul(ctx.locals.izin, 'user')) {
+    throw error(403, 'Anda tidak punya akses ke area Pengaturan.');
   }
 
   // Izin modul: staf yang boleh membuka group tetap bisa ditolak per modul,
