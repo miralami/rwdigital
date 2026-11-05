@@ -64,11 +64,17 @@ Tiga gelombang iterasi kita nyata dan terdokumentasi, sehingga tidak perlu menga
 > konsolidasi kependudukan). Kanban diadopsi pada minggu ketiga dan menjadi alat kendali utama sejak
 > Iterasi 2."
 
-**Judul:** tetap `... MENGGUNAKAN METODOLOGI KANBAN` (hindari urusan administratif), tetapi
-§2.2.3 diganti judul menjadi **"Siklus Iterative & Incremental dan Kanban sebagai Metode Pengelolaan
-Alur Kerja"**, dan abstrak menambah satu klausa: *"dengan Kanban sebagai metode pengelolaan alur
-kerja dalam siklus iteratif-incremental"*. Kalau dosen mengizinkan ganti judul, baru naikkan I&I ke
-judul.
+**Judul (diperbarui 5 Nov 2026):** I&I dan nama produk naik ke judul →
+`RANCANG BANGUN RW DIGITAL: SISTEM INFORMASI ADMINISTRASI RUKUN WARGA BERBASIS WEB MENGGUNAKAN
+METODE ITERATIVE AND INCREMENTAL DEVELOPMENT (STUDI KASUS: RW 06 KELURAHAN KOTA BARU, KOTA BEKASI)`.
+**Menunggu persetujuan pembimbing.** Kalau ditolak, kembali ke judul lama dan tambahkan klausa di
+abstrak: *"dengan Kanban sebagai metode pengelolaan alur kerja dalam siklus iteratif-incremental"*.
+§2.2.3 di `laporan.md` sudah menjadi **"Siklus Iterative & Incremental, Kanban, dan Prioritisasi
+MoSCoW"** (2.2.3.1 IID · 2.2.3.2 Kanban · 2.2.3.3 MoSCoW).
+
+**Istilah:** **SI-RW** = konsep sistem informasi tingkat RW (teori, Bab II). **RW Digital** = produk
+kita (Bab III–IV, screenshot, studi kasus). "Rancang bangun" = analisis → desain → implementasi →
+pengujian dari nol; "dan Implementasi" hanya ditambahkan bila sistem benar-benar dipakai mitra.
 
 **Konsekuensi ke §3.5.1:** flowchart wajib punya **panah loop** dari tahap 6 kembali ke tahap 1
 berlabel "Iterasi berikutnya". Tanpa loop, klaim I&I tidak terlihat.
@@ -86,6 +92,20 @@ Status akhir 3 Nov: **61 Done · 0 In Progress · 4 Todo · 3 Won't**.
 **Pemicu iterasi:** Iterasi 2 dan 3 bukan sekadar "menambah fitur", melainkan merespons revisi
 pengurus RW 06 terhadap hasil iterasi sebelumnya (mis. alur iuran 2 tingkat, KK-first, TTD RT).
 Kalimat ini wajib muncul di 4.1.3a–c supaya klaim I&I punya sebab, bukan hanya kronologi.
+
+**Bukti iterasi terhadap implementasi yang sudah ada — modul Kas** (dipakai di 4.1.3b–c). Pemicunya:
+implementasi awal **belum berfungsi dan tidak sesuai** dengan alur kas yang dibutuhkan, ditemukan
+saat evaluasi hasil iterasi. Tulis apa adanya.
+
+| Versi | Commit / PR | Rancangan |
+|---|---|---|
+| A | `6162e8f` (#62, 28 Okt) | Kas RT mandiri + rekap iuran RT + Midtrans |
+| B | `300c14d`, `6aaabcd` (#64), `62da849` / `40d3f9c` (#65 / #85) | Setoran porsi RW dari RT ke Kas RW + rekonsiliasi |
+| C | `2a1a30c` (2 Nov) | Satu payment gateway ke RW; UI Kas RT disembunyikan, pembagian ke RT secara manual |
+
+Alasan perubahan: ruang lingkup kas sempat ambigu (RT saja atau RW saja), dan payment gateway
+terpisah per RT tidak layak diterapkan, sehingga dipilih satu gateway ke RW. Ini contoh terkuat
+bahwa iterasi menyentuh arsitektur dan logika bisnis, bukan sekadar bug fixing.
 
 ---
 
@@ -211,6 +231,10 @@ Draft lama `arsip/bab4-proses-perancangan.md` masih memakai 29 Done (19 Okt) →
 *"Kanban diadopsi pada minggu ketiga (commit `17da42b`) dan menjadi alat kendali utama sejak
 Iterasi 2; 21 kartu berstatus Done pada Iterasi 1 merupakan rekonstruksi as-is."* Ini yang membuat
 klaim Iterative & Incremental konsisten dengan `git log`.
+
+**WIP limit:** aturan 1–2 kartu per orang (≤ 10 per papan) ada di `kanban/workflow.md` §4 dan
+diaudit di `kanban/board.md` §3 (pelanggaran awal Josua 3 kartu → direkonsiliasi). Tulis di 4.1.3d
+sebagai aturan + temuan audit, bukan klaim "selalu patuh".
 
 **Strategi pengujian final (keputusan):** **CI + Black Box saja.** Tidak ada klaim peer review
 manual, tidak ada klaim UAT yang belum terjadi, tidak ada klaim pengujian yang tidak punya bukti.

@@ -27,7 +27,7 @@ Status: **aktif (rekonstruksi as-is + back-fill)** · Terakhir diperbarui: 12 Ok
 | **Kartu** | 1 item kerja konkret = 1 GitHub Issue | `[1][LP-01] Landing Page Publik (Statis)` |
 
 **Penting:** *WIP limit dihitung per kartu, bukan per Epic.* Kalau Track dianggap satu kartu, 5 orang
-langsung melanggar WIP limit 1–2 yang tertulis di `laporan.md` §2.2.3.1. Dengan Track sebagai Epic,
+langsung melanggar WIP limit 1–2 yang tertulis di `laporan.md` §2.2.3.2. Dengan Track sebagai Epic,
 satu orang boleh memegang 1 Epic sambil hanya membuka 1–2 kartu sekaligus.
 
 ### Peta Epic ↔ PIC
@@ -65,7 +65,7 @@ Kolom tambahan (bukan bagian 5 kolom laporan, dipakai sebagai penanda, bukan sta
 
 ## 4. WIP Limit
 
-- Batas **1–2 kartu `In Progress` per orang** (sesuai `laporan.md` §2.2.3.1).
+- Batas **1–2 kartu `In Progress` per orang** (sesuai `laporan.md` §2.2.3.2).
 - Batas total papan: **10 kartu** `In Progress` (5 orang × 2).
 - Satu kartu `Review / Verification` **tidak** dihitung sebagai WIP penulis kode, tetapi dihitung
   sebagai antrean peninjau → peninjau harus dipacu agar `Review` tidak menumpuk.

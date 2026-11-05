@@ -1,4 +1,4 @@
-# PROJECT.md — Sistem Informasi RW
+# PROJECT.md — RW Digital (Sistem Informasi RW)
 
 > **Otoritas tertinggi proyek: `docs/laporan/laporan.md`.** Dokumen ini (dan `docs/arsip/plan.md`,
 > `docs/checklist.md`) adalah dokumen pendukung yang diselaraskan ke laporan.
@@ -7,6 +7,22 @@
 ## Ringkasan
 
 Aplikasi digitalisasi administrasi tingkat RW (Rukun Warga), dikembangkan sebagai capstone project bersama mitra RW nyata. Tujuannya membantu pengurus RW mengelola data kependudukan, keuangan kas, iuran warga, informasi/pengumuman, dan (berpotensi) surat-menyurat — secara terpusat, menggantikan proses yang saat ini tersebar di WhatsApp, dokumen fisik, dan spreadsheet terpisah per RT.
+
+**Nama produk:** **RW Digital** (dipakai di judul laporan, manifest PWA, dan Bab III–IV).
+"SI-RW" dipakai hanya untuk konsep umum sistem informasi tingkat RW (teori Bab II).
+
+**Judul laporan (usulan 5 Nov 2026, menunggu persetujuan pembimbing):** *Rancang Bangun RW Digital:
+Sistem Informasi Administrasi Rukun Warga Berbasis Web Menggunakan Metode Iterative and Incremental
+Development (Studi Kasus: RW 06 Kelurahan Kota Baru, Kota Bekasi).*
+
+## Metodologi Pengembangan
+
+- **Model proses:** Iterative and Incremental Development. Incremental = modul dibangun dan
+  diintegrasikan bertahap; iterative = implementasi yang sudah ada dievaluasi dan dirombak bila
+  perlu (contoh: arsitektur Kas RT mandiri → setoran RT ke RW → satu payment gateway ke RW).
+- **Manajemen kerja:** Kanban (GitHub Projects/Issues, PIC per kartu, feature branch + PR, CI).
+- **Prioritisasi:** MoSCoW.
+- Tidak mengklaim Scrum/Agile formal, sprint, atau peer code review tanpa bukti.
 
 ## Prinsip Pengembangan
 
@@ -106,10 +122,14 @@ Justifikasi tiap fitur dalam laporan capstone mengikuti struktur:
 
 **Konteks digitalisasi → dasar regulasi (tupoksi RW) → plausibility analysis → kebutuhan sistem → fitur sebagai respons.**
 
-Karena mitra tidak dapat diwawancarai, justifikasi fitur mengacu pada:
+Pada tahap awal, sebelum kebutuhan mitra dapat dirumuskan secara lengkap, justifikasi fitur mengacu pada:
 1. **Regulasi resmi** — UU Desa 6/2014, Permendagri 18/2018 sebagai dasar tupoksi RW
 2. **Plausibility analysis** — evaluasi kelayakan implementasi untuk konteks capstone
 3. **Praktik umum** — de facto practices yang luas diterima di lingkungan RW Indonesia
+
+Hasilnya kemudian divalidasi dan direvisi bersama pengurus RW 06 pada setiap iterasi (wawancara,
+observasi, dan pembahasan hasil iterasi). Mitra dapat dilibatkan secara intensif; regulasi hanya
+dasar scope awal, bukan pengganti mitra.
 
 Data eksternal (mis. statistik penetrasi internet nasional, adopsi QRIS nasional) hanya dipakai sebagai konteks kelayakan teknologi secara umum.
 
@@ -118,7 +138,7 @@ Data eksternal (mis. statistik penetrasi internet nasional, adopsi QRIS nasional
 - [x] Diskusi awal & brainstorming fitur
 - [x] Draft checklist fitur lengkap untuk presentasi ke RW
 - [x] Draft latar belakang capstone (struktur sudah benar)
-- [x] Analisis regulasi & plausibility (pengganti wawancara mitra)
+- [x] Analisis regulasi & plausibility (dasar scope awal, lalu divalidasi mitra)
 - [x] Finalisasi scope MVP berdasarkan regulasi
 - [x] Penentuan tech stack & arsitektur
 - [x] Desain database

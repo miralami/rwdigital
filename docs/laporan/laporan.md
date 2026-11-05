@@ -1,5 +1,5 @@
 PROPOSAL CAPSTONE PROJECT
-SISTEM INFORMASI RW MENGGUNAKAN METODOLOGI KANBAN
+RANCANG BANGUN RW DIGITAL: SISTEM INFORMASI ADMINISTRASI RUKUN WARGA BERBASIS WEB MENGGUNAKAN METODE ITERATIVE AND INCREMENTAL DEVELOPMENT (STUDI KASUS: RW 06 KELURAHAN KOTA BARU, KOTA BEKASI)
 
  
 
@@ -30,9 +30,10 @@ BAB II  TINJAUAN PUSTAKA	16
 2.2.	Teori / Konsep Umum /  Model / Kerangka Standar Terkait Perancangan	18
 2.2.1.	Sistem Informasi Rukun Warga (SI-RW)	18
 2.2.2.	Website dan Progressive Web Application (PWA)	18
-2.2.3.	Manajemen Proyek: Metode Kanban & Prioritisasi MoSCoW	19
-2.2.3.1.	Metode Kanban dan GitHub Projects	19
-2.2.3.2.	Prioritisasi Kebutuhan dengan Metode MoSCoW	19
+2.2.3.	Siklus Iterative & Incremental, Kanban, dan Prioritisasi MoSCoW	19
+2.2.3.1.	Iterative and Incremental Development	19
+2.2.3.2.	Metode Kanban dan GitHub Projects	19
+2.2.3.3.	Prioritisasi Kebutuhan dengan Metode MoSCoW	19
 2.2.4.	Teori Data dan Kependudukan	20
 2.2.5.	Teori UI/UX & Interaksi	20
 2.2.6.	Software Engineering & Pemodelan Sistem (UML & ERD)	21
@@ -250,7 +251,7 @@ d.	Penyusunan rekapitulasi dan pelaporan, seperti rekap iuran dan laporan kas pe
 
 2.	Development (Systems Analysis & Design dan Application Development)
 Domain Development mencakup siklus hidup pengembangan aplikasi, mulai dari analisis dan perancangan sistem hingga pemrograman aplikasi, termasuk pemrograman web dan perancangan antarmuka pengguna (Leidig & Salmela, 2021). BoK ini relevan karena solusi yang diusulkan berupa sistem informasi yang melibatkan lebih dari satu kelompok pengguna, yaitu pengurus RW, bendahara, pengurus RT, dan warga, dengan kebutuhan dan hak akses yang berbeda. Kebutuhan tersebut perlu diidentifikasi secara sistematis sebelum sistem dibangun, agar sistem sesuai dengan proses yang berjalan di mitra (Dennis et al., 2018). Selain itu, pengguna sistem memiliki tingkat kemampuan digital yang beragam sehingga perancangan antarmuka yang sederhana dan konsisten menjadi bagian penting dari kelayakan penggunaan sistem.
-BoK ini diterapkan melalui analisis kebutuhan berdasarkan observasi dan studi dokumen bersama pengurus RW, pemodelan sistem menggunakan UML, perancangan antarmuka responsif (UI/UX), serta pembangunan modul aplikasi berbasis alur kerja Kanban yang terintegrasi.
+BoK ini diterapkan melalui analisis kebutuhan berdasarkan observasi dan studi dokumen bersama pengurus RW, pemodelan sistem menggunakan UML, perancangan antarmuka responsif (UI/UX), serta pembangunan modul aplikasi secara iteratif dan inkremental dengan alur kerja tim yang dikelola melalui papan Kanban.
 3.	Technology (Secure Computing)
 Domain Technology mencakup infrastruktur teknologi informasi, keamanan komputasi (secure computing), dan teknologi pendukung (Leidig & Salmela, 2021). Dalam perancangan ini, area yang digunakan adalah Secure Computing. BoK ini sangat relevan karena sistem menyimpan data pribadi warga, seperti nama, alamat, No. KK, dan NIK, serta data keuangan RW yang meliputi transaksi kas dan pembayaran iuran. Kebocoran, pengubahan tanpa izin, atau hilangnya data tersebut dapat merugikan warga maupun pengurus.
 BoK ini diterapkan melalui mekanisme autentikasi pengguna yang aman, pengaturan hak akses berbasis peran (Role-Based Access Control), penyamaran (data masking) data identitas sensitif, proteksi sesi berbasis cookie terenkripsi, serta perlindungan terhadap celah kerentanan aplikasi web berbasis standar OWASP Top 10.
@@ -258,22 +259,26 @@ BoK ini diterapkan melalui mekanisme autentikasi pengguna yang aman, pengaturan 
 2.2.1.	Sistem Informasi Rukun Warga (SI-RW)
 Sistem Informasi Rukun Warga (SI-RW) adalah sistem informasi terkomputerisasi yang dirancang untuk mendukung pencatatan, pengelolaan, dan pelaporan administrasi pada tingkat rukun warga. Berdasarkan Permendagri No. 18 Tahun 2018, RW merupakan lembaga kemasyarakatan yang bertugas membantu pemerintah kelurahan dalam pelayanan administrasi, pendataan kependudukan, pemeliharaan ketertiban, serta pengelolaan dana swadaya masyarakat.
 SI-RW mengonsolidasikan data pada level komunitas mikro ke dalam basis data terpadu (single source of truth). Ruang lingkupnya mencakup pengelolaan data keluarga dan warga, transparansi kas lingkungan, pencatatan tagihan dan pembayaran iuran berkala, serta kanal informasi terstruktur bagi warga. Penerapan SI-RW pada mitra (RW 06 Kelurahan Kota Baru, Kecamatan Bekasi Barat) bertujuan menggantikan pencatatan manual berbasis buku fisik dan file Excel terpisah, sehingga meningkatkan efisiensi operasional, akurasi data, dan akuntabilitas keuangan lingkungan.
+Pada capstone ini, SI-RW diwujudkan sebagai produk bernama RW Digital, yaitu aplikasi web progresif yang dirancang dan dibangun bersama pengurus RW 06. Dalam laporan ini, istilah SI-RW merujuk pada konsep sistem informasi tingkat RW secara umum, sedangkan RW Digital merujuk pada sistem yang dihasilkan dalam capstone ini.
 2.2.2.	Website dan Progressive Web Application (PWA)
 Aplikasi berbasis website adalah perangkat lunak yang dijalankan pada peladen (server) dan diakses oleh pengguna melalui peramban web (browser) menggunakan jaringan internet atau intranet tanpa memerlukan instalasi aplikasi biner terpisah. Aplikasi web modern menerapkan prinsip desain responsif (responsive web design) agar tata letak dan interaksi sistem dapat beradaptasi secara optimal pada beragam resolusi layar, baik komputer desktop pengurus maupun telepon pintar (smartphone) warga.
 Pendekatan Progressive Web Application (PWA) memperkaya fungsionalitas aplikasi web standar melalui pemanfaatan berkas manifes (web app manifest) dan service worker. PWA memungkinkan aplikasi web dipasang sebagai pintasan pada layar utama ponsel (add to home screen), memuat antarmuka dengan kecepatan tinggi melalui mekanisme caching, dan memberikan pengalaman penggunaan menyerupai aplikasi bawaan (native app). Pendekatan ini sangat tepat bagi sistem layanan kemasyarakatan karena mempermudah partisipasi warga tanpa membebani kapasitas penyimpanan gawai mereka.
 
 
-2.2.3.	Manajemen Proyek: Metode Kanban & Prioritisasi MoSCoW
-2.2.3.1.	Metode Kanban dan GitHub Projects
-Metode Kanban adalah kerangka kerja manajemen pengembangan perangkat lunak berbasis Lean/Agile yang berfokus pada visualisasi aliran kerja (visualize workflow), pembatasan pekerjaan dalam proses (limit Work in Progress / WIP), dan perbaikan aliran tugas secara berkesinambungan (Anderson, 2010). Kanban memberikan fleksibilitas tinggi bagi tim pengembang untuk merespons kebutuhan secara adaptif tanpa terikat oleh siklus rilis kaku.
+2.2.3.	Siklus Iterative & Incremental, Kanban, dan Prioritisasi MoSCoW
+2.2.3.1.	Iterative and Incremental Development
+Iterative and Incremental Development (IID) adalah model proses pengembangan perangkat lunak yang membangun sistem melalui serangkaian siklus berulang (iterasi), di mana setiap siklus menghasilkan tambahan kemampuan (inkremen) pada sistem yang tetap dapat berfungsi (Larman & Basili, 2003). Aspek inkremental berarti sistem dibangun bagian demi bagian, misalnya modul demi modul, lalu setiap bagian diintegrasikan ke sistem yang telah ada. Aspek iteratif berarti bagian yang sudah dibangun dievaluasi kembali dan disempurnakan, termasuk perubahan rancangan basis data, logika bisnis, maupun arsitektur, ketika ditemukan ketidaksesuaian dengan kebutuhan (Pressman & Maxim, 2020).
+Model ini sesuai untuk perancangan RW Digital karena kebutuhan mitra belum dapat dirumuskan secara lengkap di awal. Ruang lingkup fitur awal disusun berdasarkan regulasi dan praktik umum RW, kemudian divalidasi dan direvisi bersama pengurus RW 06 seiring berjalannya pengembangan. Berbeda dengan model Waterfall yang menetapkan seluruh spesifikasi di awal, IID memungkinkan revisi dilakukan secara bertahap tanpa penulisan ulang sistem secara total.
+2.2.3.2.	Metode Kanban dan GitHub Projects
+Metode Kanban adalah metode pengelolaan alur kerja berbasis Lean yang berfokus pada visualisasi aliran kerja (visualize workflow), pembatasan pekerjaan dalam proses (limit Work in Progress / WIP), dan perbaikan aliran tugas secara berkesinambungan (Anderson, 2010). Kanban memberikan fleksibilitas tinggi bagi tim pengembang untuk merespons kebutuhan secara adaptif tanpa terikat oleh siklus rilis kaku. Kanban tidak mendefinisikan siklus hidup pengembangan perangkat lunak secara utuh, sehingga pada perancangan ini Kanban dipasangkan dengan model proses IID: IID menentukan bagaimana sistem dikembangkan, sedangkan Kanban menentukan bagaimana pekerjaan tim divisualisasikan dan dikendalikan.
 Penerapan metode Kanban pada proyek ini diwujudkan melalui platform GitHub Projects yang terintegrasi langsung dengan repositori kode sumber (rwdigital). Aliran kerja dibagi ke dalam kolom visual: 
 1.	Backlog: Daftar seluruh kebutuhan fungsional dan teknis hasil elisitasi yang direpresentasikan sebagai GitHub Issues. 
-2.	Todo / Ready: Tugas yang telah memiliki spesifikasi teknis jelas dan siap dikerjakan pada siklus pengerjaan aktif. 
-3.	In Progress: Tugas yang sedang aktif dikembangkan oleh anggota tim dengan batasan ketat (WIP limit maksimal 1–2 tugas per orang). 
-4.	Review / Verification: Modul yang telah selesai dikoding dan sedang dalam tahap peninjauan kode (Pull Request code review) serta pengujian fungsional. 
+2.	Todo / Ready: Tugas yang telah memiliki spesifikasi teknis jelas dan siap dikerjakan. 
+3.	In Progress: Tugas yang sedang aktif dikembangkan oleh anggota tim penanggung jawab (PIC) pada cabang fitur (feature branch) masing-masing, dengan batas WIP 1–2 kartu per orang dan maksimal 10 kartu In Progress pada papan. 
+4.	Review / Verification: Modul yang telah selesai dikoding dan diajukan melalui Pull Request, lalu diverifikasi melalui pemeriksaan otomatis (continuous integration) serta pengujian fungsional. 
 5.	Done: Fitur yang telah lulus verifikasi, disetujui, dan berhasil digabungkan (merged) ke cabang utama (main branch).
 Integrasi GitHub Projects memungkinkan pembaruan status tugas secara otomatis ketika Pull Request dibuat atau digabungkan, memastikan transparansi dan kemudahan pelacakan progres tim secara real-time.
-2.2.3.2.	Prioritisasi Kebutuhan dengan Metode MoSCoW
+2.2.3.3.	Prioritisasi Kebutuhan dengan Metode MoSCoW
 Metode MoSCoW adalah teknik analisis untuk mengklasifikasikan kebutuhan sistem ke dalam empat kategori urgensi (Clegg & Barker, 1994): - Must Have (M): Kebutuhan mandatori yang wajib diselesaikan agar produk MVP dapat beroperasi. Tanpa komponen ini, sistem tidak layak diluncurkan (misal: pendataan warga, autentikasi peran, pencatatan kas RW). - Should Have (S): Kebutuhan penting bernilai guna tinggi yang tidak bersifat kritis pada peluncuran perdana (misal: ekspor laporan berformat CSV, filter rentang tanggal, pembatasan upaya login). - Could Have (C): Kebutuhan tambahan atau nilai tambah yang dikerjakan apabila terdapat ketersediaan waktu dan sumber daya (misal: integrasi gerbang pembayaran QRIS otomatis). - Won’t Have / Would like (W): Fitur yang disepakati untuk dikesampingkan dari ruang lingkup proyek saat ini (misal: integrasi kamera pengawas/CCTV dan inventaris sarana prasarana fisik).
 2.2.4.	Teori Data dan Kependudukan
 Data dan Kependudukan memaparkan teori yang mendasari modul pengelolaan data warga sebagai sumber informasi utama sistem. Secara konseptual, data kependudukan dikelola sebagai aset organisasi yang kualitasnya meliputi keakuratan, kelengkapan, konsistensi, dan aksesibilitas dijaga melalui mekanisme validasi isian serta pemanfaatan basis data terpusat. Untuk mendukung hal tersebut, perancangan sistem menggunakan Sistem Manajemen Basis Data (DBMS) relasional dengan pendekatan Entity Relationship Model (ERD) dan normalisasi guna mencegah redundansi. Basis data ini menstrukturkan entitas kewilayahan secara hierarkis, yakni dari tingkat RW, RT, Kartu Keluarga (KK), hingga warga, dengan pengamanan integritas data melalui kunci primer dan perekaman riwayat perubahan.
@@ -316,8 +321,8 @@ SPESIFIKASI DAN MEKANISME PERANCANGAN
 Perancangan dan implementasi Sistem Informasi RW ini dibatasi oleh beberapa batasan realistis sebagai berikut:
 1)	Batasan waktu
 Pengerjaan proyek ini dilakukan dalam satu semester sesuai kurikulum program studi, sehingga waktu yang tersedia untuk analisis, perancangan, implementasi, dan pengujian bersifat terbatas. Tidak seluruh fitur yang diidentifikasi dalam analisis kebutuhan dapat diselesaikan dalam periode ini.
-2)	Batasan aksesibilitas mitra. 
-Mitra RW (pengurus RW 06) dilibatkan melalui wawancara dan observasi dengan intensitas terbatas dalam rentang waktu capstone ini, sehingga validasi kebutuhan fitur dilengkapi analisis regulasi resmi (UU No. 6 Tahun 2014, Permendagri No. 18 Tahun 2018) dan evaluasi plausibility sebagai triangulasi.
+2)	Batasan perumusan kebutuhan awal. 
+Mitra RW (pengurus RW 06) dilibatkan secara aktif melalui wawancara, observasi, dan pembahasan hasil setiap iterasi pengembangan. Batasannya terletak pada tahap awal: kebutuhan belum dapat dirumuskan secara lengkap sebelum pengembangan dimulai, sehingga ruang lingkup awal disusun berdasarkan analisis regulasi resmi (UU No. 6 Tahun 2014, Permendagri No. 18 Tahun 2018) dan evaluasi plausibility, kemudian divalidasi dan direvisi bersama mitra pada setiap iterasi.
 3)	Batasan teknologi
 Sistem menggunakan SQLite sebagai basis data dengan pendekatan single-file yang tidak dirancang untuk skala distributed atau beban konkurensi tinggi. Belum tersedia infrastruktur server produksi yang bersifat permanen untuk deployment publik.
 4)	Batasan anggaran
@@ -514,13 +519,14 @@ Tupoksi RW yang digunakan sebagai acuan penetapan fitur mengacu pada Permendagri
 SQLite dengan pendekatan penyimpanan single-file diasumsikan cukup untuk menangani volume data pada skala RW yang mencakup ratusan hingga ribuan record warga, transaksi kas, dan catatan iuran. QRIS diasumsikan secara prinsip tersedia dan dapat diintegrasikan melalui payment gateway pihak ketiga, meskipun provider spesifik dan mekanisme teknis integrasi belum dikonfirmasi pada tahap ini.
 3.5.	 Mekanisme Perancangan
 3.5.1.	Sistematika Perancangan
-Sistematika perancangan Sistem Informasi RW dilaksanakan menggunakan pendekatan Kanban yang terintegrasi dengan GitHub Projects pada repositori kerja. Alur tahapan kerja dirancang sebagai aliran berkesinambungan (continuous flow):
+Perancangan RW Digital dilaksanakan dalam siklus iterative and incremental. Setiap iterasi menghasilkan penambahan atau penyempurnaan fitur yang tetap berfungsi. Arah setiap iterasi ditentukan oleh umpan balik pengurus RW 06 dan evaluasi internal tim terhadap hasil iterasi sebelumnya, sehingga revisi terjadi secara bertahap, bukan dalam satu spesifikasi awal yang kaku. Di dalam setiap iterasi, alur kerja dikendalikan melalui papan Kanban pada GitHub Projects dengan tahapan sebagai berikut:
 1)	Pembentukan Product Backlog (Tahap Analisis): Kebutuhan sistem diuraikan menjadi kartu-kartu tugas terperinci (GitHub Issues) dan diklasifikasikan berdasarkan metode MoSCoW ke dalam papan Backlog.
 2)	Perancangan Konseptual & Arsitektur (Tahap Desain): Tugas perancangan ERD, diagram UML, UI/UX, dan RBAC dipindahkan ke status Todo/Ready setelah kriteria spesifikasi disepakati.
-3)	Pengembangan Fitur Inkremental (Continuous Flow Development): Tugas dikerjakan secara aktif pada kolom In Progress dengan batasan beban kerja (WIP limit). Kode dikembangkan pada cabang modular terpisah (feature branch).
-4)	Peninjauan Kode & Verifikasi (Review & Testing): Pembuatan Pull Request memicu pemindahan kartu tugas ke kolom Review / Verification untuk menjalani code review dan pengujian fungsional Black Box.
+3)	Pengembangan Fitur Inkremental (Tahap Implementasi): Tugas dikerjakan secara aktif pada kolom In Progress oleh PIC masing-masing dengan batas WIP 1–2 kartu per orang. Kode dikembangkan pada cabang modular terpisah (feature branch).
+4)	Verifikasi Pull Request (Review & Testing): Pembuatan Pull Request memicu pemindahan kartu tugas ke kolom Review / Verification untuk menjalani pemeriksaan otomatis (continuous integration: type check, unit test, dan build) serta pengujian fungsional Black Box.
 5)	Penggabungan Fitur (Merge & Done): Tiket tugas yang lolos pengujian dan disetujui digabungkan ke cabang main dan dipindahkan ke status Done.
-6)	Validasi Akhir & Evaluasi (Tahap UAT): Purwarupa fungsional diuji bersama pemangku kepentingan mitra dan dievaluasi kemudahan penggunaannya menggunakan instrumen SUS.
+6)	Validasi & Evaluasi: Hasil iterasi ditinjau bersama pengurus RW 06 dan dievaluasi secara internal oleh tim. Pada iterasi akhir, purwarupa fungsional diuji melalui User Acceptance Testing (UAT) dan dievaluasi kemudahan penggunaannya menggunakan instrumen SUS.
+Hasil evaluasi pada tahap 6 dicatat kembali sebagai kartu baru atau kartu revisi pada Backlog dan menjadi masukan bagi iterasi berikutnya. Revisi tersebut dapat menyentuh bagian sistem yang sudah diimplementasikan, tidak terbatas pada penambahan fitur baru. Siklus ini dijalankan dalam tiga iterasi: Iterasi 1 (MVP), Iterasi 2 (penyempurnaan keuangan dan portal), dan Iterasi 3 (RBAC, notifikasi, dan konsolidasi kependudukan).
 3.5.2.	Mekanisme Pengumpulan Data
 Untuk memperoleh data perancangan yang valid dan sesuai dengan konteks operasional mitra, mekanisme pengumpulan data dilaksanakan secara sistematis melalui beberapa instrumen:
 Tabel 11 Mekanisme pengumpulan data
@@ -546,7 +552,7 @@ Validasi dilakukan untuk memastikan sistem yang dibangun sesuai dengan kebutuhan
 3. Pemeriksaan Kepatuhan Regulasi: Spesifikasi dan implementasi sistem diperiksa kembali terhadap ketentuan perundang-undangan (UU PDP No. 27/2022, UU Adminduk No. 24/2013, dan Permendagri No. 18/2018) guna menjamin pengelolaan data warga mematuhi kewajiban hukum yang berlaku.
 
 3.5.4.	Jadwal Pelaksanaan Perancangan
-Perancangan Sistem Informasi RW dilaksanakan dalam kurun waktu satu semester akademik (estimasi 16 minggu) sesuai kurikulum program studi. Alur pelaksanaan diselaraskan dengan tahapan sistematika perancangan berbasis Kanban sebagaimana disajikan pada Tabel 12:
+Perancangan RW Digital dilaksanakan dalam kurun waktu satu semester akademik (estimasi 16 minggu) sesuai kurikulum program studi. Alur pelaksanaan diselaraskan dengan siklus iterative and incremental pada sistematika perancangan sebagaimana disajikan pada Tabel 12:
 Tabel 12 Aktivitas perancangan
 Tahap	Aktivitas Perancangan	Target Minggu	Output / Artefak
 1	Identifikasi & analisis kebutuhan; studi regulasi kemasyarakatan; observasi proses mitra	Minggu 1–2	Dokumen Kebutuhan Sistem & Matriks MoSCoW
@@ -557,7 +563,7 @@ Tahap	Aktivitas Perancangan	Target Minggu	Output / Artefak
 6	Implementasi modular: Modul Kependudukan & Manajemen Akun Pengguna	Minggu 7–9	Fitur CRUD Warga, KK, RT, & Route Guards
 7	Implementasi modular: Modul Keuangan Kas RW	Minggu 9–11	Fitur pencatatan kas, upload bukti, & laporan kas
 8	Implementasi modular: Modul Tagihan Iuran Warga & Informasi Pengumuman	Minggu 11–12	Fitur tagihan iuran, riwayat pembayaran, & pengumuman
-9	Integrasi menyeluruh antarmodul; pengujian integrasi fungsional	Minggu 13	Sistem SI-RW terpadu & uji keterhubungan data
+9	Integrasi menyeluruh antarmodul; pengujian integrasi fungsional	Minggu 13	Sistem RW Digital terpadu & uji keterhubungan data
 10	Verifikasi pengujian Black Box & Validasi UAT bersama mitra RW 06	Minggu 14–15	Berita Acara UAT & Hasil Kuesioner SUS
 11	Perbaikan pasca-UAT (bug fixing) & finalisasi dokumentasi laporan capstone	Minggu 16	Purwarupa final & Dokumen Laporan Capstone
 
@@ -630,6 +636,7 @@ GitHub. (n.d.). About projects. GitHub Docs. Retrieved October 5, 2026, from htt
 Grassi, P. A., Garcia, M. E., Fenton, J. L., Newton, E. M., Perlner, D., Regenscheid, R. L., Burr, W. E., Richer, J. F., Lefkovitz, Z., Danker, B., Choong, Y.-Y., Greene, K., Galluzzo, R. N., & Danker, J. (2010). Password management (NIST Special Publication 800-132). National Institute of Standards and Technology. https://doi.org/10.6028/NIST.SP.800-132
 International Organization for Standardization & International Electrotechnical Commission. (2018). Information technology — Security techniques — Information security management systems — Overview and vocabulary (ISO/IEC 27000:2018, 5th ed.). https://www.iso.org/standard/70352.html
 International Organization for Standardization & International Electrotechnical Commission. (2022). Information security, cybersecurity and privacy protection — Information security management systems — Requirements (ISO/IEC 27001:2022, 3rd ed.). https://www.iso.org/standard/27001
+Larman, C., & Basili, V. R. (2003). Iterative and incremental development: A brief history. Computer, 36(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
 Leidig, P. M., & Salmela, H. (2021). The IS2020 competency model for undergraduate programs in information systems: A joint ACM/AIS task force report. Communications of the Association for Information Systems, 49, 1–38. https://doi.org/10.17705/1CAIS.04901
 OWASP Foundation. (2021). OWASP Top 10: The ten most critical web application security risks (2021 ed.). https://top10.owasp.org/2021/
 OWASP Foundation. (n.d.-a). Authentication cheat sheet. OWASP Cheat Sheet Series. Retrieved October 5, 2026, from https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
