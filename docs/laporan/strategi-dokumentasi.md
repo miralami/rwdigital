@@ -1,7 +1,7 @@
 # Strategi Dokumentasi Proyek → Bab IV
 
 > Dokumen diskusi. Basis: `git log main` (92 commit, 25 Sep–3 Nov 2026), GitHub PR/issue,
-> `docs/kanban/backlog.md`, dan draft `bab4-proses-perancangan.md`.
+> `docs/kanban/backlog.md`, dan draft lama `arsip/bab4-proses-perancangan.md`.
 > Tujuan: menyelaraskan **cerita laporan** dengan **bukti repo**, lalu membagi kerja dokumen
 > tanpa menjadikan Afif bottleneck.
 
@@ -58,7 +58,7 @@
 
 ## 2. Klaim Draft Bab IV vs Bukti
 
-| Klaim di `bab4-proses-perancangan.md` | Bukti repo | Status |
+| Klaim di `arsip/bab4-proses-perancangan.md` | Bukti repo | Status |
 |---|---|---|
 | "Kode dikembangkan pada cabang fitur modular" (§4.1.3) | Sep–awal Okt commit langsung ke `main` | ❌ perlu dikoreksi: branch discipline **mulai 27 Okt** |
 | "Wajib satu peninjau, Afif peninjau utama" (§4.1.4) | Afif menulis **dan** merge PR-nya sendiri dalam hitungan menit | ❌ jangan diklaim — ganti dengan **CI + self-review** |

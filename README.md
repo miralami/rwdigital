@@ -2,7 +2,7 @@
 
 Aplikasi administrasi tingkat Rukun Warga (RW): data kependudukan, kas, iuran, dan pengumuman dalam satu tempat. Dibangun sebagai capstone project bersama mitra RW nyata, menggantikan proses yang sebelumnya tersebar di WhatsApp, dokumen fisik, dan spreadsheet per RT.
 
-Fitur dalam proyek ini berasal dari hasil wawancara/observasi ke mitra, bukan daftar fitur "bagus untuk RW pada umumnya". Lihat [`PROJECT.md`](PROJECT.md) untuk status tiap modul.
+Scope fitur disusun dari regulasi resmi lalu disempurnakan lewat umpan balik pengurus RW 06 per iterasi — bukan daftar fitur "bagus untuk RW pada umumnya". Lihat [`PROJECT.md`](PROJECT.md) untuk status tiap modul.
 
 ## Fitur
 
@@ -137,4 +137,4 @@ scripts/                   ← bootstrap DB, seed, self-check
 
 - **Data sensitif.** Aplikasi menyimpan NIK, No. KK, alamat, dan data keuangan. Semua sudah diberikan kontrol akses berbasis role, tapi Perlakukan sebagai PII — jangan commit data nyata ke repo.
 - **Domain language.** Istilah (`warga`, `kk`, `rt`, `iuran`, `kas`) sengaja tidak diterjemahkan ke Inggris agar konsisten dengan istilah mitra dan dokumen capstone.
-- **Mulai dari `PROJECT.md`.** Sebelum menambah fitur, cek status scope di sana. Lihat juga [`CLAUDE.md`](CLAUDE.md) untuk konvensi kerja.
+- **Mulai dari `PROJECT.md`.** Sebelum menambah fitur, cek status scope di sana. Lihat juga [`CLAUDE.md`](CLAUDE.md) untuk konvensi kerja dan [`AGENTS.md`](AGENTS.md) untuk aturan sesi AI.

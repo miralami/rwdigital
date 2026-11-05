@@ -1,6 +1,6 @@
 # PROJECT.md — Sistem Informasi RW
 
-> **Otoritas tertinggi proyek: `docs/laporan/laporan.md`.** Dokumen ini (dan `plan.md`,
+> **Otoritas tertinggi proyek: `docs/laporan/laporan.md`.** Dokumen ini (dan `docs/arsip/plan.md`,
 > `docs/checklist.md`) adalah dokumen pendukung yang diselaraskan ke laporan.
 > Status pengerjaan aktual per modul: `docs/kanban/backlog.md`.
 

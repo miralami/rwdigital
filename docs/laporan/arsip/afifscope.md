@@ -6,7 +6,7 @@
 >
 > **Status: DIKONFIRMASI Afif — 19 Okt 2026.** Keputusan scope ada di §9. Disusun: 19 Okt 2026.
 >
-> **File terkait:** `bab4-proses-perancangan.md` (§4.1 siap port) · `bab3-5-mekanisme.md` (§3.5) ·
+> **File terkait:** `../bab4-plan.md` (§4.1) · `../diagram-prompts.md` (§3.5 flowchart) ·
 > `diagram-prompts.md` (prompt diagram) · `pembagian-tugas.md` (pembagian semua orang). Indeks: `README.md`.
 
 ---
@@ -83,7 +83,7 @@ pustaka UI, dokumentasi.
 | B4 | **Review + merge semua PR**, jaga `main` protected, CODEOWNERS | 🔁 berkelanjutan |
 | B5 | Bantu/koordinasi implementasi modul lain bila PIC-nya terhambat | opsional |
 | B6 | Menjelang laporan akhir: pastikan app bisa dijalankan untuk **screenshot §4.2** | 🚧 |
-| B7 | Penyelarasan dokumen hidup (`PROJECT.md`, `plan.md`) ke `laporan.md` | 🔶 sebagian |
+| B7 | Penyelarasan dokumen hidup (`PROJECT.md`, `docs/arsip/plan.md`) ke `laporan.md` | 🔶 sebagian |
 
 > **Catatan:** kartu fitur modul (KP/EV/KU/SR) **bukan** tanggung jawab Afif — lihat §7.
 

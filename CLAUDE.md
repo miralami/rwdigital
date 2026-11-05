@@ -1,6 +1,7 @@
 # CLAUDE.md
 
-Panduan kerja untuk Claude Code di repo ini. Baca `PROJECT.md` dulu untuk konteks produk lengkap sebelum mengerjakan task apa pun.
+Panduan kerja untuk Claude Code di repo ini. Baca `PROJECT.md` dulu untuk konteks produk lengkap,
+lalu `docs/dev/STATE.md` untuk status pekerjaan terkini. Aturan dev-state ada di `AGENTS.md`.
 
 ## Ringkasan Proyek
 

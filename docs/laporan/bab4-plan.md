@@ -205,7 +205,7 @@ Alternate/Exceptional Flows : A-1 ...
 | 4.1.6 | **UAT dengan pengurus RW 06** (23–24 Nov 2026), adopsi Kanban 12 Okt + back-fill, batas kejujuran | 1–2 |
 
 **Angka wajib 3 Nov 2026:** 61 Done · 0 In Progress · 4 Todo · 3 Won't · 68 item papan.
-Draft `bab4-proses-perancangan.md` masih memakai 29 Done (19 Okt) → **jangan dipakai mentah**.
+Draft lama `arsip/bab4-proses-perancangan.md` masih memakai 29 Done (19 Okt) → **jangan dipakai mentah**.
 
 **Framing wajib di 4.1.3d:** jangan klaim Kanban sejak hari pertama. Kalimat yang dipakai:
 *"Kanban diadopsi pada minggu ketiga (commit `17da42b`) dan menjadi alat kendali utama sejak

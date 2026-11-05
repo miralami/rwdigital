@@ -1,14 +1,12 @@
 # `docs/arsip/` — Dokumen Teknis Usang
 
-Dokumen di sini **tidak lagi menjadi acuan aktif**. Disimpan untuk jejak sejarah/audit.
-Jangan pakai sebagai sumber kebenaran.
+Disimpan untuk jejak sejarah/audit. **Jangan dipakai sebagai sumber kebenaran.**
+Status fitur aktual: `../kanban/backlog.md`.
 
 | File | Dulu untuk | Digantikan oleh |
 |---|---|---|
-| `List feature fix.{md,html,pdf}` | daftar usulan perbaikan fitur | (arsip; sebagian sudah jadi kartu `EV-BUG-01`/`SR-BUG-01`) |
+| `plan.md` | cetak biru implementasi per fase (semua fase sudah selesai) | `../kanban/backlog.md` + `../../PROJECT.md` |
+| `List feature fix.{md,html,pdf}` | usulan perbaikan fitur | sebagian sudah jadi kartu `EV-BUG-01` / `SR-BUG-01` |
 
-> **Dokumen laporan yang dulu ada di sini sudah dipindah ke `docs/laporan/arsip/`**
-> (`laporanRevisi.md`, `planAfif.md`, `pembagian.md`), supaya semua bahan laporan ada dalam satu
-> folder. Arsip teknis non-laporan tetap di sini.
-
-> Kembalikan ke folder aktif **hanya** kalau memang akan dipakai lagi, dan perbarui `docs/README.md`.
+> Dokumen **laporan** yang usang ada di `../laporan/arsip/`.
+> Kembalikan ke folder aktif hanya kalau akan dipakai lagi, lalu perbarui `docs/README.md`.
