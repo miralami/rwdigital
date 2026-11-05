@@ -23,6 +23,7 @@
 | K-10 | Pembagian kerja | Per artefak, bukan per fitur; pemilik domain ≠ penulis kode | ✅ | 4.1, `pembagian-tugas.md` |
 | K-11 | Tenggat Bab IV | 26 Nov 2026 (buffer submit 27 Nov) | ✅ | jadwal |
 | K-12 | Figma | Tidak klaim Figma; sementara `design-preview/`, reverse engineer menyusul | ✅ | 4.1.2 |
+| K-13 | Batas Bab III vs IV | Bab III = spesifikasi terukur + mekanisme; diagram, flow, UI/UX, tabel NFR rinci, matriks RBAC → Bab IV | ⏳ tim | Bab III, 4.1.1e, 4.1.2e/j/k |
 
 ---
 
@@ -149,6 +150,22 @@ Bab IV: **26 Nov 2026** (buffer submit 27 Nov). Jadwal rinci: `bab4-plan.md` §8
 ## K-12 · Figma ✅
 
 Tidak mengklaim Figma. Sementara pakai `docs/design-preview/`; reverse engineer ke Figma menyusul.
+
+## K-13 · Batas Bab III vs Bab IV ⏳
+
+**Usulan (5 Nov 2026), acuan Panduan Rev 1.3 hlm. 49–53 + contoh laporan:**
+
+- Bab III **tetap** memuat *Spesifikasi Rancangan* (panduan mewajibkan), tetapi sebagai spesifikasi
+  **terukur** (Tabel 3.2–3.4: fungsional per modul, non-fungsional `SP-01..15` dengan target, teknis).
+- Yang keluar dari Bab III → Bab IV: alur/flow (Gambar 3.1–3.4 lama → 4.1.2e Activity), spesifikasi
+  UI/UX (→ 4.1.2j), tabel `NFRS`/`NFRA` (→ 4.1.1e), matriks RBAC (→ 4.1.2k), nama berkas kode
+  (`permissions.ts`, `guard.ts`, `hooks.server.ts`) dari Bab II–III.
+- §3.5 dilengkapi subbab wajib panduan: 3.5.1 sistematika (flowchart + loop), 3.5.2 pengumpulan data,
+  3.5.3 V&V, 3.5.4 timeline M5–M15, 3.5.5 komponen sistem terintegrasi.
+- Detail Kanban (kolom, WIP) pindah dari §2.2.4.2 (teori) ke §3.5.1 (mekanisme).
+- Surat-menyurat = Core (§3.1 lama keliru menyebutnya di luar scope).
+- **Menunggu** persetujuan tim (Shaffira: UI/UX, Alizha: keamanan/RBAC, Josua: data) karena bagian
+  mereka bergeser ke Bab IV.
 
 ---
 

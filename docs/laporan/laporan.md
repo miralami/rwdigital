@@ -46,27 +46,48 @@ Di sisi lain, perkembangan penggunaan pembayaran digital di Indonesia membuka pe
 
 Berdasarkan kondisi yang telah diuraikan, dapat disimpulkan bahwa permasalahan administrasi pada RW meliputi pengelolaan data kependudukan yang tidak terpusat, pencatatan keuangan yang tidak transparan, pembayaran iuran yang memerlukan rekonsiliasi manual, serta penyampaian informasi yang tidak terstruktur. Permasalahan-permasalahan tersebut menunjukkan kebutuhan terhadap suatu sistem informasi yang dapat mengintegrasikan proses administrasi RW secara lebih efisien dan terstruktur.
 
-Oleh karena itu, capstone project ini mengusulkan pengembangan Sistem Informasi RW (SI-RW) yang disesuaikan dengan kebutuhan mitra. Penentuan fitur sistem didasarkan pada analisis regulasi resmi (UU Desa 6/2014, Permendagri 18/2018) dan evaluasi plausibility untuk konteks implementasi capstone. Fitur yang dikembangkan mencakup manajemen data kependudukan, pengelolaan keuangan kas RW, manajemen iuran warga, dan penyampaian pengumuman/informasi. Setiap fitur dirancang untuk menjawab permasalahan yang telah diidentifikasi, sehingga sistem yang dihasilkan diharapkan dapat membantu meningkatkan efisiensi pengelolaan administrasi serta memberikan akses informasi yang lebih terstruktur bagi pengurus dan warga RW.
+Oleh karena itu, capstone project ini mengusulkan pengembangan Sistem Informasi RW (SI-RW) yang disesuaikan dengan kebutuhan mitra. Penentuan fitur sistem didasarkan pada analisis regulasi resmi (UU Desa 6/2014, Permendagri 18/2018) dan evaluasi *plausibility* untuk konteks implementasi capstone. Fitur yang dikembangkan mencakup manajemen data kependudukan, layanan surat-menyurat, pengelolaan keuangan kas RW, manajemen iuran warga, dan penyampaian pengumuman/informasi. Setiap fitur dirancang untuk menjawab permasalahan yang telah diidentifikasi, sehingga sistem yang dihasilkan diharapkan dapat membantu meningkatkan efisiensi pengelolaan administrasi serta memberikan akses informasi yang lebih terstruktur bagi pengurus dan warga RW.
 
 ## 1.2 Alternatif Solusi
 
-Dalam menghadapi permasalahan administrasi RW yang telah diidentifikasi pada subbab sebelumnya, terdapat beberapa alternatif solusi yang dapat dipertimbangkan. Analisis terhadap masing-masing alternatif dilakukan berdasarkan kesesuaiannya dengan konteks RW tingkat kelurahan, kemampuan mengatasi permasalahan yang ada, serta keterbatasan yang dimilikinya.
+Dalam menghadapi permasalahan administrasi RW yang telah diidentifikasi pada subbab sebelumnya, terdapat beberapa alternatif solusi yang dapat dipertimbangkan. Analisis terhadap masing-masing alternatif dilakukan berdasarkan kesesuaiannya dengan konteks RW tingkat kelurahan, kemampuan mengatasi permasalahan yang ada, serta keterbatasan yang dimilikinya. Sebelum alternatif solusi dirumuskan, akar permasalahan terlebih dahulu dianalisis agar solusi yang dipilih menjawab penyebab, bukan hanya gejala.
 
-### Alternatif 1: Mempertahankan proses manual (status quo)
+### 1.2.1 Analisis Akar Masalah (*Fishbone Diagram*)
+
+Analisis akar masalah dilakukan menggunakan *Fishbone Diagram* (*cause-and-effect diagram*), yaitu diagram yang menempatkan permasalahan sebagai akibat (*effect*) pada kepala diagram dan mengelompokkan faktor-faktor penyebabnya ke dalam beberapa kategori yang mengarah pada permasalahan tersebut (Ilie & Ciocoiu, 2010). Pendekatan ini telah digunakan untuk menganalisis akar masalah kesiapan sistem pemerintahan elektronik di tingkat daerah (Permatasari et al., 2025), sehingga relevan untuk konteks administrasi kemasyarakatan seperti RW.
+
+<!-- [Gambar 1.1 Fishbone Diagram — tempel di Word] -->
+
+**Gambar 1.1** *Fishbone Diagram* Permasalahan Administrasi RW 06
+
+Permasalahan utama (*effect*) yang dianalisis adalah pengelolaan administrasi RW 06 yang tidak efisien, data kependudukan dan keuangan yang rawan hilang dan tidak konsisten, serta penyampaian informasi yang tidak terstruktur. Faktor penyebabnya dikelompokkan sebagai berikut:
+
+1. **Manusia.** Literasi digital pengurus RT dan RW beragam; pengelolaan data bergantung pada segelintir orang; riwayat data sulit diwariskan saat pergantian pengurus.
+2. **Metode.** Pencatatan warga, kas, dan iuran masih manual; belum ada prosedur baku untuk pembaruan data warga; rekonsiliasi iuran dilakukan secara *ad hoc*; pengumuman dan layanan surat melalui jalur informal yang tidak terdokumentasi.
+3. **Mesin/Perangkat.** Belum ada aplikasi terpadu yang menghubungkan seluruh RT dengan RW; spreadsheet tersimpan terpisah di perangkat masing-masing pengurus; grup WhatsApp tidak dirancang untuk pengarsipan dan penelusuran informasi.
+4. **Material/Dokumen.** Buku register, kuitansi, dan buku kas fisik rentan rusak atau hilang; NIK dan Nomor KK berpotensi tercatat ganda antar-RT karena tidak ada sumber data tunggal; bukti transaksi sulit ditelusuri.
+5. **Manajemen.** Belum ada pembagian hak akses yang jelas atas data warga dan kas; status tunggakan iuran tidak terpantau secara berkala; belum ada kebijakan pelindungan data pribadi warga di tingkat RW.
+6. **Lingkungan.** Tidak tersedia anggaran swadaya untuk server khusus atau langganan aplikasi berbayar; warga perkotaan heterogen (warga tetap, pengontrak, penghuni kos) dengan mobilitas kependudukan yang tinggi.
+
+Hasil analisis tersebut menunjukkan bahwa permasalahan tidak hanya disebabkan oleh media pencatatan manual, tetapi juga oleh metode kerja, tata kelola kewenangan, dan keterbatasan sumber daya. Karena itu, alternatif solusi dinilai berdasarkan kemampuannya mengatasi penyebab-penyebab tersebut secara terpadu.
+
+### 1.2.2 Analisis Alternatif Solusi
+
+#### Alternatif 1: Mempertahankan proses manual (status quo)
 
 Pengelolaan administrasi RW secara manual menggunakan buku register, spreadsheet Excel, kuitansi fisik, dan grup WhatsApp merupakan pendekatan yang saat ini paling umum diterapkan. Pendekatan ini tidak memerlukan biaya teknologi tambahan dan tidak bergantung pada ketersediaan infrastruktur internet.
 
 Namun, pendekatan ini memiliki keterbatasan yang signifikan: data kependudukan tersebar di berbagai dokumen dan mudah hilang, pencatatan keuangan rentan terhadap kesalahan dan sulit diaudit, rekonsiliasi iuran memerlukan waktu yang panjang, serta informasi yang disebarkan melalui WhatsApp mudah terlewati dan tidak dapat ditelusuri kembali secara terstruktur. Data sensitif seperti NIK dan nomor KK juga berisiko tersebar tanpa kontrol akses yang memadai. Pendekatan ini tidak berkelanjutan untuk kebutuhan digitalisasi administrasi yang lebih terstandar.
 
-### Alternatif 2: Menggunakan platform SaaS existing yang menyasar RT/RW
+#### Alternatif 2: Menggunakan platform SaaS existing yang menyasar RT/RW
 
 Terdapat beberapa platform yang telah dikembangkan oleh pihak ketiga untuk kebutuhan administrasi RT/RW di Indonesia, salah satunya adalah Pak RT (pakrt.id). Platform ini menyediakan fitur data penduduk, kas RT, iuran, tagihan, dan pengumuman yang secara langsung menyasar konteks RT/RW — berbeda dengan Sistem Informasi Desa (SID/OpenSID) yang lebih berorientasi pada birokrasi desa, atau Siskeudes/SIPKD yang dirancang khusus untuk pengelolaan APBDes.
 
 Kelebihan utama pendekatan ini adalah kecepatan implementasi dan ketersediaan fitur yang sudah teruji. Namun, kelemahannya meliputi ketergantungan terhadap vendor eksternal (risiko perubahan model bisnis atau penghentian layanan), biaya langganan yang dapat membebani kas RW, minimnya kontrol terhadap data warga (PII) yang disimpan di server pihak ketiga, serta keterbatasan kustomisasi untuk menyesuaikan alur dengan kebutuhan spesifik mitra.
 
-### Alternatif 3: Pengembangan sistem khusus (SI-RW)
+#### Alternatif 3: Pengembangan sistem khusus (SI-RW)
 
-Alternatif ketiga adalah merancang dan membangun sistem informasi secara khusus sesuai kebutuhan mitra, sebagaimana yang diusulkan dalam capstone project ini. Sistem dikembangkan menggunakan tech stack modern (SvelteKit, SQLite/Turso, Drizzle ORM, Better Auth) dengan fitur yang ditetapkan berdasarkan analisis regulasi resmi dan evaluasi plausibility.
+Alternatif ketiga adalah merancang dan membangun sistem informasi secara khusus sesuai kebutuhan mitra, sebagaimana yang diusulkan dalam capstone project ini. Sistem dikembangkan menggunakan tech stack modern (SvelteKit, SQLite/Turso, Drizzle ORM, Better Auth) dengan fitur yang ditetapkan berdasarkan analisis regulasi resmi dan evaluasi *plausibility*.
 
 Pendekatan ini memberikan fleksibilitas penuh dalam menentukan fitur, alur, dan kontrol akses sesuai struktur organisasi RW. Data warga dapat dikelola dengan kontrol keamanan yang dirancang sejak awal. Tidak ada biaya langganan kepada vendor eksternal, dan sistem dapat dikembangkan lebih lanjut setelah capstone selesai. Kelemahan utamanya adalah waktu dan biaya pengembangan awal, serta kebutuhan akan kapasitas teknis untuk pemeliharaan sistem pasca-handover.
 
@@ -92,22 +113,24 @@ Berdasarkan analisis di atas, alternatif pengembangan sistem khusus (SI-RW) dipi
 Berdasarkan latar belakang yang telah diuraikan, rumusan masalah dalam perancangan Sistem Informasi RW ini adalah sebagai berikut:
 
 1. Bagaimana merancang sistem informasi yang dapat mengelola data kependudukan warga secara terpusat dan terstruktur di tingkat RW?
-2. Bagaimana merancang sistem pencatatan keuangan kas RW yang transparan dan dapat diakses oleh pengurus yang berwenang?
-3. Bagaimana merancang mekanisme pembayaran iuran warga yang mendukung pencatatan otomatis dan berpotensi mengakomodasi metode digital?
-4. Bagaimana merancang media penyampaian pengumuman dan informasi RW yang terstruktur dan mudah diakses oleh warga?
-5. Bagaimana merancang sistem dengan kontrol akses berbasis peran (role-based access) yang sesuai dengan struktur organisasi RW?
+2. Bagaimana merancang layanan surat-menyurat yang memanfaatkan data kependudukan sehingga pengajuan, verifikasi, dan penerbitan surat dapat dilakukan dan dipantau melalui sistem?
+3. Bagaimana merancang sistem pencatatan keuangan kas RW yang transparan dan dapat diakses oleh pengurus yang berwenang?
+4. Bagaimana merancang mekanisme pembayaran iuran warga yang mendukung pencatatan otomatis dan berpotensi mengakomodasi metode digital?
+5. Bagaimana merancang media penyampaian pengumuman dan informasi RW yang terstruktur dan mudah diakses oleh warga?
+6. Bagaimana merancang sistem dengan kontrol akses berbasis peran (role-based access) yang sesuai dengan struktur organisasi RW dan melindungi data pribadi warga?
 
 ## 1.4 Tujuan Perancangan
 
 Tujuan perancangan capstone project ini adalah menghasilkan sistem informasi RW yang dapat membantu RW 06, Kelurahan Kota Baru, Kecamatan Bekasi Barat, Kota Bekasi dalam mengelola administrasi masyarakat secara lebih terstruktur dan terintegrasi.
 
-Secara khusus, tujuan perancangan sistem ini adalah:
+Secara khusus, tujuan perancangan sistem ini menjawab setiap rumusan masalah pada subbab 1.3, yaitu:
 
-- Mengembangkan sistem yang dapat mengintegrasikan pengelolaan data kependudukan yang sebelumnya masih menggunakan buku.
-- Memudahkan pengurus RW dan RT dalam melakukan pencatatan serta pembaruan data warga, termasuk data KK, KTP, alamat, nama, usia, dan status tinggal.
-- Menyediakan pengelolaan data warga yang dapat digunakan sebagai sumber informasi dalam mendukung kebutuhan administrasi masyarakat, seperti pembuatan dokumen paspor, SKCK, SKTM, dan dokumen lainnya.
-- Mengembangkan sistem administrasi surat-menyurat yang dapat memanfaatkan data kependudukan sehingga proses pengajuan dan pembuatan surat dapat dilakukan secara lebih terstruktur.
-- Menyediakan sistem yang dapat membantu pengurus RW dalam mengelola informasi administrasi secara terpusat sehingga data tidak lagi tersebar pada media pencatatan yang berbeda.
+1. Menghasilkan modul kependudukan yang mengelola data RT, KK, dan warga secara terpusat sebagai satu sumber data, menggantikan pencatatan pada buku dan spreadsheet yang terpisah.
+2. Menghasilkan modul surat-menyurat yang mengambil data dari modul kependudukan, sehingga warga dapat mengajukan surat (misalnya pengantar SKCK atau SKTM), pengurus dapat memverifikasi dan menerbitkannya, dan warga dapat memantau statusnya.
+3. Menghasilkan modul kas RW yang mencatat setiap pemasukan dan pengeluaran beserta pencatatnya, menghitung saldo secara otomatis, dan menyajikan laporan per periode.
+4. Menghasilkan modul iuran yang menerbitkan tagihan per KK, mencatat pembayaran tunai sebagai pemasukan kas tanpa input ganda, dan disiapkan untuk pembayaran nontunai melalui QRIS.
+5. Menghasilkan modul pengumuman yang menyampaikan informasi dan kegiatan RW kepada warga melalui satu media yang terarsip.
+6. Menerapkan kontrol akses berbasis peran dan pelindungan data pribadi (penyamaran NIK/No. KK, validasi masukan, dan jejak audit) yang sesuai dengan struktur organisasi RW 06.
 
 ## 1.5 Manfaat Perancangan
 
@@ -157,9 +180,9 @@ Menyediakan media terpusat untuk menyampaikan pengumuman, informasi kegiatan, ja
 
 # BAB II TINJAUAN PUSTAKA
 
-## 2.1 Body of Knowledge
+## 2.1 *Body of Knowledge*
 
-Body of Knowledge (BoK) yang menjadi acuan dalam Capstone Design Project perancangan purwarupa sistem informasi rukun warga pada penelitian ini mengacu pada kerangka kerja IS2020 A Competency Model for Undergraduate Programs in Information Systems. Sebagai upaya penyelesaian permasalahan administrasi pada lingkungan mitra, pengembangan sistem ini melibatkan tiga domain utama dalam Body of Knowledge (BoK) pada digambar dibawah ini.
+*Body of Knowledge* (BoK) yang menjadi acuan dalam Capstone Design Project perancangan purwarupa sistem informasi rukun warga pada penelitian ini mengacu pada kerangka kerja *IS2020 A Competency Model for Undergraduate Programs in Information Systems*. Sebagai upaya penyelesaian permasalahan administrasi pada lingkungan mitra, pengembangan sistem ini melibatkan tiga domain utama dalam *Body of Knowledge* (BoK) pada digambar dibawah ini.
 
 <!-- [Gambar BoK IS2020 — tempel di Word] -->
 
@@ -187,9 +210,9 @@ Data dan Kependudukan memaparkan teori yang mendasari modul pengelolaan data war
 
 ### 2.2.2 Teori UI/UX & Interaksi
 
-User Interface (UI) dan User Experience (UX) merupakan dua komponen utama yang berinteraksi secara sinergis dalam menentukan efektivitas, kegunaan, serta keberhasilan penerapan suatu sistem informasi digital. User Interface berfokus pada elemen tata letak visual, konsistensi warna, hirarki tipografi, dan navigasi yang bertindak sebagai jembatan komunikasi visual antara manusia dan sistem. Di sisi lain, User Experience mencakup aspek emosional, respons kognitif, serta tingkat kepuasan subjektif pengguna ketika berinteraksi dan menyelesaikan tugas tertentu di dalam produk digital. Sebagaimana dijelaskan oleh Windrianto dan Suryani (2025), penerapan metodologi desain antarmuka berbasis kebutuhan pengguna mampu menyelaraskan kebutuhan fungsionalitas sistem dengan kenyamanan operasional pengguna. Hal ini diperkuat oleh studi Ramadhana et al. (2025) yang menegaskan bahwa integrasi UI/UX yang tepat terbukti secara signifikan dapat meningkatkan aksesibilitas, kemudahan navigasi, serta meminimalkan beban kognitif pengguna (learning curve) saat mengoperasikan platform digital.
+User Interface (UI) dan User Experience (UX) merupakan dua komponen utama yang berinteraksi secara sinergis dalam menentukan efektivitas, kegunaan, serta keberhasilan penerapan suatu sistem informasi digital. User Interface berfokus pada elemen tata letak visual, konsistensi warna, hirarki tipografi, dan navigasi yang bertindak sebagai jembatan komunikasi visual antara manusia dan sistem. Di sisi lain, User Experience mencakup aspek emosional, respons kognitif, serta tingkat kepuasan subjektif pengguna ketika berinteraksi dan menyelesaikan tugas tertentu di dalam produk digital. Sebagaimana dijelaskan oleh Windrianto dan Suryani (2025), penerapan metodologi desain antarmuka berbasis kebutuhan pengguna mampu menyelaraskan kebutuhan fungsionalitas sistem dengan kenyamanan operasional pengguna. Hal ini diperkuat oleh studi Ramadhana et al. (2025) yang menegaskan bahwa integrasi UI/UX yang tepat terbukti secara signifikan dapat meningkatkan aksesibilitas, kemudahan navigasi, serta meminimalkan beban kognitif pengguna (*learning curve*) saat mengoperasikan platform digital.
 
-Sementara itu, Interaction Design (IxD) atau desain interaksi bertindak sebagai fondasi operasional yang mengatur bagaimana sistem merespons setiap bentuk tindakan dan masukan dari pengguna secara intuitif. Konsep interaksi ini mendasarkan diri pada alur kerja (workflow) yang logis, pemberian umpan balik (feedback) secara waktu nyata, penyediaan kemudahan navigasi, serta penerapan keteraturan pola untuk mencegah kesalahan penggunaan (error prevention). Dalam konteks aplikasi layanan dan pengelolaan data administrasi, arsitektur interaksi yang terstruktur secara teratur memungkinkan pengguna menyelesaikan transaksi tanpa hambatan teknis. Sebagaimana dijelaskan oleh Alja et al. (2025), perancangan antarmuka dan pola interaksi yang adaptif terbukti secara signifikan meningkatkan efisiensi operasional sistem serta mempercepat waktu penyelesaian tugas (task completion rate). Hal ini sejalan dengan temuan Nurhasanah dan Kusumadiarti (2024) yang menyatakan bahwa optimalisasi desain interaksi yang terstruktur secara metodologis berhasil memperjelas penyampaian informasi dan meningkatkan kepuasan pengguna secara menyeluruh.
+Sementara itu, Interaction Design (IxD) atau desain interaksi bertindak sebagai fondasi operasional yang mengatur bagaimana sistem merespons setiap bentuk tindakan dan masukan dari pengguna secara intuitif. Konsep interaksi ini mendasarkan diri pada alur kerja (workflow) yang logis, pemberian umpan balik (feedback) secara waktu nyata, penyediaan kemudahan navigasi, serta penerapan keteraturan pola untuk mencegah kesalahan penggunaan (*error prevention*). Dalam konteks aplikasi layanan dan pengelolaan data administrasi, arsitektur interaksi yang terstruktur secara teratur memungkinkan pengguna menyelesaikan transaksi tanpa hambatan teknis. Sebagaimana dijelaskan oleh Alja et al. (2025), perancangan antarmuka dan pola interaksi yang adaptif terbukti secara signifikan meningkatkan efisiensi operasional sistem serta mempercepat waktu penyelesaian tugas (*task completion rate*). Hal ini sejalan dengan temuan Nurhasanah dan Kusumadiarti (2024) yang menyatakan bahwa optimalisasi desain interaksi yang terstruktur secara metodologis berhasil memperjelas penyampaian informasi dan meningkatkan kepuasan pengguna secara menyeluruh.
 
 ### 2.2.3 Teori Software Engineering dan Arsitektur Perangkat Lunak
 
@@ -209,19 +232,11 @@ Iterative and Incremental Development (IID) adalah model proses pengembangan per
 
 Model ini sesuai untuk perancangan RW Digital karena kebutuhan mitra belum dapat dirumuskan secara lengkap di awal. Ruang lingkup fitur awal disusun berdasarkan regulasi dan praktik umum RW, kemudian divalidasi dan direvisi bersama pengurus RW 06 seiring berjalannya pengembangan. Berbeda dengan model Waterfall yang menetapkan seluruh spesifikasi di awal, IID memungkinkan revisi dilakukan secara bertahap tanpa penulisan ulang sistem secara total.
 
-#### 2.2.4.2 Metode Kanban dan GitHub Projects
+#### 2.2.4.2 Metode Kanban
 
 Metode Kanban adalah metode pengelolaan alur kerja berbasis Lean yang berfokus pada visualisasi aliran kerja (visualize workflow), pembatasan pekerjaan dalam proses (limit Work in Progress / WIP), dan perbaikan aliran tugas secara berkesinambungan (Anderson, 2010). Kanban memberikan fleksibilitas tinggi bagi tim pengembang untuk merespons kebutuhan secara adaptif tanpa terikat oleh siklus rilis kaku. Kanban tidak mendefinisikan siklus hidup pengembangan perangkat lunak secara utuh, sehingga pada perancangan ini Kanban dipasangkan dengan model proses IID: IID menentukan bagaimana sistem dikembangkan, sedangkan Kanban menentukan bagaimana pekerjaan tim divisualisasikan dan dikendalikan.
 
-Penerapan metode Kanban pada proyek ini diwujudkan melalui platform GitHub Projects yang terintegrasi langsung dengan repositori kode sumber (rwdigital). Aliran kerja dibagi ke dalam kolom visual:
-
-1. **Backlog:** Daftar seluruh kebutuhan fungsional dan teknis hasil elisitasi yang direpresentasikan sebagai GitHub Issues.
-2. **Todo / Ready:** Tugas yang telah memiliki spesifikasi teknis jelas dan siap dikerjakan.
-3. **In Progress:** Tugas yang sedang aktif dikembangkan oleh anggota tim penanggung jawab (PIC) pada cabang fitur (feature branch) masing-masing, dengan batas WIP 1–2 kartu per orang dan maksimal 10 kartu In Progress pada papan.
-4. **Review / Verification:** Modul yang telah selesai dikoding dan diajukan melalui Pull Request, lalu diverifikasi melalui pemeriksaan otomatis (continuous integration) serta pengujian fungsional.
-5. **Done:** Fitur yang telah lulus verifikasi, disetujui, dan berhasil digabungkan (merged) ke cabang utama (main branch).
-
-Integrasi GitHub Projects memungkinkan pembaruan status tugas secara otomatis ketika Pull Request dibuat atau digabungkan, memastikan transparansi dan kemudahan pelacakan progres tim secara real-time.
+Papan Kanban terdiri atas kolom-kolom yang mewakili tahap kerja, dan setiap pekerjaan direpresentasikan sebagai kartu yang bergerak dari kiri ke kanan. Batas WIP pada kolom pengerjaan mencegah tim memulai terlalu banyak pekerjaan sekaligus, sehingga hambatan (*bottleneck*) lebih mudah terlihat dan pekerjaan diselesaikan sebelum pekerjaan baru diambil (Anderson, 2010). Papan Kanban dapat diwujudkan dengan alat bantu digital seperti GitHub Projects, yang menghubungkan kartu dengan *issue* dan *pull request* pada repositori kode sehingga status kartu dapat berubah otomatis mengikuti aktivitas pengembangan (GitHub, n.d.). Susunan kolom, batas WIP, dan aturan perpindahan kartu yang diterapkan pada perancangan ini dijelaskan pada subbab 3.5.1.
 
 #### 2.2.4.3 Prioritisasi Kebutuhan dengan Metode MoSCoW
 
@@ -232,171 +247,295 @@ Metode MoSCoW adalah teknik analisis untuk mengklasifikasikan kebutuhan sistem k
 - **Could Have (C):** Kebutuhan tambahan atau nilai tambah yang dikerjakan apabila terdapat ketersediaan waktu dan sumber daya (misal: integrasi gerbang pembayaran QRIS otomatis).
 - **Won’t Have / Would like (W):** Fitur yang disepakati untuk dikesampingkan dari ruang lingkup proyek saat ini (misal: integrasi kamera pengawas/CCTV dan inventaris sarana prasarana fisik).
 
+### 2.2.5 Pemodelan Proses Bisnis, Sistem, dan Data
+
+Pemodelan digunakan untuk menggambarkan sistem sebelum dan selama dibangun, sehingga kebutuhan, perilaku, dan struktur sistem dapat diperiksa oleh tim maupun mitra. Proses bisnis dimodelkan dengan *Business Process Model and Notation* (BPMN), notasi standar yang menggambarkan urutan aktivitas, keputusan, dan pelaku proses dalam *pool* dan *lane* (Object Management Group, 2014). BPMN dipakai untuk membandingkan proses saat ini (*as-is*) dengan proses usulan (*to-be*).
+
+Perilaku dan struktur perangkat lunak dimodelkan dengan *Unified Modeling Language* (UML). Diagram *use case* menggambarkan fungsi sistem dari sudut pandang aktor, diagram aktivitas menggambarkan alur kerja, diagram *sequence* menggambarkan urutan pesan antarkomponen, diagram kelas menggambarkan struktur objek, dan diagram *state machine* menggambarkan perubahan status suatu objek (Booch et al., 2005; Dennis et al., 2020). Struktur data dimodelkan dengan *Entity Relationship Diagram* (ERD) yang menggambarkan entitas, atribut, dan relasi antarentitas sebagai dasar perancangan basis data relasional (Chen, 1976).
+
+### 2.2.6 Pengujian dan Evaluasi Perangkat Lunak
+
+Verifikasi perangkat lunak memeriksa apakah sistem dibangun sesuai spesifikasinya, sedangkan validasi memeriksa apakah sistem yang dibangun sesuai dengan kebutuhan pengguna (Pressman & Maxim, 2020). Pengujian *black box* adalah teknik verifikasi yang menguji fungsi sistem berdasarkan masukan dan keluaran tanpa melihat struktur kode. Teknik yang umum dipakai antara lain *equivalence partitioning* (membagi masukan ke dalam kelas yang diperlakukan sama), *boundary value analysis* (menguji nilai di batas kelas masukan), dan *decision table* (menguji kombinasi kondisi dan aturan bisnis) (Pressman & Maxim, 2020). Pengujian otomatis yang dijalankan setiap kali kode diubah (*continuous integration*) membantu memastikan perubahan baru tidak merusak fungsi yang sudah ada.
+
+Validasi oleh pengguna dilakukan melalui *User Acceptance Testing* (UAT), yaitu pengujian oleh calon pengguna nyata dengan skenario tugas operasional. Tingkat kemudahan penggunaan dapat diukur dengan *System Usability Scale* (SUS), kuesioner sepuluh butir berskala Likert lima poin yang menghasilkan skor 0–100 (Brooke, 1996).
+
+### 2.2.7 Standar Keteknikan dan Regulasi Terkait
+
+Berdasarkan objek perancangan, standar keteknikan dan regulasi yang relevan dikelompokkan sebagai berikut:
+
+1. **Regulasi kelembagaan dan kependudukan:** Undang-Undang Nomor 6 Tahun 2014 tentang Desa, Permendagri Nomor 18 Tahun 2018 tentang Lembaga Kemasyarakatan Desa dan Lembaga Adat Desa, Peraturan Wali Kota Bekasi Nomor 58 Tahun 2020 tentang RT dan RW, serta Undang-Undang Nomor 24 Tahun 2013 tentang Administrasi Kependudukan.
+2. **Regulasi dan standar keamanan informasi:** Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi, ISO/IEC 27001:2022 tentang sistem manajemen keamanan informasi, dan OWASP Top 10 (2021) untuk risiko keamanan aplikasi web.
+3. **Standar pemodelan:** BPMN 2.0, UML, dan ERD sebagaimana dijelaskan pada subbab 2.2.5.
+
+Pemilihan dan penerapan standar tersebut pada rancangan dijelaskan pada subbab 3.2.
+
 ## 2.3 Teori Keamanan Data (PII, Auth)
 
 ### 2.3.1 Keamanan Data dan Pelindungan Data Pribadi
 
-Keamanan informasi secara konseptual bertumpu pada tiga properti utama, yaitu kerahasiaan (confidentiality), integritas (integrity), dan ketersediaan (availability) yang dikenal sebagai CIA triad (ISO/IEC, 2022). Pada Sistem Informasi RW, ketiga aspek ini berhubungan langsung dengan tata kelola data warga. Kerahasiaan menjamin bahwa data sensitif seperti Nomor Induk Kependudukan (NIK), Nomor Kartu Keluarga (No. KK), serta alamat warga tidak dapat diakses oleh pihak yang tidak berwenang. Integritas memastikan bahwa data kependudukan maupun transaksi kas tidak diubah tanpa otorisasi yang sah, sedangkan ketersediaan menjamin data dapat diakses oleh pengurus RW/RT saat dibutuhkan untuk keperluan administrasi. Berdasarkan Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP), data kependudukan serta data iuran warga tergolong sebagai Data Pribadi yang wajib dilindungi. UU PDP mengklasifikasikan data pribadi menjadi data umum (seperti nama lengkap dan jenis kelamin) serta data spesifik (seperti data keuangan pribadi) yang memerlukan tingkat perlindungan lebih ketat. Dalam konteks ini, pengurus RW bertindak sebagai Pengendali Data Pribadi yang berkewajiban menerapkan kontrol teknis seperti pembatasan akses (need-to-know), minimisasi data, dan penyamaran (masking) data untuk mencegah kegagalan pelindungan data.
+Keamanan informasi secara konseptual bertumpu pada tiga properti utama, yaitu kerahasiaan (confidentiality), integritas (integrity), dan ketersediaan (availability) yang dikenal sebagai CIA triad (ISO/IEC, 2022). Pada Sistem Informasi RW, ketiga aspek ini berhubungan langsung dengan tata kelola data warga. Kerahasiaan menjamin bahwa data sensitif seperti Nomor Induk Kependudukan (NIK), Nomor Kartu Keluarga (No. KK), serta alamat warga tidak dapat diakses oleh pihak yang tidak berwenang. Integritas memastikan bahwa data kependudukan maupun transaksi kas tidak diubah tanpa otorisasi yang sah, sedangkan ketersediaan menjamin data dapat diakses oleh pengurus RW/RT saat dibutuhkan untuk keperluan administrasi. Berdasarkan Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP), data kependudukan serta data iuran warga tergolong sebagai Data Pribadi yang wajib dilindungi. UU PDP mengklasifikasikan data pribadi menjadi data umum (seperti nama lengkap dan jenis kelamin) serta data spesifik (seperti data keuangan pribadi) yang memerlukan tingkat perlindungan lebih ketat. Dalam konteks ini, pengurus RW bertindak sebagai Pengendali Data Pribadi yang berkewajiban menerapkan kontrol teknis seperti pembatasan akses (*need-to-know*), minimisasi data, dan penyamaran (masking) data untuk mencegah kegagalan pelindungan data.
 
 ### 2.3.2 Autentikasi dan Manajemen Sesi
 
-Dalam mendukung aspek autentikasi dan manajemen sesi, sistem mengidentifikasi serta memverifikasi pengguna sebelum memberikan hak akses. Pada arsitektur aplikasi web modern, identitas pengguna yang terautentikasi dipertahankan melalui sesi (session) berbasis cookie yang dilindungi atribut HttpOnly untuk mencegah pembacaan oleh skrip jahat, atribut Secure untuk menjamin transmisi terenkripsi, serta SameSite guna membatasi pengiriman lintas situs (Barth, 2011). Penyimpanan kata sandi dalam basis data wajib diolah menggunakan fungsi turunan kunci (key derivation function) berbantuan salt seperti scrypt atau bcrypt guna mempersulit serangan brute-force apabila terjadi kebocoran basis data (NIST, 2017). Pada rancangan sistem ini, pengurusan autentikasi memanfaatkan pustaka Better Auth yang terintegrasi dengan framework SvelteKit. Pembacaan sesi dilakukan secara terpusat pada setiap request melalui berkas hooks.server.ts dan disimpan ke dalam event.locals sebagai dasar verifikasi otorisasi pada lapisan aplikasi.
+Dalam mendukung aspek autentikasi dan manajemen sesi, sistem mengidentifikasi serta memverifikasi pengguna sebelum memberikan hak akses. Pada arsitektur aplikasi web modern, identitas pengguna yang terautentikasi dipertahankan melalui sesi (session) berbasis cookie yang dilindungi atribut HttpOnly untuk mencegah pembacaan oleh skrip jahat, atribut Secure untuk menjamin transmisi terenkripsi, serta SameSite guna membatasi pengiriman lintas situs (Barth, 2011). Penyimpanan kata sandi dalam basis data wajib diolah menggunakan fungsi turunan kunci (key derivation function) berbantuan salt seperti scrypt atau bcrypt guna mempersulit serangan brute-force apabila terjadi kebocoran basis data (NIST, 2017). Pada aplikasi web, pembacaan sesi sebaiknya dilakukan secara terpusat pada setiap permintaan (*request*) di sisi server, sehingga setiap pemeriksaan otorisasi berikutnya berpijak pada identitas pengguna yang sama.
 
 ### 2.3.3 Role-Based Access Control (RBAC)
 
-Otorisasi dan pembatasan hak akses ditegakkan menggunakan model Role-Based Access Control (RBAC) yang mengaitkan izin akses dengan peran (role) tertentu, bukan pengguna secara individual (Sandhu et al., 1996). Sistem mendefinisikan empat peran utama yang mencerminkan struktur organisasi RW, yaitu admin_rw, pengurus_rt, bendahara, dan warga. Kewenangan tiap peran diatur dalam matriks operasi (create, read, update, delete) pada berbagai modul sistem, dengan penerapan prinsip least privilege dan defence in depth. Penegakan kontrol akses dilakukan secara berlapis, mulai dari pemeriksaan route guard terpusat pada guard.ts, pemeriksaan ulang pada lapisan layout, hingga pengecekan izin di tingkat action dengan menerapkan prinsip fail-closed agar nilai peran yang tidak valid otomatis ditolak.
+Otorisasi dan pembatasan hak akses ditegakkan menggunakan model Role-Based Access Control (RBAC) yang mengaitkan izin akses dengan peran (role) tertentu, bukan pengguna secara individual (Sandhu et al., 1996). Kewenangan tiap peran dinyatakan dalam matriks operasi (*create, read, update, delete*) terhadap setiap sumber daya. Penerapannya biasanya disertai prinsip *least privilege* (pengguna hanya diberi hak yang dibutuhkan), *defence in depth* (pemeriksaan akses berlapis), dan *fail-closed* (peran yang tidak dikenali otomatis ditolak). Pada organisasi RW, peran dapat dipetakan langsung dari struktur pengurus, misalnya pengurus RW, pengurus RT, bendahara, dan warga.
 
 ### 2.3.4 Keamanan Aplikasi Web
 
-Sebagai landasan keamanan aplikasi web secara menyeluruh, perancangan sistem mengacu pada standar Open Worldwide Application Security Project (OWASP) Top 10. Kerentanan utama seperti Broken Access Control ditangani melalui otorisasi berlapis di sisi server. Risiko Injection dicegah dengan memanfaatkan Drizzle ORM yang membangun parameterized queries sehingga masukan pengguna tidak dieksekusi sebagai perintah SQL. Seluruh masukan formulir divalidasi dan disanitasi secara ketat di sisi server menggunakan skema Zod. Selain itu, potensi Cross-Site Scripting (XSS) dimitigasi oleh mekanisme escaping bawaan Svelte, kerentanan Cross-Site Request Forgery (CSRF) dicegah melalui pemeriksaan header Origin oleh SvelteKit, serta keamanan transportasi data dijamin oleh penerapan Transport Layer Security (TLS/HTTPS) (Rescorla, 2018).
+Sebagai landasan keamanan aplikasi web secara menyeluruh, perancangan sistem mengacu pada standar Open Worldwide Application Security Project (OWASP) Top 10. Kerentanan *Broken Access Control* ditangani dengan otorisasi berlapis di sisi server. Risiko *Injection* dicegah dengan kueri berparameter (*parameterized queries*) sehingga masukan pengguna tidak dieksekusi sebagai perintah SQL, disertai validasi masukan di sisi server. *Cross-Site Scripting* (XSS) dimitigasi dengan *escaping* keluaran, *Cross-Site Request Forgery* (CSRF) dicegah dengan pemeriksaan asal permintaan (*Origin*), dan kerahasiaan data dalam transmisi dijamin dengan *Transport Layer Security* (TLS/HTTPS) (Rescorla, 2018).
 
 # BAB III SPESIFIKASI DAN MEKANISME PERANCANGAN
 
 ## 3.1 Batasan Realistis
 
-Perancangan dan implementasi Sistem Informasi RW ini dibatasi oleh beberapa batasan realistis sebagai berikut:
+Perancangan RW Digital dipengaruhi oleh kondisi nyata pada mitra RW 06 Kelurahan Kota Baru dan pada tim capstone, yang dikelompokkan sebagai berikut:
 
-1. **Batasan waktu.** Pengerjaan proyek ini dilakukan dalam satu semester sesuai kurikulum program studi, sehingga waktu yang tersedia untuk analisis, perancangan, implementasi, dan pengujian bersifat terbatas. Tidak seluruh fitur yang diidentifikasi dalam analisis kebutuhan dapat diselesaikan dalam periode ini.
-2. **Batasan perumusan kebutuhan awal.** Mitra RW (pengurus RW 06) dilibatkan secara aktif melalui wawancara, observasi, dan pembahasan hasil setiap iterasi pengembangan. Batasannya terletak pada tahap awal: kebutuhan belum dapat dirumuskan secara lengkap sebelum pengembangan dimulai, sehingga ruang lingkup awal disusun berdasarkan analisis regulasi resmi (UU No. 6 Tahun 2014, Permendagri No. 18 Tahun 2018) dan evaluasi plausibility, kemudian divalidasi dan direvisi bersama mitra pada setiap iterasi.
-3. **Batasan teknologi.** Sistem menggunakan SQLite sebagai basis data dengan pendekatan single-file yang tidak dirancang untuk skala distributed atau beban konkurensi tinggi. Belum tersedia infrastruktur server produksi yang bersifat permanen untuk deployment publik.
-4. **Batasan anggaran.** Tidak tersedia anggaran untuk layanan hosting berbayar atau akses payment gateway production, sehingga fitur pembayaran digital (QRIS) masih berada dalam tahap perancangan dan belum diintegrasikan secara penuh ke dalam sistem.
-5. **Batasan scope fitur.** Hanya fitur Core MVP yang dikerjakan dalam proyek ini, yaitu manajemen data kependudukan, kas RW, iuran warga, dan pengumuman/informasi. Fitur-fitur di luar scope — termasuk surat-menyurat, manajemen CCTV, inventaris, dan manajemen pengurus — tidak termasuk dalam cakupan pengerjaan.
-6. **Batasan pengujian.** Pengujian sistem dilakukan secara terbatas pada lingkungan kelompok capstone dan mitra, bukan deployment publik skala penuh. Hasil pengujian tidak dapat sepenuhnya merepresentasikan kondisi penggunaan nyata di lapangan.
+1. **Sumber daya manusia.** Literasi digital pengurus RW, pengurus RT, dan warga beragam. Mitra tidak memiliki tenaga TI khusus untuk memelihara sistem, sehingga antarmuka harus dapat dipakai tanpa pelatihan teknis yang panjang dan pengoperasian harian tidak boleh menuntut keahlian pemrograman.
+2. **Infrastruktur.** Mitra tidak memiliki server sendiri. Pengurus menggunakan laptop atau ponsel pribadi, sedangkan warga umumnya mengakses melalui ponsel dengan koneksi seluler. Sistem harus berbasis web, ringan, dan dapat diakses dari peramban tanpa instalasi aplikasi. Belum tersedia infrastruktur server produksi yang bersifat permanen.
+3. **Anggaran.** Tidak tersedia anggaran swadaya untuk server khusus, langganan aplikasi berbayar, maupun akses *payment gateway* produksi. Karena itu, pembayaran nontunai melalui QRIS dirancang dan diuji pada mode uji (*sandbox*) dan baru dapat diaktifkan setelah mitra menyetujui serta memiliki akun penyedia jasa pembayaran.
+4. **Waktu.** Pengerjaan dibatasi satu semester akademik, sehingga hanya fitur prioritas Core MVP yang dikerjakan: kependudukan, surat-menyurat, kas RW, iuran warga, serta pengumuman dan informasi. Fitur CCTV, inventaris sarana prasarana, dan manajemen pengurus tidak termasuk dalam cakupan.
+5. **Sistem yang berlaku.** Administrasi RW 06 saat ini berjalan manual dengan buku register, spreadsheet, kuitansi fisik, dan grup WhatsApp. Peralihan ke sistem digital harus dapat dilakukan bertahap, termasuk impor data awal dari berkas spreadsheet. Kebutuhan mitra juga belum dapat dirumuskan lengkap sebelum pengembangan dimulai, sehingga ruang lingkup awal disusun dari regulasi dan divalidasi serta direvisi bersama pengurus RW 06 pada setiap iterasi.
+6. **Regulasi.** Sistem tidak terintegrasi dengan sistem kependudukan resmi (SIAK Dukcapil) maupun sistem kelurahan, dan surat yang diterbitkan berfungsi sebagai surat pengantar RT/RW, bukan dokumen kependudukan resmi. Pengelolaan data harus mematuhi ketentuan pelindungan data pribadi.
 
 ## 3.2 Standar Keteknikan
 
-### 3.2.1 Regulasi dan Standar Keamanan Informasi
+Standar keteknikan dan regulasi yang diidentifikasi pada subbab 2.2.7 dipilih sebagai acuan rancangan berdasarkan relevansinya terhadap permasalahan. Setiap acuan berikut diturunkan menjadi spesifikasi pada subbab 3.3.
+
+### 3.2.1 Regulasi Kelembagaan RW dan Kependudukan
+
+#### 1. Permendagri Nomor 18 Tahun 2018 tentang Lembaga Kemasyarakatan Desa dan Lembaga Adat Desa
+
+Menetapkan RW sebagai lembaga kemasyarakatan yang bertugas membantu pelayanan pemerintahan, termasuk pendataan kependudukan, dan menyampaikan informasi kepada masyarakat.
+
+- **Relevansi terhadap rancangan:** menjadi dasar ruang lingkup modul kependudukan, surat pengantar, dan pengumuman.
+
+#### 2. Peraturan Wali Kota Bekasi Nomor 58 Tahun 2020
+
+Mengatur bahwa satu RT terdiri atas 30 sampai 100 KK (Pasal 10 ayat (1)) dan satu RW terdiri atas 5 sampai 25 RT (Pasal 14), pembiayaan RT/RW dapat bersumber dari swadaya masyarakat dan bantuan yang sah (Pasal 30 ayat (1)), serta keuangan dikelola secara tertib, transparan, dan akuntabel (Pasal 31).
+
+- **Relevansi terhadap rancangan:** menentukan hierarki data RW–RT–KK–warga, kapasitas minimum data (25 RT × 100 KK = 2.500 KK), serta kewajiban pencatatan kas yang dapat ditelusuri.
+
+#### 3. Undang-Undang Nomor 24 Tahun 2013 tentang Administrasi Kependudukan
+
+Menetapkan NIK sebagai nomor identitas tunggal penduduk dan, melalui Pasal 79A, melarang pungutan biaya dalam pengurusan dokumen kependudukan.
+
+- **Relevansi terhadap rancangan:** NIK dan Nomor KK menjadi kunci identitas yang wajib unik, dan sistem tidak menyediakan tagihan untuk layanan surat pengantar kependudukan.
+
+### 3.2.2 Regulasi dan Standar Keamanan Informasi
 
 #### 1. Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi (UU PDP)
 
 Mengklasifikasikan data pribadi menjadi data umum dan spesifik (Pasal 4), di mana data keuangan tergolong data spesifik. Mengatur kewajiban Pengendali Data Pribadi untuk menjamin keamanan pemrosesan data (Pasal 35), mencegah akses yang tidak sah (Pasal 39), serta memberikan pemberitahuan tertulis jika terjadi kegagalan pelindungan data (Pasal 46).
 
-- **Penerapan pada Sistem:** Akses data kependudukan dibatasi menggunakan model Role-Based Access Control (RBAC), data NIK dan Nomor Kartu Keluarga (KK) disamarkan (masking) pada daftar antarmuka, setiap perubahan data sensitif mencatat jejak audit (dicatatOleh dan timestamp), serta kata sandi tidak disimpan dalam bentuk teks asli.
+- **Relevansi terhadap rancangan:** akses data kependudukan dibatasi berdasarkan peran, NIK dan Nomor KK disamarkan pada tampilan daftar, perubahan data sensitif dicatat dalam jejak audit, dan kata sandi tidak disimpan dalam bentuk teks asli.
 
 #### 2. ISO/IEC 27001:2022 (Information Security Management System)
 
-Mengacu pada kontrol keamanan informasi Annex A, khususnya A.5.15 (Access Control) untuk aturan hak akses logis berdasarkan kebutuhan operasional, dan A.8.24 (Use of Cryptography) untuk aturan kriptografi dan pengelolaan kunci. Didukung oleh kontrol pendukung seperti A.5.17 (informasi autentikasi), A.8.5 (autentikasi aman), A.8.11 (data masking), A.8.15 (logging), serta A.8.13 (backup).
+Mengacu pada kontrol keamanan informasi Annex A, khususnya A.5.15 (*Access Control*) untuk aturan hak akses logis berdasarkan kebutuhan operasional dan A.8.24 (*Use of Cryptography*) untuk aturan kriptografi. Didukung kontrol A.5.17 (informasi autentikasi), A.8.5 (autentikasi aman), A.8.11 (*data masking*), A.8.15 (*logging*), dan A.8.13 (*backup*).
 
-- **Penerapan pada Sistem:** Penerapan matriks RBAC dengan empat peran utama via permissions.ts dan guard.ts (A.5.15), enkripsi TLS untuk data bergerak serta hashing kata sandi melalui Better Auth (A.8.24), batasan durasi sesi berbasis cookie (A.8.5), dan penyamaran tampilan NIK/KK (A.8.11).
+- **Relevansi terhadap rancangan:** menjadi dasar matriks hak akses per peran, enkripsi transmisi dan *hashing* kata sandi, batas durasi sesi, penyamaran NIK/No. KK, jejak audit, dan pencadangan basis data.
 
 #### 3. Open Worldwide Application Security Project (OWASP) Top 10 (2021)
 
-Acuan sepuluh kategori risiko keamanan aplikasi web paling kritis guna memitigasi celah kerentanan utama.
+Acuan sepuluh kategori risiko keamanan aplikasi web yang paling kritis.
 
-- **Penerapan pada Sistem:**
-  - A01 Broken Access Control: Dikelola via proteksi berlapis pada hooks.server.ts, layout, serta penegakan izin per aksi dengan prinsip fail-closed.
-  - A02 Cryptographic Failures: Penggunaan TLS/HTTPS dan enkripsi hash kata sandi.
-  - A03 Injection & XSS: Pembuatan kueri berparameter menggunakan Drizzle ORM, validasi skema masukan di sisi server via Zod, dan escaping keluaran templat bawaan Svelte.
-  - A07 Identification & Authentication Failures: Penggunaan pustaka Better Auth, batas waktu sesi, serta mekanisme rate limiting.
-  - A05 Security Misconfiguration: Penyimpanan variabel rahasia dan kunci autentikasi di dalam file variabel lingkungan (.env) yang diisolasi dari repositori.
+- **Relevansi terhadap rancangan:** kategori yang paling relevan adalah A01 *Broken Access Control*, A02 *Cryptographic Failures*, A03 *Injection* (termasuk XSS), A05 *Security Misconfiguration*, dan A07 *Identification and Authentication Failures*. Setiap kategori diturunkan menjadi spesifikasi keamanan pada subbab 3.3 dan diuji pada subbab 4.3.
 
-**Tabel 3.1 Ringkasan Pemetaan Standar Keteknikan Keamanan ke Fitur Sistem**
+### 3.2.3 Standar Pemodelan
 
-| Standar / Regulasi | Butir / Kontrol | Realisasi Pada Sistem |
+Pemodelan rancangan menggunakan BPMN 2.0 untuk proses bisnis *as-is* dan *to-be* (Object Management Group, 2014), UML untuk *use case*, aktivitas, *sequence*, kelas, dan *state machine* (Booch et al., 2005), serta ERD untuk struktur basis data (Chen, 1976). Penggunaan notasi standar memungkinkan rancangan diperiksa oleh pembimbing dan dikomunikasikan kepada mitra secara konsisten.
+
+**Tabel 3.1 Ringkasan Standar Keteknikan dan Regulasi yang Digunakan**
+
+| Standar / Regulasi | Butir / Kontrol | Diturunkan menjadi |
 | --- | --- | --- |
-| UU PDP No. 27/2022 | Keamanan & pencegahan akses tidak sah | RBAC, route guard, penyamaran (masking) PII |
-| ISO/IEC 27001:2022 | A.5.15 Access Control | permissions.ts, guard.ts, matriks 4 peran |
-| ISO/IEC 27001:2022 | A.8.24 Cryptography | Enkripsi TLS/HTTPS, hashing kata sandi (scrypt) |
-| OWASP Top 10 (2021) | A01 Broken Access Control | enforceAccess, requireRole pada server actions |
-| OWASP Top 10 (2021) | A03 Injection & XSS | Parameterized queries Drizzle ORM, Zod schema validation, Svelte escaping |
+| Permendagri No. 18/2018 | Tugas LKD dalam pelayanan dan pendataan | Ruang lingkup modul kependudukan, surat, pengumuman |
+| Perwali Bekasi No. 58/2020 | Pasal 10, 14, 30, 31 | Hierarki RW–RT–KK, kapasitas ≥ 2.500 KK, kas yang akuntabel |
+| UU No. 24/2013 | NIK sebagai identitas tunggal; Pasal 79A | NIK/No. KK 16 digit unik; tanpa tagihan layanan surat |
+| UU PDP No. 27/2022 | Pasal 35, 39, 46 | Hak akses per peran, penyamaran PII, jejak audit |
+| ISO/IEC 27001:2022 | A.5.15, A.8.24, A.8.5, A.8.11, A.8.13, A.8.15 | Matriks akses, TLS dan *hashing*, batas sesi, *masking*, pencadangan, *logging* |
+| OWASP Top 10 (2021) | A01, A02, A03, A05, A07 | Otorisasi di server, kueri berparameter, validasi masukan, pembatasan percobaan masuk |
+| BPMN 2.0, UML, ERD | Notasi pemodelan | Artefak rancangan pada subbab 4.1 |
 
 ## 3.3 Spesifikasi Rancangan
 
-### 3.3.1 Spesifikasi Kependudukan & Keuangan
+Spesifikasi rancangan disusun dengan mengelaborasikan batasan realistis (subbab 3.1) dan standar keteknikan (subbab 3.2). Spesifikasi dinyatakan dalam besaran yang dapat diukur agar dapat diverifikasi pada subbab 4.3. Rincian kebutuhan fungsional dan non-fungsional per butir beserta prioritas MoSCoW-nya dijabarkan pada subbab 4.1 sebagai hasil tahap analisis kebutuhan.
 
-Modul kependudukan menjadi sumber data warga yang terpusat bagi pengurus RW, pengurus RT, dan warga RW 06, sekaligus mendukung fitur lain seperti surat-menyurat dan iuran. Strukturnya mengikuti hierarki RW, RT, kartu keluarga (KK), dan warga menurut Peraturan Wali Kota Bekasi Nomor 58 Tahun 2020, yaitu satu RT terdiri atas 30 sampai 100 KK (Pasal 10 ayat (1)) dan satu RW terdiri atas 5 sampai 25 RT (Pasal 14), sehingga sistem harus mampu menampung sedikitnya 2.500 KK. Data warga yang wajib diisi meliputi NIK, nama, tanggal lahir, nomor KK, alamat, RT, dan status tinggal. NIK dan nomor KK harus terdiri atas 16 digit dan tidak boleh duplikat, sedangkan usia dihitung otomatis dari tanggal lahir. Data tidak dihapus permanen, melainkan dinonaktifkan, dan setiap perubahan serta peristiwa kependudukan dicatat dalam riwayat. Data awal dapat diimpor dari berkas CSV atau XLSX, warga dapat mengajukan pembaruan data yang berlaku setelah disetujui pengurus, dan akses dibatasi menurut peran.
+### 3.3.1 Spesifikasi Fungsional
 
-Modul keuangan mencakup pengelolaan kas RW dan iuran warga. Peraturan yang sama menyebutkan bahwa pembiayaan RT dan RW dapat bersumber dari swadaya masyarakat dan bantuan yang sah (Pasal 30 ayat (1)), serta mewajibkan pengelolaan keuangan yang tertib, transparan, dan akuntabel (Pasal 31). Karena itu, setiap transaksi kas dicatat lengkap beserta kategori dan pencatatnya, saldo dihitung otomatis, dan koreksi dilakukan melalui pembatalan dengan alasan, bukan penghapusan. Hanya bendahara yang berhak mengubah data kas, dan laporan keuangan per periode dapat diunduh dalam format PDF dan XLSX. Tagihan iuran diterbitkan bagi KK aktif, dan pembayaran tunai otomatis tercatat sebagai pemasukan kas tanpa input ganda. Pembayaran nontunai melalui QRIS dirancang dengan syarat disetujui mitra dan tersedia penyedia jasa pembayaran. Warga dapat melihat riwayat iuran KK sendiri, dan sistem tidak menyediakan tagihan untuk pengurusan dokumen kependudukan sesuai Undang-Undang Nomor 24 Tahun 2013 Pasal 79A.
+**Tabel 3.2 Spesifikasi Fungsional per Modul**
 
-### 3.3.2 Spesifikasi UI/UX & Flow
+| Modul | Spesifikasi | Dasar |
+| --- | --- | --- |
+| Kependudukan | Mengelola data RT, KK, dan warga dengan isian wajib NIK, nama, tanggal lahir, Nomor KK, alamat, RT, dan status tinggal; usia dihitung otomatis dari tanggal lahir; data awal dapat diimpor dari berkas CSV/XLSX; data tidak dihapus permanen, melainkan dinonaktifkan dengan riwayat peristiwa; warga dapat mengajukan pembaruan data yang berlaku setelah disetujui pengurus. | Perwali 58/2020; UU 24/2013 |
+| Surat-menyurat | Warga atau pengurus RT mengajukan surat pengantar sesuai jenisnya dengan data pemohon terisi otomatis dari modul kependudukan; pemohon mengunggah berkas persyaratan; pengurus memverifikasi, lalu surat disetujui dan diterbitkan dengan nomor otomatis dan tanda tangan elektronik; pemohon memantau status dan mengunduh surat dalam format PDF. | Permendagri 18/2018; UU 24/2013 Pasal 79A |
+| Kas RW | Mencatat pemasukan dan pengeluaran beserta kategori, nominal, tanggal, bukti, dan pencatat; saldo dihitung otomatis; koreksi dilakukan melalui pembatalan disertai alasan, bukan penghapusan; laporan per periode dapat diunduh dalam format PDF dan XLSX. | Perwali 58/2020 Pasal 30–31 |
+| Iuran warga | Menerbitkan tagihan iuran bagi KK aktif; pembayaran tunai yang dikonfirmasi otomatis tercatat sebagai pemasukan kas tanpa input ganda; pembayaran QRIS disiapkan melalui *payment gateway*; warga melihat riwayat iuran KK sendiri. | Perwali 58/2020 Pasal 31 |
+| Pengumuman dan informasi | Pengurus membuat, mengubah, dan mengarsipkan pengumuman beserta gambar kegiatan; warga melihat pengumuman aktif dan menerima notifikasi di dalam aplikasi. | Permendagri 18/2018 |
+| Akun dan akses | Akun warga dibuat terpusat oleh pengurus RW (bukan pendaftaran mandiri) untuk mencegah pemakaian NIK orang lain; peran pengguna terdiri atas pengurus RW, pengurus RT, bendahara, dan warga; pengguna dapat memulihkan kata sandi melalui email. | UU PDP; ISO/IEC 27001 A.5.15 |
 
-#### Spesifikasi Antarmuka (User Interface Specification)
+### 3.3.2 Spesifikasi Non-Fungsional
 
-**Platform dan Responsivitas**
+**Tabel 3.3 Spesifikasi Non-Fungsional dan Ukurannya**
 
-Sistem dibuat berbasis web dan dirancang agar dapat digunakan pada berbagai ukuran layar. Sistem dapat diakses melalui komputer, laptop, maupun smartphone. Penggunaan melalui smartphone lebih ditujukan untuk warga, sedangkan komputer atau laptop dapat digunakan oleh pengurus dalam mengelola data dan proses administrasi.
+| Kode | Aspek | Spesifikasi | Ukuran / Target | Dasar |
+| --- | --- | --- | --- | --- |
+| SP-01 | Kapasitas | Menampung data satu RW sesuai batas maksimum Perwali | ≥ 25 RT dan ≥ 2.500 KK | Perwali 58/2020 Pasal 10, 14 |
+| SP-02 | Kinerja | Pencarian dan penyaringan data warga | ≤ 3 detik pada 10.000 data warga | Batasan infrastruktur (3.1 butir 2) |
+| SP-03 | Integritas data | Validasi NIK dan Nomor KK | Tepat 16 digit angka, tanpa duplikat | UU 24/2013 |
+| SP-04 | Kerahasiaan | Penyamaran NIK/No. KK pada tampilan daftar | 4 digit awal + 4 digit akhir tampil (contoh `3275••••••••0001`) | UU PDP; ISO 27001 A.8.11 |
+| SP-05 | Kontrol akses | Hak akses per peran dan per aksi, diperiksa di sisi server | 4 peran; peran tidak dikenal = ditolak (*fail-closed*) | UU PDP Pasal 39; OWASP A01 |
+| SP-06 | Autentikasi | Kata sandi disimpan sebagai *hash*; transmisi terenkripsi | *Hash* scrypt; HTTPS/TLS ≥ 1.2 di produksi | ISO 27001 A.8.24; OWASP A02 |
+| SP-07 | Sesi | Sesi berakhir otomatis | 60 menit | ISO 27001 A.8.5; OWASP A07 |
+| SP-08 | Pembatasan percobaan masuk | Pembatasan permintaan ke layanan autentikasi | ≤ 10 permintaan per 60 detik | OWASP A07 |
+| SP-09 | Keamanan masukan | Seluruh masukan formulir divalidasi di server; kueri berparameter | 100% formulir tervalidasi skema | OWASP A03 |
+| SP-10 | Berkas unggahan | Jenis dan ukuran berkas dibatasi | JPG/PNG/WebP/PDF; ≤ 5 MB (bukti kas), ≤ 10 MB (syarat surat) | OWASP A05 |
+| SP-11 | Jejak audit | Perubahan data sensitif dan transaksi keuangan mencatat pelaku dan waktu | 100% transaksi kas dan pembayaran iuran | UU PDP; Perwali Pasal 31 |
+| SP-12 | Ketersediaan | Pencadangan basis data | Berkala, minimal mingguan | ISO 27001 A.8.13 |
+| SP-13 | Aksesibilitas perangkat | Antarmuka responsif tanpa instalasi | Dapat dipakai pada layar ponsel (lebar ≥ 360 px) hingga desktop | Batasan infrastruktur (3.1 butir 2) |
+| SP-14 | Kegunaan | Kemudahan penggunaan menurut pengguna | Skor SUS ≥ 68 | Batasan SDM (3.1 butir 1); Brooke (1996) |
+| SP-15 | Biaya | Tanpa biaya langganan bagi mitra | Rp0 biaya lisensi perangkat lunak | Batasan anggaran (3.1 butir 3) |
 
-Tampilan sistem dibuat responsif sehingga susunan dan ukuran komponen dapat menyesuaikan dengan perangkat yang digunakan.
+### 3.3.3 Spesifikasi Teknis
 
-**Design System, Palet Warna dan Tipografi**
+**Tabel 3.4 Spesifikasi Teknis**
 
-Untuk menjaga tampilan tetap konsisten, sistem menggunakan design system sederhana yang mencakup warna, jenis huruf, ukuran teks, tombol, dan komponen lainnya.
+| Komponen | Spesifikasi |
+| --- | --- |
+| Jenis aplikasi | Aplikasi web progresif (PWA) yang diakses melalui peramban |
+| Framework | SvelteKit 2 dengan Svelte 5 (TypeScript) |
+| Basis data | SQLite melalui Turso/libSQL dengan Drizzle ORM |
+| Autentikasi | Better Auth dengan sesi berbasis *cookie* (HttpOnly, Secure, SameSite) |
+| Validasi masukan | Skema Zod di sisi server |
+| Penyimpanan berkas | Direktori lokal server |
+| Pembayaran nontunai | *Payment gateway* QRIS (mode uji) |
+| Pengujian | *Continuous integration* (pemeriksaan tipe, *unit test*, *build*, *end-to-end test*) dan pengujian *black box* |
 
-Warna utama digunakan pada bagian-bagian yang membutuhkan perhatian pengguna, seperti tombol utama dan navigasi. Warna pendukung digunakan untuk membedakan informasi atau status tertentu. Untuk tipografi, sistem menggunakan font Inter agar teks dapat terlihat jelas dan nyaman dibaca.
+## 3.4 Batasan Asumsi
 
-**Komponen Antarmuka**
+### 3.4.1 Batasan Perancangan
 
-Beberapa komponen yang digunakan dalam perancangan antarmuka antara lain card, tabel, formulir, tombol, modal, dropdown, badge, dan notifikasi.
+1. **Data.** Kebutuhan dikumpulkan dari regulasi, wawancara dan observasi bersama pengurus RW 06, serta format dokumen administrasi yang dipakai mitra. Data uji tidak memakai data warga nyata, melainkan data contoh berpenanda seperti "Contoh Warga 1".
+2. **Metode.** Perancangan mengikuti model *iterative and incremental* dengan Kanban sebagai pengendali alur kerja. Iterasi dibatasi tiga kali dalam periode semester.
+3. **Anggaran.** Tidak ada anggaran pengadaan perangkat atau layanan berbayar; seluruh perangkat lunak yang digunakan berlisensi terbuka atau memiliki paket gratis.
+4. **Waktu.** Satu semester akademik, dengan lingkup terbatas pada fitur Core MVP (subbab 3.1 butir 4).
+5. **Integrasi.** Sistem berdiri sendiri dan tidak terhubung dengan SIAK Dukcapil maupun sistem kelurahan.
 
-Card digunakan untuk menampilkan informasi tertentu secara terpisah. Tabel digunakan untuk menampilkan data yang memiliki banyak informasi, seperti data warga dan data iuran. Formulir digunakan untuk memasukkan data dan melakukan pengajuan surat. Modal digunakan untuk memberikan konfirmasi sebelum melakukan tindakan tertentu, seperti menghapus data. Sedangkan badge dan notifikasi digunakan untuk memberikan informasi mengenai status atau perubahan data.
+### 3.4.2 Asumsi Perancangan
 
-#### B. Spesifikasi Pengalaman Pengguna (User Experience & Interaction Specification)
+1. **Struktur organisasi.** Struktur pengurus RW 06 diasumsikan terdiri atas ketua RW, sekretaris, bendahara, dan ketua RT di setiap wilayah, sesuai praktik umum RW di Indonesia.
+2. **Literasi digital.** Pengurus diasumsikan mampu mengoperasikan aplikasi web melalui peramban, dan warga diasumsikan memiliki ponsel dengan akses internet.
+3. **Dasar regulasi.** Selain Perwali Bekasi Nomor 58 Tahun 2020, diasumsikan tidak terdapat peraturan lain di wilayah mitra yang mengubah tugas RW secara substantif.
+4. **Kapasitas teknologi.** SQLite diasumsikan cukup untuk volume data skala RW (ribuan data warga, transaksi kas, dan iuran). QRIS diasumsikan dapat diintegrasikan melalui *payment gateway* pihak ketiga setelah mitra memiliki akun penyedia jasa pembayaran.
 
-**1. Navigasi dan Hirarki Informasi**
+## 3.5 Mekanisme Perancangan
 
-Navigasi sistem dibuat sederhana agar pengguna dapat menemukan fitur yang dibutuhkan dengan mudah. Fitur utama seperti Dashboard, Data Warga, Pengajuan Surat, dan Iuran ditempatkan pada bagian navigasi yang mudah ditemukan.
+### 3.5.1 Sistematika Perancangan
 
-Informasi yang dianggap penting ditampilkan dengan jelas. Contohnya, status pengajuan surat ditampilkan pada halaman yang mudah diakses sehingga warga dapat mengetahui perkembangan pengajuannya tanpa harus membuka banyak halaman.
+Perancangan RW Digital dilaksanakan dalam siklus *iterative and incremental* (subbab 2.2.4.1). Setiap iterasi menghasilkan penambahan atau penyempurnaan fitur yang tetap berfungsi. Arah setiap iterasi ditentukan oleh umpan balik pengurus RW 06 dan evaluasi internal tim terhadap hasil iterasi sebelumnya, sehingga revisi terjadi bertahap, bukan dalam satu spesifikasi awal yang kaku. Di dalam setiap iterasi, alur kerja dikendalikan melalui papan Kanban pada GitHub Projects (subbab 2.2.4.2). Alur tahapannya disajikan pada Gambar 3.1.
 
-**2. Umpan Balik Interaksi (Feedback/Status)**
+<!-- [Gambar 3.1 Flowchart Sistematika Perancangan — tempel di Word. WAJIB ada panah loop dari tahap 6 kembali ke tahap 1 berlabel "Iterasi berikutnya".] -->
 
-Sistem memberikan informasi kepada pengguna setelah melakukan suatu tindakan. Informasi tersebut dapat berupa notifikasi berhasil atau gagal, indikator proses, maupun perubahan status.
+**Gambar 3.1** Sistematika Perancangan RW Digital
 
-Sebagai contoh, setelah warga mengirim pengajuan surat, sistem memberikan informasi bahwa pengajuan telah berhasil dikirim. Warga juga dapat melihat status pengajuan, seperti "Diproses", "Disetujui", atau "Ditolak".
+1. **Analisis kebutuhan.** Kebutuhan diturunkan dari regulasi (subbab 3.2), hasil pengumpulan data (subbab 3.5.2), dan umpan balik mitra pada iterasi sebelumnya. Proses bisnis saat ini dimodelkan dengan BPMN *as-is*, lalu kebutuhan dirumuskan menjadi kebutuhan fungsional dan non-fungsional, diprioritaskan dengan MoSCoW, dan dicatat sebagai kartu (GitHub Issue) di kolom **Backlog**. Keluaran: daftar kebutuhan dan *product backlog*.
+2. **Perancangan sistem.** Kartu yang spesifikasinya telah disepakati dipindahkan ke kolom **Todo/Ready**. Rancangan disusun dalam bentuk BPMN *to-be*, diagram UML, ERD dan kamus data, rancangan antarmuka, serta arsitektur perangkat lunak dan matriks hak akses. Keluaran: artefak rancangan.
+3. **Pengembangan inkremental.** Kartu dikerjakan oleh penanggung jawab (PIC) di kolom **In Progress** dengan batas WIP 1–2 kartu per orang dan maksimal 10 kartu per papan. Setiap kartu dikerjakan pada cabang fitur (*feature branch*) terpisah. Keluaran: inkremen modul.
+4. **Verifikasi.** Pembuatan *pull request* memindahkan kartu ke kolom **Review/Verification**. *Pull request* menjalani *continuous integration* (pemeriksaan tipe, *unit test*, *build*, dan *end-to-end test*) serta pengujian *black box* terhadap spesifikasi pada subbab 3.3. Keluaran: hasil uji.
+5. **Penggabungan.** Kartu yang lolos verifikasi digabungkan ke cabang utama dan dipindahkan ke kolom **Done**. Keluaran: sistem terintegrasi yang tetap berfungsi.
+6. **Validasi dan evaluasi.** Hasil iterasi ditinjau bersama pengurus RW 06 dan dievaluasi oleh tim. Temuan dicatat kembali sebagai kartu baru atau kartu revisi di Backlog dan menjadi masukan iterasi berikutnya. Revisi dapat menyentuh bagian yang sudah diimplementasikan, termasuk basis data, logika bisnis, dan arsitektur. Pada iterasi akhir, sistem divalidasi melalui UAT dan SUS (subbab 3.5.3).
 
-**3. Pencegahan Kesalahan (Error Prevention)**
+Siklus ini dijalankan dalam tiga iterasi: Iterasi 1 (MVP seluruh modul), Iterasi 2 (penyempurnaan keuangan dan portal warga), dan Iterasi 3 (kontrol akses, notifikasi, dan konsolidasi kependudukan). Pelaksanaan setiap tahap dijabarkan pada subbab 4.1 dengan urutan yang sama.
 
-Untuk mengurangi kesalahan dalam penggunaan sistem, setiap formulir diberikan validasi sesuai dengan jenis data yang dimasukkan. Contohnya, NIK harus terdiri dari 16 digit, nominal iuran hanya dapat diisi menggunakan angka, dan file yang diunggah harus sesuai dengan ketentuan yang ditentukan.
+### 3.5.2 Mekanisme Pengumpulan Data
 
-Selain itu, sistem memberikan konfirmasi sebelum pengguna melakukan tindakan tertentu, seperti menghapus data atau menyetujui pengajuan. Dengan cara tersebut, kesalahan akibat tindakan pengguna dapat dikurangi.
+Data perancangan dikumpulkan dari mitra dan dari dokumen acuan. Responden utama adalah pengurus RW 06 karena mereka adalah pelaku langsung administrasi kependudukan, surat, kas, dan iuran sekaligus calon pengguna utama sistem. Wawancara dilakukan secara semi-terstruktur: tim menyiapkan daftar pertanyaan per modul (alur kerja saat ini, kendala, format dokumen, dan kebutuhan fitur), kemudian pertanyaan dikembangkan sesuai jawaban responden. Setelah setiap iterasi, hasil sistem diperagakan kepada pengurus untuk memperoleh umpan balik yang menjadi kartu revisi.
 
-#### C. Alur Sistem dan Interaksi (User Flow & Task Flow)
+<!-- TODO (Zidan): lengkapi tanggal wawancara/observasi, nama jabatan responden (ketua RW, sekretaris, bendahara, ketua RT), dan jumlah sesi. Jangan tulis nama pribadi warga. -->
 
-Alur sistem dibuat untuk menggambarkan langkah-langkah yang dilakukan pengguna dalam menjalankan fitur utama. Alur yang dirancang meliputi:
+**Tabel 3.5 Mekanisme Pengumpulan Data**
 
-**1. Alur Pengajuan Surat oleh Warga**
+| No | Jenis Data | Metode | Sumber / Responden | Tujuan |
+| --- | --- | --- | --- | --- |
+| 1 | Tugas dan batasan kewenangan RW | Studi dokumen regulasi | UU 6/2014, Permendagri 18/2018, Perwali Bekasi 58/2020, UU 24/2013, UU PDP 27/2022 | Menetapkan ruang lingkup modul dan kepatuhan regulasi |
+| 2 | Alur proses bisnis saat ini | Wawancara semi-terstruktur dan observasi | Ketua RW, sekretaris, bendahara, dan ketua RT RW 06 | Menyusun BPMN *as-is* dan mengidentifikasi kendala |
+| 3 | Struktur data dan format dokumen | Studi dokumen | Buku register warga, buku kas, kuitansi iuran, format surat pengantar mitra | Menentukan entitas, atribut, dan format keluaran |
+| 4 | Kebutuhan dan prioritas fitur | Wawancara dan diskusi prioritas MoSCoW | Pengurus RW 06 | Menyusun *product backlog* dan hak akses per peran |
+| 5 | Perangkat dan konektivitas pengguna | Wawancara | Pengurus RW 06 | Menentukan spesifikasi antarmuka dan teknis |
+| 6 | Umpan balik per iterasi | Demonstrasi sistem dan diskusi | Pengurus RW 06 | Menentukan kartu revisi untuk iterasi berikutnya |
 
-<!-- [Gambar 3.1 — tempel di Word] -->
+### 3.5.3 Mekanisme Verifikasi dan Validasi
 
-**Gambar 3.1** Alur Pengajuan dan Persetujuan Surat
+#### Mekanisme Verifikasi
 
-Deskripsi: Warga melakukan login, memilih jenis surat, mengisi formulir dan mengunggah persyaratan, lalu mengirim pengajuan. Sistem menyimpan pengajuan tersebut dan meneruskannya kepada pengurus.
+Verifikasi memeriksa kesesuaian hasil rancangan dengan spesifikasi pada subbab 3.3 dan dilakukan dengan dua lapis:
 
-Pengurus menerima pengajuan, membuka detailnya, memeriksa data dan persyaratan, lalu melakukan verifikasi. Jika disetujui, sistem memperbarui status menjadi disetujui dan proses dilanjutkan sesuai alur administrasi surat, sehingga warga dapat memantau status dan mengunduh surat. Jika ditolak, sistem memperbarui status dan memberi notifikasi kepada warga, yang kemudian dapat memperbaiki pengajuan dan mengajukannya kembali.
+1. **Verifikasi otomatis.** Setiap *pull request* menjalankan *continuous integration* yang terdiri atas pemeriksaan tipe, *unit test*, *build*, dan *end-to-end test*. *Pull request* yang gagal tidak digabungkan ke cabang utama.
+2. **Pengujian *black box* per modul.** Setiap spesifikasi fungsional dan non-fungsional diuji dengan kasus uji berisi masukan, langkah, keluaran yang diharapkan, dan hasil aktual. Teknik yang dipakai adalah *equivalence partitioning* dan *boundary value analysis* untuk validasi masukan (misalnya NIK 15, 16, dan 17 digit; ukuran berkas di bawah dan di atas batas), *decision table* untuk aturan hak akses per peran, serta *state transition* untuk perubahan status surat dan tagihan iuran (Pressman & Maxim, 2020).
 
-**Alur Pembayaran Iuran melalui QRIS**
+Spesifikasi yang terukur (Tabel 3.3) diverifikasi dengan ukurannya masing-masing, misalnya waktu pencarian pada 10.000 data contoh dan atribut *cookie* sesi. Hasil verifikasi disajikan pada subbab 4.3.
 
-<!-- [Gambar 3.2 — tempel di Word] -->
+#### Mekanisme Validasi
 
-**Gambar 3.2** Alur Pembayaran Iuran melalui QRIS
+Validasi memeriksa apakah sistem menjawab permasalahan mitra dan layak diimplementasikan:
 
-Deskripsi: Warga memilih tagihan iuran, melihat nominal tagihan beserta kode QRIS, lalu melakukan pembayaran melalui aplikasi pembayaran. Sistem memperbarui status pembayaran dan memeriksa apakah pembayaran telah terverifikasi. Apabila terverifikasi, status tagihan menjadi "Lunas". Apabila belum terverifikasi, tagihan tetap berstatus belum lunas dan warga dapat membayar ulang, sehingga proses kembali ke langkah pembayaran melalui aplikasi.
+1. **Validasi per iterasi.** Hasil setiap iterasi diperagakan kepada pengurus RW 06 untuk memperoleh umpan balik atas kesesuaian fitur, alur, dan antarmuka.
+2. **User Acceptance Testing (UAT).** Dilaksanakan bersama pengurus RW 06 pada 23–24 November 2026. Responden mewakili setiap peran (pengurus RW, pengurus RT, bendahara, dan warga) dan menjalankan skenario tugas operasional. Hasilnya dicatat dalam berita acara beserta rekap temuan.
+3. **System Usability Scale (SUS).** Setelah UAT, responden mengisi kuesioner SUS sepuluh butir (Brooke, 1996). Skor dibandingkan dengan target SP-14 (≥ 68).
 
-**Alur Pengelolaan Data Warga**
+Hasil validasi disajikan pada Bab VI.
 
-<!-- [Gambar 3.3 — tempel di Word] -->
+### 3.5.4 Timeline Perancangan
 
-**Gambar 3.3** Alur Pengelolaan Data Warga
+<!-- TODO: cocokkan nomor minggu dengan kalender akademik. Asumsi saat ini: Minggu 1 = 31 Agustus 2026, sehingga Minggu 5 = 28 Sep, Minggu 8 = 19 Okt, Minggu 10 = 2 Nov, Minggu 13 = 23 Nov, Minggu 15 = 7 Des. -->
 
-Deskripsi: Pengurus membuka menu data warga, kemudian memilih untuk menambahkan data baru atau memilih data yang akan diubah. Pengurus mengisi atau memperbarui data, lalu menyimpannya. Sistem melakukan validasi terhadap data tersebut. Apabila data valid, data tersimpan pada database. Apabila data tidak valid, pengurus kembali memperbaiki isian data sebelum menyimpan ulang.
+**Tabel 3.6 Timeline Pelaksanaan Perancangan**
 
-**Alur Pengelolaan Keuangan Kas RW**
+| Aktivitas | M5 | M6 | M7 | M8 | M9 | M10 | M11 | M12 | M13 | M14 | M15 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Pengumpulan data dan analisis kebutuhan | ■ | ■ | | ■ | ■ | ■ | | | | | |
+| Perancangan sistem (BPMN, UML, ERD, UI/UX, RBAC) | ■ | ■ | ■ | | ■ | ■ | ■ | | | | |
+| Iterasi 1 — MVP seluruh modul | ■ | ■ | ■ | ■ | | | | | | | |
+| Iterasi 2 — Penyempurnaan keuangan dan portal | | | | | ■ | | | | | | |
+| Iterasi 3 — Kontrol akses, notifikasi, kependudukan | | | | | | ■ | | | | | |
+| Verifikasi (CI dan *black box*) | | ■ | ■ | ■ | ■ | ■ | ■ | ■ | | | |
+| Validasi per iterasi bersama mitra | | | | ■ | ■ | ■ | | | | | |
+| UAT dan SUS bersama pengurus RW 06 | | | | | | | | | ■ | | |
+| Perbaikan pasca-UAT | | | | | | | | | ■ | ■ | |
+| Penyusunan laporan | | | | | | ■ | ■ | ■ | ■ | ■ | ■ |
 
-<!-- [Gambar 3.4 — tempel di Word] -->
+### 3.5.5 Identifikasi Komponen Sistem Terintegrasi
 
-**Gambar 3.4** Alur Pengelolaan Keuangan Kas RW
+Objek permasalahan (administrasi manual RW 06) dan rancangan solusi (RW Digital) dipetakan ke dalam lima komponen sistem terintegrasi pada Tabel 3.7.
 
-Deskripsi: Proses dimulai ketika Bendahara mengakses dan membuka menu kas RW pada sistem. Bendahara kemudian memilih jenis transaksi yang akan dicatat, baik itu pemasukan maupun pengeluaran, lalu mengisi detail informasi transaksi tersebut.
+**Tabel 3.7 Pemetaan Objek dan Rancangan Solusi ke dalam Komponen Sistem Terintegrasi**
 
-Setelah data dimasukkan, sistem secara otomatis melakukan validasi terhadap data transaksi yang diinputkan. Jika data transaksi dinilai tidak valid (misalnya terdapat kesalahan input atau format tidak sesuai), sistem akan mengembalikan alur ke tahap pengisian transaksi agar Bendahara dapat memperbaiki isian data tersebut.
+| Komponen | Objek (Sistem Saat Ini) | Rancangan Solusi (RW Digital) |
+| --- | --- | --- |
+| Manusia | Pengurus RW/RT mencatat data secara manual; bendahara merekap iuran per RT secara terpisah; warga menerima informasi secara pasif melalui grup WhatsApp | Pengurus RW mengelola akun, data induk, persetujuan surat, dan pengumuman; pengurus RT mengelola data warga dan verifikasi surat di wilayahnya; bendahara mengelola kas dan iuran; warga mengajukan surat dan memantau tagihan, dengan kewenangan dibatasi per peran |
+| Material | Buku register warga, kuitansi fisik, buku kas, dan fotokopi dokumen persyaratan | Formulir digital, berkas unggahan (bukti kas dan syarat surat), surat dan laporan dalam format PDF/XLSX |
+| Mesin/Peralatan | Laptop dan ponsel pribadi pengurus, spreadsheet terpisah, lemari arsip | Aplikasi web pada server dengan basis data terpusat, diakses melalui peramban ponsel dan laptop |
+| Informasi | Data kependudukan tersebar per RT; saldo kas lambat direkap; status iuran dan surat tidak terpantau; pengumuman tenggelam di ruang obrolan | Satu sumber data kependudukan; saldo kas dan status tagihan diperbarui otomatis; status surat dapat dipantau; arsip pengumuman dan notifikasi; jejak audit |
+| Energi | Tenaga dan waktu pengurus untuk kunjungan dan rekap manual; listrik perangkat pribadi | Listrik perangkat pengguna dan server; waktu pengurus untuk rekap berkurang karena saldo dan laporan dihasilkan otomatis |
 
-Sebaliknya, jika data dinyatakan valid, sistem akan langsung menyimpan catatan transaksi tersebut ke dalam database, menghitung ulang akumulasi total saldo kas RW, dan merekam aktivitas pencatatan ke dalam audit trail. Setelah seluruh proses pencatatan selesai dilakukan oleh sistem, Bendahara dapat melihat pembaruan saldo beserta laporan kas RW terbaru.
+# BAB IV HASIL PERANCANGAN
 
-### 3.3.3 Spesifikasi Keamanan dan Akses
+<!-- Struktur mengikuti docs/laporan/bab4-plan.md dan keputusan K-09. Blok bertanda "dipindah dari Bab III" berasal dari §3.3 versi docx sebelumnya dan perlu dirapikan ke format Bab IV. -->
 
-#### a. Persyaratan Keamanan Data dan Aplikasi
+## 4.1 Proses Perancangan
 
-**Tabel 3.3 Spesifikasi Kebutuhan Non-Fungsional Keamanan**
+### 4.1.1 Analisis Kebutuhan
+
+<!-- Butir a) aktor, b) BPMN as-is, c) hasil elisitasi, d) FR, f) MoSCoW: belum ditulis (lihat bab4-plan.md §4). -->
+
+#### e) Kebutuhan Non-Fungsional
+
+<!-- Dipindah dari Bab III §3.3.3 (versi docx). Rencana: digabung menjadi satu tabel NFR (ID, kategori, deskripsi, target, prioritas) dan ditautkan ke kode SP-xx pada Tabel 3.3. -->
+
+**Tabel 4.x Kebutuhan Non-Fungsional Keamanan**
 
 | ID | Deskripsi Kebutuhan Non-Fungsional | Prioritas |
 | --- | --- | --- |
@@ -406,137 +545,123 @@ Sebaliknya, jika data dinyatakan valid, sistem akan langsung menyimpan catatan t
 | NFRS-04 | NIK dan No. KK harus divalidasi sebagai 16 digit angka. | Must |
 | NFRS-05 | Kueri basis data harus berparameter melalui Drizzle ORM. Tidak diperbolehkan menyusun kueri dengan penggabungan string dari masukan pengguna. | Must |
 | NFRS-06 | Kredensial dan rahasia (token basis data, rahasia autentikasi) harus disimpan di variabel lingkungan (.env) dan tidak boleh masuk ke repositori. | Must |
-| NFRS-07 | Sistem harus melindungi pengiriman formulir dari CSRF dan menjaga cookie sesi dengan atribut HttpOnly, Secure(produksi), dan SameSite | Must |
-| NFRS-08 | Data pribadi nyata tidak boleh dimasukkan ke data uji. Data uji memakai penanda seperti "Contoh Warga 1" | Must |
-| NFRS-09 | Sistem harus membatasi percobaan masuk yang gagal secara berulang (rate limiting) | Should |
-| NFRS-10 | Setiap transaksi kas dan pembayaran iuran harus mencatat pengguna pencatat dan waktu pencatatan sebagai jejak audit | Should |
+| NFRS-07 | Sistem harus melindungi pengiriman formulir dari CSRF dan menjaga cookie sesi dengan atribut HttpOnly, Secure (produksi), dan SameSite. | Must |
+| NFRS-08 | Data pribadi nyata tidak boleh dimasukkan ke data uji. Data uji memakai penanda seperti "Contoh Warga 1". | Must |
+| NFRS-09 | Sistem harus membatasi percobaan masuk yang gagal secara berulang (rate limiting). | Should |
+| NFRS-10 | Setiap transaksi kas dan pembayaran iuran harus mencatat pengguna pencatat dan waktu pencatatan sebagai jejak audit. | Should |
 | NFRS-11 | Basis data dicadangkan secara berkala. | Should |
-| NFRS-12 | Enkripsi level field untuk NIK dan No. KK di basis data | Could |
+| NFRS-12 | Enkripsi level field untuk NIK dan No. KK di basis data. | Could |
 
-#### b. Persyaratan Akses dan Sesi
-
-**Tabel 3.4 Spesifikasi Kebutuhan Non-Fungsional Akses dan Sesi**
+**Tabel 4.x Kebutuhan Non-Fungsional Akses dan Sesi**
 
 | ID | Deskripsi Kebutuhan Non-Fungsional | Prioritas |
 | --- | --- | --- |
-| NFRA-01 | Sistem menerapkan RBAC dengan empat peran: admin_rw, pengurus_rt, bendahara, warga. Matriks izin didefinisikan di satu tempat (permissions.ts) | Must |
-| NFRA-02 | Pemeriksaan akses dilakukan di sisi server pada seluruh permintaan (hooks.server.ts) dan diperiksa ulang di layoutgrup rute (defence in depth) | Must |
-| NFRA-03 | Izin ditegakkan per aksi (create/read/update/delete) sesuai matriks, tidak hanya per grup rute. Contohnya, bendaharahanya membaca data warga dan pengurus_rt tidak dapat menghapus pengumuman | Must |
-| NFRA-04 | Peran yang tidak dikenal atau tidak valid tidak diberi akses (fail-closed) | Must |
-| NFRA-05 | Pengguna ber-peran warga yang membuka rute staf diarahkan ke portal warga (/portal) tanpa menampilkan galat 403. Peran staf yang tidak berhak atas suatu rute menerima 403. Otorisasi tetap ditegakkan di server | Must |
-| NFRA-06 | Pengguna tanpa sesi yang mengakses rute terlindungi diarahkan ke halaman masuk | Must |
-| NFRA-07 | engguna warga hanya dapat melihat data iuran dan pembayaran miliknya sendiri, bukan data warga lain | Must |
-| NFRA-08 | Pembuatan akun dan penetapan peran hanya dilakukan oleh admin_rw. Peran bawaan akun baru adalah warga (least privilege) | Must |
-| NFRA-09 | Sesi pengguna berakhir otomatis setelah periode tidak aktif yang ditetapkan (target awal 60 menit, disesuaikan setelah wawancara) | Should |
-| NFRA-10 | NIK dan No. KK disamarkan pada tampilan daftar. Nilai utuh hanya ditampilkan pada halaman detail untuk peran yang berwenang (admin_rw dan pengurus_rt wilayahnya). Contoh: 3275••••••••0001 | Should |
+| NFRA-01 | Sistem menerapkan RBAC dengan empat peran: admin_rw, pengurus_rt, bendahara, warga. Matriks izin didefinisikan di satu tempat (permissions.ts). | Must |
+| NFRA-02 | Pemeriksaan akses dilakukan di sisi server pada seluruh permintaan (hooks.server.ts) dan diperiksa ulang di layout grup rute (*defence in depth*). | Must |
+| NFRA-03 | Izin ditegakkan per aksi (create/read/update/delete) sesuai matriks, tidak hanya per grup rute. Contohnya, bendahara hanya membaca data warga dan pengurus_rt tidak dapat menghapus pengumuman. | Must |
+| NFRA-04 | Peran yang tidak dikenal atau tidak valid tidak diberi akses (*fail-closed*). | Must |
+| NFRA-05 | Pengguna ber-peran warga yang membuka rute staf diarahkan ke portal warga (/portal) tanpa menampilkan galat 403. Peran staf yang tidak berhak atas suatu rute menerima 403. Otorisasi tetap ditegakkan di server. | Must |
+| NFRA-06 | Pengguna tanpa sesi yang mengakses rute terlindungi diarahkan ke halaman masuk. | Must |
+| NFRA-07 | Pengguna warga hanya dapat melihat data iuran dan pembayaran miliknya sendiri, bukan data warga lain. | Must |
+| NFRA-08 | Pembuatan akun dan penetapan peran hanya dilakukan oleh admin_rw. Peran bawaan akun baru adalah warga (*least privilege*). | Must |
+| NFRA-09 | Sesi pengguna berakhir otomatis setelah periode tidak aktif yang ditetapkan (60 menit). | Should |
+| NFRA-10 | NIK dan No. KK disamarkan pada tampilan daftar. Nilai utuh hanya ditampilkan pada halaman detail untuk peran yang berwenang (admin_rw dan pengurus_rt wilayahnya). Contoh: 3275••••••••0001. | Should |
 
-#### c. Matriks Role-Based Access Control (RBAC)
+### 4.1.2 Perancangan Sistem
 
-**Tabel 3.5 Matriks Hak Akses Peran Sistem (RBAC)**
+<!-- Butir a) BPMN to-be, b) ArchiMate, c) use case, d) use case description, f) class, g) ERD, h) sequence, i) state machine: belum ditulis. -->
+
+#### e) Activity Diagram
+
+<!-- Dipindah dari Bab III §3.3.2 C (versi docx). Rencana: digambar ulang sebagai UML activity diagram dengan swimlane per aktor. -->
+
+**1. Alur Pengajuan dan Persetujuan Surat**
+
+<!-- [Gambar 4.x — tempel di Word] -->
+
+**Gambar 4.x** Alur Pengajuan dan Persetujuan Surat
+
+Warga melakukan login, memilih jenis surat, mengisi formulir dan mengunggah persyaratan, lalu mengirim pengajuan. Sistem menyimpan pengajuan tersebut dan meneruskannya kepada pengurus.
+
+Pengurus menerima pengajuan, membuka detailnya, memeriksa data dan persyaratan, lalu melakukan verifikasi. Jika disetujui, sistem memperbarui status menjadi disetujui dan proses dilanjutkan sesuai alur administrasi surat, sehingga warga dapat memantau status dan mengunduh surat. Jika ditolak, sistem memperbarui status dan memberi notifikasi kepada warga, yang kemudian dapat memperbaiki pengajuan dan mengajukannya kembali.
+
+**2. Alur Pembayaran Iuran melalui QRIS**
+
+<!-- [Gambar 4.x — tempel di Word] -->
+
+**Gambar 4.x** Alur Pembayaran Iuran melalui QRIS
+
+Warga memilih tagihan iuran, melihat nominal tagihan beserta kode QRIS, lalu melakukan pembayaran melalui aplikasi pembayaran. Sistem memperbarui status pembayaran dan memeriksa apakah pembayaran telah terverifikasi. Apabila terverifikasi, status tagihan menjadi "Lunas". Apabila belum terverifikasi, tagihan tetap berstatus belum lunas dan warga dapat membayar ulang, sehingga proses kembali ke langkah pembayaran melalui aplikasi.
+
+**3. Alur Pengelolaan Data Warga**
+
+<!-- [Gambar 4.x — tempel di Word] -->
+
+**Gambar 4.x** Alur Pengelolaan Data Warga
+
+Pengurus membuka menu data warga, kemudian memilih untuk menambahkan data baru atau memilih data yang akan diubah. Pengurus mengisi atau memperbarui data, lalu menyimpannya. Sistem melakukan validasi terhadap data tersebut. Apabila data valid, data tersimpan pada database. Apabila data tidak valid, pengurus kembali memperbaiki isian data sebelum menyimpan ulang.
+
+**4. Alur Pengelolaan Keuangan Kas RW**
+
+<!-- [Gambar 4.x — tempel di Word] -->
+
+**Gambar 4.x** Alur Pengelolaan Keuangan Kas RW
+
+Proses dimulai ketika Bendahara mengakses dan membuka menu kas RW pada sistem. Bendahara kemudian memilih jenis transaksi yang akan dicatat, baik itu pemasukan maupun pengeluaran, lalu mengisi detail informasi transaksi tersebut.
+
+Setelah data dimasukkan, sistem secara otomatis melakukan validasi terhadap data transaksi yang diinputkan. Jika data transaksi dinilai tidak valid (misalnya terdapat kesalahan input atau format tidak sesuai), sistem akan mengembalikan alur ke tahap pengisian transaksi agar Bendahara dapat memperbaiki isian data tersebut.
+
+Sebaliknya, jika data dinyatakan valid, sistem akan langsung menyimpan catatan transaksi tersebut ke dalam database, menghitung ulang akumulasi total saldo kas RW, dan merekam aktivitas pencatatan ke dalam audit trail. Setelah seluruh proses pencatatan selesai dilakukan oleh sistem, Bendahara dapat melihat pembaruan saldo beserta laporan kas RW terbaru.
+
+#### j) Perancangan Antarmuka (UI/UX)
+
+<!-- Dipindah dari Bab III §3.3.2 A–B (versi docx). Rencana: dilengkapi design token, wireframe, dan mockup dari docs/design-preview/. -->
+
+**Platform dan Responsivitas.** Sistem dibuat berbasis web dan dirancang agar dapat digunakan pada berbagai ukuran layar, baik komputer, laptop, maupun smartphone. Penggunaan melalui smartphone lebih ditujukan untuk warga, sedangkan komputer atau laptop digunakan oleh pengurus dalam mengelola data dan proses administrasi. Susunan dan ukuran komponen menyesuaikan dengan perangkat yang digunakan.
+
+**Design System, Palet Warna, dan Tipografi.** Untuk menjaga tampilan tetap konsisten, sistem menggunakan design system sederhana yang mencakup warna, jenis huruf, ukuran teks, tombol, dan komponen lainnya. Warna utama digunakan pada bagian yang membutuhkan perhatian pengguna, seperti tombol utama dan navigasi. Warna pendukung digunakan untuk membedakan informasi atau status tertentu. Tipografi menggunakan font Inter agar teks jelas dan nyaman dibaca.
+
+**Komponen Antarmuka.** Komponen yang digunakan antara lain card, tabel, formulir, tombol, modal, dropdown, badge, dan notifikasi. Card menampilkan informasi tertentu secara terpisah; tabel menampilkan data yang banyak, seperti data warga dan data iuran; formulir digunakan untuk memasukkan data dan mengajukan surat; modal memberikan konfirmasi sebelum tindakan tertentu; badge dan notifikasi memberikan informasi mengenai status atau perubahan data.
+
+**Navigasi dan Hierarki Informasi.** Fitur utama seperti Dashboard, Data Warga, Pengajuan Surat, dan Iuran ditempatkan pada navigasi yang mudah ditemukan. Informasi penting ditampilkan dengan jelas, misalnya status pengajuan surat ditampilkan pada halaman yang mudah diakses sehingga warga dapat mengetahui perkembangan pengajuannya tanpa membuka banyak halaman.
+
+**Umpan Balik Interaksi.** Sistem memberikan informasi setelah pengguna melakukan suatu tindakan, berupa notifikasi berhasil atau gagal, indikator proses, maupun perubahan status. Misalnya, setelah warga mengirim pengajuan surat, sistem menampilkan bahwa pengajuan berhasil dikirim, dan warga dapat melihat status seperti "Diproses", "Disetujui", atau "Ditolak".
+
+**Pencegahan Kesalahan.** Setiap formulir divalidasi sesuai jenis data yang dimasukkan, misalnya NIK harus 16 digit, nominal iuran hanya berupa angka, dan berkas unggahan harus sesuai ketentuan. Sistem juga meminta konfirmasi sebelum tindakan tertentu, seperti menghapus data atau menyetujui pengajuan.
+
+#### k) Arsitektur Perangkat Lunak dan Kontrol Akses
+
+<!-- Dipindah dari Bab III §3.3.3 c (versi docx). Rencana: dicocokkan ulang dengan matriks final di kode sebelum ditempel; baris Surat dan RT & RW pada versi lama memuat duplikasi "R, R". -->
+
+**Tabel 4.x Matriks Hak Akses Peran Sistem (RBAC)**
 
 | Modul / Sumber Daya | admin_rw | pengurus_rt | bendahara | warga |
 | --- | --- | --- | --- | --- |
-| Warga & KK | C, R, U, D | C, R, U,R* | R | N/A |
-| RT & RW | R, U | R,R | R | N/A |
+| Warga & KK | C, R, U, D | C, R, U, R* | R | N/A |
+| RT & RW | R, U | R | R | N/A |
 | Pengumuman | C, R, U, D | R | R | R |
 | Iuran | C, R, U, D | R | C, R, U, D | R* |
 | Kas | C, R, U, D | R | C, R, U, D | N/A |
 | Pengurus | C, R, U, D | R | R | N/A |
-| Surat | C, R, U, D | C, R, R | C, R, R | C, R* |
+| Surat | C, R, U, D | C, R, U* | R | C, R* |
 
-Keterangan:
+Keterangan: C = Create, R = Read, U = Update, D = Delete, N/A = No Access. R* / C* / U* = akses terbatas pada wilayah RT bersangkutan atau data milik pengguna sendiri.
 
-C = Create, R = Read, U = Update, D = Delete, N/A = No Access.
+### 4.1.3 Pelaksanaan Pengembangan Inkremental
 
-R* / C* = Akses terbatas pada wilayah RT/RW bersangkutan atau data milik pribadi pengguna.
+<!-- Belum ditulis (lihat bab4-plan.md §4, keputusan K-04, K-06). -->
 
-## 3.4 Batasan Asumsi
+### 4.1.4 Verifikasi Kode
 
-Perancangan Sistem Informasi RW ini didasarkan pada beberapa asumsi yang dianggap berlaku selama proses perancangan, sebagai berikut:
+<!-- Belum ditulis (keputusan K-07). -->
 
-1. **Asumsi tentang struktur organisasi mitra.** Struktur organisasi RW yang menjadi acuan adalah struktur umum yang terdiri atas ketua RW, sekretaris, bendahara, dan ketua RT di masing-masing unit. Struktur ini diasumsikan berlaku pada mitra tanpa penyesuaian yang signifikan, mengacu pada praktik umum di lingkungan RW Indonesia.
-2. **Asumsi tentang literasi digital pengguna.** Pengurus RW (admin, bendahara, ketua RT) diasumsikan memiliki literasi digital dasar yang memadai untuk mengoperasikan sistem berbasis web melalui browser. Warga diasumsikan memiliki perangkat smartphone dengan akses internet yang memungkinkan penggunaan portal warga secara mandiri.
-3. **Asumsi tentang dasar regulasi.** Tupoksi RW yang digunakan sebagai acuan penetapan fitur mengacu pada Permendagri No. 18 Tahun 2018 yang berlaku secara nasional. Diasumsikan tidak terdapat peraturan desa (Perdes), peraturan bupati (Perbup), atau peraturan wali kota (Perwali) pada wilayah mitra yang mengubah tupoksi RW secara substantif.
-4. **Asumsi tentang kapasitas teknologi.** SQLite dengan pendekatan penyimpanan single-file diasumsikan cukup untuk menangani volume data pada skala RW yang mencakup ratusan hingga ribuan record warga, transaksi kas, dan catatan iuran. QRIS diasumsikan secara prinsip tersedia dan dapat diintegrasikan melalui payment gateway pihak ketiga, meskipun provider spesifik dan mekanisme teknis integrasi belum dikonfirmasi pada tahap ini.
-
-## 3.5 Mekanisme Perancangan
-
-Mekanisme perancangan Sistem Informasi RW dilakukan secara bertahap dengan mengacu pada kebutuhan administrasi RW, batasan realistis, standar keteknikan, serta spesifikasi rancangan yang telah ditentukan. Proses perancangan dilakukan untuk menghasilkan sistem yang dapat mengintegrasikan pengelolaan data kependudukan, keuangan kas RW, iuran warga, serta pengumuman dan informasi RW.
-
-Mekanisme tersebut dijalankan dalam siklus iterative and incremental. Setiap iterasi menghasilkan penambahan atau penyempurnaan fitur yang tetap berfungsi. Arah setiap iterasi ditentukan oleh umpan balik pengurus RW 06 dan evaluasi internal tim terhadap hasil iterasi sebelumnya, sehingga revisi terjadi secara bertahap, bukan dalam satu spesifikasi awal yang kaku. Tahapan berikut tidak dijalankan sekali secara linear, tetapi diulang pada setiap iterasi.
-
-Tahapan mekanisme perancangan yang dilakukan adalah sebagai berikut:
-
-### Identifikasi dan Analisis Kebutuhan
-
-Tahap pertama dilakukan dengan mengidentifikasi permasalahan administrasi yang terjadi pada lingkungan RW. Identifikasi mencakup proses pengelolaan data kependudukan, pencatatan kas, pengelolaan iuran, dan penyampaian informasi. Kebutuhan sistem kemudian ditentukan berdasarkan permasalahan yang ditemukan, struktur organisasi RW, regulasi yang menjadi acuan, serta batasan proyek.
-
-Hasil dari tahap ini digunakan untuk menentukan kebutuhan fungsional dan non-fungsional sistem. Kebutuhan keamanan juga ditentukan dengan mempertimbangkan perlindungan data pribadi, autentikasi, kontrol akses, serta pencatatan aktivitas pengguna.
-
-### Perancangan Data dan Basis Data
-
-Tahap berikutnya adalah merancang struktur data yang akan digunakan oleh sistem. Perancangan dilakukan dengan menentukan entitas, atribut, hubungan antarentitas, serta aturan integritas data.
-
-Entitas utama yang dirancang meliputi RW, RT, KK, warga, iuran, pembayaran, transaksi kas, dan pengumuman. Struktur basis data menggunakan model relasional dengan kunci primer dan kunci asing untuk menjaga hubungan antar data.
-
-Perancangan basis data juga mempertimbangkan validasi data, pencegahan duplikasi, serta kebutuhan pencatatan riwayat perubahan data. Data kependudukan menjadi sumber data utama yang dapat digunakan oleh modul administrasi lainnya.
-
-### Perancangan Arsitektur Sistem
-
-Arsitektur sistem dirancang menggunakan aplikasi berbasis web dengan SvelteKit sebagai framework aplikasi. Sistem menggunakan SQLite sebagai basis data, Drizzle ORM sebagai pengelola interaksi dengan basis data, dan Better Auth untuk mendukung proses autentikasi dan manajemen sesi.
-
-Arsitektur dirancang dengan pemisahan antara antarmuka pengguna, logika aplikasi, autentikasi, otorisasi, dan pengelolaan basis data. Pendekatan ini digunakan untuk menjaga struktur sistem tetap terorganisasi dan memudahkan pengembangan serta pemeliharaan.
-
-### Perancangan UI/UX dan Alur Interaksi
-
-Perancangan antarmuka dilakukan dengan mempertimbangkan karakteristik pengguna sistem yang terdiri atas pengurus RW, pengurus RT, bendahara, dan warga. Antarmuka dirancang responsif agar dapat digunakan melalui komputer, laptop, maupun smartphone.
-
-Tahap ini mencakup perancangan struktur navigasi, layout halaman, komponen antarmuka, formulir, tabel, card, modal, badge, dan notifikasi. Alur interaksi juga dirancang berdasarkan tugas utama pengguna, seperti pengelolaan data warga, pengelolaan iuran, dan penyampaian pengumuman.
-
-Setiap tindakan pengguna diberikan umpan balik berupa status proses, pesan berhasil atau gagal, serta konfirmasi untuk tindakan tertentu. Validasi input diterapkan untuk membantu mencegah kesalahan pengguna.
-
-### Perancangan Keamanan dan Hak Akses
-
-Keamanan dirancang sejak tahap awal dengan menerapkan Role-Based Access Control (RBAC). Sistem memiliki empat peran utama, yaitu admin_rw, pengurus_rt, bendahara, dan warga. Setiap peran memperoleh hak akses sesuai dengan tanggung jawabnya.
-
-Kontrol akses diterapkan pada sisi server dan diperiksa kembali pada bagian yang membutuhkan otorisasi. Sistem menggunakan prinsip least privilege sehingga pengguna hanya dapat mengakses data dan fungsi yang sesuai dengan kewenangannya.
-
-Perlindungan data juga diterapkan melalui hashing kata sandi, validasi input menggunakan Zod, parameterized query melalui Drizzle ORM, perlindungan sesi, masking NIK dan Nomor KK, serta pencatatan aktivitas tertentu melalui audit trail.
-
-### Perancangan dan Implementasi Modul Sistem
-
-Setelah rancangan data, arsitektur, UI/UX, dan keamanan ditentukan, dilakukan perancangan modul berdasarkan ruang lingkup Core MVP. Modul yang menjadi fokus meliputi:
-
-- a. Modul Kependudukan untuk mengelola data RW, RT, KK, dan warga.
-- b. Modul Keuangan untuk mencatat pemasukan, pengeluaran, transaksi, saldo, dan bukti transaksi kas RW.
-- c. Modul Iuran untuk mengelola jenis iuran, tagihan, pembayaran, dan status pembayaran warga.
-- d. Modul Pengumuman dan Informasi untuk menyampaikan informasi kegiatan dan pengumuman kepada warga.
-
-Implementasi modul dilakukan dengan mempertahankan hubungan antar data sehingga informasi yang digunakan oleh setiap modul tetap konsisten.
-
-### Integrasi Antar Modul
-
-Setiap modul diintegrasikan melalui basis data terpusat. Data kependudukan digunakan sebagai sumber informasi untuk modul lain yang membutuhkan identitas warga. Data iuran terhubung dengan data warga dan pencatatan pembayaran, sedangkan transaksi keuangan digunakan untuk menghasilkan informasi mengenai kondisi kas RW.
-
-Integrasi dilakukan untuk mengurangi pencatatan data yang berulang dan menjaga konsistensi informasi antar modul.
-
-### Pengujian dan Verifikasi Rancangan
-
-Tahap terakhir dilakukan dengan menguji fungsi sistem berdasarkan kebutuhan yang telah ditentukan. Pengujian mencakup fungsi utama, validasi data, alur pengguna, hak akses, autentikasi, serta mekanisme keamanan.
-
-Hasil pengujian dibandingkan dengan spesifikasi rancangan dan kebutuhan sistem. Apabila ditemukan ketidaksesuaian, hasil evaluasi dicatat kembali sebagai kartu baru atau kartu revisi pada Backlog dan menjadi masukan bagi iterasi berikutnya. Revisi tersebut dapat menyentuh bagian sistem yang sudah diimplementasikan, termasuk rancangan basis data, logika bisnis, maupun arsitektur, tidak terbatas pada penambahan fitur baru.
-
-### Pengendalian Alur Kerja dengan Kanban
-
-Di dalam setiap iterasi, pekerjaan tim dikendalikan melalui papan Kanban pada GitHub Projects dengan kolom Backlog, Todo/Ready, In Progress, Review/Verification, dan Done. Setiap kebutuhan direpresentasikan sebagai kartu (GitHub Issue) yang diprioritaskan dengan metode MoSCoW dan memiliki penanggung jawab (PIC). Tugas pada kolom In Progress dibatasi 1–2 kartu per orang (WIP limit) dan dikerjakan pada cabang fitur (feature branch) terpisah. Pull Request memindahkan kartu ke kolom Review/Verification untuk menjalani pemeriksaan otomatis (continuous integration: type check, unit test, dan build) serta pengujian fungsional Black Box sebelum digabungkan ke cabang utama.
-
-Siklus ini dijalankan dalam tiga iterasi: Iterasi 1 (MVP), Iterasi 2 (penyempurnaan keuangan dan portal), dan Iterasi 3 (RBAC, notifikasi, dan konsolidasi kependudukan). Pada iterasi akhir, purwarupa fungsional diuji bersama pengurus RW 06 melalui User Acceptance Testing (UAT) dan instrumen System Usability Scale (SUS).
-
-# BAB IV HASIL PERANCANGAN
-
-## 4.1 Proses Perancangan
+### 4.1.5 Penggabungan Fitur dan Metrik Aliran
 
 <!-- Belum ditulis. -->
+
+### 4.1.6 Validasi Akhir
+
+<!-- Belum ditulis (keputusan K-08). -->
 
 ## 4.2 Hasil Rancangan
 
@@ -578,12 +703,27 @@ Siklus ini dijalankan dalam tiga iterasi: Iterasi 1 (MVP), Iterasi 2 (penyempurn
 
 # DAFTAR PUSTAKA
 
-Anderson, D. J. (2010). Kanban: Successful evolutionary change for your technology business. Blue Hole Press.
+Anderson, D. J. (2010). *Kanban: Successful evolutionary change for your technology business*. Blue Hole Press.
 
-Clegg, B., & Barker, R. (1994). Case method fast-track: A RAD approach. Addison-Wesley.
+Booch, G., Rumbaugh, J., & Jacobson, I. (2005). *The unified modeling language user guide* (2nd ed.). Addison-Wesley Professional.
+
+Brooke, J. (1996). SUS: A "quick and dirty" usability scale. In P. W. Jordan, B. Thomas, B. A. Weerdmeester, & A. L. McClelland (Eds.), *Usability evaluation in industry* (pp. 189–194). Taylor & Francis. https://doi.org/10.1201/9781498710411-35
+
+Chen, P. P.-S. (1976). The entity-relationship model—Toward a unified view of data. *ACM Transactions on Database Systems, 1*(1), 9–36. https://doi.org/10.1145/320434.320440
+
+Clegg, B., & Barker, R. (1994). *Case method fast-track: A RAD approach*. Addison-Wesley.
+
+Dennis, A., Wixom, B. H., & Tegarden, D. (2020). *Systems analysis and design: An object-oriented approach with UML* (6th ed.). Wiley.
 
 GitHub. (n.d.). About projects. GitHub Docs. Retrieved October 5, 2026, from https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects
 
-Larman, C., & Basili, V. R. (2003). Iterative and incremental development: A brief history. Computer, 36(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
+Ilie, G., & Ciocoiu, C. N. (2010). Application of fishbone diagram to determine the risk of an event with multiple causes. *Management Research and Practice, 2*(1), 65–80.
 
-Pressman, R. S., & Maxim, B. R. (2020). Software engineering: A practitioner’s approach (9th ed.). McGraw-Hill Education.
+Larman, C., & Basili, V. R. (2003). *Iterative and incremental development: A brief history*. Computer, 36(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
+
+Object Management Group. (2014). *Business Process Model and Notation (BPMN) version 2.0.2*. https://www.omg.org/spec/BPMN/2.0.2/
+
+Permatasari, A., Aknuranda, I., & Setiawan, B. D. (2025). Root cause analysis of government readiness in realizing the concept of e-government system: A case study of Palu City Government. *Journal of Information Technology and Computer Science, 10*(3), 112–124. https://doi.org/10.25126/jitecs.2025103789
+
+Pressman, R. S., & Maxim, B. R. (2020). *Software engineering: A practitioner’s approach* (9th ed.). McGraw-Hill Education.
+
