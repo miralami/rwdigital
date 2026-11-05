@@ -30,16 +30,35 @@ Dokumen lain merujuk ID, **jangan menyalin isinya**.
 
 ## Laporan = Capstone.docx
 
-`docs/laporan/laporan.md` adalah **cermin** `Capstone.docx`, bukan sumber terpisah.
+Dua file, dua peran (jangan dicampur):
+
+- `docs/laporan/cermin.txt` — **cermin teks** `Capstone.docx`, ditulis `npm run laporan:pull`
+  (commit `sync(docx)`). **Jangan diedit.** Patokan perbandingan.
+- `docs/laporan/laporan.md` — **sumber Markdown usulan**. Pull tidak pernah menimpanya.
+  Edit di sini; `laporan:usulan` membandingkannya dengan `cermin.txt` (teks, bukan `git diff`).
+
 Setiap kali pengguna minta "update laporan" / "diff", jalankan alur ini **tanpa ditanya**:
 
-1. `npm run laporan:pull` — tarik docx (read-only) dan auto-commit `sync(docx)` kalau berubah.
-   Ditolak kalau `laporan.md` punya perubahan belum di-commit → commit usulan dulu.
-2. Edit `laporan.md` di posisi yang sesuai struktur docx (usulan).
+1. `npm run laporan:pull` — tarik docx (read-only) ke `cermin.txt`, auto-commit `sync(docx)` kalau berubah.
+   Ditolak kalau `cermin.txt` punya perubahan belum di-commit.
+2. Edit `laporan.md` sesuai struktur docx, ikuti **Format `laporan.md`** di bawah.
 3. Commit usulan: `docs(laporan): usulan <topik>`.
 4. `npm run laporan:usulan` → `docs/laporan/usulan.md` (gitignored): lembar copas per lokasi
-   (GANTI/SISIPKAN/HAPUS + teks bersih). Beri tahu pengguna jumlah usulan & tautkan file ini.
+   (lokasi "Setelah paragraf" + teks Word bersih; daftar hapus/ganti). Beri tahu pengguna jumlah
+   lokasi & tautkan file ini.
 5. Setelah pengguna menempel ke Word → `npm run laporan:pull` lagi; ia melaporkan baris usulan
    yang belum masuk Word.
+
+### Format `laporan.md`
+
+- Judul bab `# BAB I PENDAHULUAN`; subbab `## 1.1 …`; anak subbab `### 2.2.4 …`, `#### 2.2.4.1 …`.
+  Nomor ditulis persis seperti di daftar isi Word.
+- Satu paragraf = satu baris (jangan dipotong per baris). Antarparagraf dipisah baris kosong.
+- Daftar: `1.` untuk nomor, `-` untuk butir. Huruf `a.`/`b.` ditulis di teks.
+- Tabel: Markdown `| … |` dengan baris header (isi sel persis seperti di Word).
+- Gambar: komentar `<!-- [Gambar x.y — tempel di Word] -->` lalu caption `**Gambar x.y** …`.
+- Komentar `<!-- … -->` dan baris pemisah tabel diabaikan perbandingan.
+- Daftar isi, nomor halaman, daftar gambar/tabel: **tidak ditulis** (dibuat Word).
+- Teks harus sama dengan Word kecuali memang usulan. Typo dibetulkan sebagai usulan, bukan diam-diam.
 
 Sisanya dijelaskan di `docs/README.md`. Konvensi kode ada di `CLAUDE.md`.

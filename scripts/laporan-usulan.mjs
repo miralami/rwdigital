@@ -1,122 +1,136 @@
 #!/usr/bin/env node
-// Lembar copas: ubah diff laporan.md (usulan) terhadap cermin docx terakhir menjadi
-// docs/laporan/usulan.md — teks bersih per lokasi di Word, tanpa tanda diff.
-//   npm run laporan:usulan            → tulis lembar copas
-//   node scripts/laporan-usulan.mjs --verify <ref>
-//                                     → (dipakai laporan:pull) daftar baris usulan di <ref> yang
-//                                       belum ada di cermin baru
-// Patokan = commit terakhir "sync(docx)" yang menyentuh laporan.md. Usulan boleh di-commit.
-import { execFileSync } from 'node:child_process';
+// Lembar copas: bandingkan docs/laporan/laporan.md (Markdown, sumber usulan) dengan
+// docs/laporan/cermin.txt (teks Capstone.docx, ditulis npm run laporan:pull) → docs/laporan/usulan.md.
+//   npm run laporan:usulan            → tulis lembar copas (gitignored)
+//   node scripts/laporan-usulan.mjs --verify
+//                                     → (dipakai laporan:pull) baris usulan yang belum ada di cermin baru
+// Perbandingan berbasis teks (bukan git diff), jadi tahan terhadap format Markdown & pemotongan paragraf.
 import { readFileSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 
-const SRC = 'docs/laporan/laporan.md';
+const MD = 'docs/laporan/laporan.md';
+const CERMIN = 'docs/laporan/cermin.txt';
 const OUT = 'docs/laporan/usulan.md';
-const git = (...a) => execFileSync('git', a, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 
-const baseline = (ref = 'HEAD') =>
-	git('log', '-1', '--format=%H', '-E', '--grep=^sync\\(docx\\)|jadi cermin Capstone\\.docx', ref, '--', SRC).trim() ||
-	'HEAD';
-const isStamp = (s) => s.startsWith('<!-- CERMIN Capstone.docx');
+const lines = (f) => readFileSync(f, 'utf8').replace(/\r/g, '').split('\n');
+const isSep = (t) => /^[\s|:-]+$/.test(t) && t.includes('-'); // baris pemisah tabel Markdown
+const isToc = (raw) => /\t\d+\s*$/.test(raw); // baris daftar isi dari Word (ada nomor halaman)
+// Kunci perbandingan: buang markup Markdown, penanda daftar, dan rapatkan spasi.
+const norm = (s) => {
+	let t = s.replace(/[*|]/g, ' ').replace(/\s+/g, ' ').trim();
+	for (let prev; prev !== t; ) {
+		prev = t;
+		t = t.replace(/^(#{1,6}\s+|>\s*|[-+]\s+|\d+[.)]\s+|[a-z][.)]\s+)/, ''); // penanda berlapis: "- a. ..."
+	}
+	return t;
+};
+// Teks Word untuk di-copy: markup dibuang, sel tabel dipisah tab.
+const plain = (raw) => {
+	const t = raw.trim();
+	if (t.startsWith('|')) return t.replace(/^\||\|$/g, '').split('|').map((c) => c.replace(/\*/g, '').trim()).join('\t');
+	return t.replace(/\*/g, '').replace(/^(#{1,6}\s+|>\s*|[-+]\s+|\d+[.)]\s+)/, '').trim();
+};
+const clip = (s, n = 90) => (s.length > n ? s.slice(0, n) + '…' : s);
+const HEAD_CERMIN = /^(BAB\s+[IVX]+\b|\d+(\.\d+)+\.?\s+\S|DAFTAR PUSTAKA|ABSTRAK|LAMPIRAN)/i;
+
+// --- sisi Markdown (usulan) ---
+const mdRaw = lines(MD);
+const md = [];
+mdRaw.forEach((raw) => {
+	const t = raw.trim();
+	if (!t || t.startsWith('<!--') || isSep(t)) return;
+	md.push({ raw: t, n: norm(t), heading: /^#{1,6}\s/.test(t) });
+});
+const MDJ = ' ' + md.map((x) => x.n).join(' ') + ' ';
+
+// --- sisi cermin (Word) ---
+const cerRaw = lines(CERMIN);
+const CER = ' ' + cerRaw.map(norm).filter(Boolean).join(' ') + ' ';
+const cer = cerRaw
+	.map((raw) => ({ raw: raw.trim(), n: norm(raw) }))
+	.filter((x) => x.n && x.raw !== '/' && !isToc(x.raw) && x.raw);
+
+// Baris Markdown yang tidak ada di Word = usulan (tambah/ubah).
+const changed = md.map((x, i) => ({ ...x, i, add: !!x.n && !CER.includes(x.n) }));
+// Baris Word yang tidak ada lagi di Markdown = hapus/ganti. Baris Word yang di Markdown dipecah
+// per butir (mis. "... 1994): - Must Have ...") dicek per potongan, jadi pemecahan tidak dianggap hapus.
+const fragments = (raw) => raw.split(/\s+[-*]\s+/).map(norm).filter((f) => f.length >= 3);
+const removed = cer
+	.map((x, i) => ({ ...x, i, del: fragments(x.raw).some((f) => !MDJ.includes(f)) }))
+	.filter((x) => x.del);
+
+// Kelompokkan baris berurutan.
+const groupBy = (arr, pred) => {
+	const out = [];
+	let cur = null;
+	arr.forEach((x) => {
+		if (pred(x)) {
+			if (!cur) out.push((cur = []));
+			cur.push(x);
+		} else cur = null;
+	});
+	return out;
+};
+const headingAboveMd = (idx) => {
+	for (let i = idx; i >= 0; i--) if (md[i].heading) return md[i].n;
+	return 'Halaman judul / awal dokumen';
+};
+
+const addGroups = groupBy(changed, (x) => x.add);
+const delGroups = (() => {
+	const out = [];
+	let last = -2;
+	removed.forEach((x) => {
+		if (x.i === last + 1 && out.length) out[out.length - 1].push(x);
+		else out.push([x]);
+		last = x.i;
+	});
+	return out;
+})();
 
 if (process.argv[2] === '--verify') {
-	const ref = process.argv[3];
-	const base = baseline(ref);
-	const added = git('diff', '--no-color', '-U0', base, ref, '--', SRC)
-		.replace(/\r/g, '')
-		.split('\n')
-		.filter((s) => s.startsWith('+') && !s.startsWith('+++'))
-		.map((s) => s.slice(1).trim())
-		.filter((s) => s && !isStamp(s));
-	const mirror = new Set(readFileSync(SRC, 'utf8').replace(/\r/g, '').split('\n').map((s) => s.trim()));
-	const missing = added.filter((s) => !mirror.has(s));
+	const missing = changed.filter((x) => x.add);
 	if (missing.length) {
-		console.log(`[laporan:pull] ⚠ ${missing.length} baris usulan belum ada di Word. Teksnya tetap di commit ${ref.slice(0, 7)}:`);
-		missing.slice(0, 15).forEach((s) => console.log('  - ' + (s.length > 100 ? s.slice(0, 100) + '…' : s)));
-		console.log(`  Kembalikan: git checkout ${ref.slice(0, 7)} -- ${SRC}  (lalu npm run laporan:usulan)`);
+		console.log(`[laporan:pull] ⚠ ${missing.length} baris usulan belum ada di Word:`);
+		missing.slice(0, 15).forEach((x) => console.log('  - ' + clip(x.n, 100)));
+		console.log('  Tempel ke Word (lihat docs/laporan/usulan.md), lalu jalankan npm run laporan:pull lagi.');
 	} else console.log('[laporan:pull] semua usulan sebelumnya sudah ada di Word.');
 	process.exit(0);
 }
 
-const BASE = baseline();
-const diff = git('diff', '--no-color', '-U0', BASE, '--', SRC);
-const now = readFileSync(SRC, 'utf8').replace(/\r\n/g, '\n').split('\n');
-
-const isHeading = (s) =>
-	s.length < 120 &&
-	!/\t\d+\s*$/.test(s) && // baris daftar isi (ada nomor halaman)
-	/^\s*(BAB\s+[IVX]+\b|\d+(\.\d+)+\.?\s+\S|DAFTAR PUSTAKA|ABSTRAK|LAMPIRAN)/i.test(s);
-const clip = (s, n = 90) => {
-	const t = s.trim().replace(/\s+/g, ' ');
-	return t.length > n ? t.slice(0, n) + '…' : t;
-};
-const headingAbove = (idx) => {
-	for (let i = idx; i >= 0; i--) if (isHeading(now[i])) return now[i].trim().replace(/\s+/g, ' ');
-	return 'Halaman judul / awal dokumen';
-};
-const prevText = (idx) => {
-	for (let i = idx; i >= 0; i--) if (now[i].trim()) return now[i];
-	return '';
-};
-
-// parse hunk
-const hunks = [];
-let h = null;
-for (const raw of diff.replace(/\r/g, '').split('\n')) {
-	const m = raw.match(/^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/);
-	if (m) {
-		h = { newStart: +m[3], newLen: m[4] === undefined ? 1 : +m[4], del: [], add: [] };
-		hunks.push(h);
-	} else if (h && raw.startsWith('-') && !raw.startsWith('---')) h.del.push(raw.slice(1));
-	else if (h && raw.startsWith('+') && !raw.startsWith('+++')) h.add.push(raw.slice(1));
-}
-const real = hunks
-	.map((x) => ({ ...x, del: x.del.filter((s) => !isStamp(s)), add: x.add.filter((s) => !isStamp(s)) }))
-	.filter((x) => x.del.some((s) => s.trim()) || x.add.some((s) => s.trim()));
-
-if (!real.length) {
+if (!addGroups.length && !delGroups.length) {
 	if (existsSync(OUT)) rmSync(OUT);
-	console.log('[laporan:usulan] tidak ada usulan — laporan.md sama dengan cermin docx terakhir.');
+	console.log('[laporan:usulan] tidak ada usulan — laporan.md sama dengan cermin Word terakhir.');
 	process.exit(0);
 }
 
 const out = [
 	'# Lembar Copas ke Capstone.docx',
 	'',
-	`> Dibuat ${new Date().toLocaleString('sv-SE').slice(0, 16)} dari \`git diff ${BASE.slice(0, 7)} -- ${SRC}\` ` +
-		'(cermin docx terakhir). ' +
-		'File sementara (gitignored) — jangan diedit, edit `laporan.md` lalu jalankan ulang ' +
-		'`npm run laporan:usulan`.',
-	'> Cara tempel: salin blok teks, di Word **Ctrl+Shift+V** (Keep Text Only). ' +
-		'Baris berisi tab = tabel → blok, *Insert → Table → Convert Text to Table*.',
-	'> Selesai menempel? Commit usulan, lalu `npm run laporan:pull` — ia memberi tahu baris usulan yang belum masuk Word.',
+	`> Dibuat ${new Date().toLocaleString('sv-SE').slice(0, 16)} dari perbandingan \`laporan.md\` vs \`cermin.txt\` ` +
+		'(cermin Word terakhir). File sementara (gitignored) — jangan diedit; edit `laporan.md` lalu jalankan ulang `npm run laporan:usulan`.',
+	'> Cara tempel: salin blok teks, di Word **Ctrl+Shift+V** (Keep Text Only). Baris berisi tab = tabel → *Insert → Table → Convert Text to Table*.',
+	'> Selesai menempel? Jalankan `npm run laporan:pull` — ia memberi tahu baris usulan yang belum masuk Word.',
 	''
 ];
 
-real.forEach((x, i) => {
-	const at = x.newLen === 0 ? x.newStart : x.newStart - 1; // index 0-based baris pertama hunk
-	const where = headingAbove(x.newLen === 0 ? at - 1 : at);
-	const del = x.del.filter((s) => s.trim());
-	const add = x.add;
-	let action;
-	if (!del.length) action = 'SISIPKAN';
-	else if (!add.some((s) => s.trim())) action = 'HAPUS';
-	else action = 'GANTI';
+out.push(`## A. Tambah / ubah (${addGroups.length} lokasi)`, '');
+addGroups.forEach((g, k) => {
+	const first = g[0].i;
+	let prev = '';
+	for (let i = first - 1; i >= 0; i--) if (!changed[i].add) { prev = changed[i].n; break; }
+	out.push(`### ${k + 1}. ${headingAboveMd(first)}`, '');
+	out.push(`**Setelah paragraf:** «${clip(prev || 'awal dokumen')}»`, '');
+	out.push('```text', g.map((x) => plain(x.raw)).join('\n'), '```', '');
+});
 
-	out.push(`## ${i + 1}. ${where} — ${action}`, '');
-	if (action === 'SISIPKAN') {
-		const before = prevText(at - 1);
-		out.push(`**Sisipkan setelah paragraf:** «${clip(before)}»`, '');
-	} else {
-		out.push(`**${action === 'HAPUS' ? 'Hapus' : 'Ganti'} paragraf yang diawali:**`);
-		del.forEach((s) => out.push(`- «${clip(s)}»`));
-		out.push('');
-	}
-	if (action !== 'HAPUS') {
-		const body = add.join('\n').replace(/^\n+|\n+$/g, '');
-		const tabel = add.some((s) => s.includes('\t') && !/^\s*([0-9]+|[a-z])[.)]\t[^\t]*$/.test(s));
-		out.push(tabel ? '*(ada baris tabel — dipisah tab)*' : '', '```text', body, '```', '');
-	}
+out.push(`## B. Hapus / ganti di Word (${delGroups.length} lokasi)`, '');
+delGroups.forEach((g, k) => {
+	let where = 'Halaman judul / awal dokumen';
+	for (let i = g[0].i; i >= 0; i--) if (HEAD_CERMIN.test(cer[i].raw)) { where = cer[i].n; break; }
+	out.push(`### ${k + 1}. ${where}`, '');
+	g.forEach((x) => out.push(`- «${clip(x.n)}»`));
+	out.push('');
 });
 
 writeFileSync(OUT, out.join('\n').replace(/\n{3,}/g, '\n\n'), 'utf8');
-console.log(`[laporan:usulan] ${real.length} usulan -> ${OUT}`);
+console.log(`[laporan:usulan] ${addGroups.length} lokasi tambah/ubah, ${delGroups.length} lokasi hapus/ganti -> ${OUT}`);
