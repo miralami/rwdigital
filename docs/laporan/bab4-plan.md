@@ -283,16 +283,295 @@ yang berjalan, `schema.ts`, `laporan.md`, `handover-kit.md`, hasil wawancara nar
 artefak PIC lain. Konsistensi dijaga oleh satu **kerangka bersama** (§7.1) yang dibuat di hari
 pertama, bukan oleh rantai urutan pengerjaan.
 
-### 7.1 Kerangka Bersama (Afif, ±1 jam, 6 Nov)
+### 7.1 Kerangka Bersama (Afif, 6 Nov) ✅
 
-Satu berkas acuan yang dipakai semua PIC, berisi:
-- Daftar aktor dan daftar modul.
-- **Daftar ID use case** (`UC-01 Masuk`, `UC-07 Mengajukan Surat`, dst.), cukup nama, tanpa
-  deskripsi, diturunkan dari route di `src/routes/(app)/` dan `handover-kit.md`.
-- Konvensi caption (`Gambar 4.x`, `Tabel 4.x`) dan penamaan berkas diagram.
+Acuan wajib semua PIC. Sumber: `src/routes/`, `src/lib/akses.ts` (peran bawaan),
+`handover-kit.md` §2 dan §4.
 
-Aturan: nama use case **disalin persis** dari kerangka di semua artefak (FR, use case, activity,
-sequence, black box). Dengan begitu tiap PIC bisa jalan paralel sejak hari pertama.
+**Aturan utama:** nama aktor, nama modul, dan **nama use case disalin persis** dari subbab ini ke
+semua artefak (FR, use case diagram dan description, activity, sequence, BPMN to-be, black box,
+caption screenshot). Jangan diparafrasekan. Kalau butuh UC baru atau nama perlu diganti, ubah di
+sini dulu, lalu kabari grup. Dengan begitu tiap PIC bisa jalan paralel sejak hari pertama.
+
+#### 7.1.1 Aktor
+
+Aktor diturunkan dari **peran yang benar-benar ada di aplikasi** (`src/lib/akses.ts`), karena
+screenshot, black box, dan UAT dilakukan di aplikasi itu.
+
+| Aktor (tulis persis) | Peran di kode | Akun uji | Tanggung jawab di sistem |
+|---|---|---|---|
+| **Publik** | — (tanpa login) | — | Melihat landing page: profil RW, pengurus, pengumuman, galeri |
+| **Warga** | `warga` | `warga@rw.id` | Portal warga: tagihan dan pembayaran iuran, pengajuan surat, pembaruan data, notifikasi |
+| **Pengurus RT** | `pengurus_rt` | `pengurus@rw.id` (RT 01) | Mengelola KK, warga, surat, iuran, dan kas untuk RT-nya sendiri; tanpa akses Pengaturan |
+| **Pengurus RW** | `pengurus_rw` | `admin@rw.id` | Akses penuh ke seluruh modul, termasuk Kas RW, Pengaturan, peran dan izin |
+| **Midtrans** *(aktor sekunder)* | — (sistem eksternal) | — | *Payment gateway* QRIS; mengirim notifikasi status bayar (*webhook*) |
+
+Kata sandi akun uji ada di [`credentials.md`](../../credentials.md) (hanya untuk lokal).
+
+**Yang tidak digambar sebagai aktor:**
+
+- **Bendahara.** Di aplikasi tidak ada peran `bendahara`; pekerjaan bendahara (kas, iuran,
+  konfirmasi bayar) dijalankan dengan akun **Pengurus RW**, atau peran kustom yang dibuat lewat
+  *Pengaturan → Peran & Izin*. Di narasi boleh disebut "bendahara RW", tetapi di diagram, tabel FR,
+  dan black box aktornya **Pengurus RW**.
+- **Superadmin.** Peran ada di kode, tetapi akunnya belum dibuat. Tidak digambar.
+- **`admin_rw`** (istilah lama di Bab III dan matriks RBAC `laporan.md` 4.1.2j) = **Pengurus RW**.
+  Matriks itu akan disesuaikan oleh Afif (artefak 4.1.2j).
+
+> Keputusan aktor ini tercatat sebagai **K-14** di [`../keputusan.md`](../keputusan.md).
+
+
+#### 7.1.2 Modul
+
+Delapan modul. Urutan dan nama ini dipakai juga untuk subbab 4.3.1–4.3.8 dan urutan screenshot 4.2.
+
+| No | Modul (tulis persis) | Kode | FR | Rentang UC | Subbab 4.3 | PIC domain |
+|---|---|---|---|---|---|---|
+| 1 | Autentikasi dan Akun | `AUT` | `SF-NT-01..03` | UC-01 – UC-05 | 4.3.1 | Afif |
+| 2 | Publik | `PUB` | `SF-PG-03` (landing) | UC-06 | 4.3.2 | Afif |
+| 3 | Kependudukan | `KP` | `SF-KP-01..08` | UC-07 – UC-16 | 4.3.3 | Josua |
+| 4 | Surat-Menyurat | `SR` | `SF-SR-01..07` | UC-17 – UC-23 | 4.3.4 | Zidan |
+| 5 | Kas RW | `KS` | `SF-KS-01..06` | UC-24 – UC-30 | 4.3.5 | Safira |
+| 6 | Iuran Warga | `IU` | `SF-IU-01..06` | UC-31 – UC-38 | 4.3.6 | Safira |
+| 7 | Pengumuman | `PG` | `SF-PG-01..04` | UC-39 – UC-41 | 4.3.7 | Alizha |
+| 8 | Pengaturan | `PGT` | — (`FND-08`, `W-02`, `W-06`, `SR-03b`) | UC-42 – UC-47 | 4.3.8 | Afif |
+
+
+#### 7.1.3 Daftar Use Case
+
+Nama memakai bentuk kata kerja **me-** (sesuai contoh laporan: "Mengajukan Surat"). Kolom aktor
+diturunkan dari guard dan izin bawaan; kalau saat menjalankan aplikasi ternyata berbeda, **lapor ke
+Afif**, jangan diubah sendiri di artefak.
+
+##### 7.1.3.1 Autentikasi dan Akun (`AUT`)
+
+| ID | Use Case | Aktor | FR | Route |
+|---|---|---|---|---|
+| UC-01 | Masuk | Warga, Pengurus RT, Pengurus RW | `FND-06` | `/login` |
+| UC-02 | Mengklaim Akun Warga | Warga | `SF-NT-02` | `/login` |
+| UC-03 | Memulihkan Kata Sandi | Warga, Pengurus RT, Pengurus RW | `SF-NT-03` | `/login` |
+| UC-04 | Melihat Notifikasi | Warga | `SF-NT-01` | `/portal` (laci notifikasi) |
+| UC-05 | Melihat Dasbor | Pengurus RT, Pengurus RW | `SF-KS-04`, `SF-KP-07` | `/dashboard` |
+
+##### 7.1.3.2 Publik (`PUB`)
+
+| ID | Use Case | Aktor | FR | Route |
+|---|---|---|---|---|
+| UC-06 | Melihat Profil RW | Publik | `SF-PG-03`, `LP-01/02` | `/` |
+
+##### 7.1.3.3 Kependudukan (`KP`)
+
+| ID | Use Case | Aktor | FR | Route |
+|---|---|---|---|---|
+| UC-07 | Menambah Data KK | Pengurus RT, Pengurus RW | `SF-KP-01` | `/kk/tambah` |
+| UC-08 | Mengubah Data Warga | Pengurus RT, Pengurus RW | `SF-KP-02` | `/kk/[id]/edit` |
+| UC-09 | Menonaktifkan Data Warga | Pengurus RT, Pengurus RW | `SF-KP-03` | `/kk/[id]/edit` |
+| UC-10 | Mencari Data KK | Pengurus RT, Pengurus RW | `SF-KP-04` | `/kk` |
+| UC-11 | Melihat Detail KK | Pengurus RT, Pengurus RW | `SF-KP-05` | `/kk/[id]` |
+| UC-12 | Mengimpor Data Warga | Pengurus RW | `SF-KP-06` | `/kk/impor` |
+| UC-13 | Melihat Rekap Demografis | Pengurus RT, Pengurus RW | `SF-KP-07` | `/kk/rekap` |
+| UC-14 | Mengajukan Pembaruan Data | Warga | `SF-KP-08` | `/portal/perbaruan` |
+| UC-15 | Memverifikasi Pembaruan Data | Pengurus RT, Pengurus RW | `SF-KP-08` | `/kk/pembaruan` |
+| UC-16 | Membuat Akun Portal Warga | Pengurus RT, Pengurus RW | `SF-NT-02` | `/kk/[id]` |
+
+##### 7.1.3.4 Surat-Menyurat (`SR`)
+
+| ID | Use Case | Aktor | FR | Route |
+|---|---|---|---|---|
+| UC-17 | Mengajukan Surat | Warga | `SF-SR-01` | `/portal/surat/ajukan` |
+| UC-18 | Mengunggah Dokumen Persyaratan | Warga | `SF-SR-02` | `/portal/surat/ajukan` |
+| UC-19 | Memantau Status Surat | Warga | `SF-SR-03` | `/portal/surat/[id]` |
+| UC-20 | Memverifikasi Pengajuan Surat | Pengurus RT | `SF-SR-04` | `/surat/[id]` |
+| UC-21 | Menyetujui dan Menandatangani Surat | Pengurus RT, Pengurus RW | `SF-SR-05` | `/surat/[id]` |
+| UC-22 | Mengunduh Surat | Warga, Pengurus RT | `SF-SR-06` | `/portal/surat/[id]/cetak`, `/surat/[id]/cetak` |
+| UC-23 | Melihat Riwayat Surat | Warga, Pengurus RT, Pengurus RW | `SF-SR-07` | `/surat`, `/portal` |
+
+Relasi: UC-17 `<<include>>` UC-18.
+
+##### 7.1.3.5 Kas RW (`KS`)
+
+| ID | Use Case | Aktor | FR | Route |
+|---|---|---|---|---|
+| UC-24 | Mencatat Pemasukan Kas | Pengurus RW | `SF-KS-01` | `/kas/tambah` |
+| UC-25 | Mencatat Pengeluaran Kas | Pengurus RW | `SF-KS-02` | `/kas/tambah` |
+| UC-26 | Mengunggah Bukti Transaksi | Pengurus RW | `SF-KS-03` | `/kas/tambah` |
+| UC-27 | Melihat Saldo Kas | Pengurus RT, Pengurus RW | `SF-KS-04` | `/kas` |
+| UC-28 | Melihat Laporan Kas per Periode | Pengurus RT, Pengurus RW | `SF-KS-05` | `/kas` |
+| UC-29 | Membatalkan Transaksi Kas | Pengurus RW | `SF-KS-06` | `/kas` |
+| UC-30 | Mengelola Kategori Kas | Pengurus RW | `SF-KS-01`, `SF-KS-02` | `/kas/kategori` |
+
+Relasi: UC-25 `<<include>>` UC-26; UC-24 `<<extend>>` UC-26.
+Pengurus RT hanya **membaca** Kas RW (Kas RT disembunyikan sejak rancangan Kas versi C).
+
+##### 7.1.3.6 Iuran Warga (`IU`)
+
+| ID | Use Case | Aktor | FR | Route |
+|---|---|---|---|---|
+| UC-31 | Mengelola Jenis Iuran | Pengurus RW | `SF-IU-01` | `/iuran/jenis` |
+| UC-32 | Menerbitkan Tagihan Iuran | Pengurus RW | `SF-IU-02` | `/iuran/generate` |
+| UC-33 | Mencatat Pembayaran Iuran | Pengurus RT, Pengurus RW | `SF-IU-03` | `/iuran/[id]/bayar` |
+| UC-34 | Mengonfirmasi Bukti Pembayaran | Pengurus RT, Pengurus RW | `SF-IU-03` | `/iuran/konfirmasi` |
+| UC-35 | Membayar Iuran secara Online | Warga, Midtrans | `SF-IU-04` | `/portal/iuran` |
+| UC-36 | Melihat Tagihan Iuran | Warga | `SF-IU-05` | `/portal/iuran`, `/portal` |
+| UC-37 | Melihat Rekap Iuran per RT | Pengurus RT, Pengurus RW | `SF-IU-05` | `/iuran`, `/iuran/rekap` |
+| UC-38 | Mencatat Setoran RT ke RW | Pengurus RW | `SF-IU-06` | `/iuran/setoran` |
+
+Relasi: UC-35 `<<include>>` UC-36. UC-38 hanya Pengurus RW: dicek 6 Nov, akun Pengurus RT mendapat
+403 di `/iuran/setoran` (`handover-kit.md` §2.2 yang menulis pengurus_rt sudah usang).
+
+##### 7.1.3.7 Pengumuman (`PG`)
+
+| ID | Use Case | Aktor | FR | Route |
+|---|---|---|---|---|
+| UC-39 | Membuat Pengumuman | Pengurus RT, Pengurus RW | `SF-PG-01`, `SF-PG-04` | `/pengumuman/tambah` |
+| UC-40 | Mengubah dan Mengarsipkan Pengumuman | Pengurus RT, Pengurus RW | `SF-PG-02` | `/pengumuman/[id]/edit` |
+| UC-41 | Melihat Pengumuman | Publik, Warga, Pengurus RT, Pengurus RW | `SF-PG-03` | `/pengumuman`, `/` |
+
+`SF-PG-04` (siaran notifikasi) tidak punya layar; ia terjadi di dalam UC-39 dan diuji lewat UC-04.
+Kartu `Todo` EPIC-2 (`EV-02` lampiran, `EV-03` filter, `EV-BUG-01`) **tidak** dijadikan UC.
+
+##### 7.1.3.8 Pengaturan (`PGT`)
+
+| ID | Use Case | Aktor | FR / kartu | Route |
+|---|---|---|---|---|
+| UC-42 | Mengelola Akun Pengguna | Pengurus RW | `FND-09`, `SF-NT-02` | `/pengaturan/pengguna` |
+| UC-43 | Mengelola Peran dan Izin | Pengurus RW | `FND-08` | `/pengaturan/peran` |
+| UC-44 | Mengelola Data RT | Pengurus RW | `W-06` | `/pengaturan/rt` |
+| UC-45 | Mengelola Pengurus | Pengurus RW | `W-06` | `/pengaturan/pengurus` |
+| UC-46 | Mengunggah Tanda Tangan Pejabat | Pengurus RW | `SF-SR-05`, `SR-03b` | `/pengaturan/ttd` |
+| UC-47 | Mengelola Konten Landing Page | Pengurus RW | `W-02` | `/pengaturan/landing` |
+
+##### 7.1.3.9 UC Kunci (untuk artefak yang tidak mencakup semua UC)
+
+Usulan awal; PIC artefak boleh menyesuaikan **dengan memilih dari daftar di atas**, bukan membuat nama baru.
+
+| Artefak | UC yang dipakai |
+|---|---|
+| Use case description (6–8) — Alizha | UC-01, UC-07, UC-14, UC-17, UC-21, UC-32, UC-35, UC-43 |
+| Activity diagram (7) — Josua | UC-07, UC-15, UC-17, UC-21, UC-25, UC-34, UC-35 |
+| Sequence diagram (4) — Safira | UC-17 (+UC-21), UC-35 (*webhook* Midtrans), UC-07 (KK-*first*), UC-01 (guard akses) |
+
+
+#### 7.1.4 Konvensi Penomoran dan Caption
+
+##### 7.1.4.1 Caption
+
+| Aturan | Isi |
+|---|---|
+| Penomoran | Pakai **Insert Caption** di Word (label `Gambar` / `Tabel`, sertakan nomor bab). Jangan ketik nomor manual. |
+| Di draf Markdown | Tulis `Gambar 4.n` / `Tabel 4.n` (huruf `n` apa adanya); nomor final diisi Word. |
+| Letak | **Gambar**: caption di **bawah** gambar, rata tengah. **Tabel**: caption di **atas** tabel, rata kiri. |
+| Format | `Gambar 4.n Judul` — tanpa titik di akhir, judul Title Case. |
+| Rujukan | Setiap gambar/tabel wajib dirujuk di paragraf sebelumnya ("... ditunjukkan pada Gambar 4.n"). |
+| Sumber | Gambar dari luar tim diberi baris `Sumber: ...` di bawah caption. Diagram buatan tim tidak perlu. |
+
+##### 7.1.4.2 Pola Judul Caption per Artefak
+
+| Artefak | Pola judul | Contoh |
+|---|---|---|
+| BPMN as-is | `Proses Bisnis Saat Ini <Proses>` | Gambar 4.n Proses Bisnis Saat Ini Pembayaran Iuran |
+| BPMN to-be | `Proses Bisnis Usulan <Proses>` | Gambar 4.n Proses Bisnis Usulan Pembayaran Iuran |
+| ArchiMate | `Arsitektur Enterprise <Lapisan>` | Gambar 4.n Arsitektur Enterprise Lapisan Aplikasi dan Teknologi |
+| Use case diagram | `Use Case Diagram <Modul>` / `Use Case Diagram Global` | Gambar 4.n Use Case Diagram Surat-Menyurat |
+| Use case description | `<Nama UC>` (tabel) | Tabel 4.n Mengajukan Surat |
+| Activity diagram | `Activity Diagram <Nama UC>` | Gambar 4.n Activity Diagram Mengajukan Surat |
+| Sequence diagram | `Sequence Diagram <Nama UC>` | Gambar 4.n Sequence Diagram Membayar Iuran secara Online |
+| Class diagram / ERD | `Class Diagram RW Digital` / `Entity Relationship Diagram RW Digital` | — |
+| Kamus data | `Kamus Data Tabel <nama_tabel>` | Tabel 4.n Kamus Data Tabel surat |
+| FR | `Kebutuhan Fungsional Modul <Modul>` | Tabel 4.n Kebutuhan Fungsional Modul Kas RW |
+| UI/UX | `Wireframe <Halaman>` / `Rancangan Antarmuka <Halaman>` | Gambar 4.n Wireframe Pengajuan Surat |
+| Screenshot 4.2 | `Halaman <Nama Halaman>` | Gambar 4.n Halaman Daftar Kartu Keluarga |
+| Black box 4.3 | `Pengujian Black Box Modul <Modul>` | Tabel 4.n Pengujian Black Box Modul Iuran Warga |
+
+`<Modul>` dan `<Nama UC>` **disalin dari §7.1.2 dan §7.1.3**. ID UC tidak ditulis di caption, tetapi wajib ada
+di kolom/isi artefaknya (tabel FR, use case description, tabel black box).
+
+##### 7.1.4.3 ID Turunan
+
+| Jenis | Format | Contoh |
+|---|---|---|
+| Kebutuhan fungsional | tetap `SF-<MODUL>-nn` dari `laporan.md` | `SF-SR-01` |
+| Kebutuhan non-fungsional | `NFR-<KATEGORI>-nn` | `NFR-PERF-01` |
+| Kasus uji black box | `BB-<KODE MODUL>-nn` + kolom UC | `BB-SR-03` (UC-20) |
+| Defect | `D-nn` | `D-02` |
+
+
+#### 7.1.5 Penamaan Berkas Diagram dan Screenshot
+
+Simpan di **`docs/laporan/gambar/bab4/`** (satu folder untuk semua PIC). Ekspor PNG 300 dpi; berkas
+sumber (`.vpp`, `.bpmn`, `.drawio`, Figma link) disimpan dengan nama dasar yang sama.
+
+Pola: **`<butir>-<jenis>-<subjek>.png`**, huruf kecil, pisah tanda hubung, tanpa spasi.
+
+| Bagian | `<butir>` | `<jenis>` | Contoh |
+|---|---|---|---|
+| 4.1.1b BPMN as-is | `411b` | `bpmn-asis` | `411b-bpmn-asis-iuran.png` |
+| 4.1.2a BPMN to-be | `412a` | `bpmn-tobe` | `412a-bpmn-tobe-iuran.png` |
+| 4.1.2b ArchiMate | `412b` | `archimate` | `412b-archimate-aplikasi.png` |
+| 4.1.2c Use case | `412c` | `usecase` | `412c-usecase-sr.png`, `412c-usecase-global.png` |
+| 4.1.2e Activity | `412e` | `activity` | `412e-activity-uc17-mengajukan-surat.png` |
+| 4.1.2f Class | `412f` | `class` | `412f-class-domain.png` |
+| 4.1.2g ERD | `412g` | `erd` | `412g-erd.png` |
+| 4.1.2h Sequence | `412h` | `sequence` | `412h-sequence-uc35-membayar-iuran-online.png` |
+| 4.1.2i UI/UX | `412i` | `wireframe` / `hifi` | `412i-wireframe-surat-ajukan.png` |
+| 4.1.2j Arsitektur | `412j` | `arsitektur` | `412j-arsitektur-deployment.png` |
+| 4.2 Screenshot | `42` | `ss` | `42-ss-kk-daftar.png`, `42-ss-portal-surat-ajukan.png` |
+| 4.3 Bukti uji | `43` | `bb` / `ci` | `43-bb-sr-03.png`, `43-ci-run.png` |
+
+Subjek per modul memakai **kode modul** §7.1.2 (`aut`, `pub`, `kp`, `sr`, `ks`, `iu`, `pg`, `pgt`);
+subjek per UC memakai `uc<nomor>-<slug nama UC>`.
+
+
+#### 7.1.6 Setup Aplikasi Lokal (untuk semua PIC)
+
+Dibutuhkan untuk activity, sequence, screenshot, black box, dan BPMN to-be. Cukup sekali.
+
+**Prasyarat:** Git, **Node.js 22.6 atau lebih baru** (cek `node -v`).
+
+```bash
+git clone https://github.com/miralami/rwdigital.git
+```
+
+```bash
+cd rwdigital
+```
+
+```bash
+npm install
+```
+
+```bash
+cp .env.example .env
+```
+
+(Di PowerShell/CMD: `copy .env.example .env`.)
+
+```bash
+npm run db:setup
+```
+
+```bash
+npm run db:seed
+```
+
+```bash
+npm run dev
+```
+
+Buka <http://localhost:5173>, masuk dengan akun uji di [`credentials.md`](../../credentials.md):
+`admin@rw.id` (Pengurus RW), `pengurus@rw.id` (Pengurus RT 01), `warga@rw.id` (Warga).
+
+**Catatan:**
+
+- Urutan wajib: `db:setup` sebelum `dev`. Kalau muncul `no such table: user`, jalankan ulang
+  `npm run db:setup` lalu `npm run db:seed` (keduanya aman diulang).
+- Data seed bertanda "Contoh"; jangan memasukkan data warga asli saat mengambil screenshot.
+- **Bayar online (UC-35)** butuh kunci Midtrans *sandbox* di `.env` (`MIDTRANS_SERVER_KEY`,
+  `MIDTRANS_CLIENT_KEY`). Minta ke Afif lewat chat pribadi, jangan di-commit. Tanpa kunci, halaman
+  tagihan tetap tampil, hanya tombol bayar yang gagal.
+- Jangan jalankan `npx drizzle-kit push` (lihat [`README.md`](../../README.md)).
+- Ambil versi terbaru sebelum screenshot: `git pull` lalu `npm run db:setup`.
+- Macet lebih dari 15 menit → kirim tangkapan layar error ke Afif.
 
 ### 7.2 Pembagian
 
@@ -322,7 +601,7 @@ dan UAT.
 
 ### 7.3 Konsekuensi
 
-- **Semua PIC harus bisa menjalankan aplikasi** (`npm run dev` + seed lokal, atau satu staging
+- **Semua PIC harus bisa menjalankan aplikasi** (langkah di §7.1.6; `npm run dev` + seed lokal, atau satu staging
   bersama). Josua dan Safira dibantu setup sekali di awal.
 - **Cek konsistensi di akhir, bukan blocker di tengah:** Alizha mencocokkan FR ↔ UC ↔
   activity/sequence ↔ black box berdasarkan UC-ID (lihat §8, 24–25 Nov).
@@ -337,7 +616,7 @@ Mulai: Jumat, 6 November 2026. Total 3 minggu kalender, 15 hari kerja.
 
 | Tanggal | Pekerjaan | Penanggung jawab | Output |
 |---|---|---|---|
-| 6 Nov | **Kerangka bersama** (§7.1): aktor, modul, UC-ID, konvensi caption + bantu setup aplikasi lokal | Afif | Berkas kerangka |
+| 6 Nov | **Kerangka bersama** (§7.1): aktor, modul, UC-ID, konvensi caption + bantu setup aplikasi lokal ✅ | Afif | §7.1 |
 | 6–7 Nov | **P0**: sinkron Word ← `laporan.md` (§3.5 Kanban + loop iterasi, paragraf rujukan §3.3.4, perbaikan nomor tabel/gambar, RBAC rusak, typo) | Afif | Word = `laporan.md` |
 | 6–8 Nov | Teori Bab II: BPMN, ArchiMate, Interaction Design, Kanban/MoSCoW, UML/ERD, Black Box | Afif + Alizha | §2.2 lengkap |
 | 7–11 Nov | BPMN as-is | Zidan | 4.1.1b |
@@ -381,7 +660,7 @@ Kalau satu artefak mundur >2 hari, potong ke versi **Minimum** di §6, jangan ge
 ## 10. Format & Aturan Teknis
 
 - Penomoran: `BAB IV` → `4.1` → `4.1.1` → sub-butir `a) b) c)` (**jangan** 4.1.2.1).
-- Caption: pakai *Insert Caption* Word, jangan ketik manual → `Gambar 4.1`, `Tabel 4.1`.
+- Caption: pakai *Insert Caption* Word, jangan ketik manual → `Gambar 4.1`, `Tabel 4.1` (aturan lengkap §7.1.4).
 - Font Times New Roman 12, spasi 1.5, judul bab 14 bold.
 - Setiap gambar wajib dirujuk di paragraf ("...ditunjukkan pada Gambar 4.5").
 - Setiap tabel wajib punya nomor + judul di atasnya.

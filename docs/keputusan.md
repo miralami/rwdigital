@@ -24,6 +24,7 @@
 | K-11 | Tenggat Bab IV | 26 Nov 2026 (buffer submit 27 Nov) | ✅ | jadwal |
 | K-12 | Figma | Tidak klaim Figma; sementara `design-preview/`, reverse engineer menyusul | ✅ | 4.1.2 |
 | K-13 | Batas Bab III vs IV | Bab III = spesifikasi terukur + mekanisme; diagram, flow, UI/UX, tabel NFR rinci, matriks RBAC → Bab IV | ⏳ tim | Bab III, 4.1.1e, 4.1.2e/i/j |
+| K-14 | Aktor sistem | Aktor = peran di kode: **Publik, Warga, Pengurus RT, Pengurus RW** (+ Midtrans sekunder); Bendahara & `admin_rw` → Pengurus RW | ✅ | `laporan/bab4-plan.md` §7.1, 4.1.1a, 4.1.2c–j, 4.3 |
 
 ---
 
@@ -166,6 +167,22 @@ Tidak mengklaim Figma. Sementara pakai `docs/design-preview/`; reverse engineer 
 - Surat-menyurat = Core (§3.1 lama keliru menyebutnya di luar scope).
 - **Menunggu** persetujuan tim (Shaffira: UI/UX, Alizha: keamanan/RBAC, Josua: data) karena bagian
   mereka bergeser ke Bab IV.
+
+## K-14 · Aktor sistem ✅
+
+**Diputuskan 6 Nov 2026.** Aktor di semua artefak Bab IV (diagram, FR, use case, black box) =
+peran yang ada di aplikasi (`src/lib/akses.ts`), karena screenshot, black box, dan UAT dilakukan di
+aplikasi itu:
+
+- **Publik** (tanpa login), **Warga** (`warga`), **Pengurus RT** (`pengurus_rt`), **Pengurus RW**
+  (`pengurus_rw`); **Midtrans** sebagai aktor sekunder (*payment gateway*).
+- **Bendahara** bukan aktor terpisah: tugas keuangan dijalankan dengan akun Pengurus RW (atau peran
+  kustom lewat *Peran & Izin*). Di narasi boleh disebut "bendahara RW".
+- **`admin_rw`** (istilah lama Bab III, matriks RBAC 4.1.2j) = Pengurus RW.
+- **Superadmin** tidak digambar (peran ada, akun belum dibuat).
+
+Daftar UC-ID dan aktor per UC: `laporan/bab4-plan.md` §7.1. Tindak lanjut: matriks RBAC 4.1.2j
+disesuaikan ke empat peran ini (Afif).
 
 ---
 

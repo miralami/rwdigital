@@ -8,7 +8,7 @@
 |---|---|
 | `../keputusan.md` | ⭐ Register keputusan (judul, metodologi, iterasi, dll.) — ubah di sini dulu |
 | `laporan.md` | Cermin teks `Capstone.docx` — ditarik dengan `npm run laporan:pull`. Edit = usulan untuk Word; `git diff` = daftar review/copas |
-| `bab4-plan.md` | Rencana Bab IV: struktur 4.1.1–4.1.6, isi subbab, PIC per artefak, jadwal 6–26 Nov 2026 |
+| `bab4-plan.md` | Rencana Bab IV: struktur 4.1.1–4.1.6, isi subbab, ⭐ kerangka bersama §7.1 (aktor, modul, UC-ID, caption, setup lokal), PIC per artefak, jadwal 6–26 Nov 2026 |
 
 ## Reference
 
