@@ -16,7 +16,8 @@ const isSep = (t) => /^[\s|:-]+$/.test(t) && t.includes('-'); // baris pemisah t
 const isToc = (raw) => /\t\d+\s*$/.test(raw); // baris daftar isi dari Word (ada nomor halaman)
 // Kunci perbandingan: buang markup Markdown, penanda daftar, dan rapatkan spasi.
 const norm = (s) => {
-	let t = s.replace(/[*|]/g, ' ').replace(/\s+/g, ' ').trim();
+	// "*" (bold/italic) dibuang tanpa spasi, "|" (sel tabel) jadi spasi.
+	let t = s.replace(/\*/g, '').replace(/\|/g, ' ').replace(/\s+/g, ' ').trim();
 	for (let prev; prev !== t; ) {
 		prev = t;
 		t = t.replace(/^(#{1,6}\s+|>\s*|[-+]\s+|\d+[.)]\s+|[a-z][.)]\s+)/, ''); // penanda berlapis: "- a. ..."
