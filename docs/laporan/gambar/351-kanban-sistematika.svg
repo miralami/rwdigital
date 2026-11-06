@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 820" width="1600" height="820" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1F3A5F"/>
+    </marker>
+    <marker id="ahr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#B4462B"/>
+    </marker>
+    <style>
+      .board { fill:#F6F8FB; stroke:#C9D3E0; stroke-width:1.5 }
+      .col { fill:#FFFFFF; stroke:#9FB1C8; stroke-width:1.5 }
+      .colw { fill:#FFFFFF; stroke:#1F3A5F; stroke-width:3 }
+      .hd { fill:#1F3A5F }
+      .hdt { fill:#FFFFFF; font-size:22px; font-weight:700 }
+      .hds { fill:#D6E2F0; font-size:16px }
+      .step { fill:#1F3A5F; font-size:17px; font-weight:700 }
+      .tx { fill:#26323F; font-size:15.5px }
+      .mono { fill:#26323F; font-size:14px; font-family:Consolas, 'Courier New', monospace }
+      .chip { fill:#EEF3F9; stroke:#1F3A5F; stroke-width:1.2 }
+      .chipt { fill:#1F3A5F; font-size:14px; font-weight:700 }
+      .out { fill:#F2F2F2; stroke:#7A8899; stroke-width:1; stroke-dasharray:4 3 }
+      .outt { fill:#4A5866; font-size:14px; font-style:italic }
+      .lbl { fill:#1F3A5F; font-size:13.5px; font-weight:700 }
+      .fb { fill:#FBF1EE; stroke:#B4462B; stroke-width:2 }
+      .fbt { fill:#B4462B; font-size:20px; font-weight:700 }
+      .fbx { fill:#3B2A25; font-size:15.5px }
+      .red { fill:#B4462B; font-size:14px; font-weight:700 }
+      .note { fill:#5A6877; font-size:14px }
+      .card { fill:#FFFFFF; stroke:#9FB1C8; stroke-width:1 }
+    </style>
+  </defs>
+
+  <!-- Papan -->
+  <rect class="board" x="20" y="20" width="1560" height="590" rx="14"/>
+  <text x="40" y="52" class="step" font-size="18">Papan Kanban RW Digital — GitHub Projects</text>
+  <text x="1560" y="52" class="note" text-anchor="end">1 GitHub Issue = 1 kartu · 6 Epic per modul · kartu bergerak kiri → kanan</text>
+
+  <!-- Kolom 1 Backlog -->
+  <g>
+    <rect class="col" x="40" y="70" width="276" height="520" rx="10"/>
+    <path class="hd" d="M40,80 a10,10 0 0 1 10,-10 h256 a10,10 0 0 1 10,10 v48 h-276 z"/>
+    <text x="178" y="104" class="hdt" text-anchor="middle">Backlog</text>
+    <text x="178" y="122" class="hds" text-anchor="middle">Tahap 1</text>
+    <text x="56" y="160" class="step">Analisis Kebutuhan</text>
+    <text class="tx"><tspan x="56" y="190">• Regulasi, wawancara, observasi</tspan><tspan x="56" y="214">• BPMN as-is</tspan><tspan x="56" y="238">• FR &amp; NFR → GitHub Issue</tspan><tspan x="56" y="262">• Prioritas MoSCoW + Epic</tspan></text>
+    <rect class="card" x="56" y="290" width="244" height="54" rx="6"/>
+    <rect x="56" y="290" width="6" height="54" fill="#7A8899"/>
+    <text x="72" y="312" class="mono">[3][KP-08] KK-first</text>
+    <text x="72" y="333" class="note">moscow:must · EPIC-3</text>
+    <rect class="chip" x="56" y="440" width="244" height="58" rx="8"/>
+    <text class="chipt"><tspan x="68" y="463">Masuk: Issue + label</tspan><tspan x="68" y="484">moscow:* + Epic</tspan></text>
+    <rect class="out" x="56" y="516" width="244" height="56" rx="8"/>
+    <text class="outt"><tspan x="68" y="540">Keluaran:</tspan><tspan x="68" y="560">product backlog</tspan></text>
+  </g>
+
+  <!-- Kolom 2 Todo/Ready -->
+  <g>
+    <rect class="col" x="350" y="70" width="276" height="520" rx="10"/>
+    <path class="hd" d="M350,80 a10,10 0 0 1 10,-10 h256 a10,10 0 0 1 10,10 v48 h-276 z"/>
+    <text x="488" y="104" class="hdt" text-anchor="middle">Todo / Ready</text>
+    <text x="488" y="122" class="hds" text-anchor="middle">Tahap 2</text>
+    <text x="366" y="160" class="step">Perancangan</text>
+    <text class="tx"><tspan x="366" y="190">• BPMN to-be, UML, ERD</tspan><tspan x="366" y="214">• Rancangan UI/UX</tspan><tspan x="366" y="238">• Matriks hak akses (RBAC)</tspan><tspan x="366" y="262">• PIC &amp; dependensi jelas</tspan></text>
+    <rect class="chip" x="366" y="440" width="244" height="58" rx="8"/>
+    <text class="chipt"><tspan x="378" y="463">Masuk: Definition of</tspan><tspan x="378" y="484">Ready (DoR) terpenuhi</tspan></text>
+    <rect class="out" x="366" y="516" width="244" height="56" rx="8"/>
+    <text class="outt"><tspan x="378" y="540">Keluaran:</tspan><tspan x="378" y="560">artefak rancangan</tspan></text>
+  </g>
+
+  <!-- Kolom 3 In Progress (WIP) -->
+  <g>
+    <rect class="colw" x="660" y="70" width="276" height="520" rx="10"/>
+    <path class="hd" d="M660,80 a10,10 0 0 1 10,-10 h256 a10,10 0 0 1 10,10 v48 h-276 z"/>
+    <text x="798" y="104" class="hdt" text-anchor="middle">In Progress</text>
+    <text x="798" y="122" class="hds" text-anchor="middle">Tahap 3</text>
+    <text x="676" y="160" class="step">Pengembangan</text>
+    <text class="tx"><tspan x="676" y="190">• PIC membuat feature branch</tspan></text>
+    <text x="690" y="214" class="mono">feat/&lt;kode&gt;-&lt;slug&gt;</text>
+    <text class="tx"><tspan x="676" y="238">• Implementasi + uji mandiri</tspan></text>
+    <rect class="card" x="676" y="266" width="244" height="40" rx="6"/>
+    <rect x="676" y="266" width="6" height="40" fill="#1F3A5F"/>
+    <text x="692" y="291" class="mono">[4][KU-05] Iuran 2 tingkat</text>
+    <rect class="card" x="676" y="314" width="244" height="40" rx="6"/>
+    <rect x="676" y="314" width="6" height="40" fill="#1F3A5F"/>
+    <text x="692" y="339" class="mono">[5][SR-06] TTD RT</text>
+    <rect x="676" y="440" width="244" height="58" rx="8" fill="#1F3A5F"/>
+    <text fill="#FFFFFF" font-size="15px" font-weight="700"><tspan x="688" y="463">Batas WIP: ≤ 2 kartu/orang</tspan><tspan x="688" y="484">dan ≤ 10 kartu/papan</tspan></text>
+    <rect class="out" x="676" y="516" width="244" height="56" rx="8"/>
+    <text class="outt"><tspan x="688" y="540">Keluaran:</tspan><tspan x="688" y="560">fitur di cabang fitur</tspan></text>
+  </g>
+
+  <!-- Kolom 4 Review/Verification -->
+  <g>
+    <rect class="col" x="970" y="70" width="276" height="520" rx="10"/>
+    <path class="hd" d="M970,80 a10,10 0 0 1 10,-10 h256 a10,10 0 0 1 10,10 v48 h-276 z"/>
+    <text x="1108" y="104" class="hdt" text-anchor="middle">Review / Verification</text>
+    <text x="1108" y="122" class="hds" text-anchor="middle">Tahap 4</text>
+    <text x="986" y="160" class="step">Verifikasi</text>
+    <text class="tx"><tspan x="986" y="190">• Pull request dibuka →</tspan><tspan x="1000" y="212">kartu pindah otomatis</tspan><tspan x="986" y="238">• CI: check · unit · build · e2e</tspan><tspan x="986" y="262">• Uji black box per spesifikasi</tspan></text>
+    <rect class="chip" x="986" y="440" width="244" height="58" rx="8"/>
+    <text class="chipt"><tspan x="998" y="463">Masuk: PR tertaut</tspan><tspan x="998" y="484">"Closes #issue"</tspan></text>
+    <rect class="out" x="986" y="516" width="244" height="56" rx="8"/>
+    <text class="outt"><tspan x="998" y="540">Keluaran:</tspan><tspan x="998" y="560">hasil uji</tspan></text>
+  </g>
+
+  <!-- Kolom 5 Done -->
+  <g>
+    <rect class="col" x="1280" y="70" width="280" height="520" rx="10"/>
+    <path class="hd" d="M1280,80 a10,10 0 0 1 10,-10 h260 a10,10 0 0 1 10,10 v48 h-280 z"/>
+    <text x="1420" y="104" class="hdt" text-anchor="middle">Done</text>
+    <text x="1420" y="122" class="hds" text-anchor="middle">Tahap 5</text>
+    <text x="1296" y="160" class="step">Penggabungan</text>
+    <text class="tx"><tspan x="1296" y="190">• Merge ke main →</tspan><tspan x="1310" y="212">kartu pindah otomatis</tspan><tspan x="1296" y="238">• Issue tertutup</tspan><tspan x="1296" y="262">• Kartu Done tidak dibuka</tspan><tspan x="1310" y="284">ulang</tspan></text>
+    <rect class="chip" x="1296" y="440" width="248" height="58" rx="8"/>
+    <text class="chipt"><tspan x="1308" y="463">Keluar: Definition of</tspan><tspan x="1308" y="484">Done (DoD) terpenuhi</tspan></text>
+    <rect class="out" x="1296" y="516" width="248" height="56" rx="8"/>
+    <text class="outt"><tspan x="1308" y="540">Keluaran: sistem terintegrasi</tspan><tspan x="1308" y="560">yang tetap berfungsi</tspan></text>
+  </g>
+
+  <!-- Panah maju antarkolom -->
+  <g stroke="#1F3A5F" stroke-width="2.5" fill="none" marker-end="url(#ah)">
+    <line x1="318" y1="390" x2="347" y2="390"/>
+    <line x1="628" y1="390" x2="657" y2="390"/>
+    <line x1="938" y1="390" x2="967" y2="390"/>
+    <line x1="1248" y1="390" x2="1277" y2="390"/>
+  </g>
+
+  <!-- Loop gagal: Review → In Progress -->
+  <path d="M1108,412 C1108,428 1060,428 1000,420 L936,410" stroke="#B4462B" stroke-width="2.2" fill="none" stroke-dasharray="6 4" marker-end="url(#ahr)"/>
+  <text x="1024" y="412" class="red" text-anchor="middle" font-size="13px">gagal CI / uji</text>
+
+  <!-- Tahap 6 umpan balik -->
+  <rect class="fb" x="660" y="660" width="900" height="132" rx="12"/>
+  <text x="684" y="694" class="fbt">Tahap 6 · Validasi dan Umpan Balik</text>
+  <text class="fbx"><tspan x="684" y="726">• Kartu yang selesai diperagakan ke pengurus RW 06 pada titik rilis (Rilis 1–3)</tspan><tspan x="684" y="752">• Evaluasi internal tim atas fungsi yang sudah berjalan</tspan><tspan x="684" y="778">• Validasi akhir: UAT bersama pengurus RW 06 + kuesioner SUS</tspan></text>
+
+  <!-- Done → Tahap 6 -->
+  <path d="M1420,590 L1420,656" stroke="#B4462B" stroke-width="2.5" fill="none" marker-end="url(#ahr)"/>
+  <text x="1432" y="632" class="red">rilis</text>
+
+  <!-- Tahap 6 → Backlog (umpan balik) -->
+  <path d="M660,726 L178,726 L178,594" stroke="#B4462B" stroke-width="3" fill="none" marker-end="url(#ahr)"/>
+  <rect x="196" y="640" width="440" height="62" rx="8" fill="#FFFFFF" stroke="#B4462B" stroke-width="1.2"/>
+  <text class="red" font-size="15px"><tspan x="212" y="664">Temuan &amp; revisi mitra → kartu baru di Backlog</tspan><tspan x="212" y="688" font-weight="400" fill="#3B2A25">(merujuk kartu asal; label req-stakeholder)</tspan></text>
+  <text class="note"><tspan x="40" y="764">Otomasi GitHub Projects:</tspan><tspan x="40" y="784">PR dibuka → Review/Verification · PR merged → Done</tspan></text>
+</svg>

@@ -2,7 +2,7 @@
 
 # PROPOSAL CAPSTONE PROJECT
 
-# RANCANG BANGUN RW DIGITAL: SISTEM INFORMASI ADMINISTRASI RUKUN WARGA BERBASIS WEB MENGGUNAKAN METODE ITERATIVE AND INCREMENTAL DEVELOPMENT (STUDI KASUS: RW 06 KELURAHAN KOTA BARU, KOTA BEKASI)
+# RANCANG BANGUN RW DIGITAL: SISTEM INFORMASI ADMINISTRASI RUKUN WARGA BERBASIS WEB MENGGUNAKAN METODE KANBAN (STUDI KASUS: RW 06 KELURAHAN KOTA BARU, KOTA BEKASI)
 
 Disusun Oleh
 
@@ -224,21 +224,24 @@ Dalam perancangan Sistem Informasi RW, konsep arsitektur digunakan untuk mengatu
 
 Penerapan konsep Software Engineering dan arsitektur perangkat lunak pada perancangan ini mencakup analisis kebutuhan, pemodelan sistem, perancangan basis data, perancangan antarmuka, penerapan mekanisme keamanan, implementasi modul, integrasi komponen, serta pengujian sistem. Dengan pendekatan tersebut, rancangan sistem diharapkan memiliki struktur yang jelas, mudah dikembangkan, dan sesuai dengan kebutuhan pengguna serta batasan perancangan.
 
-### 2.2.4 Siklus Iterative & Incremental, Kanban, dan Prioritisasi MoSCoW
+### 2.2.4 Metode Kanban dan Prioritisasi MoSCoW
 
-#### 2.2.4.1 Iterative and Incremental Development
+#### 2.2.4.1 Metode Kanban dan GitHub Projects
 
-Iterative and Incremental Development (IID) adalah model proses pengembangan perangkat lunak yang membangun sistem melalui serangkaian siklus berulang (iterasi), di mana setiap siklus menghasilkan tambahan kemampuan (inkremen) pada sistem yang tetap dapat berfungsi (Larman & Basili, 2003). Aspek inkremental berarti sistem dibangun bagian demi bagian, misalnya modul demi modul, lalu setiap bagian diintegrasikan ke sistem yang telah ada. Aspek iteratif berarti bagian yang sudah dibangun dievaluasi kembali dan disempurnakan, termasuk perubahan rancangan basis data, logika bisnis, maupun arsitektur, ketika ditemukan ketidaksesuaian dengan kebutuhan (Pressman & Maxim, 2020).
+Metode Kanban adalah metode pengelolaan pekerjaan berbasis Lean yang berfokus pada visualisasi aliran kerja (*visualize workflow*), pembatasan pekerjaan dalam proses (*limit Work in Progress*/WIP), dan perbaikan aliran secara berkesinambungan (Anderson, 2010). Berbeda dengan metode berbasis *sprint*, Kanban tidak membagi pekerjaan ke dalam siklus berdurasi tetap. Pekerjaan mengalir secara berkesinambungan (*continuous flow*): kartu baru diambil ketika kapasitas tersedia, dan perubahan kebutuhan dapat dimasukkan ke antrean kapan pun tanpa menghentikan pekerjaan yang sedang berjalan.
 
-Model ini sesuai untuk perancangan RW Digital karena kebutuhan mitra belum dapat dirumuskan secara lengkap di awal. Ruang lingkup fitur awal disusun berdasarkan regulasi dan praktik umum RW, kemudian divalidasi dan direvisi bersama pengurus RW 06 seiring berjalannya pengembangan. Berbeda dengan model Waterfall yang menetapkan seluruh spesifikasi di awal, IID memungkinkan revisi dilakukan secara bertahap tanpa penulisan ulang sistem secara total.
+Anderson dan Carmichael (2016) merumuskan enam praktik inti Kanban:
 
-#### 2.2.4.2 Metode Kanban
+1. **Visualisasi.** Setiap pekerjaan ditampilkan sebagai kartu pada papan yang kolomnya mewakili tahap kerja, sehingga status seluruh pekerjaan terlihat oleh tim.
+2. **Pembatasan WIP.** Jumlah kartu pada kolom pengerjaan dibatasi agar tim menyelesaikan pekerjaan sebelum mengambil pekerjaan baru dan hambatan (*bottleneck*) mudah terlihat.
+3. **Pengelolaan aliran.** Pergerakan kartu dipantau dengan metrik seperti *throughput* (jumlah kartu selesai per periode) dan distribusi kartu per kolom.
+4. **Kebijakan eksplisit.** Syarat perpindahan kartu antarkolom ditulis dengan jelas, misalnya *Definition of Ready* (DoR) dan *Definition of Done* (DoD).
+5. **Umpan balik.** Tim memiliki mekanisme rutin untuk menerima masukan, baik dari pengguna maupun dari pengujian otomatis, dan mengubahnya menjadi kartu.
+6. **Perbaikan kolaboratif.** Proses dan hasil kerja diperbaiki secara bertahap berdasarkan data dan umpan balik, bukan dirombak sekaligus.
 
-Metode Kanban adalah metode pengelolaan alur kerja berbasis Lean yang berfokus pada visualisasi aliran kerja (visualize workflow), pembatasan pekerjaan dalam proses (limit Work in Progress / WIP), dan perbaikan aliran tugas secara berkesinambungan (Anderson, 2010). Kanban memberikan fleksibilitas tinggi bagi tim pengembang untuk merespons kebutuhan secara adaptif tanpa terikat oleh siklus rilis kaku. Kanban tidak mendefinisikan siklus hidup pengembangan perangkat lunak secara utuh, sehingga pada perancangan ini Kanban dipasangkan dengan model proses IID: IID menentukan bagaimana sistem dikembangkan, sedangkan Kanban menentukan bagaimana pekerjaan tim divisualisasikan dan dikendalikan.
+Papan Kanban dapat diwujudkan dengan GitHub Projects, yaitu papan yang terhubung langsung dengan *issue* dan *pull request* pada repositori kode. Setiap kartu dapat diberi atribut (status, penanggung jawab, prioritas, Epic), ditampilkan dalam tampilan papan maupun tabel, dan dipindahkan otomatis oleh alur kerja bawaan ketika *pull request* dibuka atau digabungkan (GitHub, n.d.). Integrasi ini membuat riwayat papan dapat ditelusuri ke riwayat kode, sehingga papan dapat dipakai sebagai bukti proses. Susunan kolom, batas WIP, dan kebijakan perpindahan kartu yang diterapkan pada perancangan ini dijelaskan pada subbab 3.5.1.
 
-Papan Kanban terdiri atas kolom-kolom yang mewakili tahap kerja, dan setiap pekerjaan direpresentasikan sebagai kartu yang bergerak dari kiri ke kanan. Batas WIP pada kolom pengerjaan mencegah tim memulai terlalu banyak pekerjaan sekaligus, sehingga hambatan (*bottleneck*) lebih mudah terlihat dan pekerjaan diselesaikan sebelum pekerjaan baru diambil (Anderson, 2010). Papan Kanban dapat diwujudkan dengan alat bantu digital seperti GitHub Projects, yang menghubungkan kartu dengan *issue* dan *pull request* pada repositori kode sehingga status kartu dapat berubah otomatis mengikuti aktivitas pengembangan (GitHub, n.d.). Susunan kolom, batas WIP, dan aturan perpindahan kartu yang diterapkan pada perancangan ini dijelaskan pada subbab 3.5.1.
-
-#### 2.2.4.3 Prioritisasi Kebutuhan dengan Metode MoSCoW
+#### 2.2.4.2 Prioritisasi Kebutuhan dengan Metode MoSCoW
 
 Metode MoSCoW adalah teknik analisis untuk mengklasifikasikan kebutuhan sistem ke dalam empat kategori urgensi (Clegg & Barker, 1994):
 
@@ -297,7 +300,7 @@ Perancangan RW Digital dipengaruhi oleh kondisi nyata pada mitra RW 06 Kelurahan
 2. **Infrastruktur.** Mitra tidak memiliki server sendiri. Pengurus menggunakan laptop atau ponsel pribadi, sedangkan warga umumnya mengakses melalui ponsel dengan koneksi seluler. Sistem harus berbasis web, ringan, dan dapat diakses dari peramban tanpa instalasi aplikasi. Belum tersedia infrastruktur server produksi yang bersifat permanen.
 3. **Anggaran.** Tidak tersedia anggaran swadaya untuk server khusus, langganan aplikasi berbayar, maupun akses *payment gateway* produksi. Karena itu, pembayaran nontunai melalui QRIS dirancang dan diuji pada mode uji (*sandbox*) dan baru dapat diaktifkan setelah mitra menyetujui serta memiliki akun penyedia jasa pembayaran.
 4. **Waktu.** Pengerjaan dibatasi satu semester akademik, sehingga hanya fitur prioritas Core MVP yang dikerjakan: kependudukan, surat-menyurat, kas RW, iuran warga, serta pengumuman dan informasi. Fitur CCTV, inventaris sarana prasarana, dan manajemen pengurus tidak termasuk dalam cakupan.
-5. **Sistem yang berlaku.** Administrasi RW 06 saat ini berjalan manual dengan buku register, spreadsheet, kuitansi fisik, dan grup WhatsApp. Peralihan ke sistem digital harus dapat dilakukan bertahap, termasuk impor data awal dari berkas spreadsheet. Kebutuhan mitra juga belum dapat dirumuskan lengkap sebelum pengembangan dimulai, sehingga ruang lingkup awal disusun dari regulasi dan divalidasi serta direvisi bersama pengurus RW 06 pada setiap iterasi.
+5. **Sistem yang berlaku.** Administrasi RW 06 saat ini berjalan manual dengan buku register, spreadsheet, kuitansi fisik, dan grup WhatsApp. Peralihan ke sistem digital harus dapat dilakukan bertahap, termasuk impor data awal dari berkas spreadsheet. Kebutuhan mitra juga belum dapat dirumuskan lengkap sebelum pengembangan dimulai, sehingga ruang lingkup awal disusun dari regulasi dan divalidasi serta direvisi bersama pengurus RW 06 setiap kali hasil sistem diperagakan.
 6. **Regulasi.** Sistem tidak terintegrasi dengan sistem kependudukan resmi (SIAK Dukcapil) maupun sistem kelurahan, dan surat yang diterbitkan berfungsi sebagai surat pengantar RT/RW, bukan dokumen kependudukan resmi. Pengelolaan data harus mematuhi ketentuan pelindungan data pribadi.
 
 ## 3.2 Standar Keteknikan
@@ -419,7 +422,7 @@ Spesifikasi rancangan disusun dengan mengelaborasikan batasan realistis (subbab 
 ### 3.4.1 Batasan Perancangan
 
 1. **Data.** Kebutuhan dikumpulkan dari regulasi, wawancara dan observasi bersama pengurus RW 06, serta format dokumen administrasi yang dipakai mitra. Data uji tidak memakai data warga nyata, melainkan data contoh berpenanda seperti "Contoh Warga 1".
-2. **Metode.** Perancangan mengikuti model *iterative and incremental* dengan Kanban sebagai pengendali alur kerja. Iterasi dibatasi tiga kali dalam periode semester.
+2. **Metode.** Perancangan dikelola dengan metode Kanban pada GitHub Projects dalam aliran kerja berkesinambungan, tanpa *sprint* berdurasi tetap. Papan Kanban mulai dipakai pada minggu ketiga pengembangan; pekerjaan sebelumnya dicatat ulang sebagai kartu *Done*.
 3. **Anggaran.** Tidak ada anggaran pengadaan perangkat atau layanan berbayar; seluruh perangkat lunak yang digunakan berlisensi terbuka atau memiliki paket gratis.
 4. **Waktu.** Satu semester akademik, dengan lingkup terbatas pada fitur Core MVP (subbab 3.1 butir 4).
 5. **Integrasi.** Sistem berdiri sendiri dan tidak terhubung dengan SIAK Dukcapil maupun sistem kelurahan.
@@ -435,24 +438,24 @@ Spesifikasi rancangan disusun dengan mengelaborasikan batasan realistis (subbab 
 
 ### 3.5.1 Sistematika Perancangan
 
-Perancangan RW Digital dilaksanakan dalam siklus *iterative and incremental* (subbab 2.2.4.1). Setiap iterasi menghasilkan penambahan atau penyempurnaan fitur yang tetap berfungsi. Arah setiap iterasi ditentukan oleh umpan balik pengurus RW 06 dan evaluasi internal tim terhadap hasil iterasi sebelumnya, sehingga revisi terjadi bertahap, bukan dalam satu spesifikasi awal yang kaku. Di dalam setiap iterasi, alur kerja dikendalikan melalui papan Kanban pada GitHub Projects (subbab 2.2.4.2). Alur tahapannya disajikan pada Gambar 3.1.
+Perancangan RW Digital dikelola dengan metode Kanban pada GitHub Projects (subbab 2.2.4.1). Setiap kebutuhan dicatat sebagai kartu (GitHub Issue) yang mengalir dari kolom **Backlog** hingga **Done**. Tahap rekayasa perangkat lunak tidak dijalankan sebagai fase berurutan untuk seluruh sistem, melainkan melekat pada kolom papan: setiap kartu melewati analisis, perancangan, pengembangan, verifikasi, dan penggabungan secara mandiri. Umpan balik pengurus RW 06 dan evaluasi tim dicatat sebagai kartu baru di Backlog, sehingga perubahan kebutuhan masuk ke aliran kerja tanpa menghentikan pengembangan. Alur tahapannya disajikan pada Gambar 3.1.
 
-<!-- [Gambar 3.1 Flowchart Sistematika Perancangan — tempel di Word. WAJIB ada panah loop dari tahap 6 kembali ke tahap 1 berlabel "Iterasi berikutnya".] -->
+<!-- [Gambar 3.1 — tempel di Word dari docs/laporan/gambar/351-kanban-sistematika.png. Panah umpan balik dari tahap 6 kembali ke Backlog sudah ada di gambar.] -->
 
-**Gambar 3.1** Sistematika Perancangan RW Digital
+**Gambar 3.1** Sistematika Perancangan RW Digital dengan Metode Kanban
 
-1. **Analisis kebutuhan.** Kebutuhan diturunkan dari regulasi (subbab 3.2), hasil pengumpulan data (subbab 3.5.2), dan umpan balik mitra pada iterasi sebelumnya. Proses bisnis saat ini dimodelkan dengan BPMN *as-is*, lalu kebutuhan dirumuskan menjadi kebutuhan fungsional dan non-fungsional, diprioritaskan dengan MoSCoW, dan dicatat sebagai kartu (GitHub Issue) di kolom **Backlog**. Keluaran: daftar kebutuhan dan *product backlog*.
-2. **Perancangan sistem.** Kartu yang spesifikasinya telah disepakati dipindahkan ke kolom **Todo/Ready**. Rancangan disusun dalam bentuk BPMN *to-be*, diagram UML, ERD dan kamus data, rancangan antarmuka, serta arsitektur perangkat lunak dan matriks hak akses. Keluaran: artefak rancangan.
-3. **Pengembangan inkremental.** Kartu dikerjakan oleh penanggung jawab (PIC) di kolom **In Progress** dengan batas WIP 1–2 kartu per orang dan maksimal 10 kartu per papan. Setiap kartu dikerjakan pada cabang fitur (*feature branch*) terpisah. Keluaran: inkremen modul.
-4. **Verifikasi.** Pembuatan *pull request* memindahkan kartu ke kolom **Review/Verification**. *Pull request* menjalani *continuous integration* (pemeriksaan tipe, *unit test*, *build*, dan *end-to-end test*) serta pengujian *black box* terhadap spesifikasi pada subbab 3.3. Keluaran: hasil uji.
-5. **Penggabungan.** Kartu yang lolos verifikasi digabungkan ke cabang utama dan dipindahkan ke kolom **Done**. Keluaran: sistem terintegrasi yang tetap berfungsi.
-6. **Validasi dan evaluasi.** Hasil iterasi ditinjau bersama pengurus RW 06 dan dievaluasi oleh tim. Temuan dicatat kembali sebagai kartu baru atau kartu revisi di Backlog dan menjadi masukan iterasi berikutnya. Revisi dapat menyentuh bagian yang sudah diimplementasikan, termasuk basis data, logika bisnis, dan arsitektur. Pada iterasi akhir, sistem divalidasi melalui UAT dan SUS (subbab 3.5.3).
+1. **Analisis kebutuhan (Backlog).** Kebutuhan diturunkan dari regulasi (subbab 3.2), hasil pengumpulan data (subbab 3.5.2), dan umpan balik mitra. Proses bisnis saat ini dimodelkan dengan BPMN *as-is*, kebutuhan dirumuskan menjadi kebutuhan fungsional dan non-fungsional, diberi prioritas MoSCoW, dan dicatat sebagai kartu di kolom **Backlog** beserta Epic dan kriteria penerimaannya. Keluaran: *product backlog*.
+2. **Perancangan (Todo/Ready).** Kartu yang memenuhi *Definition of Ready* (kriteria penerimaan dapat diuji, ada PIC dan prioritas, dependensi teridentifikasi) dipindahkan ke kolom **Todo/Ready**. Rancangan yang dibutuhkan kartu disusun dalam bentuk BPMN *to-be*, diagram UML, ERD, rancangan antarmuka, atau matriks hak akses. Keluaran: artefak rancangan.
+3. **Pengembangan (In Progress).** PIC mengerjakan kartu di kolom **In Progress** pada cabang fitur (*feature branch*) terpisah. Batas WIP adalah 1–2 kartu per orang dan paling banyak 10 kartu pada seluruh papan. Keluaran: fitur pada cabang fitur.
+4. **Verifikasi (Review/Verification).** Pembukaan *pull request* memindahkan kartu ke kolom **Review/Verification**. *Pull request* menjalani *continuous integration* (pemeriksaan tipe, *unit test*, *build*, dan *end-to-end test*) serta pengujian *black box* terhadap spesifikasi pada subbab 3.3. Keluaran: hasil uji.
+5. **Penggabungan (Done).** Kartu yang lolos verifikasi dan memenuhi *Definition of Done* digabungkan ke cabang utama, lalu otomatis berpindah ke kolom **Done**. Kartu *Done* tidak dibuka kembali. Keluaran: sistem terintegrasi yang tetap berfungsi.
+6. **Validasi dan umpan balik.** Kumpulan kartu yang selesai diperagakan kepada pengurus RW 06 dan dievaluasi oleh tim. Temuan dicatat sebagai kartu baru di Backlog yang merujuk kartu asalnya, termasuk revisi yang menyentuh basis data, logika bisnis, atau arsitektur. Validasi akhir dilakukan melalui UAT dan SUS (subbab 3.5.3).
 
-Siklus ini dijalankan dalam tiga iterasi: Iterasi 1 (MVP seluruh modul), Iterasi 2 (penyempurnaan keuangan dan portal warga), dan Iterasi 3 (kontrol akses, notifikasi, dan konsolidasi kependudukan). Pelaksanaan setiap tahap dijabarkan pada subbab 4.1 dengan urutan yang sama.
+Selama pengembangan, kartu yang selesai diperagakan kepada mitra pada tiga titik rilis: Rilis 1 (MVP seluruh modul), Rilis 2 (penyempurnaan keuangan dan portal warga), dan Rilis 3 (kontrol akses, notifikasi, dan konsolidasi kependudukan). Seluruh aktivitas tercatat pada GitHub Projects sehingga papan, *issue*, dan *pull request* menjadi bukti pelaksanaan setiap tahap. Pelaksanaannya dijabarkan pada subbab 4.1 dengan urutan yang sama.
 
 ### 3.5.2 Mekanisme Pengumpulan Data
 
-Data perancangan dikumpulkan dari mitra dan dari dokumen acuan. Responden utama adalah pengurus RW 06 karena mereka adalah pelaku langsung administrasi kependudukan, surat, kas, dan iuran sekaligus calon pengguna utama sistem. Wawancara dilakukan secara semi-terstruktur: tim menyiapkan daftar pertanyaan per modul (alur kerja saat ini, kendala, format dokumen, dan kebutuhan fitur), kemudian pertanyaan dikembangkan sesuai jawaban responden. Setelah setiap iterasi, hasil sistem diperagakan kepada pengurus untuk memperoleh umpan balik yang menjadi kartu revisi.
+Data perancangan dikumpulkan dari mitra dan dari dokumen acuan. Responden utama adalah pengurus RW 06 karena mereka adalah pelaku langsung administrasi kependudukan, surat, kas, dan iuran sekaligus calon pengguna utama sistem. Wawancara dilakukan secara semi-terstruktur: tim menyiapkan daftar pertanyaan per modul (alur kerja saat ini, kendala, format dokumen, dan kebutuhan fitur), kemudian pertanyaan dikembangkan sesuai jawaban responden. Pada setiap titik rilis, hasil sistem diperagakan kepada pengurus untuk memperoleh umpan balik yang dicatat sebagai kartu revisi di Backlog.
 
 <!-- TODO (Zidan): lengkapi tanggal wawancara/observasi, nama jabatan responden (ketua RW, sekretaris, bendahara, ketua RT), dan jumlah sesi. Jangan tulis nama pribadi warga. -->
 
@@ -465,7 +468,7 @@ Data perancangan dikumpulkan dari mitra dan dari dokumen acuan. Responden utama 
 | 3 | Struktur data dan format dokumen | Studi dokumen | Buku register warga, buku kas, kuitansi iuran, format surat pengantar mitra | Menentukan entitas, atribut, dan format keluaran |
 | 4 | Kebutuhan dan prioritas fitur | Wawancara dan diskusi prioritas MoSCoW | Pengurus RW 06 | Menyusun *product backlog* dan hak akses per peran |
 | 5 | Perangkat dan konektivitas pengguna | Wawancara | Pengurus RW 06 | Menentukan spesifikasi antarmuka dan teknis |
-| 6 | Umpan balik per iterasi | Demonstrasi sistem dan diskusi | Pengurus RW 06 | Menentukan kartu revisi untuk iterasi berikutnya |
+| 6 | Umpan balik per rilis | Demonstrasi sistem dan diskusi | Pengurus RW 06 | Menghasilkan kartu revisi di Backlog |
 
 ### 3.5.3 Mekanisme Verifikasi dan Validasi
 
@@ -482,7 +485,7 @@ Spesifikasi yang terukur (Tabel 3.3) diverifikasi dengan ukurannya masing-masing
 
 Validasi memeriksa apakah sistem menjawab permasalahan mitra dan layak diimplementasikan:
 
-1. **Validasi per iterasi.** Hasil setiap iterasi diperagakan kepada pengurus RW 06 untuk memperoleh umpan balik atas kesesuaian fitur, alur, dan antarmuka.
+1. **Validasi per rilis.** Hasil setiap rilis diperagakan kepada pengurus RW 06 untuk memperoleh umpan balik atas kesesuaian fitur, alur, dan antarmuka.
 2. **User Acceptance Testing (UAT).** Dilaksanakan bersama pengurus RW 06 pada 23–24 November 2026. Responden mewakili setiap peran (pengurus RW, pengurus RT, bendahara, dan warga) dan menjalankan skenario tugas operasional. Hasilnya dicatat dalam berita acara beserta rekap temuan.
 3. **System Usability Scale (SUS).** Setelah UAT, responden mengisi kuesioner SUS sepuluh butir (Brooke, 1996). Skor dibandingkan dengan target SP-14 (≥ 68).
 
@@ -498,11 +501,11 @@ Hasil validasi disajikan pada Bab VI.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Pengumpulan data dan analisis kebutuhan | ■ | ■ | | ■ | ■ | ■ | | | | | |
 | Perancangan sistem (BPMN, UML, ERD, UI/UX, RBAC) | ■ | ■ | ■ | | ■ | ■ | ■ | | | | |
-| Iterasi 1 — MVP seluruh modul | ■ | ■ | ■ | ■ | | | | | | | |
-| Iterasi 2 — Penyempurnaan keuangan dan portal | | | | | ■ | | | | | | |
-| Iterasi 3 — Kontrol akses, notifikasi, kependudukan | | | | | | ■ | | | | | |
+| Rilis 1 — MVP seluruh modul | ■ | ■ | ■ | ■ | | | | | | | |
+| Rilis 2 — Penyempurnaan keuangan dan portal | | | | | ■ | | | | | | |
+| Rilis 3 — Kontrol akses, notifikasi, kependudukan | | | | | | ■ | | | | | |
 | Verifikasi (CI dan *black box*) | | ■ | ■ | ■ | ■ | ■ | ■ | ■ | | | |
-| Validasi per iterasi bersama mitra | | | | ■ | ■ | ■ | | | | | |
+| Validasi per rilis bersama mitra | | | | ■ | ■ | ■ | | | | | |
 | UAT dan SUS bersama pengurus RW 06 | | | | | | | | | ■ | | |
 | Perbaikan pasca-UAT | | | | | | | | | ■ | ■ | |
 | Penyusunan laporan | | | | | | ■ | ■ | ■ | ■ | ■ | ■ |
@@ -647,7 +650,7 @@ Sebaliknya, jika data dinyatakan valid, sistem akan langsung menyimpan catatan t
 
 Keterangan: C = Create, R = Read, U = Update, D = Delete, N/A = No Access. R* / C* / U* = akses terbatas pada wilayah RT bersangkutan atau data milik pengguna sendiri.
 
-### 4.1.3 Pelaksanaan Pengembangan Inkremental
+### 4.1.3 Pelaksanaan Alur Kerja Kanban
 
 <!-- Belum ditulis (lihat bab4-plan.md §4, keputusan K-04, K-06). -->
 
@@ -705,6 +708,8 @@ Keterangan: C = Create, R = Read, U = Update, D = Delete, N/A = No Access. R* / 
 
 Anderson, D. J. (2010). *Kanban: Successful evolutionary change for your technology business*. Blue Hole Press.
 
+Anderson, D. J., & Carmichael, A. (2016). *Essential Kanban condensed*. Lean Kanban University Press.
+
 Booch, G., Rumbaugh, J., & Jacobson, I. (2005). *The unified modeling language user guide* (2nd ed.). Addison-Wesley Professional.
 
 Brooke, J. (1996). SUS: A "quick and dirty" usability scale. In P. W. Jordan, B. Thomas, B. A. Weerdmeester, & A. L. McClelland (Eds.), *Usability evaluation in industry* (pp. 189–194). Taylor & Francis. https://doi.org/10.1201/9781498710411-35
@@ -718,8 +723,6 @@ Dennis, A., Wixom, B. H., & Tegarden, D. (2020). *Systems analysis and design: A
 GitHub. (n.d.). About projects. GitHub Docs. Retrieved October 5, 2026, from https://docs.github.com/en/issues/planning-and-tracking-with-projects/learning-about-projects/about-projects
 
 Ilie, G., & Ciocoiu, C. N. (2010). Application of fishbone diagram to determine the risk of an event with multiple causes. *Management Research and Practice, 2*(1), 65–80.
-
-Larman, C., & Basili, V. R. (2003). *Iterative and incremental development: A brief history*. Computer, 36(6), 47–56. https://doi.org/10.1109/MC.2003.1204375
 
 Object Management Group. (2014). *Business Process Model and Notation (BPMN) version 2.0.2*. https://www.omg.org/spec/BPMN/2.0.2/
 

@@ -11,10 +11,10 @@
 
 | ID | Topik | Keputusan singkat | Status | Diturunkan ke |
 |---|---|---|---|---|
-| K-01 | Judul laporan | *Rancang Bangun RW Digital … Iterative and Incremental Development (Studi Kasus RW 06)* | ⏳ pembimbing | `laporan.md` judul |
+| K-01 | Judul laporan | *Rancang Bangun RW Digital … Menggunakan Metode Kanban (Studi Kasus RW 06)* | ⏳ pembimbing | `laporan.md` judul |
 | K-02 | Istilah | **SI-RW** = konsep · **RW Digital** = produk · "rancang bangun" | ✅ | §2.2.1 |
-| K-03 | Metodologi | **I&I** (model proses) + **Kanban** (manajemen kerja) + **MoSCoW** | ✅ | §2.2.3, §3.5.1 |
-| K-04 | Iterasi | 3 iterasi nyata; pemicu = umpan balik mitra + evaluasi tim | ✅ | §3.5.1, 4.1.3 |
+| K-03 | Metodologi | **Kanban** (GitHub Projects) + **MoSCoW**; I&I dibatalkan 6 Nov | ✅ | §2.2.4, §3.5.1, 4.1 |
+| K-04 | Rilis | 3 rilis nyata (bukan iterasi); pemicu = umpan balik mitra + evaluasi tim → kartu baru | ✅ | §3.5.1, 4.1.3 |
 | K-05 | Keterlibatan mitra | Mitra RW 06 terlibat intensif; regulasi = dasar scope awal saja | ✅ | §3.1 butir 2 |
 | K-06 | WIP limit | 1–2 kartu/orang, ≤ 10/papan; diaudit, ada pelanggaran awal | ✅ | §2.2.3.2, §3.5.1, 4.1.3d |
 | K-07 | Pengujian | **CI + Black Box**; tanpa klaim peer review | ✅ | §3.5.1, 4.1.4, 4.3 |
@@ -30,15 +30,14 @@
 
 ## K-01 · Judul laporan ⏳
 
-**Usulan (5 Nov 2026):**
+**Usulan (diperbarui 6 Nov 2026, kembali ke Kanban):**
 
 > RANCANG BANGUN RW DIGITAL: SISTEM INFORMASI ADMINISTRASI RUKUN WARGA BERBASIS WEB MENGGUNAKAN
-> METODE ITERATIVE AND INCREMENTAL DEVELOPMENT (STUDI KASUS: RW 06 KELURAHAN KOTA BARU, KOTA BEKASI)
+> METODE KANBAN (STUDI KASUS: RW 06 KELURAHAN KOTA BARU, KOTA BEKASI)
 
-- Menggantikan: *SISTEM INFORMASI RW MENGGUNAKAN METODOLOGI KANBAN* (Kanban = manajemen alur kerja,
-  bukan model proses).
-- **Menunggu persetujuan pembimbing.** Kalau ditolak → kembali ke judul lama, tambahkan klausa di
-  abstrak: *"dengan Kanban sebagai metode pengelolaan alur kerja dalam siklus iteratif-incremental"*.
+- Berangkat dari judul proposal *SISTEM INFORMASI RW MENGGUNAKAN METODOLOGI KANBAN*; yang ditambah
+  hanya "rancang bangun", nama produk, dan studi kasus. Usulan judul I&I (5 Nov) **dibatalkan** (K-03).
+- **Menunggu persetujuan pembimbing.** Kalau ditolak → pakai judul proposal apa adanya.
 - "Rancang bangun", bukan "pengembangan" (sistem dibuat dari nol) dan bukan "perancangan" (ada
   kode). Tambah "dan Implementasi" **hanya** kalau sistem benar-benar dipakai mitra sebelum sidang.
 
@@ -50,50 +49,65 @@
 | **RW Digital** | Produk kita (sama dengan `short_name` di manifest PWA) | Judul, Bab III–IV, screenshot, studi kasus |
 | Rancang bangun | Analisis → desain → implementasi → pengujian dari nol | Judul |
 
-## K-03 · Metodologi ✅
+## K-03 · Metodologi ✅ (diubah 6 Nov 2026)
 
-- **Model proses:** Iterative and Incremental Development (Larman & Basili, 2003; Pressman & Maxim, 2020).
-  *Incremental* = modul dibangun dan diintegrasikan bertahap. *Iterative* = implementasi yang sudah
-  ada dievaluasi dan dirombak bila perlu (bukan sekadar bug fixing).
-- **Manajemen kerja:** Kanban di GitHub Projects (issue = kartu, PIC, feature branch + PR, CI).
-- **Prioritisasi:** MoSCoW.
+**Kanban** pada GitHub Projects adalah metode perancangan; **MoSCoW** untuk prioritisasi.
+Framing *Iterative and Incremental Development* (5 Nov) **dibatalkan**: kembali ke metode proposal.
 
-**Kalimat kunci** (sudah ada di `laporan.md` §3.5.1, pakai versi ini di Bab IV):
+- **Tahap rekayasa perangkat lunak** (analisis → desain → implementasi → verifikasi → integrasi →
+  validasi) dipetakan ke **kolom papan** (Backlog → Todo/Ready → In Progress → Review/Verification →
+  Done), bukan ke fase berurutan.
+- **Perubahan kebutuhan** (revisi mitra, rombakan Kas) masuk lewat **umpan balik Kanban**: temuan
+  menjadi kartu baru di Backlog; kartu Done tidak dibuka ulang (`kanban/workflow.md` §7).
+- **Praktik inti yang diklaim** (Anderson, 2010; Anderson & Carmichael, 2016) dan buktinya:
 
-> Perancangan RW Digital dilaksanakan dalam siklus *iterative and incremental*. Setiap iterasi
-> menghasilkan penambahan atau penyempurnaan fitur yang tetap berfungsi. Arah setiap iterasi
-> ditentukan oleh umpan balik pengurus RW 06 dan evaluasi internal tim terhadap hasil iterasi
-> sebelumnya. Di dalam setiap iterasi, alur kerja dikendalikan melalui papan Kanban. Kanban
-> diadopsi pada minggu ketiga dan menjadi alat kendali utama sejak Iterasi 2.
+| Praktik Kanban | Wujud di proyek | Bukti (screenshot GitHub Projects/repo) |
+|---|---|---|
+| Visualisasi alur kerja | 5 kolom papan, 1 Issue = 1 kartu, 6 Epic | Tampilan *Board* |
+| Batasi WIP | 1–2 kartu/orang, ≤ 10/papan (K-06) | *Board* dikelompokkan per *Assignee*; audit `board.md` |
+| Kelola aliran | Cuplikan distribusi papan; *throughput* per rilis | *Insights* (grafik status terhadap waktu) |
+| Kebijakan eksplisit | DoR, DoD, konvensi branch/PR | `workflow.md`, deskripsi kolom, templat Issue |
+| Umpan balik | Demo ke mitra → kartu revisi; CI di setiap PR | Issue berlabel `req-stakeholder`; tab *Checks* PR |
+| Perbaikan bertahap | Rombakan Kas A→B→C; perbaikan disiplin PR | Riwayat PR #62, #64, #65, #94 |
+
+**Kalimat kunci** (pakai di §3.5.1 dan Bab IV):
+
+> Perancangan RW Digital dikelola dengan metode Kanban pada GitHub Projects. Setiap kebutuhan
+> dicatat sebagai kartu yang mengalir dari Backlog hingga Done, dengan batas pekerjaan dalam proses
+> dan kebijakan perpindahan kolom yang eksplisit. Umpan balik pengurus RW 06 dan evaluasi tim dicatat
+> sebagai kartu baru di Backlog, sehingga perubahan kebutuhan masuk ke aliran kerja tanpa
+> menghentikan pengembangan. Papan Kanban diadopsi pada minggu ketiga (12 Oktober 2026); pekerjaan
+> sebelumnya direkonstruksi sebagai kartu *Done*.
 
 **Kenapa bukan yang lain:**
 
 | Opsi | Bukti yang kita punya | Risiko klaim |
 |---|---|---|
-| **I&I + Kanban** (dipakai) | Papan GitHub Projects, MoSCoW, WIP, 3 iterasi nyata, revisi arsitektur Kas | Rendah |
-| Kanban saja | Sama, tapi iterasi 2/3 dan rombakan Kas tidak punya tempat | Rendah, tapi lemah |
+| **Kanban** (dipakai) | Papan GitHub Projects, MoSCoW, WIP, DoR/DoD, PR + CI, kartu revisi mitra | Rendah; wajib jujur soal adopsi minggu ke-3 |
+| I&I + Kanban | Sama, ditambah label "iterasi" | Dibatalkan 6 Nov: menambah teori model proses yang tidak ada di proposal |
 | Scrum | Tidak ada sprint planning/review/retro, PO/SM | **Tinggi** — harus mengarang artefak |
 | Waterfall | Terbantah: 12.229 baris kode 28 Sep, dokumen desain menyusul | **Sangat tinggi** |
-| Staged delivery ("1 iterasi, banyak inkremen") | Terbantah: Kas yang sudah jadi dirombak 2× | Tinggi |
 
-**Jangan:** menyebut Scrum/Agile formal, "sprint", atau "Kanban sejak hari pertama"; menyebut
-Waterfall hanya karena urutan Bab I–VII linear.
+**Jangan:** menyebut Scrum, "sprint", "iterasi" sebagai model proses, atau "Kanban sejak hari
+pertama". Label GitHub `iterasi-2` boleh disebut sebagai nama label historis.
 
-## K-04 · Iterasi ✅
+## K-04 · Rilis ✅ (diubah 6 Nov 2026)
 
-| Iterasi | Periode | Fokus | Kartu utama |
+Tiga titik rilis = batch kartu yang selesai lalu diperagakan ke mitra (*delivery*), **bukan** iterasi.
+
+| Rilis | Periode | Fokus | Kartu utama |
 |---|---|---|---|
-| 1 | 25 Sep – 20 Okt | MVP: kependudukan, kas, iuran, surat, pengumuman, landing, portal. Papan Kanban diadopsi 12 Okt; 21 kartu direkonstruksi | `KP-A..E`, `KU-A..`, `SR-A..`, `EV-A`, `LP-01/02`, `FND-06` |
-| 2 | 27–28 Okt | Penyempurnaan keuangan & portal | `KU-01b`, `KU-02b`, `KP-06`, `KP-07`, `SR-02b`, `LP-03`, `FND-07`, `T0-01`, `T0-02` |
+| 1 | 25 Sep – 20 Okt | MVP: kependudukan, kas, iuran, surat, pengumuman, landing, portal. Papan diadopsi 12 Okt; 21 kartu direkonstruksi | `KP-A..E`, `KU-A..`, `SR-A..`, `EV-A`, `LP-01/02`, `FND-06` |
+| 2 | 27–28 Okt | Penyempurnaan keuangan & portal (label GitHub `iterasi-2`) | `KU-01b`, `KU-02b`, `KP-06`, `KP-07`, `SR-02b`, `LP-03`, `FND-07`, `T0-01`, `T0-02` |
 | 3 | 2–3 Nov | RBAC, notifikasi, KK-first, iuran 2 tingkat, TTD | `FND-08`, `FND-09`, `KP-08`, `KU-05`, `SR-06`, `EV-04` |
 
 Status papan 3 Nov: **61 Done · 0 In Progress · 4 Todo · 3 Won't** (68 item).
 
-**Pemicu iterasi** (wajib muncul di 4.1.3a–c supaya klaim I&I punya sebab):
+**Pemicu kartu revisi** (umpan balik Kanban; wajib muncul di 4.1.3):
 - Revisi mitra RW 06: alur iuran 2 tingkat, KK-first, TTD RT.
 - Evaluasi tim: modul Kas — implementasi awal **belum berfungsi dan tidak sesuai** alur kas yang dibutuhkan.
 
-**Bukti rombakan Kas** (contoh terkuat bahwa iterasi menyentuh arsitektur, bukan bug fixing):
+**Bukti rombakan Kas** (contoh terkuat perbaikan bertahap lewat kartu baru, bukan membuka kartu lama):
 
 | Versi | Commit / PR | Rancangan |
 |---|---|---|
@@ -103,13 +117,13 @@ Status papan 3 Nov: **61 Done · 0 In Progress · 4 Todo · 3 Won't** (68 item).
 
 Alasan: ruang lingkup kas ambigu (RT saja / RW saja), dan payment gateway terpisah per RT tidak layak.
 
-**Framing Kanban (4.1.3d):** *"Kanban diadopsi pada minggu ketiga (commit `17da42b`) dan menjadi
-alat kendali utama sejak Iterasi 2; 21 kartu berstatus Done pada Iterasi 1 merupakan rekonstruksi as-is."*
+**Framing adopsi:** *"Papan Kanban diadopsi pada minggu ketiga (commit `17da42b`, 12 Oktober 2026);
+21 kartu berstatus Done pada Rilis 1 merupakan rekonstruksi as-is."*
 
 ## K-05 · Keterlibatan mitra ✅
 
 Pengurus RW 06 **dapat dilibatkan secara intensif** (wawancara, observasi, pembahasan hasil tiap
-iterasi). Framing lama "mitra tidak dapat diwawancarai" adalah kondisi awal dan **tidak dipakai
+rilis). Framing lama "mitra tidak dapat diwawancarai" adalah kondisi awal dan **tidak dipakai
 lagi**. Batasan yang jujur: kebutuhan belum bisa dirumuskan lengkap di awal, sehingga scope awal
 disusun dari regulasi (UU 6/2014, Permendagri 18/2018, Perwali Bekasi 58/2020) + plausibility, lalu
 divalidasi dan direvisi bersama mitra.
@@ -196,7 +210,7 @@ disesuaikan ke empat peran ini (Afif).
    `git show ac01721:docs/laporan/laporan.md`). Putuskan mana yang masuk docx:
    - Judul baru (K-01) — docx masih `(Judul)`
    - §1.2.1–1.2.3 (Fishbone, solusi, solusi dipilih) · §1.3 Perumusan Masalah
-   - §2.2.1 SI-RW · §2.2.2 PWA · §2.2.3 I&I / Kanban / MoSCoW (K-03) · §2.2.6 UML & ERD · §2.2.7 tech stack & pengujian
+   - §2.2.1 SI-RW · §2.2.2 PWA · §2.2.4 Kanban / MoSCoW (K-03) · §2.2.6 UML & ERD · §2.2.7 tech stack & pengujian
    - §3.2.1 regulasi lembaga kemasyarakatan · §3.3.4 Spesifikasi Fungsional
    - §3.5.1–3.5.5 (docx masih punya versi lama §3.5 tanpa subbab) · §3.1 butir 2 (K-05)
    - Daftar Pustaka (+ Larman & Basili 2003)

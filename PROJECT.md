@@ -8,23 +8,23 @@
 
 Aplikasi digitalisasi administrasi tingkat RW (Rukun Warga), dikembangkan sebagai capstone project bersama mitra RW nyata. Tujuannya membantu pengurus RW mengelola data kependudukan, keuangan kas, iuran warga, informasi/pengumuman, dan (berpotensi) surat-menyurat — secara terpusat, menggantikan proses yang saat ini tersebar di WhatsApp, dokumen fisik, dan spreadsheet terpisah per RT.
 
-**Nama produk:** **RW Digital**. Judul laporan, istilah, dan metodologi (I&I + Kanban + MoSCoW)
+**Nama produk:** **RW Digital**. Judul laporan, istilah, dan metodologi (Kanban + MoSCoW)
 diputuskan di [`docs/keputusan.md`](docs/keputusan.md) — K-01, K-02, K-03.
 
 ## Prinsip Pengembangan
 
-Fitur dalam proyek ini ditetapkan berdasarkan **analisis regulasi resmi** (UU Desa 6/2014, Permendagri 18/2018) dan **evaluasi plausibility** untuk implementasi capstone. Scope awal disusun dari regulasi, lalu **disempurnakan secara bertahap melalui umpan balik pengurus RW 06** pada setiap iterasi pengembangan. 
+Fitur dalam proyek ini ditetapkan berdasarkan **analisis regulasi resmi** (UU Desa 6/2014, Permendagri 18/2018) dan **evaluasi plausibility** untuk implementasi capstone. Scope awal disusun dari regulasi, lalu **disempurnakan secara bertahap melalui umpan balik pengurus RW 06** pada setiap rilis pengembangan. 
 
 Idealnya, sebuah fitur memiliki validasi lewat:
 1. Deskripsi proses aktual mitra saat ini
 2. Kendala koncret yang dialami
 3. Dampak kendala terhadap pekerjaan pengurus atau warga
 
-Pada Iterasi 1, regulasi resmi menjadi dasar utama penentuan scope — dengan asumsi bahwa fitur yang diatur dalam tupoksi RW secara hukum adalah fitur yang paling plausible untuk dibutuhkan. **Iterasi 2 dan 3 kemudian menyempurnakan hasil Iterasi 1 berdasarkan revisi dan umpan balik mitra RW 06**, sehingga penambahan/perubahan fitur bersifat incremental, bukan penulisan ulang total.
+Pada Rilis 1, regulasi resmi menjadi dasar utama penentuan scope — dengan asumsi bahwa fitur yang diatur dalam tupoksi RW secara hukum adalah fitur yang paling plausible untuk dibutuhkan. **Rilis 2 dan 3 kemudian menyempurnakan hasil Rilis 1 berdasarkan revisi dan umpan balik mitra RW 06**, sehingga penambahan/perubahan fitur bersifat incremental, bukan penulisan ulang total.
 
 ## Status Fitur (Final — Berdasarkan Regulasi & Plausibility Analysis)
 
-> Feature set ini dimulai dari analisis regulasi resmi (UU Desa 6/2014, Permendagri 18/2018), lalu **direvisi bertahap berdasarkan umpan balik pengurus RW 06** pada Iterasi 1–3. Kronologi iterasi ada di `docs/keputusan.md` K-04.
+> Feature set ini dimulai dari analisis regulasi resmi (UU Desa 6/2014, Permendagri 18/2018), lalu **direvisi bertahap berdasarkan umpan balik pengurus RW 06** pada Rilis 1–3. Kronologi rilis ada di `docs/keputusan.md` K-04.
 
 ### Core MVP & High Priority (Status Terkini: Selesai / Implemented)
 
@@ -114,8 +114,8 @@ Pada tahap awal, sebelum kebutuhan mitra dapat dirumuskan secara lengkap, justif
 2. **Plausibility analysis** — evaluasi kelayakan implementasi untuk konteks capstone
 3. **Praktik umum** — de facto practices yang luas diterima di lingkungan RW Indonesia
 
-Hasilnya kemudian divalidasi dan direvisi bersama pengurus RW 06 pada setiap iterasi (wawancara,
-observasi, dan pembahasan hasil iterasi). Mitra dapat dilibatkan secara intensif; regulasi hanya
+Hasilnya kemudian divalidasi dan direvisi bersama pengurus RW 06 pada setiap rilis (wawancara,
+observasi, dan pembahasan hasil rilis). Mitra dapat dilibatkan secara intensif; regulasi hanya
 dasar scope awal, bukan pengganti mitra.
 
 Data eksternal (mis. statistik penetrasi internet nasional, adopsi QRIS nasional) hanya dipakai sebagai konteks kelayakan teknologi secara umum.

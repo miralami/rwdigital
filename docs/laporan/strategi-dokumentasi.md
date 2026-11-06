@@ -44,7 +44,7 @@
 |---|---|---|
 | **1. Big-bang** | 25 Sep – 11 Okt | Scaffold, lalu `5dbdfe9` (28 Sep) berisi **69 file / 12.229 baris**: warga, kas, iuran, pengumuman, auth sekaligus. Portal + guard menyusul hari yang sama. Belum ada papan, belum ada PR per fitur |
 | **2. Retrofit Kanban** | 12 – 20 Okt | `17da42b` "terapkan papan Kanban & selaraskan laporan". Issue = kartu, MoSCoW, PIC, `CODEOWNERS` (17 Okt). Kontribusi Josua & Alizha masuk di sini |
-| **3. Aliran disiplin** | 27 Okt – 3 Nov | PR per kartu (#74–#90), CI Vitest + Playwright, iterasi 2 (setoran RT, iuran config-driven, landing dinamis) dan iterasi 3 (RBAC dinamis, notifikasi, KK-first, iuran 2 tingkat, TTD) |
+| **3. Aliran disiplin** | 27 Okt – 3 Nov | PR per kartu (#74–#90), CI Vitest + Playwright, rilis 2 (setoran RT, iuran config-driven, landing dinamis) dan rilis 3 (RBAC dinamis, notifikasi, KK-first, iuran 2 tingkat, TTD) |
 
 **Detail yang perlu diketahui sebelum menulis**
 
@@ -77,7 +77,7 @@ bukan history-nya (jangan rewrite git).
 
 ### 3.1 Framing → `../keputusan.md` K-03 & K-04
 
-Rumusan, alasan pemilihan (tabel opsi), dan bukti iterasi dipindah ke register keputusan.
+Rumusan, alasan pemilihan (tabel opsi), dan bukti rilis dipindah ke register keputusan.
 
 ### 3.2 Peran: pemilik domain ≠ penulis kode
 
@@ -143,11 +143,11 @@ Alizha bisa menyusun tabel uji, Safira bisa memetakan layar.
 
 | Bab | Konsekuensi dari temuan ini |
 |---|---|
-| **III** | §3.5 harus versi Kanban (bukan 7 tahap generik) + **panah loop "Iterasi berikutnya"** dari tahap 6 ke tahap 1, karena tanpa loop klaim I&I tidak terlihat. §3.3.4 FR: satu paragraf rujukan ke 4.1.1d (FR seluruhnya di Bab IV) |
+| **III** | §3.5 harus versi Kanban (bukan 7 tahap generik) + Gambar 3.1 Kanban (6 tahap = 5 kolom + panah umpan balik ke Backlog), lalu bukti screenshot GitHub Projects di 4.1.3. §3.3.4 FR: satu paragraf rujukan ke 4.1.1d (FR seluruhnya di Bab IV) |
 | **II** | Wajib tambah teori: BPMN, ArchiMate, Interaction Design, Kanban/MoSCoW, UML/ERD, Black Box. Tanpa ini, artefak Bab IV tanpa dasar. §2.2.3 sudah dipecah menjadi IID / Kanban / MoSCoW (K-03) |
 | **Judul/Abstrak** | Lihat K-01 (judul baru menunggu pembimbing; fallback = klausa di abstrak) |
 | **V** | Biaya bisa dihitung dari **data commit** (rentang waktu, jumlah commit per fase, jam kerja) — jauh lebih kredibel daripada angka karangan. Ini nilai plus |
-| **VI** | UAT adalah bukti **validasi**. **Mitra RW 06 masih dapat diakses** dan revisi tiap iterasi memang berasal dari mereka, jadi UAT dijadwalkan **23–24 Nov 2026**. Siapkan berita acara + rekap temuan; pertimbangkan SUS sebagai pelengkap |
+| **VI** | UAT adalah bukti **validasi**. **Mitra RW 06 masih dapat diakses** dan revisi tiap rilis memang berasal dari mereka, jadi UAT dijadwalkan **23–24 Nov 2026**. Siapkan berita acara + rekap temuan; pertimbangkan SUS sebagai pelengkap |
 | **VII** | Kesimpulan harus cocok: 61/68 kartu selesai, 4 Todo, 3 Won't — bukan "seluruh sistem selesai" |
 
 ---

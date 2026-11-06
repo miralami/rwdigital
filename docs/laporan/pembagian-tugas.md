@@ -52,7 +52,7 @@ Papan per 3 Nov 2026: **Done 61 · In Progress 0 · Todo 4 · Won't 3** (68 item
 | 3.3 (UI/UX & flow) | Safira | |
 | 3.3 (keamanan & akses) | Alizha | |
 | 3.4 Batasan Asumsi | Afif + Zidan | |
-| **3.5 Mekanisme Perancangan** | **Afif** | isi di `laporan.md`; sisa: gambar flowchart + panah loop iterasi |
+| **3.5 Mekanisme Perancangan** | **Afif** | isi di `laporan.md`; sisa: tempel Gambar 3.1 `gambar/351-kanban-sistematika.png` |
 | **4.1 Proses Perancangan** | **Afif** | rencana di `bab4-plan.md` |
 | **4.2 Hasil Rancangan** | PIC modul → dirapikan Afif | screenshot per halaman |
 | **4.3 Verifikasi Hasil Rancangan** | Alizha (koordinasi) + PIC modul | tabel Black Box per modul |

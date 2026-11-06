@@ -4,8 +4,8 @@
 > CAPSTONE-1.pdf` (hlm. 37–104). Dasar isi: `laporan.md`, `Capstone.docx`, `docs/kanban/backlog.md`
 > (3 Nov 2026), `diagram-prompts.md`, `pembagian-tugas.md`, `git log main`.
 >
-> v3 = v2 + **framing metodologi** (Iterative & Incremental + Kanban) dan penyesuaian 4.1.3 menjadi
-> tiga iterasi nyata. v2 = semua artefak pemodelan masuk 4.1 (bukan 4.2), 4.2 murni screenshot,
+> v4 (6 Nov) = metodologi **kembali ke Kanban** (K-03); 4.1.3 = tiga rilis + bukti GitHub Projects.
+> v3 = v2 + framing I&I (dibatalkan). v2 = semua artefak pemodelan masuk 4.1 (bukan 4.2), 4.2 murni screenshot,
 > penomoran maksimal 3 tingkat dengan sub-butir a), b), c).
 
 ---
@@ -49,18 +49,19 @@
 Semua keputusan metodologi **tidak lagi ditulis di sini**. Rujuk:
 
 - **K-01** judul · **K-02** istilah SI-RW / RW Digital
-- **K-03** I&I + Kanban + MoSCoW (kalimat kunci untuk 4.1.3)
-- **K-04** rekap 3 iterasi, pemicu iterasi, bukti rombakan Kas, framing adopsi Kanban
+- **K-03** Kanban + MoSCoW, enam praktik inti + buktinya (kalimat kunci untuk 4.1.3)
+- **K-04** rekap 3 rilis, pemicu kartu revisi, bukti rombakan Kas, framing adopsi Kanban
 - **K-06** WIP limit · **K-07** pengujian CI + Black Box
 
-Konsekuensi ke Bab III: flowchart §3.5.1 wajib punya **panah loop** dari tahap 6 kembali ke
-Backlog berlabel "Iterasi berikutnya". Tanpa loop, klaim I&I tidak terlihat.
+Konsekuensi ke Bab III: Gambar 3.1 (`gambar/351-kanban-sistematika.png`) memetakan 6 tahap ke 5
+kolom papan, dengan panah **umpan balik → kartu baru di Backlog**. Bukti nyata = screenshot GitHub
+Projects (§3a di bawah).
 
 ---
 
 ## 3. Struktur BAB IV Final (untuk proyek kita)
 
-6 subbab = 6 tahap siklus iteratif; Kanban mengendalikan alurnya dan siklus diulang tiga iterasi.
+6 subbab = 6 tahap sistematika Kanban (§3.5.1) = 5 kolom papan + umpan balik.
 Sub-butir huruf agar tetap 3 tingkat.
 
 ```
@@ -83,17 +84,18 @@ Sub-butir huruf agar tetap 3 tingkat.
           h) Sequence Diagram
           i) Perancangan Antarmuka (UI/UX)
           j) Arsitektur Perangkat Lunak dan Kontrol Akses
-    4.1.3 Pelaksanaan Pengembangan Inkremental         (tahap 3 — diulang 3 iterasi)
-          a) Iterasi 1 — MVP
-          b) Iterasi 2 — Penyempurnaan Keuangan dan Portal
-          c) Iterasi 3 — RBAC, Notifikasi, dan KK-First
-          d) WIP Limit, Feature Branch, dan Bukti Commit
+    4.1.3 Pelaksanaan Alur Kerja Kanban                (tahap 3 — kolom In Progress)
+          a) Papan Kanban pada GitHub Projects
+          b) Rilis 1 — MVP
+          c) Rilis 2 — Penyempurnaan Keuangan dan Portal
+          d) Rilis 3 — RBAC, Notifikasi, dan KK-First
+          e) WIP Limit, Feature Branch, dan Bukti Commit
     4.1.4 Peninjauan Kode dan Verifikasi               (tahap 4)
           a) Kebijakan Review dan CI
           b) Temuan dan Perbaikan Disiplin PR
     4.1.5 Penggabungan Fitur dan Metrik Aliran          (tahap 5)
           a) Definition of Done dan Bukti Kartu Done
-          b) Metrik Aliran per Iterasi
+          b) Metrik Aliran per Rilis
     4.1.6 Validasi Akhir dan Catatan Metodologis        (tahap 6)
           a) Rencana UAT (rujuk Bab VI)
           b) Adopsi Kanban dan Rekonstruksi As-Is
@@ -115,7 +117,7 @@ tidak punya karena Waterfall; kita Kanban, jadi papan + PR + DoD wajib terlihat.
 |---|---|---|---|
 | a | Aktor (Publik, Warga, Pengurus RT, Bendahara, Admin RW) + batasan sistem | Tabel aktor & tanggung jawab | 1 |
 | b | **BPMN as-is**: pendataan warga, iuran & kas, surat, pengumuman | Gambar BPMN (pool/lane per aktor) | 2–4 |
-| c | Dasar kebutuhan: regulasi (UU 6/2014, Permendagri 18/2018, Perwali Bekasi 58/2020) + **checklist kebutuhan mitra RW 06** + umpan balik/revisi mitra pada tiap iterasi | Tabel kebutuhan vs dasar & sumber | 1 |
+| c | Dasar kebutuhan: regulasi (UU 6/2014, Permendagri 18/2018, Perwali Bekasi 58/2020) + **checklist kebutuhan mitra RW 06** + umpan balik/revisi mitra pada tiap rilis (kartu `req-stakeholder`) | Tabel kebutuhan vs dasar & sumber | 1 |
 | d | **FR**: 34 fungsi `SF-KP/SR/KS/IU/PG/NT` | 6 tabel (satu per modul) | 6 |
 | e | **NFR**: `NFR-SEC` (12), `NFR-ACC` (10), + `NFR-PERF`, `NFR-USA`, `NFR-COM`, `NFR-MNT` | 1 tabel gabungan (ID, kategori, target, prioritas) | 1 |
 | f | MoSCoW 30 Must / 8 Should / 0 Could / 3 Won't + peta Epic | 2 tabel + screenshot board | 2 |
@@ -162,13 +164,36 @@ Sub Flows     : S-1 ...
 Alternate/Exceptional Flows : A-1 ...
 ```
 
-### 4.1.3–4.1.6 (siklus iteratif + Kanban)
+### 4.1.3–4.1.6 (alur Kanban)
+
+#### 3a. Bukti GitHub Projects (screenshot wajib)
+
+Kanban jadi kuat karena **papannya bisa dibuktikan**. Ambil dari GitHub Projects RW Digital (akun
+`miralami`), simpan dengan pola §7.1.5 (`413-gh-...`, `415-gh-...`), ukuran jendela ≥ 1440 px,
+mode terang, data warga tidak tampil.
+
+| No | Screenshot | Cara ambil | Membuktikan praktik | Dipakai di |
+|---|---|---|---|---|
+| G1 | Tampilan **Board** penuh (5 kolom + jumlah kartu) | Project → view *Board* | Visualisasi | 4.1.3a, Gambar 3.x opsional |
+| G2 | Board dikelompokkan per **Assignee**, filter `status:"In Progress"` | *Group by: Assignees* | Batas WIP 1–2/orang | 4.1.3e |
+| G3 | Tampilan **Table** dengan kolom Status, Epic, MoSCoW, Assignee, Linked PR | view *Table* | Kebijakan eksplisit (atribut wajib) | 4.1.1f, 4.1.3a |
+| G4 | **Workflows** bawaan (*Item added*, *PR merged → Done*, *Item closed → Done*) | Project → ⋯ → *Workflows* | Otomasi kolom | 4.1.3a, 4.1.5a |
+| G5 | Satu **Issue** lengkap: label `moscow:*`, Epic, kriteria penerimaan, *Development* → PR | buka mis. `KU-05` #94 | DoR + tautan Issue ↔ PR | 4.1.5a |
+| G6 | **PR** dengan *Checks* CI hijau + `Closes #…` | mis. PR #90 / #94 | Verifikasi otomatis, DoD | 4.1.4a |
+| G7 | **Insights**: grafik status/jumlah kartu terhadap waktu | Project → *Insights* | Pengelolaan aliran, *throughput* | 4.1.5b |
+| G8 | Daftar Issue berlabel `req-stakeholder` | Issues → filter label | Umpan balik mitra → kartu | 4.1.3b–d, 4.1.6 |
+| G9 | Kartu revisi Kas yang merujuk kartu asal (`KU-01b`, `KU-05`) | Issue → *timeline* | Perbaikan bertahap, kartu Done tidak dibuka ulang | 4.1.3c |
+
+> `gh` di mesin Afif belum punya scope `read:project`; screenshot diambil manual dari browser
+> (atau jalankan `gh auth refresh -s read:project` kalau mau ekspor data Insights).
+
+#### 3b. Isi 4.1.3–4.1.6
 
 | Subbab | Isi | Tabel |
 |---|---|---|
-| 4.1.3 | **Tiga iterasi** (lihat §2): a) Iterasi 1 MVP, b) Iterasi 2 keuangan & portal, c) Iterasi 3 RBAC/notifikasi/KK-first, d) WIP limit, feature branch, bukti commit | 3–4 |
+| 4.1.3 | a) **papan GitHub Projects** (screenshot board, tabel, kolom, otomasi), b–d) **tiga rilis** (K-04), e) WIP limit, feature branch, bukti commit | 3–4 + 4–6 gambar |
 | 4.1.4 | **CI** (`.github/workflows/ci.yml`: `check` → unit test → build → e2e), gate PR, temuan "kolom Review kosong" (F5), pernyataan jujur bahwa review manusia terbatas | 1 |
-| 4.1.5 | DoD + contoh kartu Done & bukti PR/commit; throughput dan cycle time **per iterasi** | 2 |
+| 4.1.5 | DoD + contoh kartu Done & bukti PR/commit; throughput **per rilis** + screenshot *Insights* GitHub Projects | 2 |
 | 4.1.6 | **UAT dengan pengurus RW 06** (23–24 Nov 2026), adopsi Kanban 12 Okt + back-fill, batas kejujuran | 1–2 |
 
 **Angka wajib 3 Nov 2026:** 61 Done · 0 In Progress · 4 Todo · 3 Won't · 68 item papan.
@@ -498,7 +523,7 @@ di kolom/isi artefaknya (tabel FR, use case description, tabel black box).
 
 #### 7.1.5 Penamaan Berkas Diagram dan Screenshot
 
-Simpan di **`docs/laporan/gambar/bab4/`** (satu folder untuk semua PIC). Ekspor PNG 300 dpi; berkas
+Simpan di **`docs/laporan/gambar/`** (satu folder untuk semua PIC dan semua bab; awalan nomor subbab membedakannya). Ekspor PNG 300 dpi; berkas
 sumber (`.vpp`, `.bpmn`, `.drawio`, Figma link) disimpan dengan nama dasar yang sama.
 
 Pola: **`<butir>-<jenis>-<subjek>.png`**, huruf kecil, pisah tanda hubung, tanpa spasi.
@@ -515,6 +540,8 @@ Pola: **`<butir>-<jenis>-<subjek>.png`**, huruf kecil, pisah tanda hubung, tanpa
 | 4.1.2h Sequence | `412h` | `sequence` | `412h-sequence-uc35-membayar-iuran-online.png` |
 | 4.1.2i UI/UX | `412i` | `wireframe` / `hifi` | `412i-wireframe-surat-ajukan.png` |
 | 4.1.2j Arsitektur | `412j` | `arsitektur` | `412j-arsitektur-deployment.png` |
+| 3.5.1 Sistematika Kanban | `351` | `kanban` | `351-kanban-sistematika.png` |
+| 4.1.3 / 4.1.5 GitHub Projects | `413` / `415` | `gh` | `413-gh-board.png`, `415-gh-insights.png` |
 | 4.2 Screenshot | `42` | `ss` | `42-ss-kk-daftar.png`, `42-ss-portal-surat-ajukan.png` |
 | 4.3 Bukti uji | `43` | `bb` / `ci` | `43-bb-sr-03.png`, `43-ci-run.png` |
 
@@ -617,7 +644,7 @@ Mulai: Jumat, 6 November 2026. Total 3 minggu kalender, 15 hari kerja.
 | Tanggal | Pekerjaan | Penanggung jawab | Output |
 |---|---|---|---|
 | 6 Nov | **Kerangka bersama** (§7.1): aktor, modul, UC-ID, konvensi caption + bantu setup aplikasi lokal ✅ | Afif | §7.1 |
-| 6–7 Nov | **P0**: sinkron Word ← `laporan.md` (§3.5 Kanban + loop iterasi, paragraf rujukan §3.3.4, perbaikan nomor tabel/gambar, RBAC rusak, typo) | Afif | Word = `laporan.md` |
+| 6–7 Nov | **P0**: sinkron Word ← `laporan.md` (judul Kanban, §2.2.4 Kanban, §3.5 Kanban + Gambar 3.1, paragraf rujukan §3.3.4, perbaikan nomor tabel/gambar, RBAC rusak, typo) | Afif | Word = `laporan.md` |
 | 6–8 Nov | Teori Bab II: BPMN, ArchiMate, Interaction Design, Kanban/MoSCoW, UML/ERD, Black Box | Afif + Alizha | §2.2 lengkap |
 | 7–11 Nov | BPMN as-is | Zidan | 4.1.1b |
 | 7–11 Nov | BPMN to-be | Josua | 4.1.2a |
@@ -647,12 +674,12 @@ Kalau satu artefak mundur >2 hari, potong ke versi **Minimum** di §6, jangan ge
 | Temuan | Dampak | Aksi |
 |---|---|---|
 | 🔴 §3.3.4 FR tidak ada di Word (lompat 3.3.3 → 3.4) | Bab IV 4.1.1d merujuk FR yang tidak ada di dokumen | **Keputusan: FR seluruhnya di 4.1.1d.** Di Word, §3.3.4 diisi satu paragraf rujukan silang ("spesifikasi fungsional dirinci pada 4.1.1d") agar tidak ada lompatan penomoran |
-| 🔴 §3.5 Word narasi generik, "Kanban" 0 kemunculan | 4.1 tidak "mengikuti" §3.5.1 → temuan reviewer | Ganti dengan versi `laporan.md` (6 tahap) **dan** tambahkan framing I&I + panah loop "Iterasi berikutnya" |
+| 🔴 §3.5 Word narasi generik, "Kanban" 0 kemunculan | 4.1 tidak "mengikuti" §3.5.1 → temuan reviewer | Ganti dengan versi `laporan.md` (6 tahap) **dan** Gambar 3.1 Kanban dengan panah umpan balik ke Backlog |
 | 🟠 Bab II tanpa teori Kanban/UML/ERD/BlackBox/BPMN/ArchiMate/IxD | Artefak Bab IV tanpa dasar teori | Tambah 3–4 subbab teori |
 | 🟠 Tabel `3.1, 3.3, 3.5` (3.2/3.4 hilang); Daftar Gambar `1..6` vs body `3.1..3.4` | Nomor silang di seluruh laporan | Renumber sekali di akhir |
 | 🟠 Matriks RBAC baris Surat rusak (5 grup nilai untuk 4 peran) | Data salah | Perbaiki |
 | 🟠 Fishbone (Gambar 1) tidak ter-embed; InlineShapes hanya 5 | Gambar hilang saat dicetak | Cek & sisipkan ulang |
-| 🟠 Klaim wawancara RW 06 (§3.1, §3.5.2) vs `PROJECT.md` "tanpa wawancara" | Inkonsistensi lintas bab | **Terjawab: mitra RW 06 memang terlibat — revisi tiap iterasi berasal dari mereka.** Selaraskan `PROJECT.md` dan §3.1/§3.5.2 ke narasi ini; 4.1.1c memakai "checklist + umpan balik per iterasi" |
+| 🟠 Klaim wawancara RW 06 (§3.1, §3.5.2) vs `PROJECT.md` "tanpa wawancara" | Inkonsistensi lintas bab | **Terjawab: mitra RW 06 memang terlibat — revisi tiap rilis berasal dari mereka.** Selaraskan `PROJECT.md` dan §3.1/§3.5.2 ke narasi ini; 4.1.1c memakai "checklist + umpan balik per iterasi" |
 | 🟡 Typo: `engguna`, `bendaharahanya`, `sistemBoK`, `pada  berfokus`; heading Bab I kehilangan nomor | Nilai formalitas | Sapu bersih |
 
 ---
