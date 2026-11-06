@@ -61,7 +61,7 @@ Dokumen Word resmi: `C:\Users\Afif\OneDrive\Kuliah\Semester 7\Capstone\Capstone_
 
 | File | Isi | |
 |---|---|---|
-| `backlog.md` ⭐ | 38 kartu + status + bukti kode | 🟢 |
+| `backlog.md` ⭐ | 68 item (61 Done · 4 Todo · 3 Won't) + bukti kode | 🟢 |
 | `workflow.md` | aturan: kolom, WIP, DoR/DoD, MoSCoW | 🟢 |
 | `board.md` | snapshot papan GitHub + metrik | ⚪ riwayat |
 | `temuan-inkonsistensi.md` | temuan F1–F7 | ⚪ |

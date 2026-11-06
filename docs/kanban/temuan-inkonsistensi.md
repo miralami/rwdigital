@@ -20,7 +20,7 @@ Disusun: 12 Okt 2026 · Dasar: pembacaan `laporan.md` + verifikasi kode di `src/
 | F4 | Model iuran: tagihan murni (§3.3.4) vs rekapitulasi (Track 4/KU-02) | 🟠 Sedang | Selaraskan definisi SF-IU | 🟡 terpetakan di `KU-02` |
 | F5 | Kanban diklaim jalan di §2.2.3.1, realitanya belum (Review kosong) | 🔴 Tinggi | Jalankan + catat rekonstruksi di Bab IV | ✅ papan dibangun, rekonstruksi dicatat di Bab IV §4.1 |
 | F6 | Defect kode: hard-delete pengumuman; aksi surat tanpa cek peran | 🟡 Rendah | Jadikan kartu `type:bug` | ✅ kartu `EV-BUG-01` & `SR-BUG-01` dibuat |
-| F7 | Dokumen sekitar usang (docs/arsip/plan.md, docs/stakeholder/checklist.md, docs/arsip/planAfif.md) | 🟠 Sedang | Diselaraskan ke laporan.md | 🟡 sebagian diselaraskan |
+| F7 | Dokumen sekitar usang (docs/arsip/plan.md, docs/arsip/planAfif.md) | 🟠 Sedang | Diselaraskan ke laporan.md | 🟡 sebagian diselaraskan |
 
 ---
 
@@ -98,8 +98,8 @@ Tidak ada perubahan kode pada tahap ini (murni penyelarasan spesifikasi).
 **jujur menuliskannya** di Bab IV §4.1: papan dibangun retroaktif, tanggal back-fill tidak dikarang.
 Ini sekaligus memberi isi nyata untuk Bab IV yang saat ini masih kosong.
 
-**Status: ✅ SELESAI (19 Okt 2026).** Papan sudah dibangun (lihat `board.md`: **50 kartu** —
-Done 32 · In Progress 3 · Todo 9 · Won't 6). Rekonstruksi *as-is* + *back-fill* dicatat apa adanya
+**Status: ✅ SELESAI.** Papan sudah dibangun (lihat `board.md`; status per 3 Nov 2026:
+**68 item** — Done 61 · In Progress 0 · Todo 4 · Won't 3). Rekonstruksi *as-is* + *back-fill* dicatat apa adanya
 di Bab IV §4.1 (`bab4-proses-perancangan.md`), tanpa mengarang tanggal pengerjaan.
 
 ---
@@ -122,7 +122,7 @@ di Bab IV §4.1 (`bab4-proses-perancangan.md`), tanpa mengarang tanggal pengerja
 
 | Dokumen | Masalah | Tindakan |
 |---|---|---|
-| `docs/arsip/plan.md` | Mengklaim impor warga, rekap, surat, kategori, void **belum ada** — padahal **sudah ada** | Beri catatan "usang" + tunjuk ke `backlog.md` sebagai status aktual |
+| `docs/arsip/plan.md` | Mengklaim impor warga, rekap, surat, kategori, void **belum ada** — padahal **sudah ada** | Sudah diarsipkan; status aktual di `backlog.md` |
 | `docs/stakeholder/checklist.md` | Ringkasan prioritas menaruh **Surat-Menyurat = Out of Scope** | Selaraskan → masuk scope (F1) |
 | `docs/arsip/planAfif.md` | Catatan lama "surat-menyurat out of scope di PROJECT.md" (sudah tak relevan) | Tandai usang |
 | `PROJECT.md` | Status proyek masih "Implementasi: belum" | Perbarui status + tegaskan `laporan.md` = otoritas |

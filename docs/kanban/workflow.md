@@ -27,7 +27,7 @@ Status: **aktif (rekonstruksi as-is + back-fill)** · Terakhir diperbarui: 12 Ok
 | **Kartu** | 1 item kerja konkret = 1 GitHub Issue | `[1][LP-01] Landing Page Publik (Statis)` |
 
 **Penting:** *WIP limit dihitung per kartu, bukan per Epic.* Kalau Track dianggap satu kartu, 5 orang
-langsung melanggar WIP limit 1–2 yang tertulis di `laporan.md` §2.2.3.1. Dengan Track sebagai Epic,
+langsung melanggar WIP limit 1–2 yang tertulis di `laporan.md` §2.2.3.2. Dengan Track sebagai Epic,
 satu orang boleh memegang 1 Epic sambil hanya membuka 1–2 kartu sekaligus.
 
 ### Peta Epic ↔ PIC
@@ -37,8 +37,8 @@ satu orang boleh memegang 1 Epic sambil hanya membuka 1–2 kartu sekaligus.
 | `EPIC-0` | Fondasi & Infrastruktur | Afif (lead) | `miralami` |
 | `EPIC-1` | Modul Publik, Landing Page & Profil RW | Afif | `miralami` |
 | `EPIC-2` | Modul Informasi, Event & Humas | Alizha | `alizha13` |
-| `EPIC-3` | Modul Kependudukan & Dashboard Internal | Josua | `josuasahat` |
-| `EPIC-4` | Modul Keuangan & Kas RT | Safira | `shaffiraindanazulfa` |
+| `EPIC-3` | Modul Keluarga (KK) & Dashboard Internal | Josua | `josuasahat` |
+| `EPIC-4` | Modul Keuangan, Kas RT & Iuran | Safira | `shaffiraindanazulfa` |
 | `EPIC-5` | Modul Surat-Menyurat | Zidan | `elfarizidan` |
 
 ---
@@ -65,7 +65,7 @@ Kolom tambahan (bukan bagian 5 kolom laporan, dipakai sebagai penanda, bukan sta
 
 ## 4. WIP Limit
 
-- Batas **1–2 kartu `In Progress` per orang** (sesuai `laporan.md` §2.2.3.1).
+- Batas **1–2 kartu `In Progress` per orang** (sesuai `laporan.md` §2.2.3.2).
 - Batas total papan: **10 kartu** `In Progress` (5 orang × 2).
 - Satu kartu `Review / Verification` **tidak** dihitung sebagai WIP penulis kode, tetapi dihitung
   sebagai antrean peninjau → peninjau harus dipacu agar `Review` tidak menumpuk.
@@ -118,6 +118,11 @@ Kartu hanya boleh masuk `Done` jika seluruhnya benar:
 - [ ] Dokumentasi terkait diperbarui bila menyentuh scope/aturan.
 
 > Kartu `Won't` **tidak** pernah masuk `Done`; ia ditutup sebagai *won't do* dengan alasan.
+
+> **Kartu `Done` tidak dibuka ulang.** Kalau ada revisi/perubahan kebutuhan setelah kartu selesai,
+> buat **kartu baru** (mis. kode `R-01`, `R-02`, …) yang menautkan kartu asalnya. Tujuannya:
+> riwayat papan tetap jujur, dan jumlah kartu bertambah sesuai pekerjaan nyata — bukan mengubah
+> catatan lama.
 
 ---
 
