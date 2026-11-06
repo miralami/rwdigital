@@ -37,3 +37,6 @@ local.db-shm
 local.db.bak
 # Lembar copas laporan (sementara, dibuat npm run laporan:usulan)
 docs/laporan/usulan.md
+
+# Berkas privat Afif — junction ke OneDrive Capstone\Draft-Claude (bukan bagian repo)
+/docs/private

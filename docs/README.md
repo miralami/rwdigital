@@ -45,7 +45,7 @@ Sisanya **tidak** perlu disentuh tiap commit.
 | Folder | Isi |
 |---|---|
 | [`arsip/`](arsip/) | Teknis: `plan.md` (cetak biru implementasi, sudah selesai), `List feature fix.*` |
-| [`laporan/arsip/`](laporan/arsip/) | Laporan: `laporanRevisi`, `planAfif`, `pembagian`, `afifscope`, `bab3-5-mekanisme`, `bab4-proses-perancangan` |
+| [`laporan/arsip/`](laporan/arsip/) | Laporan: `laporanRevisi`, `pembagian`, `bab3-5-mekanisme`, `bab4-proses-perancangan` |
 
 ## 4. Dokumen di root repo
 
