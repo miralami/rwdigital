@@ -5,7 +5,7 @@
 > lalu daftar di **DAFTAR GAMBAR** (auto-generate).
 >
 > Dasar: `src/lib/server/db/schema.ts` (13 tabel) + kode `SF-*` di `laporan.md` §3.3.
-> PIC: **ERD global + template = Afif**; diagram per modul = **PIC modul** (lihat `pembagian-tugas.md`).
+> PIC: **ERD global + template = Afif**; diagram per modul = **PIC modul** (lihat `../tim/pembagian-tugas.md`).
 >
 > **Aturan label:** tulis nama elemen dalam **Bahasa Indonesia** (sesuai istilah mitra & kode).
 > `Gambar 3.x` = nomor bab + urut; jangan diketik manual, pakai *Insert Caption* di Word.

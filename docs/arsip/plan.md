@@ -1,5 +1,7 @@
 # PLAN.MD — Rencana Implementasi SI-RW (Berdasarkan docs/laporan/laporan.md)
 
+> ⚠️ **Referensi teknis, sebagian usang.** Isi/scope: `docs/laporan/laporan.md` · status fitur terkini: `docs/kanban/backlog.md` · peta dokumen: `docs/README.md`.
+
 > ✅ **STATUS REVISI FINAL: LENGKAP & SELESAI.**
 > Seluruh modul inti (Kependudukan KK-First, Surat Pengantar Otoritas RT, Iuran 2-Tingkat & Setoran, Kas RW/RT, Pengumuman Berkala & Galeri, Notifikasi Multi-channel & Klaim Akun Warga, serta Konsolidasi Dasbor Beranda) telah selesai diimplementasikan, diverifikasi melalui unit test (90 passed) dan type checking (0 errors).
 

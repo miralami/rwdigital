@@ -4,6 +4,8 @@ Aplikasi administrasi tingkat Rukun Warga (RW): data kependudukan, kas, iuran, d
 
 Fitur dalam proyek ini berasal dari hasil wawancara/observasi ke mitra, bukan daftar fitur "bagus untuk RW pada umumnya". Lihat [`PROJECT.md`](PROJECT.md) untuk status tiap modul.
 
+> 📚 **Dokumentasi:** peta lengkap semua dokumen ada di [`docs/README.md`](docs/README.md).
+
 ## Fitur
 
 | Modul | Rute | Status |

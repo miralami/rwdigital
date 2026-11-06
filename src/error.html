@@ -1,0 +1,67 @@
+<!doctype html>
+<!--
+  Halaman galat statis SvelteKit. Dipakai untuk galat yang dilempar dari
+  `hooks.server.ts` (mis. 403 guard), karena galat di `handle` tidak dirender
+  lewat `+error.svelte`. Gaya disalin dari `src/routes/+error.svelte`.
+-->
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>%sveltekit.status% — RW Digital</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 1rem;
+        box-sizing: border-box;
+        background: #f4f6f9;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      }
+      .box {
+        width: 100%;
+        max-width: 24rem;
+        text-align: center;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 1rem;
+        padding: 2.5rem 2rem;
+        box-shadow: 0 10px 25px -5px rgb(15 23 42 / 0.1);
+      }
+      .code {
+        font-size: 2.75rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        color: #94a3b8;
+        margin: 0 0 0.75rem;
+      }
+      .msg {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #334155;
+        margin: 0 0 1.75rem;
+      }
+      a {
+        display: inline-block;
+        padding: 0.625rem 1.125rem;
+        background: #1e3a8a;
+        color: #fff;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <p class="code">%sveltekit.status%</p>
+      <p class="msg">%sveltekit.error.message%</p>
+      <a href="/">Kembali ke halaman utama</a>
+    </div>
+  </body>
+</html>

@@ -199,7 +199,7 @@ Metrik aliran dicatat sebagai dasar perbaikan berkesinambungan.
 
 ## 4.2 Hasil Rancangan — *Kerangka & Template*
 
-> Diisi **per modul** oleh PIC modul (lihat `pembagian-tugas.md`), lalu dirapikan Afif.
+> Diisi **per modul** oleh PIC modul (lihat `../tim/pembagian-tugas.md`), lalu dirapikan Afif.
 > Panduan: **screenshot tiap halaman + 1 paragraf fungsi**.
 
 ### Template per modul

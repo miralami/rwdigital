@@ -40,7 +40,11 @@
 
     const result = await signIn.email({ email, password });
     if (result.error) {
-      error = result.error.message ?? 'Login gagal. Periksa kembali email dan kata sandi Anda.';
+      // Pesan Better Auth berbahasa Inggris; tampilkan versi Bahasa Indonesia.
+      error =
+        result.error.status === 429
+          ? 'Terlalu banyak percobaan masuk. Tunggu beberapa saat lalu coba lagi.'
+          : 'Login gagal. Periksa kembali email dan kata sandi Anda.';
     } else {
       goto('/', { invalidateAll: true });
     }

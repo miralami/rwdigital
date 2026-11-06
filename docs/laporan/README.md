@@ -1,12 +1,14 @@
 # Indeks `docs/laporan/` — Navigasi
 
+↑ Peta utama: [`../README.md`](../README.md)
+
 > **Otoritas isi laporan: `laporan.md`.** File lain di sini adalah draft, bahan, atau catatan kerja.
 
 ## 🚦 Mulai dari sini
 
 | Kamu mau apa? | Buka |
 |---|---|
-| **Tahu tugas/tanggung jawabku** | `afifscope.md` (Afif) · `pembagian-tugas.md` (semua orang) |
+| **Tahu tugas/tanggung jawabku** | `../tim/afifscope.md` (Afif) · `../tim/pembagian-tugas.md` (semua orang) |
 | **Nulis / port bab ke docx** | `bab4-proses-perancangan.md` (Bab IV §4.1) · `bab3-5-mekanisme.md` (§3.5) |
 | **Bikin gambar/diagram** | `diagram-prompts.md` (prompt Visual Paradigm AI) |
 | **Lihat isi laporan resmi** | `laporan.md` |
@@ -29,37 +31,15 @@ Tiap bab di `Capstone_Kelompok_30.docx` diambil **dari satu sumber** berikut —
 | BAB V Analisis Biaya & Kelayakan | *belum ada file* | Safira | ⛔ belum |
 | BAB VI Evaluasi & Validasi | *belum ada file* | Zidan | ⛔ belum |
 | BAB VII Kesimpulan & Saran | *belum ada file* | Zidan | ⛔ belum |
-| Daftar Pustaka | `referensi/bibliography.md` | tim | 🟢 siap |
+| Daftar Pustaka | `referensi/daftar-pustaka.md` | tim | 🟢 siap |
 | Semua gambar (1–7) | `diagram-prompts.md` → *generate* di Visual Paradigm | PIC | 🟡 prompt siap |
 | Daftar Tabel & Daftar Gambar | otomatis (field Word) | — | klik *Update Field* / F9 |
 
 ---
 
-## File Aktif
+## Daftar file
 
-| File | Isi | Status |
-|---|---|---|
-| **`laporan.md`** | **Dokumen laporan lengkap (otoritas tertinggi).** Bab I–VII; §3.5 sudah lengkap versi Kanban | 🟢 sumber kebenaran |
-| `bab3-5-mekanisme.md` | Catatan §3.5: isi sudah ada di `.md` & docx, **sisa = gambar flowchart** | 🟡 1 gambar lagi |
-| `bab4-proses-perancangan.md` | **Bab IV §4.1 penuh** (6 tahap Kanban, data 19 Okt) + kerangka §4.2/§4.3 | 🟡 siap port |
-| `diagram-prompts.md` | Prompt AI untuk semua diagram (flowchart, ERD, use case, activity) | 🟢 siap pakai |
-| `afifscope.md` | Scope kerja Afif (peran, kartu, sub-bab, keputusan) | 🟢 aktif |
-| `pembagian-tugas.md` | Pembagian tugas **semua orang** (3 lapis: kartu Kanban, sub-bab, artefak) | 🟢 aktif |
-| `README.md` | Indeks ini | — |
-
-## `referensi/`
-
-| File | Isi |
-|---|---|
-| `analisis-panduan.md` | Gap panduan Rev 1.3 + contoh laporan vs proposal kita |
-| `bibliography.md` | Daftar pustaka final (APA 7) — **versi pakai ini** |
-| `daftar-pustaka.md` | Versi lengkap + catatan koreksi sitasi (Bagian C & D) |
-| `contohlaporan.md` | Salinan contoh laporan akhir capstone (kasus surat-menyurat) |
-
-## `../arsip/` (di luar folder ini)
-
-Dokumen usang: `laporanRevisi.md`, `planAfif.md`, `pembagian.md`, `List feature fix.*`.
-Lihat `../arsip/README.md`.
+Status & isi semua file: lihat [`../README.md`](../README.md) (tabel 3).
 
 ---
 

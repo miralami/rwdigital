@@ -3,6 +3,7 @@ import { warga, surat } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { saveUploadedFile, UploadError } from '$lib/server/storage';
+import { requirePermission } from '$lib/server/rbac';
 import { z } from 'zod';
 import type { PageServerLoad, Actions } from './$types';
 
@@ -47,6 +48,7 @@ export const actions: Actions = {
     if (!locals.user) {
       redirect(302, '/login');
     }
+    requirePermission(locals, 'surat', 'create');
 
     const [w] = await db
       .select({ id: warga.id })
