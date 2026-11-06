@@ -298,7 +298,7 @@ time* kartu hasil rekonstruksi) disajikan pada lampiran papan.
 | `docs/kanban/backlog.md` | Daftar 38 kartu + 6 grey-out + bukti kode |
 | `docs/kanban/board.md` | Snapshot papan, audit WIP, metrik, kondisi papan terpasang + peta kartu ↔ issue |
 | `docs/kanban/temuan-inkonsistensi.md` | Temuan F1–F7 dan arah penyelesaian |
-| `PROJECT.md`, `plan.md`, `docs/checklist.md`, `docs/arsip/planAfif.md` | Diselaraskan dengan `laporan.md` |
+| `PROJECT.md`, `docs/arsip/plan.md`, `docs/stakeholder/checklist.md`, `docs/arsip/planAfif.md` | Diselaraskan dengan `laporan.md` |
 
 ---
 

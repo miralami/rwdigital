@@ -35,3 +35,7 @@ local.db-shm
 
 /static/uploads/surat
 local.db.bak
+# Local-only files (credentials, backups, uploads)
+credentials.md
+/static/uploads/landing
+local.db.bak

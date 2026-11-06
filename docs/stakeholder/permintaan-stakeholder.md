@@ -3,7 +3,7 @@
 > **Fungsi dokumen ini:** ledger (buku catatan) semua permintaan yang datang dari **customer /
 > stakeholder mitra** dan **dosen pembimbing**, supaya setiap kartu di GitHub Projects bisa
 > ditelusuri asal-usulnya. Dokumen ini **bukan** backlog teknis — daftar kartu tetap di
-> `backlog.md`, sedangkan status papan ada di `board.md`.
+> `../kanban/backlog.md`, sedangkan status papan ada di `../kanban/board.md`.
 >
 > **Sumber data:** riwayat sesi OpenCode 27 Sep – 27 Okt 2026 (basis data sesi lokal),
 > `docs/arsip/List feature fix.md`, dan catatan mitra yang di-*dump* pada 27 Okt 2026.
@@ -263,7 +263,7 @@ Saat menerima permintaan baru dari mitra/dosen:
    - Tanggal: <tanggal>
    - Sumber: <nama / forum>
    - Kutipan: "<kalimat asli>"
-   - Catatan lengkap: docs/kanban/permintaan-stakeholder.md#<bagian>
+   - Catatan lengkap: docs/stakeholder/permintaan-stakeholder.md#<bagian>
    ```
 
 3. Tambahkan label `req-stakeholder` (dan `iterasi-2` bila masuk gelombang berjalan).

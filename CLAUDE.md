@@ -1,128 +1,118 @@
 # CLAUDE.md
 
-Panduan kerja untuk Claude Code di repo ini. Baca `PROJECT.md` dulu untuk konteks produk lengkap sebelum mengerjakan task apa pun.
+Panduan kerja untuk AI assistant di repo ini. Baca `PROJECT.md` dulu untuk konteks produk, lalu `docs/README.md` untuk peta dokumen.
 
 ## Ringkasan Proyek
 
-Sistem Informasi RW — aplikasi capstone untuk digitalisasi administrasi tingkat RW (kependudukan, surat, keuangan, iuran, informasi), dikembangkan bersama mitra RW nyata. Detail lengkap ada di `PROJECT.md`.
+Sistem Informasi RW — aplikasi capstone (kelompok 30, 5 orang) untuk digitalisasi administrasi tingkat RW (kependudukan, surat, keuangan, iuran, informasi), dikembangkan bersama mitra RW nyata. Aplikasi sudah berjalan (bukan lagi tahap requirements); status fitur aktual ada di `docs/kanban/backlog.md`.
+
+## Sumber Kebenaran (jangan campur)
+
+| Pertanyaan | Buka |
+|---|---|
+| Isi laporan akademik | `docs/laporan/laporan.md` (otoritas) |
+| Status fitur aktual | `docs/kanban/backlog.md` |
+| Scope & prioritas MVP | `PROJECT.md` |
+| Siapa mengerjakan apa | `docs/tim/pembagian-tugas.md` |
+| Peta semua dokumen | `docs/README.md` |
+| Cara jalankan app, role, rute | `README.md` |
+| Akun demo | `credentials.md` |
+
+Abaikan `docs/arsip/` (usang, termasuk `plan.md`). `laporan.md` (~92 KB) dan `docs/laporan/referensi/contohlaporan.md` (~136 KB) sangat besar — cari bagian dengan grep/heading, jangan dibaca utuh.
 
 ## Aturan Utama
 
-1. **Scope proyek mengacu pada `docs/laporan/laporan.md` dan `PROJECT.md`**. Scope mencakup 5 modul Core: Kependudukan, Surat-Menyurat, Kas RW, Iuran Warga, dan Pengumuman/Informasi.
-2. **Fitur "Surat-Menyurat" masuk dalam Core MVP** sesuai spesifikasi SF-SR-01 s/d SF-SR-07 pada `docs/laporan/laporan.md` (pengajuan surat, unggah berkas, verifikasi pengurus, persetujuan/penerbitan admin RW, unduh slip/PDF).
-3. **Pendaftaran akun warga dilakukan terpusat oleh Admin RW** (bukan pendaftaran mandiri/publik), untuk mencegah warga mendaftar menggunakan NIK milik orang lain.
-4. **Penyimpanan berkas** (bukti kas, dokumen syarat surat) disimpan di direktori lokal server.
-5. **Istilah domain tetap pakai Bahasa Indonesia** di kode (nama entity, field DB, variabel domain) — `warga`, `kk`, `rt`, `rw`, `surat`, `iuran`, `kas`, `pengurus`, dst. Jangan diterjemahkan ke Inggris (`resident`, `dues`, dll.), supaya istilah di kode konsisten dengan istilah yang dipakai mitra dan dokumen akademik capstone.
-6. **Data yang disimpan bersifat sensitif** — NIK, No. KK, alamat, dan data keuangan warga adalah PII dan data finansial. Terapkan data masking pada tampilan tabel (`3275••••••••0001`), validasi input Zod 16 digit, dan kontrol akses berbasis role.
-5. Kalau diminta menambah fitur dari daftar "Fitur Dikesampingkan dari MVP" di `PROJECT.md` (CCTV, manajemen pengurus, inventaris), **konfirmasi dulu ke pengguna** sebelum mengerjakan.
-6. Kalau ragu apakah sesuatu termasuk scope MVP, cek tabel prioritas di `PROJECT.md` (Core MVP / High Priority / Medium) sebelum mengerjakan, dan tanyakan jika masih ambigu.
+1. **Scope mengacu pada `docs/laporan/laporan.md` dan `PROJECT.md`**: 5 modul Core — Kependudukan, Surat-Menyurat, Kas RW, Iuran Warga, Pengumuman/Informasi.
+2. **Surat-Menyurat masuk Core MVP** (SF-SR-01 s/d SF-SR-07 di `laporan.md`: pengajuan, unggah berkas, verifikasi pengurus, persetujuan/penerbitan, unduh PDF).
+3. **Akun warga dibuat terpusat oleh pengurus RW** (bukan pendaftaran mandiri), agar tidak ada yang mendaftar dengan NIK orang lain.
+4. **Berkas** (bukti kas, dokumen syarat surat) disimpan di direktori lokal server (`static/uploads/`).
+5. **Istilah domain tetap Bahasa Indonesia** di kode (`warga`, `kk`, `rt`, `rw`, `surat`, `iuran`, `kas`, `pengurus`). Jangan diterjemahkan ke Inggris, agar konsisten dengan mitra dan dokumen akademik.
+6. **Data sensitif** — NIK, No. KK, alamat, data keuangan adalah PII. Terapkan masking di tabel (`3275••••••••0001`), validasi Zod 16 digit, dan kontrol akses berbasis role.
+7. Fitur dari daftar "Fitur Dikesampingkan dari MVP" di `PROJECT.md` (CCTV, manajemen pengurus, inventaris): **konfirmasi dulu ke pengguna**.
+8. Ragu soal scope? Cek tabel prioritas di `PROJECT.md`, tanyakan jika masih ambigu.
+9. Jangan buat data dummy yang menyerupai data warga asli; pakai penanda jelas seperti "Contoh Warga 1".
 
 ## Tech Stack
 
-- Bahasa & framework: **SvelteKit 2 + Svelte 5** (TypeScript, runes mode aktif)
-- CSS: **Tailwind CSS v4** via `@tailwindcss/vite` — design tokens di `src/app.css` (@theme)
-- Database: **SQLite via Turso/libsql** (`file:local.db` lokal, `libsql://...` production)
-- ORM / query layer: **Drizzle ORM** (`drizzle-orm/libsql`) + drizzle-kit migrations
-- Autentikasi: **Better Auth** dengan `admin` plugin — roles: `superadmin`, `pengurus_rw`, `pengurus_rt`, `warga`
-- Payment gateway / QRIS provider: `[TODO — konfirmasi mitra dulu]`
+- **SvelteKit 2 + Svelte 5** (TypeScript, runes)
+- **Tailwind CSS v4** via `@tailwindcss/vite` — design tokens di `src/app.css` (@theme)
+- **SQLite via Turso/libsql** (`file:local.db` lokal, `libsql://...` production)
+- **Drizzle ORM** + drizzle-kit migrations
+- **Better Auth** (`admin` plugin + access control)
+- **zod + sveltekit-superforms** untuk validasi form
+- Payment gateway: **Midtrans** (`src/lib/server/midtrans.ts`, `src/routes/api/midtrans/`)
+- Test: Vitest (unit, `*.test.ts`) dan Playwright (`e2e/`)
 - Hosting/deployment: `[TODO]`
 
 ## Perintah Umum
 
 ```bash
-# Install dependencies
 npm install
-
-# Jalankan dev server
+cp .env.example .env     # default file:local.db
+npm run db:setup         # tabel domain + Better Auth (idempotent) — wajib sebelum dev
+npx tsx scripts/seed.ts  # user admin + RW + kategori kas
 npm run dev
-
-# Type check
-npm run check
-
-# Bootstrap DB lokal (domain + Better Auth, idempotent)
-npm run db:setup
-
-# Generate SQL migrasi baru, lalu terapkan ke local.db
-npx drizzle-kit generate
-npm run db:setup
-
-# Jalankan migrasi (Turso remote/production)
-npx drizzle-kit migrate
-
-# PENTING: jangan `npx drizzle-kit push` pada local.db — tabel Better Auth
-# (user/session/account/verification) bukan bagian dari schema Drizzle, jadi
-# drizzle-kit meminta jawaban interaktif dan bisa crash di Windows.
-#
-# PENTING: DB lokal = `file:local.db`. `compose.yaml` (libsql-server via Docker)
-# belum tersambung ke script mana pun — `db:setup`/`db:auth` hanya menerima URL
-# `file:`, jadi jangan arahkan TURSO_DATABASE_URL ke 127.0.0.1:8080.
-
-# Build production
+npm run check            # type check
 npm run build
+npx drizzle-kit generate && npm run db:setup   # migrasi baru ke local.db
+npx drizzle-kit migrate                        # migrasi Turso production
 ```
+
+- **Jangan** `npx drizzle-kit push` pada `local.db`: tabel Better Auth bukan bagian schema Drizzle; drizzle-kit meminta input interaktif dan bisa crash di Windows.
+- DB lokal = `file:local.db`. `compose.yaml` (libsql-server via Docker) belum tersambung ke script mana pun; `db:setup`/`db:auth` hanya menerima URL `file:`.
 
 ## Struktur Repo
 
 ```
 src/
-  app.css                  ← Tailwind v4 + design tokens (@theme)
-  app.html                 ← HTML shell + PWA meta
-  app.d.ts                 ← App.Locals types (user, session)
-  hooks.server.ts          ← Session hydration + auth guard
+  hooks.server.ts            session hydration + auth guard
   lib/
-    auth-client.ts         ← Better Auth client (browser)
+    permissions.ts           matriks role × resource × action (sumber tunggal)
+    roles.ts, akses.ts       definisi & helper akses
+    nav.ts, format.ts, types.ts, pdf-surat.ts
+    components/              komponen UI (Button, Card, DataTable, Modal, ...)
     server/
-      auth.ts              ← Better Auth server instance
-      db/
-        index.ts           ← Drizzle client (Turso/libsql)
-        schema.ts          ← Semua tabel domain
+      auth.ts                Better Auth server
+      guard.ts               klasifikasi rute & role (dipakai hooks, layout, login)
+      rbac.ts, scope.ts      cek izin & pembatasan per RT
+      iuran.ts, kas.ts, pembayaran.ts, setoran.ts, midtrans.ts
+      surat-ttd.ts, storage.ts, usia.ts
+      db/schema.ts           semua tabel domain
+      db/index.ts            klien Drizzle
   routes/
-    +layout.svelte         ← Root layout (app.css import)
-    +layout.server.ts      ← Expose user ke semua pages
-    +page.svelte           ← Redirect → /dashboard
     login/
-      +page.svelte         ← Login form
-    (app)/                 ← Route group: authenticated shell
-      +layout.svelte       ← Sidebar + bottom nav
-      +layout.server.ts    ← Auth guard
-      dashboard/
-      warga/
-      kas/
-      iuran/
-      pengumuman/
-static/
-  manifest.webmanifest     ← PWA manifest
-drizzle/                   ← Generated SQL migrations
-drizzle.config.ts          ← Drizzle kit config
+    (app)/                   area pengurus (butuh login)
+      dashboard/ warga/ kk/ kas/ iuran/ surat/ pengumuman/ pengaturan/
+    portal/                  portal warga (mobile-first): iuran, surat, perbaruan
+    api/                     auth, midtrans, notifikasi
+drizzle/                     migrasi SQL (+ meta/)
+scripts/                     db-setup, seed, check-guard, check-form-routes
+e2e/                         tes Playwright
+docs/                        dokumentasi (lihat docs/README.md)
 ```
 
-## Role & Aktor Sistem
+## Role
 
-- **Admin RW** — akses penuh ke semua modul
-- **Pengurus RT** — input/kelola data warga di wilayahnya, ajukan surat atas nama warga
-- **Bendahara** — akses modul keuangan & iuran
-- **Warga** — akses terbatas: lihat info RW, ajukan surat, bayar iuran (jika QRIS aktif)
+Didefinisikan di `src/lib/permissions.ts`; ringkasan di `README.md`.
 
-> Role ini berdasarkan asumsi struktur RW umum — sesuaikan jika nanti ada klarifikasi dari mitra.
+- `superadmin` — izin penuh (belum dipakai di seed)
+- `pengurus_rw` — penuh ke semua modul, termasuk Pengaturan & Kas RW
+- `pengurus_rt` — kelola data & Kas RT wilayahnya; Kas RW hanya baca; tanpa Pengaturan
+- `warga` — baca pengumuman & iuran sendiri, ajukan surat, bayar iuran
 
-## Cara Kerja yang Diharapkan
+Role yang masuk ke group orang lain diarahkan ke landing miliknya (bukan 403). Jangan membuat cek role baru di luar `permissions.ts` / `guard.ts`.
 
-- Proyek ini masih tahap requirements/awal pengembangan untuk sebuah capstone akademik — utamakan kesesuaian dengan kebutuhan mitra yang terdokumentasi di atas kelengkapan fitur.
-- Kalau task menyentuh scope fitur (menambah field, mengubah alur, menambah modul), cek dulu apakah itu selaras dengan `PROJECT.md`. Kalau tidak selaras atau tidak disebutkan di sana, tanyakan ke pengguna alih-alih berasumsi.
-- Jangan generate data dummy yang terlihat seperti data warga sungguhan (nama, NIK, dll.) dengan format yang bisa disalahartikan sebagai data asli — gunakan penanda jelas seperti "Contoh Warga 1" untuk seed/test data.
+## Dokumen Laporan (Word)
 
-## Dokumen Word / SharePoint
-
-- Draft laporan: `docs/laporan/laporan.md` — kalau diminta "tulis ke Word/SharePoint", isinya ditransfer ke proposal di SharePoint, **bukan** generate `.docx` lokal.
-- Lokasi folder kerja capstone: `C:\Users\Sena\OneDrive\Kuliah\Semester 7\Capstone`
-- Dokumen proposal: `Capstone.docx` di SharePoint Telkom, diakses lewat shortcut `Capstone.docx.url` di folder tersebut (URL dibaca dari shortcut, jangan hardcode).
-- Selalu pakai skill **`capstone-word`** (`C:\Users\Sena\.agents\skills\capstone-word\SKILL.md` + `word-helper.ps1`, Word COM) untuk membaca/mengedit dokumennya — aturan keras & struktur heading ada di skill itu.
+- Draft: `docs/laporan/laporan.md`. Dokumen resmi: `C:\Users\Afif\OneDrive\Kuliah\Semester 7\Capstone\Capstone_Kelompok_30.docx`.
+- Alur: tulis di file `bab*` → setelah disetujui tim masuk `laporan.md` → disalin ke docx. Peta per bab ada di `docs/laporan/README.md`.
+- Jangan edit `laporan.md` sebelum disetujui tim.
+- Jangan update `laporan.md` secara proaktif (termasuk dari hasil verifikasi/riset). Kalau memang diminta mengubahnya, **salin dulu isi terbaru dari sumber utama (docx resmi di atas) ke `laporan.md`**, baru terapkan perubahan, supaya tidak menimpa revisi tim yang hanya ada di Word. Temuan/koreksi sebelum itu cukup dicatat di file terpisah (mis. `docs/laporan/referensi/daftar-pustaka.md` bagian 3).
+- Kalau diminta "tulis ke Word", transfer isi ke docx di atas (bukan generate `.docx` baru) memakai skill **`capstone-word`** (Word COM). Skill & path OneDrive berbeda per anggota; pakai yang ada di mesin pengguna.
 
 ## Referensi
 
-- `PROJECT.md` — konteks produk, scope fitur, dan status tiap modul
-- `docs/laporan/laporan.md` — laporan capstone
-- `docs/checklist.md` — checklist fitur untuk presentasi ke RW
+- `PROJECT.md` · `docs/README.md` · `docs/stakeholder/checklist.md` (checklist fitur untuk presentasi ke RW)
 
 ## Research & penulisan laporan
 

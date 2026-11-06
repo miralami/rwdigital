@@ -101,4 +101,4 @@ Bab I (1.1–1.5), Bab II (2.1–2.3), Bab III (3.1–3.4). Isi §3.5 ada **satu
 - `docs/arsip/laporanRevisi.md` — draft §3.5.1 & Bab IV §4.1 versi Kanban
 - `docs/kanban/workflow.md` — aturan Kanban aktual
 - `docs/arsip/pembagian.md` — pembagian sub-bab per orang
-- `docs/laporan/afifscope.md` — scope kerja Afif
+- `docs/tim/afifscope.md` — scope kerja Afif

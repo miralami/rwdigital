@@ -4,7 +4,7 @@
 > supaya tidak ada yang diam-diam dianggap final. Setiap baris menjawab: asumsi apa yang
 > dipakai sekarang, siapa yang perlu mengonfirmasi, dan apa dampaknya kalau asumsi salah.
 >
-> Terkait: `permintaan-stakeholder.md` §5 (D1–D5) · issue **#71** · `board.md` §5.
+> Terkait: `permintaan-stakeholder.md` §5 (D1–D5) · issue **#71** · `../kanban/board.md` §5.
 
 Terakhir diperbarui: 28 Okt 2026
 

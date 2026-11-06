@@ -1,7 +1,7 @@
 # Plan Pengerjaan Afif — Laporan Capstone SI-RW
 
 > ⚠️ **Usang (19 Okt 2026).** Banyak TODO di sini sudah selesai dan penugasan §3.5 sudah berubah.
-> Rencana terkini: **`afifscope.md`** (scope Afif) + **`pembagian-tugas.md`** (semua orang).
+> Rencana terkini: **`../tim/afifscope.md`** (scope Afif) + **`../tim/pembagian-tugas.md`** (semua orang).
 > Navigasi: `README.md`.
 
 ## 1.1 Latar Belakang ✅ (sudah ada draft)

@@ -20,7 +20,7 @@ Disusun: 12 Okt 2026 · Dasar: pembacaan `laporan.md` + verifikasi kode di `src/
 | F4 | Model iuran: tagihan murni (§3.3.4) vs rekapitulasi (Track 4/KU-02) | 🟠 Sedang | Selaraskan definisi SF-IU | 🟡 terpetakan di `KU-02` |
 | F5 | Kanban diklaim jalan di §2.2.3.1, realitanya belum (Review kosong) | 🔴 Tinggi | Jalankan + catat rekonstruksi di Bab IV | ✅ papan dibangun, rekonstruksi dicatat di Bab IV §4.1 |
 | F6 | Defect kode: hard-delete pengumuman; aksi surat tanpa cek peran | 🟡 Rendah | Jadikan kartu `type:bug` | ✅ kartu `EV-BUG-01` & `SR-BUG-01` dibuat |
-| F7 | Dokumen sekitar usang (plan.md, checklist.md, docs/arsip/planAfif.md) | 🟠 Sedang | Diselaraskan ke laporan.md | 🟡 sebagian diselaraskan |
+| F7 | Dokumen sekitar usang (docs/arsip/plan.md, docs/stakeholder/checklist.md, docs/arsip/planAfif.md) | 🟠 Sedang | Diselaraskan ke laporan.md | 🟡 sebagian diselaraskan |
 
 ---
 
@@ -33,7 +33,7 @@ Disusun: 12 Okt 2026 · Dasar: pembacaan `laporan.md` + verifikasi kode di `src/
 - **Kode sudah terbangun:** `(app)/surat/`, `(app)/surat/[id]/`, `(app)/surat/[id]/cetak/`,
   `portal/surat/ajukan/`, `portal/surat/[id]/cetak/`, tabel `surat`.
 - **Track 5** memang ada dengan PIC Zidan.
-- `docs/checklist.md` (ringkasan prioritas) juga menaruh Surat-Menyurat = *Out of Scope*; `plan.md`
+- `docs/stakeholder/checklist.md` (ringkasan prioritas) juga menaruh Surat-Menyurat = *Out of Scope*; `docs/arsip/plan.md`
   justru menaruhnya sebagai Core MVP.
 
 **Resolusi:** surat-menyurat **masuk scope** (`must`). §3.1 perlu dikoreksi (hapus
@@ -122,8 +122,8 @@ di Bab IV §4.1 (`bab4-proses-perancangan.md`), tanpa mengarang tanggal pengerja
 
 | Dokumen | Masalah | Tindakan |
 |---|---|---|
-| `plan.md` | Mengklaim impor warga, rekap, surat, kategori, void **belum ada** — padahal **sudah ada** | Beri catatan "usang" + tunjuk ke `backlog.md` sebagai status aktual |
-| `docs/checklist.md` | Ringkasan prioritas menaruh **Surat-Menyurat = Out of Scope** | Selaraskan → masuk scope (F1) |
+| `docs/arsip/plan.md` | Mengklaim impor warga, rekap, surat, kategori, void **belum ada** — padahal **sudah ada** | Beri catatan "usang" + tunjuk ke `backlog.md` sebagai status aktual |
+| `docs/stakeholder/checklist.md` | Ringkasan prioritas menaruh **Surat-Menyurat = Out of Scope** | Selaraskan → masuk scope (F1) |
 | `docs/arsip/planAfif.md` | Catatan lama "surat-menyurat out of scope di PROJECT.md" (sudah tak relevan) | Tandai usang |
 | `PROJECT.md` | Status proyek masih "Implementasi: belum" | Perbarui status + tegaskan `laporan.md` = otoritas |
 | `docs/arsip/List feature fix.md` | Model iuran (rekap) belum tertaut ke SF | Tautkan ke F4 |
