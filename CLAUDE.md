@@ -123,3 +123,20 @@ drizzle.config.ts          ← Drizzle kit config
 - `PROJECT.md` — konteks produk, scope fitur, dan status tiap modul
 - `docs/laporan/laporan.md` — laporan capstone
 - `docs/checklist.md` — checklist fitur untuk presentasi ke RW
+
+## Research & penulisan laporan
+
+Skill di `.claude/skills/` (dipanggil otomatis sesuai task):
+
+| Skill | Kapan |
+|---|---|
+| `research-source-finder` | Cari jurnal/referensi, ambil full text, isi matriks literatur |
+| `thesis-writing-coach` | Struktur bab, outline, draft, timeline, persiapan sidang |
+| `thesis-chapter-review` | Review bab sebelum dikirim ke dosen/mitra |
+| `academic-translation-en-id` | Terjemah EN <-> ID akademik |
+
+- Sumber: connector claude.ai (Consensus, Wiley Scholar Gateway, PubMed) + MCP `paper-search` (`.mcp.json`, butuh `uv` terpasang). Email Unpaywall & API key opsional taruh di `~/.config/paper-search-mcp/.env`, **jangan** di repo.
+- Referensi disimpan di `docs/laporan/referensi/` — daftar pustaka di `daftar-pustaka.md` / `bibliography.md`, panduan analisis di `analisis-panduan.md`. Baca dulu sebelum cari sumber baru agar tidak duplikat.
+- Tidak boleh mengarang sumber, DOI, kutipan, atau nomor halaman. Tidak memakai Sci-Hub/LibGen. Tandai `abstract-only` jika full text tidak tersedia.
+- Bab teknis (perancangan, implementasi, pengujian) harus sesuai kode aktual di repo ini.
+- Gaya sitasi default APA 7 kecuali pedoman Telkom/laporan menyatakan lain. Transfer ke Word tetap lewat skill `capstone-word` (lihat bagian di atas).
