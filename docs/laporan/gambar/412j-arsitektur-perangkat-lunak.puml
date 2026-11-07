@@ -1,0 +1,56 @@
+@startuml 412j-arsitektur-perangkat-lunak
+' Gambar 4.n Arsitektur Perangkat Lunak RW Digital
+' Sumber: src/hooks.server.ts, src/lib/server/*, src/routes/*. Hosting produksi masih rencana.
+skinparam dpi 200
+skinparam shadowing false
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 12
+skinparam componentStyle rectangle
+skinparam nodesep 30
+skinparam ranksep 40
+skinparam ArrowColor #333333
+skinparam nodeBackgroundColor #FFFFFF
+skinparam componentBackgroundColor #E8EEF7
+skinparam packageBackgroundColor #FFFFFF
+
+actor "Pengguna\nPublik, Warga,\nPengurus RT, Pengurus RW" as U
+
+node "Peramban (PWA)" as B {
+  component "Halaman Svelte 5\nsrc/routes/**/+page.svelte" as UI
+}
+
+node "Server SvelteKit (Node.js)" as S {
+  component "hooks.server.ts\nhidrasi sesi dan penjaga rute" as H
+  component "guard.ts\nklasifikasi rute dan modul" as G
+  component "Rute server\n+page.server.ts\n(load, actions, validasi Zod)" as R
+  package "Lapisan domain (src/lib/server)" as D {
+    component "rbac.ts, scope.ts\nizin per aksi, batas RT" as RB
+    component "kas.ts, iuran.ts,\npembayaran.ts, setoran.ts,\nsurat-ttd.ts" as DOM
+    component "storage.ts\nunggah berkas" as STO
+    component "midtrans.ts\nintegrasi pembayaran" as MT
+  }
+  component "auth.ts\nBetter Auth" as A
+  component "Drizzle ORM\ndb/schema.ts" as ORM
+}
+
+database "SQLite\n(Turso / libSQL)" as DB
+folder "static/uploads" as F
+cloud "Midtrans\n(Snap, webhook)" as MID
+
+U --> UI
+UI --> H : permintaan HTTP
+H --> A : baca sesi
+H --> G : periksa rute
+G --> R : lolos
+R --> RB : cek izin
+R --> DOM
+R --> STO
+R --> MT
+DOM --> ORM
+RB --> ORM
+ORM --> DB
+STO --> F
+MT --> MID : buat transaksi
+MID --> R : webhook status
+A --> ORM
+@enduml

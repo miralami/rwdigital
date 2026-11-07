@@ -1,0 +1,245 @@
+@startuml 412f-class-domain
+' Gambar 4.n Class Diagram RW Digital
+' Sumber: src/lib/server/db/schema.ts (atribut) dan src/lib/server/*.ts (operasi).
+' Render: java -jar plantuml.jar -tpng 412f-class-domain.puml
+skinparam dpi 200
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 12
+skinparam roundCorner 0
+skinparam ArrowColor #333333
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  HeaderBackgroundColor #E8EEF7
+  StereotypeFontSize 10
+}
+skinparam nodesep 40
+skinparam ranksep 60
+hide empty members
+
+' ── Wilayah ───────────────────────────────────────
+class Rw {
+  + id : int
+  + nama : String
+  + alamat : String
+  + kelurahan : String
+  + kecamatan : String
+  + kota : String
+}
+class Rt {
+  + id : int
+  + nomor : int
+}
+class Pengurus {
+  + id : int
+  + jabatan : String
+  + nama : String
+  + fotoUrl : String
+  + aktif : boolean
+}
+class PetugasRt {
+  + id : int
+  + userId : String
+}
+
+' ── Kependudukan ──────────────────────────────────
+class Kk {
+  + id : int
+  + noKk : String
+  + alamat : String
+  + statusHuni : StatusHuni
+}
+class Warga {
+  + id : int
+  + nik : String
+  + nama : String
+  + tanggalLahir : Date
+  + jenisKelamin : L | P
+  + statusHubunganKk : String
+  + aktif : boolean
+  --
+  + hitungUsia() : int
+}
+class PermintaanPembaruan {
+  + id : int
+  + dataLama : JSON
+  + dataBaru : JSON
+  + status : StatusPembaruan
+  + ditinjauOleh : String
+}
+
+' ── Akun dan akses ────────────────────────────────
+class User <<Better Auth>> {
+  + id : String
+  + email : String
+  + role : String
+}
+class Peran {
+  + id : int
+  + nama : String
+  + tipe : staff | warga
+  + scope : all | rt | none
+  + permissions : JSON
+  + superadmin : boolean
+  --
+  + can(modul, aksi) : boolean
+  + requirePermission(modul, aksi)
+}
+class Notifikasi {
+  + id : int
+  + judul : String
+  + pesan : String
+  + tipe : TipeNotifikasi
+  + dibaca : boolean
+}
+
+' ── Informasi ─────────────────────────────────────
+class Pengumuman {
+  + id : int
+  + judul : String
+  + isi : String
+  + kategori : KategoriPengumuman
+  + tanggalMulai : Date
+  + tanggalSelesai : Date
+  + ditampilkan : boolean
+}
+
+' ── Surat ─────────────────────────────────────────
+class Surat {
+  + id : int
+  + nomorSurat : String
+  + jenis : String
+  + keperluan : String
+  + status : StatusSurat
+  + butuhTtdRt : boolean
+  + butuhTtdRw : boolean
+  --
+  + dimintaTtd() : boolean
+  + sudahTtd() : boolean
+  + bolehMenandatangani() : boolean
+}
+
+' ── Iuran ─────────────────────────────────────────
+class JenisIuran {
+  + id : int
+  + nama : String
+  + nominal : double
+  + porsiRw : double
+  + periode : Periode
+  + scope : rw | rt
+  --
+  + bolehDitagihKeRt() : boolean
+}
+class Tagihan {
+  + id : int
+  + periode : String
+  + nominal : double
+  + porsiRw : double
+  + status : StatusTagihan
+  + jatuhTempo : Date
+  --
+  + hitungSisa() : double
+  + statusTagihan() : StatusTagihan
+  + menunggak() : boolean
+}
+class Pembayaran {
+  + id : int
+  + jumlah : double
+  + metodeBayar : qris | tunai | transfer
+  + dibayarPada : DateTime
+  --
+  + catatPembayaran()
+}
+class PembayaranOnline {
+  + id : int
+  + orderId : String
+  + jumlah : double
+  + status : StatusMidtrans
+  + snapToken : String
+}
+class KonfirmasiBayar {
+  + id : int
+  + jumlah : double
+  + status : menunggu | diterima | ditolak
+  + diajukanOleh : String
+  + diprosesOleh : String
+}
+
+' ── Kas ───────────────────────────────────────────
+class KategoriKas {
+  + id : int
+  + nama : String
+  + jenis : pemasukan | pengeluaran
+  + scope : semua | rw | rt
+}
+class TransaksiKas {
+  + id : int
+  + jenis : pemasukan | pengeluaran
+  + nominal : double
+  + tanggal : Date
+  + bukti : String
+  + dibatalkan : boolean
+  --
+  + hitungSaldo() : double
+}
+class TransaksiKasRt {
+  + id : int
+  + namaKas : String
+  + jenis : pemasukan | pengeluaran
+  + nominal : double
+  + tanggal : Date
+  + dibatalkan : boolean
+}
+class SetoranRt {
+  + id : int
+  + periode : String
+  + totalTerkumpul : double
+  + porsiRw : double
+  + disetorPada : Date
+  + dibatalkan : boolean
+  --
+  + hitungSetoranRt()
+  + catatSetoran()
+  + batalkanSetoran()
+}
+
+' ── Relasi: wilayah dan kependudukan ──────────────
+Rw "1" -- "1..*" Rt
+Rw "1" -- "0..*" Pengurus
+Rt "0..1" -- "0..*" Pengurus
+Rt "1" -- "0..*" PetugasRt
+Rt "1" -- "0..*" Kk
+Kk "1" -- "1..*" Warga
+Warga "1" -- "0..*" PermintaanPembaruan
+Warga "1" -- "0..*" Surat
+
+' ── Relasi: akun dan akses ────────────────────────
+User "0..1" -- "0..1" Warga : akun portal
+User "1" -- "0..1" PetugasRt
+User "*" -- "1" Peran : role
+User "1" -- "0..*" Notifikasi
+
+' ── Relasi: informasi ─────────────────────────────
+Rw "1" -- "0..*" Pengumuman
+Rt "0..1" -- "0..*" Pengumuman
+
+' ── Relasi: iuran ─────────────────────────────────
+Rw "1" -- "0..*" JenisIuran
+JenisIuran "1" -- "0..*" Tagihan
+Kk "1" -- "0..*" Tagihan
+Tagihan "1" -- "0..*" Pembayaran
+Tagihan "1" -- "0..*" PembayaranOnline
+Tagihan "1" -- "0..*" KonfirmasiBayar
+PembayaranOnline "0..1" -- "0..1" Pembayaran : menjadi
+
+' ── Relasi: kas ───────────────────────────────────
+Rw "1" -- "0..*" TransaksiKas
+Rt "1" -- "0..*" TransaksiKasRt
+KategoriKas "0..1" -- "0..*" TransaksiKas
+KategoriKas "0..1" -- "0..*" TransaksiKasRt
+Rt "1" -- "0..*" SetoranRt
+SetoranRt "0..1" --> "1" TransaksiKas : masuk kas RW
+SetoranRt "0..1" --> "1" TransaksiKasRt : keluar kas RT
+@enduml

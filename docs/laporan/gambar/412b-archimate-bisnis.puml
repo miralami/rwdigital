@@ -1,0 +1,46 @@
+@startuml 412b-archimate-bisnis
+' Gambar 4.n Arsitektur Enterprise Lapisan Motivasi dan Bisnis
+' Sumber: Bab I (1.3 dan 1.4), Bab III (3.3), dan alur proses pada 4.1.1.
+!include <archimate/Archimate>
+skinparam dpi 200
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 12
+skinparam nodesep 30
+skinparam ranksep 40
+left to right direction
+
+Motivation_Stakeholder(sPengurus, "Pengurus RW 06")
+Motivation_Stakeholder(sWarga, "Warga RW 06")
+Motivation_Driver(dManual, "Administrasi masih manual:\nbuku, spreadsheet, grup obrolan")
+Motivation_Goal(gTujuan, "Administrasi RW terstruktur\ndan terintegrasi")
+Motivation_Requirement(rAkses, "Kontrol akses berbasis peran\ndan pelindungan data pribadi")
+
+Business_Actor(aWarga, "Warga")
+Business_Actor(aRt, "Pengurus RT")
+Business_Actor(aRw, "Pengurus RW")
+
+Business_Process(pData, "Pendataan Kependudukan")
+Business_Process(pSurat, "Pengajuan dan Penerbitan Surat")
+Business_Process(pIuran, "Penagihan dan Pembayaran Iuran")
+Business_Process(pKas, "Pengelolaan Kas RW")
+Business_Process(pInfo, "Penyampaian Pengumuman")
+
+Rel_Association(sPengurus, dManual)
+Rel_Association(sWarga, dManual)
+Rel_Influence(dManual, gTujuan, "mendorong")
+Rel_Realization(rAkses, gTujuan)
+
+Rel_Assignment(aRt, pData)
+Rel_Assignment(aRw, pKas)
+Rel_Assignment(aRw, pInfo)
+Rel_Assignment(aRt, pSurat)
+Rel_Assignment(aWarga, pSurat)
+Rel_Assignment(aWarga, pIuran)
+Rel_Assignment(aRt, pIuran)
+
+Rel_Realization(pData, gTujuan)
+Rel_Realization(pSurat, gTujuan)
+Rel_Realization(pIuran, gTujuan)
+Rel_Realization(pKas, gTujuan)
+Rel_Realization(pInfo, gTujuan)
+@enduml

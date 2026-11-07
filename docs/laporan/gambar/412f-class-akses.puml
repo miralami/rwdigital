@@ -1,0 +1,75 @@
+@startuml 412f-class-akses
+' Gambar 4.n Class Diagram Akun dan Akses
+' Sumber: src/lib/server/db/schema.ts (atribut) dan src/lib/server/*.ts (operasi).
+' Render: java -jar plantuml.jar -tpng 412f-class-domain.puml
+skinparam dpi 200
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 12
+skinparam roundCorner 0
+skinparam ArrowColor #333333
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  HeaderBackgroundColor #E8EEF7
+  StereotypeFontSize 10
+}
+skinparam nodesep 30
+skinparam ranksep 45
+hide empty members
+
+class User <<Better Auth>> {
+  + id : String
+  + email : String
+  + role : String
+}
+
+class Warga {
+  + id : int
+  + nik : String
+  + nama : String
+  + tanggalLahir : Date
+  + jenisKelamin : L | P
+  + statusHubunganKk : String
+  + aktif : boolean
+  --
+  + hitungUsia() : int
+}
+
+class PetugasRt {
+  + id : int
+  + userId : String
+}
+
+class Rt {
+  + id : int
+  + nomor : int
+}
+
+class Peran {
+  + id : int
+  + nama : String
+  + tipe : staff | warga
+  + scope : all | rt | none
+  + permissions : JSON
+  + superadmin : boolean
+  --
+  + can(modul, aksi) : boolean
+  + requirePermission(modul, aksi)
+}
+
+class Notifikasi {
+  + id : int
+  + judul : String
+  + pesan : String
+  + tipe : TipeNotifikasi
+  + dibaca : boolean
+}
+
+Rt "1" -- "0..*" PetugasRt
+User "0..1" -- "0..1" Warga : akun portal
+User "1" -- "0..1" PetugasRt
+User "*" -- "1" Peran : role
+User "1" -- "0..*" Notifikasi
+@enduml

@@ -1,0 +1,94 @@
+@startuml 412f-class-iuran
+' Gambar 4.n Class Diagram Iuran
+' Sumber: src/lib/server/db/schema.ts (atribut) dan src/lib/server/*.ts (operasi).
+' Render: java -jar plantuml.jar -tpng 412f-class-domain.puml
+skinparam dpi 200
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 12
+skinparam roundCorner 0
+skinparam ArrowColor #333333
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  HeaderBackgroundColor #E8EEF7
+  StereotypeFontSize 10
+}
+skinparam nodesep 30
+skinparam ranksep 45
+hide empty members
+
+class Rw {
+  + id : int
+  + nama : String
+  + alamat : String
+  + kelurahan : String
+  + kecamatan : String
+  + kota : String
+}
+
+class JenisIuran {
+  + id : int
+  + nama : String
+  + nominal : double
+  + porsiRw : double
+  + periode : Periode
+  + scope : rw | rt
+  --
+  + bolehDitagihKeRt() : boolean
+}
+
+class Kk {
+  + id : int
+  + noKk : String
+  + alamat : String
+  + statusHuni : StatusHuni
+}
+
+class Tagihan {
+  + id : int
+  + periode : String
+  + nominal : double
+  + porsiRw : double
+  + status : StatusTagihan
+  + jatuhTempo : Date
+  --
+  + hitungSisa() : double
+  + statusTagihan() : StatusTagihan
+  + menunggak() : boolean
+}
+
+class Pembayaran {
+  + id : int
+  + jumlah : double
+  + metodeBayar : qris | tunai | transfer
+  + dibayarPada : DateTime
+  --
+  + catatPembayaran()
+}
+
+class PembayaranOnline {
+  + id : int
+  + orderId : String
+  + jumlah : double
+  + status : StatusMidtrans
+  + snapToken : String
+}
+
+class KonfirmasiBayar {
+  + id : int
+  + jumlah : double
+  + status : menunggu | diterima | ditolak
+  + diajukanOleh : String
+  + diprosesOleh : String
+}
+
+Rw "1" -- "0..*" JenisIuran
+JenisIuran "1" -- "0..*" Tagihan
+Kk "1" -- "0..*" Tagihan
+Tagihan "1" -- "0..*" Pembayaran
+Tagihan "1" -- "0..*" PembayaranOnline
+Tagihan "1" -- "0..*" KonfirmasiBayar
+PembayaranOnline "0..1" -- "0..1" Pembayaran : menjadi
+@enduml

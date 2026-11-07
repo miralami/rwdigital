@@ -1,0 +1,84 @@
+@startuml 412f-class-kas
+' Gambar 4.n Class Diagram Kas
+' Sumber: src/lib/server/db/schema.ts (atribut) dan src/lib/server/*.ts (operasi).
+' Render: java -jar plantuml.jar -tpng 412f-class-domain.puml
+skinparam dpi 200
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 12
+skinparam roundCorner 0
+skinparam ArrowColor #333333
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+  HeaderBackgroundColor #E8EEF7
+  StereotypeFontSize 10
+}
+skinparam nodesep 30
+skinparam ranksep 45
+hide empty members
+
+class Rw {
+  + id : int
+  + nama : String
+  + alamat : String
+  + kelurahan : String
+  + kecamatan : String
+  + kota : String
+}
+
+class Rt {
+  + id : int
+  + nomor : int
+}
+
+class KategoriKas {
+  + id : int
+  + nama : String
+  + jenis : pemasukan | pengeluaran
+  + scope : semua | rw | rt
+}
+
+class TransaksiKas {
+  + id : int
+  + jenis : pemasukan | pengeluaran
+  + nominal : double
+  + tanggal : Date
+  + bukti : String
+  + dibatalkan : boolean
+  --
+  + hitungSaldo() : double
+}
+
+class TransaksiKasRt {
+  + id : int
+  + namaKas : String
+  + jenis : pemasukan | pengeluaran
+  + nominal : double
+  + tanggal : Date
+  + dibatalkan : boolean
+}
+
+class SetoranRt {
+  + id : int
+  + periode : String
+  + totalTerkumpul : double
+  + porsiRw : double
+  + disetorPada : Date
+  + dibatalkan : boolean
+  --
+  + hitungSetoranRt()
+  + catatSetoran()
+  + batalkanSetoran()
+}
+
+Rw "1" -- "1..*" Rt
+Rw "1" -- "0..*" TransaksiKas
+Rt "1" -- "0..*" TransaksiKasRt
+KategoriKas "0..1" -- "0..*" TransaksiKas
+KategoriKas "0..1" -- "0..*" TransaksiKasRt
+Rt "1" -- "0..*" SetoranRt
+SetoranRt "0..1" --> "1" TransaksiKas : masuk kas RW
+SetoranRt "0..1" --> "1" TransaksiKasRt : keluar kas RT
+@enduml

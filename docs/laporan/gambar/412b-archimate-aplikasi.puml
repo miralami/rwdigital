@@ -1,0 +1,59 @@
+@startuml 412b-archimate-aplikasi
+' Gambar 4.n Arsitektur Enterprise Lapisan Aplikasi dan Teknologi
+' Sumber: Tabel 3.4 (spesifikasi teknis), src/lib/server/*, .github/workflows/ci.yml.
+' Hosting produksi masih rencana (Vercel), bukan sistem yang sudah dipakai.
+!include <archimate/Archimate>
+skinparam dpi 200
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 12
+skinparam nodesep 30
+skinparam ranksep 40
+left to right direction
+
+Application_Interface(iPortal, "Portal Warga")
+Application_Interface(iDash, "Dasbor Pengurus")
+Application_Interface(iPublik, "Halaman Publik")
+
+Application_Service(sKep, "Layanan Kependudukan")
+Application_Service(sSurat, "Layanan Surat-Menyurat")
+Application_Service(sIuran, "Layanan Iuran")
+Application_Service(sKas, "Layanan Kas RW")
+Application_Service(sInfo, "Layanan Pengumuman")
+Application_Service(sAuth, "Autentikasi dan Kontrol Akses")
+
+Application_Component(cApp, "Aplikasi RW Digital\n(SvelteKit 2, Svelte 5)")
+Application_Component(cMidtrans, "Midtrans\n(payment gateway QRIS)")
+
+Technology_Device(dPeramban, "Peramban ponsel dan laptop (PWA)")
+Technology_Node(nServer, "Server aplikasi (Node.js)")
+Technology_SystemSoftware(ssAuth, "Better Auth")
+Technology_SystemSoftware(ssOrm, "Drizzle ORM")
+Technology_SystemSoftware(ssDb, "Basis data SQLite\n(Turso / libSQL)")
+Technology_Artifact(aBerkas, "Berkas unggahan\n(static/uploads)")
+Technology_Node(nCI, "GitHub Actions\n(CI: check, unit test, build, e2e)")
+Technology_Node(nHost, "Hosting produksi\n(rencana: Vercel)")
+
+Rel_Serving(iPortal, dPeramban)
+Rel_Serving(iDash, dPeramban)
+Rel_Serving(iPublik, dPeramban)
+
+Rel_Realization(cApp, sKep)
+Rel_Realization(cApp, sSurat)
+Rel_Realization(cApp, sIuran)
+Rel_Realization(cApp, sKas)
+Rel_Realization(cApp, sInfo)
+Rel_Realization(cApp, sAuth)
+Rel_Assignment(cApp, iPortal)
+Rel_Assignment(cApp, iDash)
+Rel_Assignment(cApp, iPublik)
+Rel_Flow(cApp, cMidtrans, "tagihan QRIS")
+Rel_Flow(cMidtrans, cApp, "webhook status")
+
+Rel_Realization(nServer, cApp)
+Rel_Assignment(nServer, ssAuth)
+Rel_Assignment(nServer, ssOrm)
+Rel_Serving(ssOrm, ssDb)
+Rel_Access_rw(nServer, aBerkas)
+Rel_Serving(nHost, nServer, "direncanakan")
+Rel_Serving(nCI, nServer, "verifikasi")
+@enduml

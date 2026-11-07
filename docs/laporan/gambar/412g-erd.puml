@@ -1,0 +1,218 @@
+@startuml 412g-erd
+' Gambar 4.n Entity Relationship Diagram RW Digital
+' Sumber: src/lib/server/db/schema.ts. Kolom yang ditampilkan: kunci (PK/FK), kolom unik, dan kolom penentu.
+' Garis putus-putus = rujukan user_id ke tabel Better Auth tanpa foreign key.
+skinparam dpi 200
+skinparam shadowing false
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 12
+skinparam ArrowColor #333333
+skinparam linetype ortho
+skinparam nodesep 25
+skinparam ranksep 55
+skinparam entity {
+  BackgroundColor #FFFFFF
+  BorderColor #333333
+}
+hide circle
+left to right direction
+
+entity "rw" as rw {
+  * id : int <<PK>>
+  --
+  nama
+  kelurahan
+}
+entity "rt" as rt {
+  * id : int <<PK>>
+  --
+  * rw_id : int <<FK>>
+  nomor
+}
+entity "petugas_rt" as petugas_rt {
+  * id : int <<PK>>
+  --
+  * rt_id : int <<FK>>
+  * user_id : text <<unik>>
+}
+entity "pengurus" as pengurus {
+  * id : int <<PK>>
+  --
+  rt_id : int <<FK>>
+  jabatan
+}
+entity "kk" as kk {
+  * id : int <<PK>>
+  --
+  * rt_id : int <<FK>>
+  * no_kk : text <<unik>>
+}
+entity "warga" as warga {
+  * id : int <<PK>>
+  --
+  * kk_id : int <<FK>>
+  * nik : text <<unik>>
+  user_id : text
+}
+entity "riwayat_warga" as riwayat_warga {
+  * id : int <<PK>>
+  --
+  * warga_id : int <<FK>>
+}
+entity "permintaan_pembaruan" as permintaan_pembaruan {
+  * id : int <<PK>>
+  --
+  * warga_id : int <<FK>>
+  status
+}
+entity "surat" as surat {
+  * id : int <<PK>>
+  --
+  * warga_id : int <<FK>>
+  nomor_surat <<unik>>
+  status
+}
+entity "pengumuman" as pengumuman {
+  * id : int <<PK>>
+  --
+  * rw_id : int <<FK>>
+  rt_id : int <<FK>>
+  kategori
+}
+entity "jenis_iuran" as jenis_iuran {
+  * id : int <<PK>>
+  --
+  * rw_id : int <<FK>>
+  rt_id : int <<FK>>
+  nominal, porsi_rw
+}
+entity "paket_iuran" as paket_iuran {
+  * id : int <<PK>>
+  --
+  * rw_id : int <<FK>>
+}
+entity "paket_iuran_item" as paket_iuran_item {
+  * id : int <<PK>>
+  --
+  * paket_id : int <<FK>>
+  * jenis_iuran_id : int <<FK>>
+}
+entity "tagihan" as tagihan {
+  * id : int <<PK>>
+  --
+  * kk_id : int <<FK>>
+  * jenis_iuran_id : int <<FK>>
+  periode, status
+}
+entity "pembayaran" as pembayaran {
+  * id : int <<PK>>
+  --
+  * tagihan_id : int <<FK>>
+  metode_bayar
+}
+entity "pembayaran_online" as pembayaran_online {
+  * id : int <<PK>>
+  --
+  * tagihan_id : int <<FK>>
+  pembayaran_id : int <<FK>>
+  * order_id : text <<unik>>
+}
+entity "konfirmasi_bayar" as konfirmasi_bayar {
+  * id : int <<PK>>
+  --
+  * tagihan_id : int <<FK>>
+  status
+}
+entity "kategori_kas" as kategori_kas {
+  * id : int <<PK>>
+  --
+  * rw_id : int <<FK>>
+  jenis, scope
+}
+entity "transaksi_kas" as transaksi_kas {
+  * id : int <<PK>>
+  --
+  * rw_id : int <<FK>>
+  kategori_id : int <<FK>>
+  nominal, tanggal
+}
+entity "transaksi_kas_rt" as transaksi_kas_rt {
+  * id : int <<PK>>
+  --
+  * rt_id : int <<FK>>
+  kategori_id : int <<FK>>
+  nominal, tanggal
+}
+entity "setoran_rt" as setoran_rt {
+  * id : int <<PK>>
+  --
+  * rt_id : int <<FK>>
+  transaksi_rw_id : int <<FK>>
+  transaksi_rt_id : int <<FK>>
+  periode
+}
+entity "user (Better Auth)" as user {
+  * id : text <<PK>>
+  --
+  role
+}
+entity "peran" as peran {
+  * id : int <<PK>>
+  --
+  * nama : text <<unik>>
+  permissions : json
+}
+entity "notifikasi" as notifikasi {
+  * id : int <<PK>>
+  --
+  * user_id : text
+  dibaca
+}
+entity "ttd_pejabat" as ttd_pejabat {
+  * id : int <<PK>>
+  --
+  * user_id : text <<unik>>
+}
+entity "galeri" as galeri {
+  * id : int <<PK>>
+}
+entity "pengaturan_landing" as pengaturan_landing {
+  * id : int <<PK>>
+}
+
+rw ||--o{ rt
+rt ||--o{ petugas_rt
+rt |o--o{ pengurus
+rt ||--o{ kk
+kk ||--|{ warga
+warga ||--o{ riwayat_warga
+warga ||--o{ permintaan_pembaruan
+warga ||--o{ surat
+rw ||--o{ pengumuman
+rt |o--o{ pengumuman
+rw ||--o{ jenis_iuran
+rt |o--o{ jenis_iuran
+rw ||--o{ paket_iuran
+paket_iuran ||--o{ paket_iuran_item
+jenis_iuran ||--o{ paket_iuran_item
+kk ||--o{ tagihan
+jenis_iuran ||--o{ tagihan
+tagihan ||--o{ pembayaran
+tagihan ||--o{ pembayaran_online
+pembayaran |o--o| pembayaran_online
+tagihan ||--o{ konfirmasi_bayar
+rw ||--o{ kategori_kas
+rw ||--o{ transaksi_kas
+kategori_kas |o--o{ transaksi_kas
+rt ||--o{ transaksi_kas_rt
+kategori_kas |o--o{ transaksi_kas_rt
+rt ||--o{ setoran_rt
+transaksi_kas |o--o{ setoran_rt
+transaksi_kas_rt |o--o{ setoran_rt
+
+user .. warga
+user .. petugas_rt
+user .. notifikasi
+user .. ttd_pejabat
+user }o..|| peran
+@enduml
