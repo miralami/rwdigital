@@ -1,11 +1,10 @@
 import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
-  dialect: 'turso',
+  dialect: 'mysql',
   schema:  './src/lib/server/db/schema.ts',
   out:     './drizzle',
   dbCredentials: {
-    url:       process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN || undefined
+    url: process.env.DATABASE_URL ?? 'mysql://root@127.0.0.1:3306/rwdigital'
   }
 });

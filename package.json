@@ -8,7 +8,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"db:setup": "node scripts/db-setup.mts",
-		"db:auth": "node scripts/db-auth.mts",
+		"db:auth": "node scripts/db-setup.mts --auth-saja",
 		"db:seed": "npx tsx scripts/seed.ts",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -38,14 +38,13 @@
 		"vitest": "^5.0.5"
 	},
 	"dependencies": {
-		"@libsql/client": "^0.18.0",
-		"@libsql/kysely-libsql": "^0.4.1",
 		"@lucide/svelte": "^1.48.0",
 		"@tailwindcss/vite": "^4.3.3",
 		"better-auth": "^1.7.6",
 		"drizzle-orm": "^0.45.3",
 		"html2canvas-pro": "^2.6.0",
 		"jspdf": "^4.2.1",
+		"mysql2": "^3.24.6",
 		"sveltekit-superforms": "^2.30.2",
 		"tailwindcss": "^4.3.3",
 		"zod": "^4.6.7"

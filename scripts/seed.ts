@@ -2,9 +2,8 @@ import { readFileSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { betterAuth } from 'better-auth';
 import { admin } from 'better-auth/plugins';
-import { LibsqlDialect } from '@libsql/kysely-libsql';
-import { drizzle } from 'drizzle-orm/libsql';
-import { createClient } from '@libsql/client';
+import { drizzle } from 'drizzle-orm/mysql2';
+import { createPool } from 'mysql2/promise';
 import { eq, inArray, isNull } from 'drizzle-orm';
 import { ac, roles } from '../src/lib/permissions';
 import { PERAN_DEFAULT } from '../src/lib/akses';
@@ -45,18 +44,13 @@ if (existsSync(envPath)) {
 	}
 }
 
-const TURSO_DATABASE_URL = process.env.TURSO_DATABASE_URL ?? 'file:local.db';
-const TURSO_AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN ?? '';
+const DATABASE_URL = process.env.DATABASE_URL ?? 'mysql://root@127.0.0.1:3306/rwdigital';
+
+const pool = createPool({ uri: DATABASE_URL, decimalNumbers: true, timezone: 'Z' });
 
 // ─── Auth instance ────────────────────────────────────────────────────────────
 const auth = betterAuth({
-	database: {
-		dialect: new LibsqlDialect({
-			url: TURSO_DATABASE_URL,
-			authToken: TURSO_AUTH_TOKEN
-		}),
-		type: 'sqlite'
-	},
+	database: pool,
 	emailAndPassword: { enabled: true },
 	plugins: [
 		admin({
@@ -69,11 +63,14 @@ const auth = betterAuth({
 });
 
 // ─── DB client ────────────────────────────────────────────────────────────────
-const client = createClient({
-	url: TURSO_DATABASE_URL,
-	authToken: TURSO_AUTH_TOKEN
-});
-const db = drizzle(client, {
+// Pembungkus tipis untuk SQL mentah (tabel Better Auth tidak ada di schema Drizzle).
+const client = {
+	async execute({ sql, args = [] }: { sql: string; args?: unknown[] }) {
+		const [rows] = await pool.query(sql, args);
+		return { rows: rows as Record<string, unknown>[] };
+	}
+};
+const db = drizzle(pool, {
 	schema: {
 		rw,
 		rt,
@@ -88,7 +85,8 @@ const db = drizzle(client, {
 		tagihan,
 		pengurus,
 		peran
-	}
+	},
+	mode: 'default'
 });
 
 // ─── Seed config ─────────────────────────────────────────────────────────────
@@ -107,7 +105,7 @@ async function seed() {
 
 	try {
 		const userResult = await client.execute({
-			sql: 'SELECT id FROM user WHERE email = ?',
+			sql: 'SELECT id FROM `user` WHERE email = ?',
 			args: [ADMIN_EMAIL]
 		});
 		const existingUser = userResult.rows[0] as { id: string } | undefined;
@@ -145,7 +143,7 @@ async function seed() {
 	} catch (e) {
 		try {
 			await client.execute({
-				sql: 'UPDATE user SET role = ? WHERE id = ?',
+				sql: 'UPDATE `user` SET role = ? WHERE id = ?',
 				args: ['pengurus_rw', userId]
 			});
 			console.log('   Role pengurus_rw berhasil diatur via database.');
@@ -166,7 +164,7 @@ async function seed() {
 	// Akun demo lama juga tidak dipakai lagi. Akun `admin@rw.id` dipertahankan
 	// (hanya perannya berubah menjadi pengurus_rw).
 	await client.execute({
-		sql: "DELETE FROM user WHERE email IN ('ketua@rw.id', 'sekretaris@rw.id', 'bendahara@rw.id')"
+		sql: "DELETE FROM `user` WHERE email IN ('ketua@rw.id', 'sekretaris@rw.id', 'bendahara@rw.id')"
 	});
 
 	const peranAda = await db.select({ nama: peran.nama }).from(peran);
@@ -211,9 +209,8 @@ async function seed() {
 					kelurahan: 'Kelurahan Kota Baru',
 					kecamatan: 'Kecamatan Bekasi Barat',
 					kota: 'Kota Bekasi'
-				})
-				.returning();
-			rwId = insertedRw.id;
+				});
+			rwId = insertedRw.insertId;
 			console.log(`   RW default dibuat: RW 06 Kota Baru (id: ${rwId})`);
 		}
 	} catch (e) {
@@ -233,8 +230,8 @@ async function seed() {
 			rtMap.set(nomor, sudahAda.id);
 			continue;
 		}
-		const [insertedRt] = await db.insert(rt).values({ nomor, rwId }).returning();
-		rtMap.set(nomor, insertedRt.id);
+		const [insertedRt] = await db.insert(rt).values({ nomor, rwId });
+		rtMap.set(nomor, insertedRt.insertId);
 		rtBaru += 1;
 	}
 
@@ -303,10 +300,9 @@ async function seed() {
 					alamat: item.alamat,
 					rtId: rtIdVal,
 					statusHuni: 'tetap'
-				})
-				.returning();
+				});
 
-			kkIds.push(insertedKk.id);
+			kkIds.push(insertedKk.insertId);
 
 			await db.insert(warga).values({
 				nik: item.nik,
@@ -319,7 +315,7 @@ async function seed() {
 				pekerjaan: 'Karyawan Swasta',
 				statusPerkawinan: 'kawin',
 				statusHubunganKk: 'kepala_keluarga',
-				kkId: insertedKk.id,
+				kkId: insertedKk.insertId,
 				aktif: true
 			});
 		}
@@ -335,15 +331,14 @@ async function seed() {
 				periode: 'bulanan',
 				aktif: true,
 				rwId
-			})
-			.returning();
+			});
 
 		// Buat tagihan periode 2026-10 (jatuh tempo mengikuti kebijakan D4)
 		for (let i = 0; i < kkIds.length; i++) {
 			const status = i % 2 === 0 ? 'lunas' : 'belum_bayar';
 			await db.insert(tagihan).values({
 				kkId: kkIds[i],
-				jenisIuranId: iuranWajib.id,
+				jenisIuranId: iuranWajib.insertId,
 				periode: '2026-10',
 				nominal: 50000,
 				status,
@@ -365,7 +360,7 @@ async function seed() {
 		role: string
 	): Promise<string> {
 		const found = await client.execute({
-			sql: 'SELECT id FROM user WHERE email = ?',
+			sql: 'SELECT id FROM `user` WHERE email = ?',
 			args: [email]
 		});
 		let id = (found.rows[0] as { id: string } | undefined)?.id;
@@ -380,7 +375,7 @@ async function seed() {
 
 		// Role di-set langsung di DB: `setRole` butuh sesi admin, sedangkan seed
 		// berjalan tanpa sesi.
-		await client.execute({ sql: 'UPDATE user SET role = ? WHERE id = ?', args: [role, id] });
+		await client.execute({ sql: 'UPDATE `user` SET role = ? WHERE id = ?', args: [role, id] });
 		return id;
 	}
 
@@ -454,9 +449,8 @@ async function seed() {
 		if (idJenis.has(preset.nama)) continue;
 		const [baru] = await db
 			.insert(jenisIuran)
-			.values({ ...preset, scope: 'rt', rtId: null, aktif: true, rwId })
-			.returning();
-		idJenis.set(preset.nama, baru.id);
+			.values({ ...preset, scope: 'rt', rtId: null, aktif: true, rwId });
+		idJenis.set(preset.nama, baru.insertId);
 	}
 
 	const presetPaket = [
@@ -477,12 +471,11 @@ async function seed() {
 		if (paketTersedia.some((p) => p.nama === preset.nama)) continue;
 		const [paket] = await db
 			.insert(paketIuran)
-			.values({ nama: preset.nama, keterangan: preset.keterangan, aktif: true, rwId })
-			.returning();
+			.values({ nama: preset.nama, keterangan: preset.keterangan, aktif: true, rwId });
 
 		const item = preset.isi.flatMap((nama, index) => {
 			const jenisIuranId = idJenis.get(nama);
-			return jenisIuranId ? [{ paketId: paket.id, jenisIuranId, urutan: index }] : [];
+			return jenisIuranId ? [{ paketId: paket.insertId, jenisIuranId, urutan: index }] : [];
 		});
 		if (item.length > 0) await db.insert(paketIuranItem).values(item);
 	}
@@ -641,7 +634,9 @@ async function seed() {
 	console.log(`  ${'warga@rw.id'.padEnd(20)} ${'warga123'.padEnd(14)} warga (tertaut ke 1 KK)`);
 }
 
-seed().catch((error) => {
-	console.error('\nError saat seed:', error);
-	process.exit(1);
-});
+seed()
+	.catch((error) => {
+		console.error('\nError saat seed:', error);
+		process.exitCode = 1;
+	})
+	.finally(() => pool.end());

@@ -1,14 +1,15 @@
 services:
   db:
-    image: ghcr.io/tursodatabase/libsql-server:latest
-    platform: linux/amd64
+    image: mysql:8.4
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:3306:3306"
     environment:
-      SQLD_NODE: primary
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: rwdigital
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     volumes:
-      - libsql-data:/var/lib/sqld
+      - mysql-data:/var/lib/mysql
 
 volumes:
-  libsql-data:
+  mysql-data:

@@ -1,35 +1,49 @@
 import {
+  boolean,
+  customType,
+  double,
   index,
-  integer,
-  real,
-  sqliteTable,
+  int,
+  mysqlEnum,
+  mysqlTable,
   text,
-  uniqueIndex
-} from 'drizzle-orm/sqlite-core';
+  uniqueIndex,
+  varchar
+} from 'drizzle-orm/mysql-core';
 import { sql } from 'drizzle-orm';
+
+// Kolom JSON yang aman di MySQL maupun MariaDB. MySQL mengembalikan objek dari
+// kolom JSON, sedangkan MariaDB (JSON = alias LONGTEXT) mengembalikan string;
+// tipe bawaan Drizzle hanya siap untuk kasus pertama.
+const jsonKolom = <T>(nama: string) =>
+  customType<{ data: T; driverData: string | T }>({
+    dataType: () => 'json',
+    toDriver: (nilai) => JSON.stringify(nilai),
+    fromDriver: (nilai) => (typeof nilai === 'string' ? (JSON.parse(nilai) as T) : nilai)
+  })(nama);
 
 // ─── Timestamps helper ───────────────────────────────────────────────────────
 const timestamps = {
-  createdAt: text('created_at').notNull().default(sql`(current_timestamp)`),
-  updatedAt: text('updated_at').notNull().default(sql`(current_timestamp)`)
+  createdAt: varchar('created_at', { length: 255 }).notNull().default(sql`(current_timestamp)`),
+  updatedAt: varchar('updated_at', { length: 255 }).notNull().default(sql`(current_timestamp)`)
 };
 
 // ─── RW ──────────────────────────────────────────────────────────────────────
-export const rw = sqliteTable('rw', {
-  id:       integer('id').primaryKey({ autoIncrement: true }),
-  nama:     text('nama').notNull(),
-  alamat:   text('alamat').notNull(),
-  kelurahan:text('kelurahan').notNull(),
-  kecamatan:text('kecamatan').notNull(),
-  kota:     text('kota').notNull(),
+export const rw = mysqlTable('rw', {
+  id:       int('id').primaryKey().autoincrement(),
+  nama:     varchar('nama', { length: 255 }).notNull(),
+  alamat:   varchar('alamat', { length: 255 }).notNull(),
+  kelurahan:varchar('kelurahan', { length: 255 }).notNull(),
+  kecamatan:varchar('kecamatan', { length: 255 }).notNull(),
+  kota:     varchar('kota', { length: 255 }).notNull(),
   ...timestamps
 });
 
 // ─── RT ──────────────────────────────────────────────────────────────────────
-export const rt = sqliteTable('rt', {
-  id:       integer('id').primaryKey({ autoIncrement: true }),
-  nomor:    integer('nomor').notNull(),           // e.g. 01, 02
-  rwId:     integer('rw_id').notNull().references(() => rw.id),
+export const rt = mysqlTable('rt', {
+  id:       int('id').primaryKey().autoincrement(),
+  nomor:    int('nomor').notNull(),           // e.g. 01, 02
+  rwId:     int('rw_id').notNull().references(() => rw.id),
   ...timestamps
 });
 
@@ -37,10 +51,10 @@ export const rt = sqliteTable('rt', {
 // Satu akun `pengurus_rt` bertugas di satu RT. Tabel terpisah dipakai supaya
 // tabel `user` milik Better Auth tidak perlu diubah. Akun tanpa baris di sini
 // tidak mendapat akses data RT mana pun (fail-closed).
-export const petugasRt = sqliteTable('petugas_rt', {
-  id:     integer('id').primaryKey({ autoIncrement: true }),
-  userId: text('user_id').notNull().unique(),     // Better Auth user.id
-  rtId:   integer('rt_id').notNull().references(() => rt.id),
+export const petugasRt = mysqlTable('petugas_rt', {
+  id:     int('id').primaryKey().autoincrement(),
+  userId: varchar('user_id', { length: 255 }).notNull().unique(),     // Better Auth user.id
+  rtId:   int('rt_id').notNull().references(() => rt.id),
   ...timestamps
 }, (table) => [
   index('petugas_rt_rt_id_idx').on(table.rtId)
@@ -50,10 +64,10 @@ export const petugasRt = sqliteTable('petugas_rt', {
 // Disimpan terpisah dari tabel `user` Better Auth. Satu akun pengurus punya
 // satu gambar TTD; snapshot URL-nya disalin ke surat saat menandatangani agar
 // dokumen lama tidak berubah ketika gambar diganti.
-export const ttdPejabat = sqliteTable('ttd_pejabat', {
-  id:        integer('id').primaryKey({ autoIncrement: true }),
-  userId:    text('user_id').notNull().unique(),  // Better Auth user.id
-  url:       text('url').notNull(),               // /uploads/ttd/...
+export const ttdPejabat = mysqlTable('ttd_pejabat', {
+  id:        int('id').primaryKey().autoincrement(),
+  userId:    varchar('user_id', { length: 255 }).notNull().unique(),  // Better Auth user.id
+  url:       varchar('url', { length: 255 }).notNull(),               // /uploads/ttd/...
   ...timestamps
 });
 
@@ -69,78 +83,73 @@ export const ttdPejabat = sqliteTable('ttd_pejabat', {
 // - `permissions`: map modul → daftar aksi, mis. { "warga": ["read"] }.
 // - `sistem`    : role bawaan yang boleh diubah izinnya tapi tidak dihapus.
 // - `superadmin` : role dengan akses penuh permanen, tidak bisa diedit/dihapus.
-export const peran = sqliteTable('peran', {
-  id:          integer('id').primaryKey({ autoIncrement: true }),
-  nama:        text('nama').notNull().unique(),
-  label:       text('label').notNull(),
+export const peran = mysqlTable('peran', {
+  id:          int('id').primaryKey().autoincrement(),
+  nama:        varchar('nama', { length: 255 }).notNull().unique(),
+  label:       varchar('label', { length: 255 }).notNull(),
   deskripsi:   text('deskripsi'),
-  tipe:        text('tipe', { enum: ['staff', 'warga'] }).notNull().default('staff'),
-  scope:       text('scope', { enum: ['all', 'rt', 'none'] }).notNull().default('none'),
-  permissions: text('permissions', { mode: 'json' })
-    .$type<Record<string, string[]>>()
+  tipe:        mysqlEnum('tipe', ['staff', 'warga']).notNull().default('staff'),
+  scope:       mysqlEnum('scope', ['all', 'rt', 'none']).notNull().default('none'),
+  permissions: jsonKolom<Record<string, string[]>>('permissions')
     .notNull()
-    .default({}),
-  sistem:      integer('sistem', { mode: 'boolean' }).notNull().default(false),
-  superadmin:  integer('superadmin', { mode: 'boolean' }).notNull().default(false),
-  urutan:      integer('urutan').notNull().default(0),
+    .default(sql`(JSON_OBJECT())`),
+  sistem:      boolean('sistem').notNull().default(false),
+  superadmin:  boolean('superadmin').notNull().default(false),
+  urutan:      int('urutan').notNull().default(0),
   ...timestamps
 });
 
 // ─── KK (Kartu Keluarga) ─────────────────────────────────────────────────────
-export const kk = sqliteTable('kk', {
-  id:        integer('id').primaryKey({ autoIncrement: true }),
-  noKk:      text('no_kk').notNull().unique(),   // 16-digit KK number
-  alamat:    text('alamat').notNull(),
-  rtId:      integer('rt_id').notNull().references(() => rt.id),
-  statusHuni:text('status_huni', { enum: ['tetap', 'kontrak', 'kos'] }).notNull().default('tetap'),
+export const kk = mysqlTable('kk', {
+  id:        int('id').primaryKey().autoincrement(),
+  noKk:      varchar('no_kk', { length: 255 }).notNull().unique(),   // 16-digit KK number
+  alamat:    varchar('alamat', { length: 255 }).notNull(),
+  rtId:      int('rt_id').notNull().references(() => rt.id),
+  statusHuni:mysqlEnum('status_huni', ['tetap', 'kontrak', 'kos']).notNull().default('tetap'),
   ...timestamps
 });
 
 // ─── Warga ───────────────────────────────────────────────────────────────────
-export const warga = sqliteTable('warga', {
-  id:           integer('id').primaryKey({ autoIncrement: true }),
-  nik:          text('nik').notNull().unique(),   // 16-digit NIK
-  nama:         text('nama').notNull(),
-  tempatLahir:  text('tempat_lahir').notNull(),
-  tanggalLahir: text('tanggal_lahir').notNull(), // ISO date string
-  jenisKelamin: text('jenis_kelamin', { enum: ['L', 'P'] }).notNull(),
-  agama:        text('agama').notNull(),
-  pendidikan:   text('pendidikan'),
-  pekerjaan:    text('pekerjaan'),
-  statusPerkawinan: text('status_perkawinan', {
-    enum: ['belum_kawin', 'kawin', 'cerai_hidup', 'cerai_mati']
-  }).notNull().default('belum_kawin'),
-  statusHubunganKk: text('status_hubungan_kk', {
-    enum: ['kepala_keluarga', 'istri', 'anak', 'lainnya']
-  }).notNull(),
-  kkId:         integer('kk_id').notNull().references(() => kk.id),
-  aktif:        integer('aktif', { mode: 'boolean' }).notNull().default(true),
-  userId:       text('user_id'),                  // Better Auth user.id
+export const warga = mysqlTable('warga', {
+  id:           int('id').primaryKey().autoincrement(),
+  nik:          varchar('nik', { length: 255 }).notNull().unique(),   // 16-digit NIK
+  nama:         varchar('nama', { length: 255 }).notNull(),
+  tempatLahir:  varchar('tempat_lahir', { length: 255 }).notNull(),
+  tanggalLahir: varchar('tanggal_lahir', { length: 255 }).notNull(), // ISO date string
+  jenisKelamin: mysqlEnum('jenis_kelamin', ['L', 'P']).notNull(),
+  agama:        varchar('agama', { length: 255 }).notNull(),
+  pendidikan:   varchar('pendidikan', { length: 255 }),
+  pekerjaan:    varchar('pekerjaan', { length: 255 }),
+  statusPerkawinan: mysqlEnum('status_perkawinan', ['belum_kawin', 'kawin', 'cerai_hidup', 'cerai_mati']).notNull().default('belum_kawin'),
+  statusHubunganKk: mysqlEnum('status_hubungan_kk', ['kepala_keluarga', 'istri', 'anak', 'lainnya']).notNull(),
+  kkId:         int('kk_id').notNull().references(() => kk.id),
+  aktif:        boolean('aktif').notNull().default(true),
+  userId:       varchar('user_id', { length: 255 }),                  // Better Auth user.id
   alasanNonaktif:  text('alasan_nonaktif'),       // Pindah / Meninggal / dll.
-  tanggalNonaktif: text('tanggal_nonaktif'),      // Tanggal dinonaktifkan
+  tanggalNonaktif: varchar('tanggal_nonaktif', { length: 255 }),      // Tanggal dinonaktifkan
   ...timestamps
 });
 
-export const riwayatWarga = sqliteTable('riwayat_warga', {
-  id:         integer('id').primaryKey({ autoIncrement: true }),
-  wargaId:    integer('warga_id').notNull().references(() => warga.id),
-  diubahOleh: text('diubah_oleh').notNull(),      // user id yang mengubah
+export const riwayatWarga = mysqlTable('riwayat_warga', {
+  id:         int('id').primaryKey().autoincrement(),
+  wargaId:    int('warga_id').notNull().references(() => warga.id),
+  diubahOleh: varchar('diubah_oleh', { length: 255 }).notNull(),      // user id yang mengubah
   alasan:     text('alasan').notNull(),           // Alasan perubahan
   ringkasan:  text('ringkasan'),                  // Detail data yang diubah
-  tanggal:    text('tanggal').notNull().default(sql`(current_timestamp)`)
+  tanggal:    varchar('tanggal', { length: 255 }).notNull().default(sql`(current_timestamp)`)
 });
 
 // ─── Pengurus (bagan organisasi RW & RT) ────────────────────────────────────
 // `rtId` NULL = pengurus tingkat RW. `fotoUrl` menunjuk ke /uploads/pengurus/...
 // supaya bagan pengurus di landing page bisa menampilkan foto asli.
-export const pengurus = sqliteTable('pengurus', {
-  id:       integer('id').primaryKey({ autoIncrement: true }),
-  rtId:     integer('rt_id').references(() => rt.id),   // null = pengurus RW
-  jabatan:  text('jabatan').notNull(),                  // Ketua, Sekretaris, Bendahara, ...
-  nama:     text('nama').notNull(),
-  fotoUrl:  text('foto_url'),
-  urutan:   integer('urutan').notNull().default(0),
-  aktif:    integer('aktif', { mode: 'boolean' }).notNull().default(true),
+export const pengurus = mysqlTable('pengurus', {
+  id:       int('id').primaryKey().autoincrement(),
+  rtId:     int('rt_id').references(() => rt.id),   // null = pengurus RW
+  jabatan:  varchar('jabatan', { length: 255 }).notNull(),                  // Ketua, Sekretaris, Bendahara, ...
+  nama:     varchar('nama', { length: 255 }).notNull(),
+  fotoUrl:  varchar('foto_url', { length: 255 }),
+  urutan:   int('urutan').notNull().default(0),
+  aktif:    boolean('aktif').notNull().default(true),
   ...timestamps
 }, (table) => [
   index('pengurus_rt_id_idx').on(table.rtId)
@@ -149,130 +158,128 @@ export const pengurus = sqliteTable('pengurus', {
 // ─── Pengaturan Landing & Galeri (LP-01) ────────────────────────────────────
 // Satu baris konfigurasi (id = 1). Nilai kosong berarti landing memakai
 // default yang tertanam di kode, sehingga instalasi baru tetap tampil utuh.
-export const pengaturanLanding = sqliteTable('pengaturan_landing', {
-  id:               integer('id').primaryKey(),
-  heroJudul:        text('hero_judul'),
-  heroSubjudul:     text('hero_subjudul'),
+export const pengaturanLanding = mysqlTable('pengaturan_landing', {
+  id:               int('id').primaryKey(),
+  heroJudul:        varchar('hero_judul', { length: 255 }),
+  heroSubjudul:     varchar('hero_subjudul', { length: 255 }),
   // Berupa warna hex (#0f172a) atau path gambar (/uploads/landing/...).
-  heroBackground:   text('hero_background'),
+  heroBackground:   varchar('hero_background', { length: 255 }),
   sambutan:         text('sambutan'),
-  namaKetua:        text('nama_ketua'),
-  fotoKetua:        text('foto_ketua'),
+  namaKetua:        varchar('nama_ketua', { length: 255 }),
+  fotoKetua:        varchar('foto_ketua', { length: 255 }),
   visi:             text('visi'),
   misi:             text('misi'),          // satu poin per baris
   sejarah:          text('sejarah'),
-  alamat:           text('alamat'),
-  telepon:          text('telepon'),
-  email:            text('email'),
+  alamat:           varchar('alamat', { length: 255 }),
+  telepon:          varchar('telepon', { length: 255 }),
+  email:            varchar('email', { length: 255 }),
   ...timestamps
 });
 
-export const galeri = sqliteTable('galeri', {
-  id:         integer('id').primaryKey({ autoIncrement: true }),
-  judul:      text('judul').notNull(),
+export const galeri = mysqlTable('galeri', {
+  id:         int('id').primaryKey().autoincrement(),
+  judul:      varchar('judul', { length: 255 }).notNull(),
   keterangan: text('keterangan'),
-  fotoUrl:    text('foto_url').notNull(),
-  urutan:     integer('urutan').notNull().default(0),
-  aktif:      integer('aktif', { mode: 'boolean' }).notNull().default(true),
+  fotoUrl:    varchar('foto_url', { length: 255 }).notNull(),
+  urutan:     int('urutan').notNull().default(0),
+  aktif:      boolean('aktif').notNull().default(true),
   ...timestamps
 });
 
 // ─── Pengumuman ───────────────────────────────────────────────────────────────
-export const pengumuman = sqliteTable('pengumuman', {
-  id:            integer('id').primaryKey({ autoIncrement: true }),
-  judul:         text('judul').notNull(),
+export const pengumuman = mysqlTable('pengumuman', {
+  id:            int('id').primaryKey().autoincrement(),
+  judul:         varchar('judul', { length: 255 }).notNull(),
   isi:           text('isi').notNull(),
-  kategori:      text('kategori', {
-    enum: ['umum', 'kegiatan', 'keuangan', 'darurat']
-  }).notNull().default('umum'),
-  tanggalMulai:        text('tanggal_mulai'),
-  tanggalSelesai:      text('tanggal_selesai'),
-  tanggalMulaiEvent:   text('tanggal_mulai_event'),
-  tanggalSelesaiEvent: text('tanggal_selesai_event'),
-  lokasi:              text('lokasi'),
-  periodeUlang:        text('periode_ulang', { enum: ['sekali', 'mingguan', 'bulanan', 'kustom'] }).notNull().default('sekali'),
-  intervalHari:        integer('interval_hari'),
-  thumbnailUrl:        text('thumbnail_url'),
+  kategori:      mysqlEnum('kategori', ['umum', 'kegiatan', 'keuangan', 'darurat']).notNull().default('umum'),
+  tanggalMulai:        varchar('tanggal_mulai', { length: 255 }),
+  tanggalSelesai:      varchar('tanggal_selesai', { length: 255 }),
+  tanggalMulaiEvent:   varchar('tanggal_mulai_event', { length: 255 }),
+  tanggalSelesaiEvent: varchar('tanggal_selesai_event', { length: 255 }),
+  lokasi:              varchar('lokasi', { length: 255 }),
+  periodeUlang:        mysqlEnum('periode_ulang', ['sekali', 'mingguan', 'bulanan', 'kustom']).notNull().default('sekali'),
+  intervalHari:        int('interval_hari'),
+  thumbnailUrl:        varchar('thumbnail_url', { length: 255 }),
   lampiranUrls:        text('lampiran_urls'), // JSON array of string URLs
-  ditampilkan:         integer('ditampilkan', { mode: 'boolean' }).notNull().default(true),
-  rwId:                integer('rw_id').notNull().references(() => rw.id),
+  ditampilkan:         boolean('ditampilkan').notNull().default(true),
+  rwId:                int('rw_id').notNull().references(() => rw.id),
   // null = pengumuman tingkat RW (berlaku semua RT); terisi = khusus RT itu.
-  rtId:                integer('rt_id').references(() => rt.id),
-  dibuatOleh:          text('dibuat_oleh').notNull(), // user id from better-auth
+  rtId:                int('rt_id').references(() => rt.id),
+  dibuatOleh:          varchar('dibuat_oleh', { length: 255 }).notNull(), // user id from better-auth
   ...timestamps
 }, (table) => [
   index('pengumuman_rt_id_idx').on(table.rtId)
 ]);
 
 // ─── Notifikasi Sistem (In-app, Email, Push) ──────────────────────────────────
-export const notifikasi = sqliteTable('notifikasi', {
-  id:        integer('id').primaryKey({ autoIncrement: true }),
-  userId:    text('user_id').notNull(),
-  judul:     text('judul').notNull(),
-  pesan:     text('pesan').notNull(),
-  tipe:      text('tipe', { enum: ['info', 'sukses', 'peringatan', 'bahaya'] }).notNull().default('info'),
-  tautan:    text('tautan'),
-  dibaca:    integer('dibaca', { mode: 'boolean' }).notNull().default(false),
-  channel:   text('channel', { enum: ['in_app', 'email', 'push'] }).notNull().default('in_app'),
+export const notifikasi = mysqlTable('notifikasi', {
+  id:        int('id').primaryKey().autoincrement(),
+  userId:    varchar('user_id', { length: 255 }).notNull(),
+  judul:     varchar('judul', { length: 255 }).notNull(),
+  pesan:     varchar('pesan', { length: 255 }).notNull(),
+  tipe:      mysqlEnum('tipe', ['info', 'sukses', 'peringatan', 'bahaya']).notNull().default('info'),
+  tautan:    varchar('tautan', { length: 255 }),
+  dibaca:    boolean('dibaca').notNull().default(false),
+  channel:   mysqlEnum('channel', ['in_app', 'email', 'push']).notNull().default('in_app'),
   ...timestamps
 }, (table) => [
   index('notifikasi_user_idx').on(table.userId)
 ]);
 
 // ─── Iuran (jenis/tagihan periodik) ──────────────────────────────────────────
-export const jenisIuran = sqliteTable('jenis_iuran', {
-  id:       integer('id').primaryKey({ autoIncrement: true }),
-  nama:     text('nama').notNull(),             // e.g. "Iuran Keamanan", "Kebersihan"
-  nominal:  real('nominal').notNull(),
+export const jenisIuran = mysqlTable('jenis_iuran', {
+  id:       int('id').primaryKey().autoincrement(),
+  nama:     varchar('nama', { length: 255 }).notNull(),             // e.g. "Iuran Keamanan", "Kebersihan"
+  nominal:  double('nominal').notNull(),
   // Bagian RW dari tiap tagihan (nominal tetap per KK). Nilai ini adalah
   // konfigurasi data, bukan konstanta kode, sehingga porsi bisa diubah
   // kapan saja tanpa menyentuh tagihan lama (lihat snapshot di `tagihan`).
-  porsiRw:  real('porsi_rw').notNull().default(0),
-  periode:  text('periode', { enum: ['bulanan', 'tahunan', 'insidental'] }).notNull().default('bulanan'),
+  porsiRw:  double('porsi_rw').notNull().default(0),
+  periode:  mysqlEnum('periode', ['bulanan', 'tahunan', 'insidental']).notNull().default('bulanan'),
   // Siapa yang menagih: 'rw' = langsung RW ke warga, 'rt' = lewat RT.
   // Hanya jenis ber-scope 'rt' yang boleh digenerate per RT. Default 'rt'
   // supaya data lama (yang selama ini ditagih lewat RT) tetap bisa digenerate.
-  scope:    text('scope', { enum: ['rw', 'rt'] }).notNull().default('rt'),
-  rtId:     integer('rt_id').references(() => rt.id), // pemilik bila scope 'rt'; null = semua RT
-  urutan:   integer('urutan').notNull().default(0),
-  aktif:    integer('aktif', { mode: 'boolean' }).notNull().default(true),
-  rwId:     integer('rw_id').notNull().references(() => rw.id),
+  scope:    mysqlEnum('scope', ['rw', 'rt']).notNull().default('rt'),
+  rtId:     int('rt_id').references(() => rt.id), // pemilik bila scope 'rt'; null = semua RT
+  urutan:   int('urutan').notNull().default(0),
+  aktif:    boolean('aktif').notNull().default(true),
+  rwId:     int('rw_id').notNull().references(() => rw.id),
   ...timestamps
 });
 
 // Paket = preset beberapa jenis iuran yang biasa ditagih bersamaan
 // (mis. K3 + Soskem + Santunan). Isinya data, bukan kode.
-export const paketIuran = sqliteTable('paket_iuran', {
-  id:         integer('id').primaryKey({ autoIncrement: true }),
-  nama:       text('nama').notNull(),
+export const paketIuran = mysqlTable('paket_iuran', {
+  id:         int('id').primaryKey().autoincrement(),
+  nama:       varchar('nama', { length: 255 }).notNull(),
   keterangan: text('keterangan'),
-  aktif:      integer('aktif', { mode: 'boolean' }).notNull().default(true),
-  rwId:       integer('rw_id').notNull().references(() => rw.id),
+  aktif:      boolean('aktif').notNull().default(true),
+  rwId:       int('rw_id').notNull().references(() => rw.id),
   ...timestamps
 });
 
-export const paketIuranItem = sqliteTable('paket_iuran_item', {
-  id:           integer('id').primaryKey({ autoIncrement: true }),
-  paketId:      integer('paket_id').notNull().references(() => paketIuran.id, { onDelete: 'cascade' }),
-  jenisIuranId: integer('jenis_iuran_id').notNull().references(() => jenisIuran.id),
-  urutan:       integer('urutan').notNull().default(0)
+export const paketIuranItem = mysqlTable('paket_iuran_item', {
+  id:           int('id').primaryKey().autoincrement(),
+  paketId:      int('paket_id').notNull().references(() => paketIuran.id, { onDelete: 'cascade' }),
+  jenisIuranId: int('jenis_iuran_id').notNull().references(() => jenisIuran.id),
+  urutan:       int('urutan').notNull().default(0)
 }, (table) => [
   uniqueIndex('paket_iuran_item_unik').on(table.paketId, table.jenisIuranId)
 ]);
 
-export const tagihan = sqliteTable('tagihan', {
-  id:           integer('id').primaryKey({ autoIncrement: true }),
-  kkId:         integer('kk_id').notNull().references(() => kk.id),
-  jenisIuranId: integer('jenis_iuran_id').notNull().references(() => jenisIuran.id),
-  periode:      text('periode').notNull(),      // e.g. "2025-01"
+export const tagihan = mysqlTable('tagihan', {
+  id:           int('id').primaryKey().autoincrement(),
+  kkId:         int('kk_id').notNull().references(() => kk.id),
+  jenisIuranId: int('jenis_iuran_id').notNull().references(() => jenisIuran.id),
+  periode:      varchar('periode', { length: 255 }).notNull(),      // e.g. "2025-01"
   // Snapshot saat tagihan dibuat: perubahan nominal/porsi di jenis_iuran
   // tidak boleh mengubah tagihan yang sudah terbit.
-  nominal:      real('nominal').notNull(),
-  porsiRw:      real('porsi_rw').notNull().default(0),
-  status:       text('status', { enum: ['belum_bayar', 'lunas', 'sebagian'] }).notNull().default('belum_bayar'),
+  nominal:      double('nominal').notNull(),
+  porsiRw:      double('porsi_rw').notNull().default(0),
+  status:       mysqlEnum('status', ['belum_bayar', 'lunas', 'sebagian']).notNull().default('belum_bayar'),
   // Tanggal jatuh tempo (D4). Disimpan per tagihan supaya perubahan kebijakan
   // tidak menggeser tagihan yang sudah terbit. Null = belum ditetapkan.
-  jatuhTempo:   text('jatuh_tempo'),
+  jatuhTempo:   varchar('jatuh_tempo', { length: 255 }),
   ...timestamps
 }, (table) => [
   // Satu KK hanya punya satu tagihan per jenis per periode. Ini yang membuat
@@ -280,15 +287,15 @@ export const tagihan = sqliteTable('tagihan', {
   uniqueIndex('tagihan_kk_jenis_periode_unik').on(table.kkId, table.jenisIuranId, table.periode)
 ]);
 
-export const pembayaran = sqliteTable('pembayaran', {
-  id:          integer('id').primaryKey({ autoIncrement: true }),
-  tagihanId:   integer('tagihan_id').notNull().references(() => tagihan.id),
-  jumlah:      real('jumlah').notNull(),
-  metodeBayar: text('metode_bayar', { enum: ['qris', 'tunai', 'transfer'] }).notNull(),
-  referensi:   text('referensi'),               // QRIS/payment gateway ref
+export const pembayaran = mysqlTable('pembayaran', {
+  id:          int('id').primaryKey().autoincrement(),
+  tagihanId:   int('tagihan_id').notNull().references(() => tagihan.id),
+  jumlah:      double('jumlah').notNull(),
+  metodeBayar: mysqlEnum('metode_bayar', ['qris', 'tunai', 'transfer']).notNull(),
+  referensi:   varchar('referensi', { length: 255 }),               // QRIS/payment gateway ref
   catatan:     text('catatan'),
-  dibayarPada: text('dibayar_pada').notNull(),  // ISO datetime
-  dicatatOleh: text('dicatat_oleh').notNull(),  // user id
+  dibayarPada: varchar('dibayar_pada', { length: 255 }).notNull(),  // ISO datetime
+  dicatatOleh: varchar('dicatat_oleh', { length: 255 }).notNull(),  // user id
   ...timestamps
 });
 
@@ -296,19 +303,17 @@ export const pembayaran = sqliteTable('pembayaran', {
 // karena order bisa dibuat, kedaluwarsa, atau gagal tanpa pernah menjadi
 // pembayaran resmi. Baru setelah settlement/`capture` sukses baris
 // `pembayaran` dibuat (lewat `catatPembayaran`) dan `pembayaranId` diisi.
-export const pembayaranOnline = sqliteTable('pembayaran_online', {
-  id:              integer('id').primaryKey({ autoIncrement: true }),
-  tagihanId:       integer('tagihan_id').notNull().references(() => tagihan.id),
-  userId:          text('user_id').notNull(),          // Better Auth user.id
-  orderId:         text('order_id').notNull().unique(), // order_id Midtrans
-  jumlah:          real('jumlah').notNull(),
-  status:          text('status', {
-    enum: ['pending', 'capture', 'settlement', 'deny', 'cancel', 'expire', 'failure', 'refund']
-  }).notNull().default('pending'),
+export const pembayaranOnline = mysqlTable('pembayaran_online', {
+  id:              int('id').primaryKey().autoincrement(),
+  tagihanId:       int('tagihan_id').notNull().references(() => tagihan.id),
+  userId:          varchar('user_id', { length: 255 }).notNull(),          // Better Auth user.id
+  orderId:         varchar('order_id', { length: 255 }).notNull().unique(), // order_id Midtrans
+  jumlah:          double('jumlah').notNull(),
+  status:          mysqlEnum('status', ['pending', 'capture', 'settlement', 'deny', 'cancel', 'expire', 'failure', 'refund']).notNull().default('pending'),
   snapToken:       text('snap_token'),
   snapRedirectUrl: text('snap_redirect_url'),
-  paymentType:     text('payment_type'),
-  pembayaranId:    integer('pembayaran_id').references(() => pembayaran.id),
+  paymentType:     varchar('payment_type', { length: 255 }),
+  pembayaranId:    int('pembayaran_id').references(() => pembayaran.id),
   ...timestamps
 }, (table) => [
   index('pembayaran_online_tagihan_idx').on(table.tagihanId),
@@ -318,16 +323,16 @@ export const pembayaranOnline = sqliteTable('pembayaran_online', {
 // Pengajuan konfirmasi bayar dari portal warga (biasanya tunai ke bendahara).
 // Baru menjadi `pembayaran` resmi setelah diterima bendahara, supaya status
 // tagihan di portal dan di halaman staf selalu berasal dari sumber yang sama.
-export const konfirmasiBayar = sqliteTable('konfirmasi_bayar', {
-  id:           integer('id').primaryKey({ autoIncrement: true }),
-  tagihanId:    integer('tagihan_id').notNull().references(() => tagihan.id),
-  jumlah:       real('jumlah').notNull(),
-  metodeBayar:  text('metode_bayar', { enum: ['tunai', 'transfer'] }).notNull().default('tunai'),
+export const konfirmasiBayar = mysqlTable('konfirmasi_bayar', {
+  id:           int('id').primaryKey().autoincrement(),
+  tagihanId:    int('tagihan_id').notNull().references(() => tagihan.id),
+  jumlah:       double('jumlah').notNull(),
+  metodeBayar:  mysqlEnum('metode_bayar', ['tunai', 'transfer']).notNull().default('tunai'),
   catatan:      text('catatan'),
-  status:       text('status', { enum: ['menunggu', 'diterima', 'ditolak'] }).notNull().default('menunggu'),
-  diajukanOleh: text('diajukan_oleh').notNull(),  // user id warga
-  diprosesOleh: text('diproses_oleh'),
-  diprosesPada: text('diproses_pada'),
+  status:       mysqlEnum('status', ['menunggu', 'diterima', 'ditolak']).notNull().default('menunggu'),
+  diajukanOleh: varchar('diajukan_oleh', { length: 255 }).notNull(),  // user id warga
+  diprosesOleh: varchar('diproses_oleh', { length: 255 }),
+  diprosesPada: varchar('diproses_pada', { length: 255 }),
   alasanTolak:  text('alasan_tolak'),
   ...timestamps
 }, (table) => [
@@ -336,48 +341,48 @@ export const konfirmasiBayar = sqliteTable('konfirmasi_bayar', {
 ]);
 
 // ─── Kas RW & Kas RT (KU-01 s/d KU-04) ──────────────────────────────────────
-export const kategoriKas = sqliteTable('kategori_kas', {
-  id:    integer('id').primaryKey({ autoIncrement: true }),
-  nama:  text('nama').notNull(),
-  jenis: text('jenis', { enum: ['pemasukan', 'pengeluaran'] }).notNull(),
-  scope: text('scope', { enum: ['semua', 'rw', 'rt'] }).notNull().default('semua'),
-  rwId:  integer('rw_id').notNull().references(() => rw.id)
+export const kategoriKas = mysqlTable('kategori_kas', {
+  id:    int('id').primaryKey().autoincrement(),
+  nama:  varchar('nama', { length: 255 }).notNull(),
+  jenis: mysqlEnum('jenis', ['pemasukan', 'pengeluaran']).notNull(),
+  scope: mysqlEnum('scope', ['semua', 'rw', 'rt']).notNull().default('semua'),
+  rwId:  int('rw_id').notNull().references(() => rw.id)
 });
 
-export const transaksiKas = sqliteTable('transaksi_kas', {
-  id:             integer('id').primaryKey({ autoIncrement: true }),
-  jenis:          text('jenis', { enum: ['pemasukan', 'pengeluaran'] }).notNull(),
-  nominal:        real('nominal').notNull(),
+export const transaksiKas = mysqlTable('transaksi_kas', {
+  id:             int('id').primaryKey().autoincrement(),
+  jenis:          mysqlEnum('jenis', ['pemasukan', 'pengeluaran']).notNull(),
+  nominal:        double('nominal').notNull(),
   keterangan:     text('keterangan').notNull(),
-  kategoriId:     integer('kategori_id').references(() => kategoriKas.id),
-  tanggal:        text('tanggal').notNull(),        // ISO date
-  bukti:          text('bukti'),                    // file path/URL lokal
-  dicatatOleh:    text('dicatat_oleh').notNull(),   // user id
-  dibatalkan:     integer('dibatalkan', { mode: 'boolean' }).notNull().default(false),
+  kategoriId:     int('kategori_id').references(() => kategoriKas.id),
+  tanggal:        varchar('tanggal', { length: 255 }).notNull(),        // ISO date
+  bukti:          varchar('bukti', { length: 255 }),                    // file path/URL lokal
+  dicatatOleh:    varchar('dicatat_oleh', { length: 255 }).notNull(),   // user id
+  dibatalkan:     boolean('dibatalkan').notNull().default(false),
   alasanBatal:    text('alasan_batal'),
-  dibatalkanOleh: text('dibatalkan_oleh'),
-  rwId:           integer('rw_id').notNull().references(() => rw.id),
+  dibatalkanOleh: varchar('dibatalkan_oleh', { length: 255 }),
+  rwId:           int('rw_id').notNull().references(() => rw.id),
   ...timestamps
 });
 
-export const transaksiKasRt = sqliteTable('transaksi_kas_rt', {
-  id:             integer('id').primaryKey({ autoIncrement: true }),
-  rtId:           integer('rt_id').notNull().references(() => rt.id),
-  namaKas:        text('nama_kas').notNull().default('Kas Sosial Kematian'), // e.g. "Kas Sosial Kematian", "Kas Rukun Kematian", "Kas Operasional RT"
-  jenis:          text('jenis', { enum: ['pemasukan', 'pengeluaran'] }).notNull(),
-  nominal:        real('nominal').notNull(),
+export const transaksiKasRt = mysqlTable('transaksi_kas_rt', {
+  id:             int('id').primaryKey().autoincrement(),
+  rtId:           int('rt_id').notNull().references(() => rt.id),
+  namaKas:        varchar('nama_kas', { length: 255 }).notNull().default('Kas Sosial Kematian'), // e.g. "Kas Sosial Kematian", "Kas Rukun Kematian", "Kas Operasional RT"
+  jenis:          mysqlEnum('jenis', ['pemasukan', 'pengeluaran']).notNull(),
+  nominal:        double('nominal').notNull(),
   keterangan:     text('keterangan').notNull(),
-  kategoriId:     integer('kategori_id').references(() => kategoriKas.id),
-  tanggal:        text('tanggal').notNull(),        // ISO date
-  bukti:          text('bukti'),                    // file path/URL lokal
-  dicatatOleh:    text('dicatat_oleh').notNull(),   // user id
-  dibatalkan:     integer('dibatalkan', { mode: 'boolean' }).notNull().default(false),
+  kategoriId:     int('kategori_id').references(() => kategoriKas.id),
+  tanggal:        varchar('tanggal', { length: 255 }).notNull(),        // ISO date
+  bukti:          varchar('bukti', { length: 255 }),                    // file path/URL lokal
+  dicatatOleh:    varchar('dicatat_oleh', { length: 255 }).notNull(),   // user id
+  dibatalkan:     boolean('dibatalkan').notNull().default(false),
   alasanBatal:    text('alasan_batal'),
-  dibatalkanOleh: text('dibatalkan_oleh'),
-  metodePembayaran: text('metode_pembayaran').notNull().default('tunai'),
-  midtransOrderId:  text('midtrans_order_id'),
-  midtransPaymentType: text('midtrans_payment_type'),
-  midtransStatus:   text('midtrans_status'),
+  dibatalkanOleh: varchar('dibatalkan_oleh', { length: 255 }),
+  metodePembayaran: varchar('metode_pembayaran', { length: 255 }).notNull().default('tunai'),
+  midtransOrderId:  varchar('midtrans_order_id', { length: 255 }),
+  midtransPaymentType: varchar('midtrans_payment_type', { length: 255 }),
+  midtransStatus:   varchar('midtrans_status', { length: 255 }),
   snapToken:        text('snap_token'),
   ...timestamps
 });
@@ -386,70 +391,70 @@ export const transaksiKasRt = sqliteTable('transaksi_kas_rt', {
 // Uang iuran RT ditahan di kas RT sampai disetorkan. Satu baris setoran
 // mencatat dua sisi sekaligus (kas RT keluar, kas RW masuk) supaya angka
 // selalu bisa ditelusuri dan pembatalan tidak pernah menghitung dua kali.
-export const setoranRt = sqliteTable('setoran_rt', {
-  id:             integer('id').primaryKey({ autoIncrement: true }),
-  rtId:           integer('rt_id').notNull().references(() => rt.id),
-  periode:        text('periode').notNull(),          // e.g. "2026-10"
+export const setoranRt = mysqlTable('setoran_rt', {
+  id:             int('id').primaryKey().autoincrement(),
+  rtId:           int('rt_id').notNull().references(() => rt.id),
+  periode:        varchar('periode', { length: 255 }).notNull(),          // e.g. "2026-10"
   // Snapshot saat setoran dibuat; perubahan pembayaran sesudahnya tidak
   // mengubah setoran yang sudah tercatat.
-  totalTerkumpul: real('total_terkumpul').notNull().default(0),
-  porsiRw:        real('porsi_rw').notNull().default(0),
+  totalTerkumpul: double('total_terkumpul').notNull().default(0),
+  porsiRw:        double('porsi_rw').notNull().default(0),
   catatan:        text('catatan'),
-  bukti:          text('bukti'),
-  disetorPada:    text('disetor_pada').notNull(),     // ISO date
-  dicatatOleh:    text('dicatat_oleh').notNull(),
-  transaksiRwId:  integer('transaksi_rw_id').references(() => transaksiKas.id),
-  transaksiRtId:  integer('transaksi_rt_id').references(() => transaksiKasRt.id),
-  dibatalkan:     integer('dibatalkan', { mode: 'boolean' }).notNull().default(false),
+  bukti:          varchar('bukti', { length: 255 }),
+  disetorPada:    varchar('disetor_pada', { length: 255 }).notNull(),     // ISO date
+  dicatatOleh:    varchar('dicatat_oleh', { length: 255 }).notNull(),
+  transaksiRwId:  int('transaksi_rw_id').references(() => transaksiKas.id),
+  transaksiRtId:  int('transaksi_rt_id').references(() => transaksiKasRt.id),
+  dibatalkan:     boolean('dibatalkan').notNull().default(false),
   alasanBatal:    text('alasan_batal'),
-  dibatalkanOleh: text('dibatalkan_oleh'),
+  dibatalkanOleh: varchar('dibatalkan_oleh', { length: 255 }),
+  // Kolom turunan: 1 saat setoran aktif, NULL saat dibatalkan. MySQL tidak punya
+  // partial unique index, jadi keunikan "satu setoran aktif" dibangun lewat
+  // unique index yang menyertakan kolom ini (NULL tidak dianggap duplikat).
+  aktifKey:       int('aktif_key').generatedAlwaysAs(sql`IF(dibatalkan = 0, 1, NULL)`, { mode: 'virtual' }),
   ...timestamps
 }, (table) => [
   // Satu RT hanya boleh punya satu setoran aktif per periode. Setoran yang
   // dibatalkan tidak dihitung, jadi periode itu bisa disetor ulang.
-  uniqueIndex('setoran_rt_rt_periode_unik')
-    .on(table.rtId, table.periode)
-    .where(sql`${table.dibatalkan} = 0`)
+  uniqueIndex('setoran_rt_rt_periode_unik').on(table.rtId, table.periode, table.aktifKey)
 ]);
 
 // ─── Surat-Menyurat (SF-SR-01 s/d SF-SR-07) ─────────────────────────────────
-export const surat = sqliteTable('surat', {
-  id:               integer('id').primaryKey({ autoIncrement: true }),
+export const surat = mysqlTable('surat', {
+  id:               int('id').primaryKey().autoincrement(),
   // Nomor hanya diisi saat seluruh TTD yang diminta selesai (status terbit).
   // UNIQUE menjaga agar dua surat tidak pernah mendapat nomor yang sama.
-  nomorSurat:       text('nomor_surat').unique(),
-  jenis:            text('jenis').notNull(),         // e.g. "skck", "sktm", "domisili", "usaha", "kematian", "umum"
-  keperluan:        text('keperluan').notNull(),
+  nomorSurat:       varchar('nomor_surat', { length: 255 }).unique(),
+  jenis:            varchar('jenis', { length: 255 }).notNull(),         // e.g. "skck", "sktm", "domisili", "usaha", "kematian", "umum"
+  keperluan:        varchar('keperluan', { length: 255 }).notNull(),
   keterangan:       text('keterangan'),
-  dokumenSyarat:    text('dokumen_syarat'),          // path lokal file berkas persyaratan
-  status:           text('status', {
-    enum: ['diajukan', 'menunggu_ttd', 'terbit', 'ditolak']
-  }).notNull().default('diajukan'),
+  dokumenSyarat:    varchar('dokumen_syarat', { length: 255 }),          // path lokal file berkas persyaratan
+  status:           mysqlEnum('status', ['diajukan', 'menunggu_ttd', 'terbit', 'ditolak']).notNull().default('diajukan'),
   catatanPengurus:  text('catatan_pengurus'),        // alasan tolak atau catatan verifikasi
   // Permintaan tanda tangan dari warga saat mengajukan surat.
-  butuhTtdRt:       integer('butuh_ttd_rt', { mode: 'boolean' }).notNull().default(false),
-  butuhTtdRw:       integer('butuh_ttd_rw', { mode: 'boolean' }).notNull().default(false),
+  butuhTtdRt:       boolean('butuh_ttd_rt').notNull().default(false),
+  butuhTtdRw:       boolean('butuh_ttd_rw').notNull().default(false),
   // Snapshot tanda tangan: URL gambar + identitas pejabat saat menandatangani.
-  ttdRtUrl:         text('ttd_rt_url'),
-  ttdRtOleh:        text('ttd_rt_oleh'),             // user id penanda tangan RT
-  ttdRtPada:        text('ttd_rt_pada'),             // ISO datetime
-  ttdRtNama:        text('ttd_rt_nama'),
-  ttdRtJabatan:     text('ttd_rt_jabatan'),
-  ttdRwUrl:         text('ttd_rw_url'),
-  ttdRwOleh:        text('ttd_rw_oleh'),             // user id penanda tangan RW
-  ttdRwPada:        text('ttd_rw_pada'),             // ISO datetime
-  ttdRwNama:        text('ttd_rw_nama'),
-  ttdRwJabatan:     text('ttd_rw_jabatan'),
+  ttdRtUrl:         varchar('ttd_rt_url', { length: 255 }),
+  ttdRtOleh:        varchar('ttd_rt_oleh', { length: 255 }),             // user id penanda tangan RT
+  ttdRtPada:        varchar('ttd_rt_pada', { length: 255 }),             // ISO datetime
+  ttdRtNama:        varchar('ttd_rt_nama', { length: 255 }),
+  ttdRtJabatan:     varchar('ttd_rt_jabatan', { length: 255 }),
+  ttdRwUrl:         varchar('ttd_rw_url', { length: 255 }),
+  ttdRwOleh:        varchar('ttd_rw_oleh', { length: 255 }),             // user id penanda tangan RW
+  ttdRwPada:        varchar('ttd_rw_pada', { length: 255 }),             // ISO datetime
+  ttdRwNama:        varchar('ttd_rw_nama', { length: 255 }),
+  ttdRwJabatan:     varchar('ttd_rw_jabatan', { length: 255 }),
   // Jejak proses: verifikasi diisi saat pihak pertama menandatangani, lalu
   // disetujui/terbit saat semua TTD yang diminta lengkap.
-  diverifikasiOleh: text('diverifikasi_oleh'),       // user id pengurus RT/RW
-  disetujuiOleh:    text('disetujui_oleh'),          // user id pihak terakhir
-  tanggalTerbit:    text('tanggal_terbit'),          // ISO date
-  diverifikasiPada: text('diverifikasi_pada'),       // ISO datetime
-  disetujuiPada:    text('disetujui_pada'),          // ISO datetime
-  ditolakPada:      text('ditolak_pada'),            // ISO datetime
-  ditolakOleh:      text('ditolak_oleh'),            // user id penolak
-  wargaId:          integer('warga_id').notNull().references(() => warga.id),
+  diverifikasiOleh: varchar('diverifikasi_oleh', { length: 255 }),       // user id pengurus RT/RW
+  disetujuiOleh:    varchar('disetujui_oleh', { length: 255 }),          // user id pihak terakhir
+  tanggalTerbit:    varchar('tanggal_terbit', { length: 255 }),          // ISO date
+  diverifikasiPada: varchar('diverifikasi_pada', { length: 255 }),       // ISO datetime
+  disetujuiPada:    varchar('disetujui_pada', { length: 255 }),          // ISO datetime
+  ditolakPada:      varchar('ditolak_pada', { length: 255 }),            // ISO datetime
+  ditolakOleh:      varchar('ditolak_oleh', { length: 255 }),            // user id penolak
+  wargaId:          int('warga_id').notNull().references(() => warga.id),
   ...timestamps
 });
 
@@ -457,20 +462,18 @@ export const surat = sqliteTable('surat', {
 // Warga mengajukan perubahan data diri; pengurus menyetujui/menolak sebelum
 // perubahan diterapkan ke tabel warga. Status flow:
 //   diajukan → diverifikasi → disetujui | ditolak
-export const permintaanPembaruan = sqliteTable('permintaan_pembaruan', {
-  id:             integer('id').primaryKey({ autoIncrement: true }),
-  wargaId:        integer('warga_id').notNull().references(() => warga.id, { onDelete: 'cascade' }),
+export const permintaanPembaruan = mysqlTable('permintaan_pembaruan', {
+  id:             int('id').primaryKey().autoincrement(),
+  wargaId:        int('warga_id').notNull().references(() => warga.id, { onDelete: 'cascade' }),
   // Snapshot perubahan yang diajukan (JSON stringified)
   dataLama:       text('data_lama').notNull(),    // JSON snapshot data sebelum
   dataBaru:       text('data_baru').notNull(),    // JSON data yang diusulkan warga
   catatan:        text('catatan'),                // Penjelasan alasan perubahan
-  status:         text('status', {
-    enum: ['diajukan', 'diverifikasi', 'disetujui', 'ditolak']
-  }).notNull().default('diajukan'),
+  status:         mysqlEnum('status', ['diajukan', 'diverifikasi', 'disetujui', 'ditolak']).notNull().default('diajukan'),
   catatanPengurus:text('catatan_pengurus'),       // Alasan tolak / catatan verifikasi
-  ditinjauOleh:   text('ditinjau_oleh'),          // user id pengurus yang meninjau
-  tanggalTinjau:  text('tanggal_tinjau'),         // ISO datetime saat ditinjau
-  diajukanOleh:   text('diajukan_oleh').notNull(), // user id warga pengaju
+  ditinjauOleh:   varchar('ditinjau_oleh', { length: 255 }),          // user id pengurus yang meninjau
+  tanggalTinjau:  varchar('tanggal_tinjau', { length: 255 }),         // ISO datetime saat ditinjau
+  diajukanOleh:   varchar('diajukan_oleh', { length: 255 }).notNull(), // user id warga pengaju
   ...timestamps
 }, (table) => [
   index('permintaan_pembaruan_warga_id_idx').on(table.wargaId)

@@ -64,7 +64,7 @@ export const POST: RequestHandler = async ({ request }) => {
     });
 
     if (res?.user?.id) {
-      await db.run(sql`UPDATE user SET role = ${'warga'} WHERE id = ${res.user.id}`);
+      await db.execute(sql`UPDATE user SET role = ${'warga'} WHERE id = ${res.user.id}`);
       await db.update(warga).set({ userId: res.user.id }).where(eq(warga.id, dataWarga.id));
 
       // Kirim notifikasi selamat datang

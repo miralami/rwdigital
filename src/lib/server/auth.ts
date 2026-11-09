@@ -3,9 +3,8 @@ import { admin } from 'better-auth/plugins';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
 import { getRequestEvent } from '$app/server';
 import { dev } from '$app/environment';
-import { LibsqlDialect } from '@libsql/kysely-libsql';
 import { env } from '$env/dynamic/private';
-import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from '$env/static/private';
+import { pool } from '$lib/server/db';
 import { ac, roles } from '$lib/permissions';
 
 const trustedOrigins = [
@@ -27,13 +26,7 @@ export const auth = betterAuth({
     ...trustedOrigins
   ],
   advanced: { trustedProxyHeaders: true },
-  database: {
-    dialect: new LibsqlDialect({
-      url: TURSO_DATABASE_URL,
-      authToken: TURSO_AUTH_TOKEN
-    }),
-    type: 'sqlite'
-  },
+  database: pool,
   emailAndPassword: {
     enabled: true,
     sendResetPassword: async ({ user, url }) => {

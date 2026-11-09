@@ -22,8 +22,8 @@ Sistem Informasi RW — aplikasi capstone untuk digitalisasi administrasi tingka
 
 - Bahasa & framework: **SvelteKit 2 + Svelte 5** (TypeScript, runes mode aktif)
 - CSS: **Tailwind CSS v4** via `@tailwindcss/vite` — design tokens di `src/app.css` (@theme)
-- Database: **SQLite via Turso/libsql** (`file:local.db` lokal, `libsql://...` production)
-- ORM / query layer: **Drizzle ORM** (`drizzle-orm/libsql`) + drizzle-kit migrations
+- Database: **MySQL/MariaDB** via `mysql2` (`DATABASE_URL=mysql://user:pass@host:3306/rwdigital`); lokal bisa XAMPP/MariaDB atau `docker compose up -d`
+- ORM / query layer: **Drizzle ORM** (`drizzle-orm/mysql2`) + drizzle-kit migrations
 - Autentikasi: **Better Auth** dengan `admin` plugin — roles: `superadmin`, `pengurus_rw`, `pengurus_rt`, `warga`
 - Payment gateway / QRIS provider: `[TODO — konfirmasi mitra dulu]`
 - Hosting/deployment: `[TODO]`
@@ -40,30 +40,22 @@ npm run dev
 # Type check
 npm run check
 
-# Bootstrap DB lokal (domain + Better Auth, idempotent)
+# Bootstrap DB (buat database + tabel Better Auth + migrasi domain, idempotent)
 npm run db:setup
 
-# Generate SQL migrasi baru, lalu terapkan ke local.db
+# Generate SQL migrasi baru, lalu terapkan
 npx drizzle-kit generate
 npm run db:setup
 
-# Jalankan migrasi (Turso remote/production)
-npx drizzle-kit migrate
+# Data contoh (akun admin/pengurus/warga + data RW)
+npm run db:seed
 
-# PENTING: jangan `npx drizzle-kit push` pada local.db — tabel Better Auth
-# (user/session/account/verification) bukan bagian dari schema Drizzle, jadi
-# drizzle-kit meminta jawaban interaktif dan bisa crash di Windows.
+# PENTING: jangan `npx drizzle-kit push` — tabel Better Auth (user/session/account/
+# verification) bukan bagian dari schema Drizzle (lihat scripts/auth-schema.sql),
+# jadi drizzle-kit menganggapnya tabel asing. Pakai generate + db:setup.
 #
-# PENTING: DB lokal = `file:local.db`. `compose.yaml` (libsql-server via Docker)
-# belum tersambung ke script mana pun — `db:setup`/`db:auth` hanya menerima URL
-# `file:`, jadi jangan arahkan TURSO_DATABASE_URL ke 127.0.0.1:8080.
-
-# Laporan: tarik Capstone.docx -> laporan.md (cermin), lalu buat lembar copas usulan
-npm run laporan:pull
-npm run laporan:usulan
-
-# Build production
-npm run build
+# Catatan MySQL: tanggal disimpan sebagai string ISO (varchar) seperti sebelumnya;
+# tidak ada RETURNING — pakai insertId dari hasil insert.
 ```
 
 ## Struktur Repo
@@ -79,7 +71,7 @@ src/
     server/
       auth.ts              ← Better Auth server instance
       db/
-        index.ts           ← Drizzle client (Turso/libsql)
+        index.ts           ← Drizzle client (mysql2)
         schema.ts          ← Semua tabel domain
   routes/
     +layout.svelte         ← Root layout (app.css import)

@@ -185,7 +185,7 @@ export const actions: Actions = {
 
     // Pecah insert agar tidak menabrak batas jumlah variabel SQLite.
     for (let i = 0; i < barisBaru.length; i += 100) {
-      await db.insert(tagihan).values(barisBaru.slice(i, i + 100)).onConflictDoNothing();
+      await db.insert(tagihan).ignore().values(barisBaru.slice(i, i + 100));
     }
 
     // ── 4. Ringkasan untuk ditampilkan kembali ke pengguna ──────────────────

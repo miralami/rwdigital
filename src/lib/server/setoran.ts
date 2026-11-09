@@ -203,8 +203,7 @@ export async function catatSetoran(input: CatatSetoranInput): Promise<HasilSetor
         tanggal: input.tanggal,
         bukti: input.bukti || null,
         dicatatOleh: input.operator
-      })
-      .returning({ id: transaksiKasRt.id });
+      });
 
     const [masuk] = await tx
       .insert(transaksiKas)
@@ -217,8 +216,7 @@ export async function catatSetoran(input: CatatSetoranInput): Promise<HasilSetor
         bukti: input.bukti || null,
         dicatatOleh: input.operator,
         rwId
-      })
-      .returning({ id: transaksiKas.id });
+      });
 
     const [setoran] = await tx
       .insert(setoranRt)
@@ -231,12 +229,11 @@ export async function catatSetoran(input: CatatSetoranInput): Promise<HasilSetor
         bukti: input.bukti || null,
         disetorPada: input.tanggal,
         dicatatOleh: input.operator,
-        transaksiRwId: masuk?.id ?? null,
-        transaksiRtId: keluar?.id ?? null
-      })
-      .returning({ id: setoranRt.id });
+        transaksiRwId: masuk?.insertId ?? null,
+        transaksiRtId: keluar?.insertId ?? null
+      });
 
-    return { id: setoran.id, porsiRw: ringkasan.porsiRw, totalTerkumpul: ringkasan.totalTerkumpul };
+    return { id: setoran.insertId, porsiRw: ringkasan.porsiRw, totalTerkumpul: ringkasan.totalTerkumpul };
   });
 
   return hasil;

@@ -115,7 +115,7 @@ export const actions: Actions = {
 
     const [rwData] = await db.select().from(rw).limit(1);
 
-    const [baru] = await db.insert(pengumuman).values({
+    await db.insert(pengumuman).values({
       judul: result.data.judul,
       isi: result.data.isi,
       kategori: result.data.kategori,
@@ -132,7 +132,7 @@ export const actions: Actions = {
       rwId: rwData?.id ?? 1,
       rtId,
       dibuatOleh: locals.user?.name ?? locals.user?.id ?? 'Pengurus'
-    }).returning();
+    });
 
     // Broadcast in-app & push notification to linked warga — hanya warga di RT
     // yang bersangkutan kalau pengumuman ini milik satu RT.

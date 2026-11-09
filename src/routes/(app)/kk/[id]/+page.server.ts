@@ -72,9 +72,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   let userAccount: { id: string; email: string; role: string | null } | null = null;
   if (detail.userId) {
     try {
-      const userRows = await db.all<{ id: string; email: string; role: string | null }>(
+      const [userRows] = (await db.execute(
         sql`SELECT id, email, role FROM user WHERE id = ${detail.userId}`
-      );
+      )) as unknown as [{ id: string; email: string; role: string | null }[]];
       userAccount = userRows[0] ?? null;
     } catch {
       userAccount = null;
@@ -147,7 +147,7 @@ export const actions: Actions = {
       if (res?.user?.id) {
         // `signUpEmail` tidak menerima role. Set eksplisit supaya akun ini
         // benar-benar jadi portal warga, bukan role default.
-        await db.run(sql`UPDATE user SET role = ${'warga'} WHERE id = ${res.user.id}`);
+        await db.execute(sql`UPDATE user SET role = ${'warga'} WHERE id = ${res.user.id}`);
         await db.update(warga).set({ userId: res.user.id }).where(eq(warga.id, id));
       }
 

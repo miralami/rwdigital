@@ -92,12 +92,12 @@ export const actions: Actions = {
 
     // Insert atomic
     try {
-      const [newKk] = await db.insert(kk).values(kkResult.data).returning();
+      const [{ insertId: newKkId }] = await db.insert(kk).values(kkResult.data);
 
       for (const a of validatedAnggota) {
         await db.insert(warga).values({
           ...a,
-          kkId: newKk.id
+          kkId: newKkId
         });
       }
     } catch (err: any) {

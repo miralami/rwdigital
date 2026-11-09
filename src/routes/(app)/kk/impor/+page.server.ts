@@ -114,8 +114,8 @@ export const actions: Actions = {
           continue;
         }
         if (!rtId) {
-          const [newRt] = await db.insert(rt).values({ nomor: nomorRt, rwId: defaultRw.id }).returning();
-          rtId = newRt.id;
+          const [newRt] = await db.insert(rt).values({ nomor: nomorRt, rwId: defaultRw.id });
+          rtId = newRt.insertId;
           rtMap.set(nomorRt, rtId);
         }
 
@@ -139,9 +139,8 @@ export const actions: Actions = {
               alamat,
               rtId,
               statusHuni: ['tetap', 'kontrak', 'kos'].includes(statusHuni) ? statusHuni : 'tetap'
-            })
-            .returning();
-          kkId = newKk.id;
+            });
+          kkId = newKk.insertId;
         }
 
         // Insert Warga

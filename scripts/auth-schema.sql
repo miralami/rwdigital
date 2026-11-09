@@ -1,59 +1,60 @@
--- Better Auth tables (emailAndPassword + admin plugin).
--- Generated with: npx @better-auth/cli generate --config src/lib/server/auth.ts
--- Apply with: npm run db:auth
--- Keep in sync with src/lib/server/auth.ts when plugins change.
+-- Better Auth tables (emailAndPassword + admin plugin), dialek MySQL/MariaDB.
+-- Berbasis: npx @better-auth/cli generate --config src/lib/server/auth.ts
+-- Terapkan dengan: npm run db:auth  (atau otomatis lewat npm run db:setup)
+-- Selaraskan dengan src/lib/server/auth.ts bila plugin berubah.
 
-create table if not exists "user" (
-  "id" text not null primary key,
-  "name" text not null,
-  "email" text not null unique,
-  "emailVerified" integer not null,
-  "image" text,
-  "createdAt" date not null,
-  "updatedAt" date not null,
-  "role" text,
-  "banned" integer,
-  "banReason" text,
-  "banExpires" date
+create table if not exists `user` (
+  `id` varchar(36) not null primary key,
+  `name` varchar(255) not null,
+  `email` varchar(255) not null unique,
+  `emailVerified` tinyint(1) not null default 0,
+  `image` text,
+  `createdAt` datetime(3) not null default current_timestamp(3),
+  `updatedAt` datetime(3) not null default current_timestamp(3),
+  `role` varchar(255),
+  `banned` tinyint(1) default 0,
+  `banReason` text,
+  `banExpires` datetime(3)
 );
 
-create table if not exists "session" (
-  "id" text not null primary key,
-  "expiresAt" date not null,
-  "token" text not null unique,
-  "createdAt" date not null,
-  "updatedAt" date not null,
-  "ipAddress" text,
-  "userAgent" text,
-  "userId" text not null references "user" ("id") on delete cascade,
-  "impersonatedBy" text
+create table if not exists `session` (
+  `id` varchar(36) not null primary key,
+  `expiresAt` datetime(3) not null,
+  `token` varchar(255) not null unique,
+  `createdAt` datetime(3) not null default current_timestamp(3),
+  `updatedAt` datetime(3) not null default current_timestamp(3),
+  `ipAddress` text,
+  `userAgent` text,
+  `userId` varchar(36) not null,
+  `impersonatedBy` text,
+  constraint `session_userId_fk` foreign key (`userId`) references `user` (`id`) on delete cascade
 );
 
-create table if not exists "account" (
-  "id" text not null primary key,
-  "accountId" text not null,
-  "providerId" text not null,
-  "userId" text not null references "user" ("id") on delete cascade,
-  "accessToken" text,
-  "refreshToken" text,
-  "idToken" text,
-  "accessTokenExpiresAt" date,
-  "refreshTokenExpiresAt" date,
-  "scope" text,
-  "password" text,
-  "createdAt" date not null,
-  "updatedAt" date not null
+create table if not exists `account` (
+  `id` varchar(36) not null primary key,
+  `accountId` text not null,
+  `providerId` text not null,
+  `userId` varchar(36) not null,
+  `accessToken` text,
+  `refreshToken` text,
+  `idToken` text,
+  `accessTokenExpiresAt` datetime(3),
+  `refreshTokenExpiresAt` datetime(3),
+  `scope` text,
+  `password` text,
+  `createdAt` datetime(3) not null default current_timestamp(3),
+  `updatedAt` datetime(3) not null default current_timestamp(3),
+  constraint `account_userId_fk` foreign key (`userId`) references `user` (`id`) on delete cascade
 );
 
-create table if not exists "verification" (
-  "id" text not null primary key,
-  "identifier" text not null,
-  "value" text not null,
-  "expiresAt" date not null,
-  "createdAt" date not null,
-  "updatedAt" date not null
+create table if not exists `verification` (
+  `id` varchar(36) not null primary key,
+  `identifier` varchar(255) not null,
+  `value` text not null,
+  `expiresAt` datetime(3) not null,
+  `createdAt` datetime(3) not null default current_timestamp(3),
+  `updatedAt` datetime(3) not null default current_timestamp(3)
 );
 
-create index if not exists "session_userId_idx" on "session" ("userId");
-create index if not exists "account_userId_idx" on "account" ("userId");
-create index if not exists "verification_identifier_idx" on "verification" ("identifier");
+-- MySQL tidak punya `create index if not exists`; index dibuat di db-setup.mts
+-- (cek information_schema dulu) agar skrip aman dijalankan berulang.

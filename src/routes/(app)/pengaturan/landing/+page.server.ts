@@ -130,8 +130,7 @@ export const actions: Actions = {
     await db
       .insert(pengaturanLanding)
       .values({ id: 1, ...nilai })
-      .onConflictDoUpdate({
-        target: pengaturanLanding.id,
+      .onDuplicateKeyUpdate({
         set: { ...nilai, updatedAt: new Date().toISOString() }
       });
 

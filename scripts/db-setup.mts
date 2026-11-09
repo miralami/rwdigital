@@ -1,12 +1,13 @@
-import { DatabaseSync } from 'node:sqlite';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
-import { resolve, join, relative } from 'node:path';
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { createConnection } from 'mysql2/promise';
+import { drizzle } from 'drizzle-orm/mysql2';
+import { migrate } from 'drizzle-orm/mysql2/migrator';
 
 // ─── Load .env ────────────────────────────────────────────────────────────────
 const envPath = resolve(process.cwd(), '.env');
 if (existsSync(envPath)) {
-	const envContent = readFileSync(envPath, 'utf8');
-	for (const line of envContent.split('\n')) {
+	for (const line of readFileSync(envPath, 'utf8').split('\n')) {
 		const trimmed = line.trim();
 		if (!trimmed || trimmed.startsWith('#')) continue;
 		const eqIndex = trimmed.indexOf('=');
@@ -16,128 +17,71 @@ if (existsSync(envPath)) {
 			.slice(eqIndex + 1)
 			.trim()
 			.replace(/^["']|["']$/g, '');
-		if (!(key in process.env)) {
-			process.env[key] = value;
-		}
+		if (!(key in process.env)) process.env[key] = value;
 	}
 }
 
-// ─── Config ───────────────────────────────────────────────────────────────────
-// Bootstrap database lokal dalam satu pass: tabel Better Auth (auth-schema.sql)
-// + seluruh migrasi domain (drizzle/*.sql).
+// Bootstrap database MySQL/MariaDB dalam satu pass, idempotent:
+//   1. buat database bila belum ada,
+//   2. tabel Better Auth (scripts/auth-schema.sql) — bukan bagian schema Drizzle,
+//   3. migrasi domain (drizzle/*.sql) lewat migrator Drizzle (tercatat di
+//      tabel __drizzle_migrations, jadi tidak dijalankan dua kali).
 //
-// Sengaja TIDAK memakai @libsql/client, drizzle-orm, atau drizzle-kit: tabel
-// auth tidak ada di src/lib/server/db/schema.ts, jadi drizzle-kit push akan
-// menganggapnya tabel asing dan meminta jawaban interaktif.
-const url = process.env.TURSO_DATABASE_URL ?? 'file:local.db';
+// Pakai `--auth-saja` untuk hanya menerapkan langkah 2 (npm run db:auth).
+const authSaja = process.argv.includes('--auth-saja');
+const url = new URL(process.env.DATABASE_URL ?? 'mysql://root@127.0.0.1:3306/rwdigital');
+const namaDb = decodeURIComponent(url.pathname.replace(/^\//, ''));
 
-if (!url.startsWith('file:')) {
-  console.error(`db:setup hanya untuk database lokal (file:). Dapat: ${url}`);
-  console.error('Skrip ini tidak mendukung database Turso remote/production.');
-  console.error('Untuk Turso remote gunakan: npx drizzle-kit migrate');
-  process.exit(1);
+if (!/^[A-Za-z0-9_]+$/.test(namaDb)) {
+	console.error(`Nama database tidak valid di DATABASE_URL: "${namaDb}"`);
+	process.exit(1);
 }
 
-const path = resolve(process.cwd(), url.slice('file:'.length));
-const db = new DatabaseSync(path);
+// 1. Buat database (koneksi tanpa memilih database).
+const root = new URL(url);
+root.pathname = '/';
+const awal = await createConnection({ uri: root.toString() });
+await awal.query(
+	`CREATE DATABASE IF NOT EXISTS \`${namaDb}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
+);
+await awal.end();
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
-const BREAKPOINT = '--> statement-breakpoint';
+const conn = await createConnection({ uri: url.toString(), multipleStatements: true });
 
-// SQL hasil drizzle-kit generate memakai CREATE TABLE / CREATE UNIQUE INDEX
-// polos (tanpa IF NOT EXISTS), jadi tidak bisa dijalankan dua kali.
-const CREATE_RE =
-	/^CREATE\s+(UNIQUE\s+)?(TABLE|INDEX)\s+(?:IF\s+NOT\s+EXISTS\s+)?[`"]?([A-Za-z0-9_]+)[`"]?/i;
-
-const ALTER_ADD_COLUMN_RE =
-	/^ALTER\s+TABLE\s+[`"]?([A-Za-z0-9_]+)[`"]?\s+ADD\s+(?:COLUMN\s+)?[`"]?([A-Za-z0-9_]+)[`"]?/i;
-
-function sudahAda(type: string, name: string): boolean {
-	return (
-		db.prepare('select name from sqlite_master where type = ? and name = ?').get(type, name) !==
-		undefined
-	);
-}
-
-function kolomSudahAda(table: string, column: string): boolean {
-	try {
-		const cols = db.prepare(`PRAGMA table_info("${table}")`).all() as Array<{ name: string }>;
-		return cols.some((c) => c.name.toLowerCase() === column.toLowerCase());
-	} catch {
-		return false;
-	}
-}
-
-function jalankan(sql: string, dari: string) {
-	const createMatch = CREATE_RE.exec(sql);
-	if (createMatch) {
-		const type = createMatch[2].toLowerCase();
-		const name = createMatch[3];
-		if (sudahAda(type, name)) {
-			console.log(`   lewati (sudah ada): ${type} ${name}`);
-			return;
-		}
-	}
-
-	const alterMatch = ALTER_ADD_COLUMN_RE.exec(sql);
-	if (alterMatch) {
-		const table = alterMatch[1];
-		const column = alterMatch[2];
-		if (kolomSudahAda(table, column)) {
-			console.log(`   lewati (kolom ${table}.${column} sudah ada)`);
-			return;
-		}
-	}
-
-	try {
-		db.exec(sql);
-	} catch (e) {
-		console.error(`Gagal menjalankan statement dari ${dari}:`);
-		console.error(sql);
-		console.error(e instanceof Error ? e.message : String(e));
-		process.exit(1);
-	}
-}
-
-// ─── 1. Tabel Better Auth ─────────────────────────────────────────────────────
-const authSchemaPath = resolve(process.cwd(), 'scripts/auth-schema.sql');
+// 2. Tabel Better Auth.
 console.log('Terapkan: scripts/auth-schema.sql');
-db.exec(readFileSync(authSchemaPath, 'utf8'));
+await conn.query(readFileSync(resolve(process.cwd(), 'scripts/auth-schema.sql'), 'utf8'));
 
-// ─── 2. Migrasi domain ────────────────────────────────────────────────────────
-const drizzleDir = resolve(process.cwd(), 'drizzle');
-const migrations = readdirSync(drizzleDir)
-	.filter((f) => f.endsWith('.sql'))
-	.sort();
-
-for (const file of migrations) {
-	const full = join(drizzleDir, file);
-	const label = relative(process.cwd(), full).split('\\').join('/');
-	console.log(`Terapkan: ${label}`);
-	for (const chunk of readFileSync(full, 'utf8').split(BREAKPOINT)) {
-		const sql = chunk.trim();
-		if (sql) jalankan(sql, label);
+const INDEKS_AUTH: Array<[string, string, string]> = [
+	['session', 'session_userId_idx', 'userId'],
+	['account', 'account_userId_idx', 'userId'],
+	['verification', 'verification_identifier_idx', 'identifier']
+];
+for (const [tabel, nama, kolom] of INDEKS_AUTH) {
+	const [rows] = await conn.query(
+		'select 1 from information_schema.statistics where table_schema = ? and table_name = ? and index_name = ? limit 1',
+		[namaDb, tabel, nama]
+	);
+	if ((rows as unknown[]).length === 0) {
+		await conn.query(`create index \`${nama}\` on \`${tabel}\` (\`${kolom}\`)`);
 	}
 }
 
-// ─── Hasil ────────────────────────────────────────────────────────────────────
-const tables = db
-	.prepare("select name from sqlite_master where type='table' order by name")
-	.all()
-	.map((r) => r.name);
+// 3. Migrasi domain.
+if (!authSaja) {
+	console.log('Terapkan: drizzle/*.sql');
+	await migrate(drizzle(conn), { migrationsFolder: resolve(process.cwd(), 'drizzle') });
+}
 
-db.close();
+const [tabel] = await conn.query('show tables');
+await conn.end();
 
 console.log(`\n=== Setup selesai ===`);
-console.log(`Database lokal: ${path}`);
-console.log(tables.join('\n'));
+console.log(`Database: ${namaDb} @ ${url.host}`);
+console.log((tabel as Array<Record<string, string>>).map((r) => Object.values(r)[0]).sort().join('\n'));
 
-console.log('\n=== Peringatan ===');
-console.log('Jangan jalankan "npx drizzle-kit push" terhadap file lokal ini.');
-console.log('Tabel Better Auth (user, session, account, verification) bukan bagian');
-console.log('dari schema Drizzle, sehingga drizzle-kit akan meminta jawaban interaktif');
-console.log('(dan bisa crash di terminal Windows) lalu menghapus tabel auth.');
-console.log('');
-console.log('Alur yang benar untuk perubahan schema:');
-console.log('  npx drizzle-kit generate   →   node scripts/db-setup.mts');
-console.log('Database Turso remote/production: npx drizzle-kit migrate');
+console.log('\n=== Catatan ===');
+console.log('Jangan jalankan "npx drizzle-kit push": tabel Better Auth (user, session,');
+console.log('account, verification) bukan bagian schema Drizzle sehingga akan dianggap');
+console.log('tabel asing. Alur perubahan schema:');
+console.log('  npx drizzle-kit generate   →   npm run db:setup');

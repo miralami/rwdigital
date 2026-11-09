@@ -143,8 +143,8 @@ Data eksternal (mis. statistik penetrasi internet nasional, adopsi QRIS nasional
 
 - **Bahasa & Framework**: SvelteKit 2 + Svelte 5 (TypeScript, runes mode)
 - **CSS**: Tailwind CSS v4 via `@tailwindcss/vite` — design tokens di `src/app.css` (@theme)
-- **Database**: SQLite via Turso/libsql (`file:local.db` lokal, `libsql://...` production)
-- **ORM / Query Layer**: Drizzle ORM (`drizzle-orm/libsql`) + drizzle-kit migrations
+- **Database**: MySQL/MariaDB via `mysql2` (`DATABASE_URL`)
+- **ORM / Query Layer**: Drizzle ORM (`drizzle-orm/mysql2`) + drizzle-kit migrations
 - **Autentikasi**: Better Auth dengan `admin` plugin — roles: `superadmin`, `pengurus_rw`, `pengurus_rt`, `warga`
 - **Payment Gateway / QRIS Provider**: `[TODO — konfirmasi mitra dulu]`
 - **Hosting/Deployment**: `[TODO]`

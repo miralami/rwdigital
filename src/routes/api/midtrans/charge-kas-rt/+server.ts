@@ -107,8 +107,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
         midtransOrderId: orderId,
         midtransStatus: 'pending',
         snapToken: snapRes.token
-      })
-      .returning();
+      });
 
     return json({
       success: true,
@@ -116,7 +115,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
       snapToken: snapRes.token,
       redirectUrl: snapRes.redirectUrl,
       isSimulated: snapRes.isSimulated,
-      transaksiId: inserted?.id
+      transaksiId: inserted?.insertId
     });
   } catch (err: any) {
     console.error('[Midtrans Charge Kas RT Error]:', err);
