@@ -1,0 +1,2703 @@
+{
+  "generatedAt": "2026-11-08T02:17:04.448Z",
+  "total": 165,
+  "pass": 157,
+  "fail": 8,
+  "results": [
+    {
+      "id": "A-01",
+      "module": "Autentikasi",
+      "test": "Login",
+      "type": "Positif",
+      "testCase": "Pengurus RW login dengan kredensial benar",
+      "pre": "Akun seed admin@rw.id aktif",
+      "steps": [
+        "Buka /login",
+        "Isi email admin@rw.id",
+        "Isi password admin123",
+        "Klik Masuk"
+      ],
+      "expected": "Login berhasil, sesi dibuat, diarahkan ke /dashboard",
+      "status": "Pass",
+      "evidence": "HTTP 200, user=pengurus_rw, cookies=1",
+      "ms": 252
+    },
+    {
+      "id": "A-02",
+      "module": "Autentikasi",
+      "test": "Login",
+      "type": "Positif",
+      "testCase": "Pengurus RT login dengan kredensial benar",
+      "pre": "Akun seed pengurus@rw.id aktif",
+      "steps": [
+        "Buka /login",
+        "Isi email pengurus@rw.id",
+        "Isi password pengurus123",
+        "Klik Masuk"
+      ],
+      "expected": "Login berhasil dan diarahkan ke /dashboard",
+      "status": "Pass",
+      "evidence": "HTTP 200, role=pengurus_rt",
+      "ms": 252
+    },
+    {
+      "id": "A-03",
+      "module": "Autentikasi",
+      "test": "Login",
+      "type": "Positif",
+      "testCase": "Warga login dengan kredensial benar",
+      "pre": "Akun seed warga@rw.id aktif",
+      "steps": [
+        "Buka /login",
+        "Isi email warga@rw.id",
+        "Isi password warga123",
+        "Klik Masuk"
+      ],
+      "expected": "Login berhasil dan diarahkan ke /portal",
+      "status": "Pass",
+      "evidence": "GET /portal HTTP 200",
+      "ms": 545
+    },
+    {
+      "id": "A-04",
+      "module": "Autentikasi",
+      "test": "Login",
+      "type": "Negatif",
+      "testCase": "Login dengan password salah",
+      "pre": "Akun admin@rw.id ada",
+      "steps": [
+        "Buka /login",
+        "Isi email admin@rw.id",
+        "Isi password salah123",
+        "Klik Masuk"
+      ],
+      "expected": "Login ditolak, pesan kredensial tidak valid, tidak ada sesi",
+      "status": "Pass",
+      "evidence": "HTTP 401, cookies=0",
+      "ms": 75
+    },
+    {
+      "id": "A-05",
+      "module": "Autentikasi",
+      "test": "Login",
+      "type": "Negatif",
+      "testCase": "Login dengan email tidak terdaftar",
+      "pre": "Email tidak ada di database",
+      "steps": [
+        "Buka /login",
+        "Isi email tidakada@rw.id",
+        "Isi password acak123",
+        "Klik Masuk"
+      ],
+      "expected": "Login ditolak (401), tidak ada sesi",
+      "status": "Pass",
+      "evidence": "HTTP 401",
+      "ms": 62
+    },
+    {
+      "id": "A-06",
+      "module": "Autentikasi",
+      "test": "Login",
+      "type": "Negatif",
+      "testCase": "Login dengan email kosong",
+      "pre": "Halaman login terbuka",
+      "steps": [
+        "Buka /login",
+        "Kosongkan email",
+        "Isi password admin123",
+        "Klik Masuk"
+      ],
+      "expected": "Validasi menolak, login gagal",
+      "status": "Pass",
+      "evidence": "HTTP 400",
+      "ms": 5
+    },
+    {
+      "id": "A-07",
+      "module": "Autentikasi",
+      "test": "Login",
+      "type": "Negatif",
+      "testCase": "Login dengan format email tidak valid",
+      "pre": "Halaman login terbuka",
+      "steps": [
+        "Buka /login",
+        "Isi email \"bukan-email\"",
+        "Isi password admin123",
+        "Klik Masuk"
+      ],
+      "expected": "Validasi format email menolak (400)",
+      "status": "Pass",
+      "evidence": "HTTP 400",
+      "ms": 4
+    },
+    {
+      "id": "A-08",
+      "module": "Autentikasi",
+      "test": "Kontrol Akses",
+      "type": "Negatif",
+      "testCase": "Buka /dashboard tanpa login",
+      "pre": "Belum punya sesi",
+      "steps": [
+        "Buka URL /dashboard langsung"
+      ],
+      "expected": "Dialihkan ke /login",
+      "status": "Pass",
+      "evidence": "HTTP 302 Location /login",
+      "ms": 20
+    },
+    {
+      "id": "A-09",
+      "module": "Autentikasi",
+      "test": "Kontrol Akses",
+      "type": "Negatif",
+      "testCase": "Buka /kk tanpa login",
+      "pre": "Belum punya sesi",
+      "steps": [
+        "Buka URL /kk langsung"
+      ],
+      "expected": "Dialihkan ke /login",
+      "status": "Pass",
+      "evidence": "HTTP 302 Location /login",
+      "ms": 9
+    },
+    {
+      "id": "A-10",
+      "module": "Autentikasi",
+      "test": "Kontrol Akses",
+      "type": "Negatif",
+      "testCase": "Buka /portal tanpa login",
+      "pre": "Belum punya sesi",
+      "steps": [
+        "Buka URL /portal langsung"
+      ],
+      "expected": "Dialihkan ke /login",
+      "status": "Pass",
+      "evidence": "HTTP 302 Location /login",
+      "ms": 4
+    },
+    {
+      "id": "A-11",
+      "module": "Autentikasi",
+      "test": "Login",
+      "type": "Negatif",
+      "testCase": "Halaman login dibuka saat sudah login",
+      "pre": "Sesi admin aktif",
+      "steps": [
+        "Login sebagai admin",
+        "Buka /login"
+      ],
+      "expected": "Halaman login tetap tampil tanpa error (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200 Location null",
+      "ms": 235
+    },
+    {
+      "id": "A-12",
+      "module": "Autentikasi",
+      "test": "Logout",
+      "type": "Positif",
+      "testCase": "Logout menghapus sesi",
+      "pre": "Sesi admin aktif",
+      "steps": [
+        "Login sebagai admin",
+        "Panggil sign-out",
+        "Buka /dashboard"
+      ],
+      "expected": "Sesi berakhir dan /dashboard dialihkan ke /login",
+      "status": "Pass",
+      "evidence": "signout 200, dashboard 302 -> /login",
+      "ms": 384
+    },
+    {
+      "id": "K-01",
+      "module": "Klaim Akun",
+      "test": "Klaim",
+      "type": "Negatif",
+      "testCase": "Klaim tanpa mengisi kolom lengkap",
+      "pre": "Halaman klaim tersedia",
+      "steps": [
+        "Buka /login mode klaim",
+        "Kosongkan NIK/No KK/tanggal lahir",
+        "Kirim"
+      ],
+      "expected": "Server menolak dengan 400 dan pesan kolom wajib",
+      "status": "Fail",
+      "evidence": "HTTP 404 ",
+      "ms": 8
+    },
+    {
+      "id": "K-02",
+      "module": "Klaim Akun",
+      "test": "Klaim",
+      "type": "Negatif",
+      "testCase": "Klaim dengan password kurang dari 6 karakter",
+      "pre": "Data warga valid tersedia",
+      "steps": [
+        "Buka mode klaim",
+        "Isi data valid",
+        "Isi password 123",
+        "Kirim"
+      ],
+      "expected": "Server menolak dengan 400, pesan minimal 6 karakter",
+      "status": "Fail",
+      "evidence": "HTTP 404 {}",
+      "ms": 6
+    },
+    {
+      "id": "K-03",
+      "module": "Klaim Akun",
+      "test": "Klaim",
+      "type": "Negatif",
+      "testCase": "Klaim dengan NIK tidak cocok dengan No KK",
+      "pre": "Data kependudukan seed ada",
+      "steps": [
+        "Buka mode klaim",
+        "Isi NIK warga lain",
+        "Isi No KK yang tidak berpasangan",
+        "Kirim"
+      ],
+      "expected": "Server menolak, data kependudukan tidak cocok",
+      "status": "Fail",
+      "evidence": "HTTP 404 {}",
+      "ms": 3
+    },
+    {
+      "id": "K-04",
+      "module": "Klaim Akun",
+      "test": "Klaim",
+      "type": "Negatif",
+      "testCase": "Klaim akun yang sudah pernah diklaim",
+      "pre": "Warga Bambang sudah punya user",
+      "steps": [
+        "Buka mode klaim",
+        "Isi NIK/No KK/tanggal lahir Bambang",
+        "Isi email & password",
+        "Kirim"
+      ],
+      "expected": "Server menolak karena akun sudah diklaim",
+      "status": "Fail",
+      "evidence": "HTTP 404 {}",
+      "ms": 3
+    },
+    {
+      "id": "K-05",
+      "module": "Klaim Akun",
+      "test": "Klaim",
+      "type": "Positif",
+      "testCase": "Klaim akun warga yang belum terhubung dengan data benar",
+      "pre": "Warga Agus Setiawan belum punya akun",
+      "steps": [
+        "Buka mode klaim",
+        "Isi NIK 3276010101850002",
+        "Isi No KK 3276010101000002",
+        "Isi tanggal lahir 1985-05-15",
+        "Isi email & password valid",
+        "Kirim"
+      ],
+      "expected": "Klaim berhasil, akun warga dibuat dan tertaut",
+      "status": "Fail",
+      "evidence": "HTTP 404 {}",
+      "ms": 3
+    },
+    {
+      "id": "D-01",
+      "module": "Dashboard",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka dashboard",
+      "pre": "Login admin",
+      "steps": [
+        "Login admin@rw.id",
+        "Buka /dashboard"
+      ],
+      "expected": "Halaman dashboard tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 595
+    },
+    {
+      "id": "D-02",
+      "module": "Dashboard",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RT membuka dashboard",
+      "pre": "Login pengurus RT",
+      "steps": [
+        "Login pengurus@rw.id",
+        "Buka /dashboard"
+      ],
+      "expected": "Dashboard tampil dengan data scope RT 01",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 256
+    },
+    {
+      "id": "D-03",
+      "module": "Dashboard",
+      "test": "Akses",
+      "type": "Negatif",
+      "testCase": "Warga membuka dashboard staf",
+      "pre": "Login warga",
+      "steps": [
+        "Login warga@rw.id",
+        "Buka /dashboard"
+      ],
+      "expected": "Dialihkan ke /portal",
+      "status": "Pass",
+      "evidence": "HTTP 302 -> /portal",
+      "ms": 209
+    },
+    {
+      "id": "W-01",
+      "module": "Kependudukan",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka daftar KK",
+      "pre": "Login admin",
+      "steps": [
+        "Login admin",
+        "Buka /kk"
+      ],
+      "expected": "Daftar KK tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 345
+    },
+    {
+      "id": "W-02",
+      "module": "Kependudukan",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RT membuka daftar KK",
+      "pre": "Login pengurus RT",
+      "steps": [
+        "Login pengurus RT",
+        "Buka /kk"
+      ],
+      "expected": "Daftar KK scoped RT 01 tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 292
+    },
+    {
+      "id": "W-03",
+      "module": "Kependudukan",
+      "test": "Akses",
+      "type": "Negatif",
+      "testCase": "Warga membuka modul KK",
+      "pre": "Login warga",
+      "steps": [
+        "Login warga",
+        "Buka /kk"
+      ],
+      "expected": "Dialihkan ke /portal",
+      "status": "Pass",
+      "evidence": "HTTP 302 -> /portal",
+      "ms": 236
+    },
+    {
+      "id": "W-04",
+      "module": "Kependudukan",
+      "test": "Detail",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka detail KK",
+      "pre": "KK id 1 ada",
+      "steps": [
+        "Login admin",
+        "Buka /kk/1"
+      ],
+      "expected": "Detail KK tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 293
+    },
+    {
+      "id": "W-05",
+      "module": "Kependudukan",
+      "test": "Detail",
+      "type": "Negatif",
+      "testCase": "Membuka detail KK dengan ID tidak ada",
+      "pre": "ID 99999 tidak ada",
+      "steps": [
+        "Login admin",
+        "Buka /kk/99999"
+      ],
+      "expected": "Tidak crash: 404 atau dialihkan ke /kk",
+      "status": "Pass",
+      "evidence": "HTTP 302 -> /kk",
+      "ms": 224
+    },
+    {
+      "id": "W-06",
+      "module": "Kependudukan",
+      "test": "Otorisasi",
+      "type": "Negatif",
+      "testCase": "Pengurus RT 01 membuka KK milik RT 02",
+      "pre": "KK id 4 milik RT 02",
+      "steps": [
+        "Login pengurus RT 01",
+        "Buka /kk/4"
+      ],
+      "expected": "Akses ditolak (403)",
+      "status": "Pass",
+      "evidence": "HTTP 403",
+      "ms": 267
+    },
+    {
+      "id": "W-07",
+      "module": "Kependudukan",
+      "test": "Tambah KK",
+      "type": "Negatif",
+      "testCase": "Tambah KK dengan semua field kosong",
+      "pre": "Form tambah KK terbuka",
+      "steps": [
+        "Buka /kk/tambah",
+        "Kosongkan semua field",
+        "Simpan"
+      ],
+      "expected": "Validasi menolak, pesan No. KK 16 digit",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Data KK tidak valid: No. KK harus 16 digit, Alamat wajib diisi, RT wajib dipilih, Invalid option: expected one of \\\\\\\"teta",
+      "ms": 241
+    },
+    {
+      "id": "W-08",
+      "module": "Kependudukan",
+      "test": "Tambah KK",
+      "type": "Negatif",
+      "testCase": "Tambah KK dengan No. KK 15 digit",
+      "pre": "Form tambah KK terbuka",
+      "steps": [
+        "Isi No KK 15 digit",
+        "Isi alamat & RT",
+        "Simpan"
+      ],
+      "expected": "Validasi menolak panjang No. KK",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Data KK tidak valid: No. KK harus 16 digit\\\"]\"",
+      "ms": 249
+    },
+    {
+      "id": "W-09",
+      "module": "Kependudukan",
+      "test": "Tambah KK",
+      "type": "Negatif",
+      "testCase": "Tambah KK dengan No. KK duplikat",
+      "pre": "No KK 3276010101000001 sudah ada",
+      "steps": [
+        "Isi No KK yang sudah terdaftar",
+        "Isi alamat & RT",
+        "Simpan"
+      ],
+      "expected": "Server menolak duplikasi",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Gagal menyimpan: Failed query: insert into \\\\\\\"kk\\\\\\\" (\\\\\\\"id\\\\\\\", \\\\\\\"no_kk\\\\\\\", \\\\\\\"alamat\\\\\\\", \\\\\\\"rt_id\\\\\\\", \\\\\\\"status_huni\\\\\\\", \\\\\\\"created_at\\\\\\\", \\\\\\\"updated_at\\\\\\\") values (",
+      "ms": 204
+    },
+    {
+      "id": "W-10",
+      "module": "Kependudukan",
+      "test": "Tambah KK",
+      "type": "Negatif",
+      "testCase": "Tambah KK tanpa memilih RT",
+      "pre": "Form tambah KK terbuka",
+      "steps": [
+        "Isi No KK valid",
+        "Isi alamat",
+        "Kosongkan RT",
+        "Simpan"
+      ],
+      "expected": "Validasi menolak RT wajib dipilih",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Data KK tidak valid: RT wajib dipilih\\\"]\"",
+      "ms": 238
+    },
+    {
+      "id": "W-11",
+      "module": "Kependudukan",
+      "test": "Tambah KK",
+      "type": "Positif",
+      "testCase": "Tambah KK baru dengan satu anggota valid",
+      "pre": "No KK & NIK baru belum terdaftar",
+      "steps": [
+        "Buka /kk/tambah",
+        "Isi No KK 16 digit",
+        "Isi alamat & RT",
+        "Isi 1 anggota valid",
+        "Simpan"
+      ],
+      "expected": "KK tersimpan dan diarahkan ke /kk",
+      "status": "Pass",
+      "evidence": "200 \"{\\\"type\\\":\\\"redirect\\\",\\\"status\\\":303,\\\"location\\\":\\\"/kk\\\"}\"",
+      "ms": 566
+    },
+    {
+      "id": "W-12",
+      "module": "Kependudukan",
+      "test": "Tambah KK",
+      "type": "Negatif",
+      "testCase": "Tambah KK dengan NIK anggota 15 digit",
+      "pre": "Form tambah KK terbuka",
+      "steps": [
+        "Isi No KK valid",
+        "Isi anggota dengan NIK 15 digit",
+        "Simpan"
+      ],
+      "expected": "Validasi menolak NIK 16 digit",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Anggota #1 tidak valid: NIK harus 16 digit\\\"]\"",
+      "ms": 224
+    },
+    {
+      "id": "W-13",
+      "module": "Kependudukan",
+      "test": "Tambah KK",
+      "type": "Negatif",
+      "testCase": "Tambah KK dengan NIK anggota duplikat",
+      "pre": "NIK 3276010101800001 sudah ada",
+      "steps": [
+        "Isi No KK baru",
+        "Isi anggota dengan NIK terdaftar",
+        "Simpan"
+      ],
+      "expected": "Server menolak duplikasi NIK",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Gagal menyimpan: Failed query: insert into \\\\\\\"warga\\\\\\\" (\\\\\\\"id\\\\\\\", \\\\\\\"nik\\\\\\\", \\\\\\\"nama\\\\\\\", \\\\\\\"tempat_lahir\\\\\\\", \\\\\\\"tanggal_lahir\\\\\\\", ",
+      "ms": 384
+    },
+    {
+      "id": "W-14",
+      "module": "Kependudukan",
+      "test": "Edit Warga",
+      "type": "Negatif",
+      "testCase": "Edit warga dengan alasan kurang dari 5 karakter",
+      "pre": "Warga id 2 ada",
+      "steps": [
+        "Buka /kk/2/edit",
+        "Isi alasan \"abc\"",
+        "Simpan"
+      ],
+      "expected": "Validasi menolak alasan minimal 5 karakter",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1},{\\\"alasan\\\":2},[3],\\\"Alasan perubahan data harus diisi minimal 5 karakter\\\"]\"",
+      "ms": 232
+    },
+    {
+      "id": "W-15",
+      "module": "Kependudukan",
+      "test": "Edit Warga",
+      "type": "Positif",
+      "testCase": "Edit data warga dengan data valid",
+      "pre": "Warga id 2 ada",
+      "steps": [
+        "Buka /kk/2/edit",
+        "Ubah nama & alasan valid",
+        "Simpan"
+      ],
+      "expected": "Data tersimpan dan diarahkan ke detail",
+      "status": "Pass",
+      "evidence": "200 \"{\\\"type\\\":\\\"redirect\\\",\\\"status\\\":303,\\\"location\\\":\\\"/kk/2\\\"}\"",
+      "ms": 550
+    },
+    {
+      "id": "W-16",
+      "module": "Kependudukan",
+      "test": "Impor CSV",
+      "type": "Negatif",
+      "testCase": "Impor CSV tanpa memilih berkas",
+      "pre": "Form impor terbuka",
+      "steps": [
+        "Buka /kk/impor",
+        "Kirim tanpa file"
+      ],
+      "expected": "Ditolak, pesan pilih berkas CSV",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Pilih berkas CSV untuk diimpor.\\\"]\"",
+      "ms": 289
+    },
+    {
+      "id": "W-17",
+      "module": "Kependudukan",
+      "test": "Impor CSV",
+      "type": "Negatif",
+      "testCase": "Impor CSV hanya berisi header",
+      "pre": "File CSV tanpa baris data",
+      "steps": [
+        "Buka /kk/impor",
+        "Unggah CSV header saja",
+        "Kirim"
+      ],
+      "expected": "Ditolak, tidak ada data untuk diimpor",
+      "status": "Pass",
+      "evidence": "200 {\"type\":\"failure\",\"status\":400,\"data\":\"[{\\\"error\\\":1},\\\"Berkas CSV kosong atau hanya berisi baris judul header.\\\"]\"}",
+      "ms": 235
+    },
+    {
+      "id": "W-18",
+      "module": "Kependudukan",
+      "test": "Impor CSV",
+      "type": "Positif",
+      "testCase": "Impor CSV berisi satu warga valid",
+      "pre": "NIK & No KK baru",
+      "steps": [
+        "Buka /kk/impor",
+        "Unggah CSV valid",
+        "Kirim"
+      ],
+      "expected": "Data berhasil diimpor, ada ringkasan berhasil",
+      "status": "Pass",
+      "evidence": "200 {\"type\":\"success\",\"status\":200,\"data\":\"[{\\\"sukses\\\":1,\\\"totalBaris\\\":2,\\\"berhasilCount\\\":2,\\\"gagalCount\\\":3,\\\"errors\\\":4},true,1,0,[]]\"}",
+      "ms": 541
+    },
+    {
+      "id": "W-19",
+      "module": "Kependudukan",
+      "test": "Pembaruan Data",
+      "type": "Negatif",
+      "testCase": "Tinjau permintaan pembaruan dengan aksi tidak valid",
+      "pre": "Login pengurus",
+      "steps": [
+        "POST /kk/pembaruan?/tinjau",
+        "aksi=hapus",
+        "id=1"
+      ],
+      "expected": "Ditolak parameter tidak valid",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Parameter tidak valid.\\\"]\"",
+      "ms": 197
+    },
+    {
+      "id": "W-20",
+      "module": "Kependudukan",
+      "test": "Pembaruan Data",
+      "type": "Negatif",
+      "testCase": "Tinjau permintaan pembaruan yang tidak ada",
+      "pre": "ID 99999 tidak ada",
+      "steps": [
+        "POST /kk/pembaruan?/tinjau",
+        "aksi=setujui",
+        "id=99999"
+      ],
+      "expected": "Ditolak, permintaan tidak ditemukan",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Permintaan tidak ditemukan.\\\"]\"",
+      "ms": 227
+    },
+    {
+      "id": "W-21",
+      "module": "Kependudukan",
+      "test": "Redirect",
+      "type": "Positif",
+      "testCase": "/warga dialihkan ke /kk",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /warga"
+      ],
+      "expected": "Redirect 301 ke /kk",
+      "status": "Pass",
+      "evidence": "HTTP 301 -> /kk",
+      "ms": 227
+    },
+    {
+      "id": "KS-01",
+      "module": "Kas",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka halaman kas",
+      "pre": "Login admin",
+      "steps": [
+        "Login admin",
+        "Buka /kas"
+      ],
+      "expected": "Halaman kas tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 649
+    },
+    {
+      "id": "KS-02",
+      "module": "Kas",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RT membuka halaman kas",
+      "pre": "Login pengurus RT",
+      "steps": [
+        "Login pengurus RT",
+        "Buka /kas"
+      ],
+      "expected": "Halaman kas tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 244
+    },
+    {
+      "id": "KS-03",
+      "module": "Kas",
+      "test": "Akses",
+      "type": "Negatif",
+      "testCase": "Warga membuka halaman kas",
+      "pre": "Login warga",
+      "steps": [
+        "Login warga",
+        "Buka /kas"
+      ],
+      "expected": "Dialihkan ke /portal",
+      "status": "Pass",
+      "evidence": "HTTP 302 -> /portal",
+      "ms": 194
+    },
+    {
+      "id": "KS-04",
+      "module": "Kas",
+      "test": "Kas RW",
+      "type": "Negatif",
+      "testCase": "Tambah kas RW dengan nominal 0",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /kas",
+        "Tambah transaksi",
+        "Nominal 0",
+        "Simpan"
+      ],
+      "expected": "Validasi menolak nominal harus > 0",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errorKasRw\\\":1},\\\"Nominal dan keterangan wajib diisi.\\\"]\"",
+      "ms": 209
+    },
+    {
+      "id": "KS-05",
+      "module": "Kas",
+      "test": "Kas RW",
+      "type": "Negatif",
+      "testCase": "Tambah kas RW dengan nominal negatif",
+      "pre": "Login admin",
+      "steps": [
+        "Tambah transaksi",
+        "Nominal -1000",
+        "Simpan"
+      ],
+      "expected": "Validasi menolak nominal negatif",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errorKasRw\\\":1},\\\"Nominal dan keterangan wajib diisi.\\\"]\"",
+      "ms": 200
+    },
+    {
+      "id": "KS-06",
+      "module": "Kas",
+      "test": "Kas RW",
+      "type": "Negatif",
+      "testCase": "Tambah kas RW tanpa keterangan",
+      "pre": "Login admin",
+      "steps": [
+        "Tambah transaksi",
+        "Nominal 5000",
+        "Kosongkan keterangan",
+        "Simpan"
+      ],
+      "expected": "Validasi menolak keterangan wajib",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errorKasRw\\\":1},\\\"Nominal dan keterangan wajib diisi.\\\"]\"",
+      "ms": 199
+    },
+    {
+      "id": "KS-07",
+      "module": "Kas",
+      "test": "Kas RW",
+      "type": "Positif",
+      "testCase": "Tambah kas RW valid",
+      "pre": "Login admin",
+      "steps": [
+        "Tambah transaksi",
+        "Jenis pemasukan, nominal 5000",
+        "Keterangan diisi",
+        "Simpan"
+      ],
+      "expected": "Transaksi tersimpan, saldo bertambah",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"successKasRw\\\":1},true]\"",
+      "ms": 351
+    },
+    {
+      "id": "KS-08",
+      "module": "Kas",
+      "test": "Kas RW",
+      "type": "Negatif",
+      "testCase": "Pengurus RT menambah Kas RW",
+      "pre": "Login pengurus RT",
+      "steps": [
+        "Login pengurus RT",
+        "POST tambahKasRw"
+      ],
+      "expected": "Ditolak 403, hanya Pengurus RW",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errorKasRw\\\":1},\\\"Hanya Pengurus RW yang dapat mencatat Kas RW.\\\"]\"",
+      "ms": 232
+    },
+    {
+      "id": "KS-09",
+      "module": "Kas",
+      "test": "Kas RT",
+      "type": "Positif",
+      "testCase": "Pengurus RT menambah Kas RT sendiri",
+      "pre": "Login pengurus RT 01",
+      "steps": [
+        "Tambah kas RT",
+        "RT 01, nominal 5000",
+        "Keterangan diisi",
+        "Simpan"
+      ],
+      "expected": "Transaksi Kas RT tersimpan",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"successKasRt\\\":1},true]\"",
+      "ms": 367
+    },
+    {
+      "id": "KS-10",
+      "module": "Kas",
+      "test": "Kas RT",
+      "type": "Negatif",
+      "testCase": "Tambah Kas RT tanpa keterangan & nominal",
+      "pre": "Login pengurus RT",
+      "steps": [
+        "Tambah kas RT",
+        "Kosongkan nominal & keterangan",
+        "Simpan"
+      ],
+      "expected": "Ditolak, field wajib",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errorKasRt\\\":1},\\\"RT, nominal, dan keterangan wajib diisi.\\\"]\"",
+      "ms": 190
+    },
+    {
+      "id": "KS-11",
+      "module": "Kas",
+      "test": "Kategori",
+      "type": "Negatif",
+      "testCase": "Pengurus RT menambah kategori kas",
+      "pre": "Login pengurus RT",
+      "steps": [
+        "POST tambahKategori"
+      ],
+      "expected": "Ditolak 403, hanya Pengurus RW",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errorKategori\\\":1},\\\"Hanya Pengurus RW yang dapat mengelola kategori kas.\\\"]\"",
+      "ms": 217
+    },
+    {
+      "id": "KS-12",
+      "module": "Kas",
+      "test": "Kategori",
+      "type": "Negatif",
+      "testCase": "Tambah kategori kas tanpa nama",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambahKategori",
+        "nama kosong"
+      ],
+      "expected": "Ditolak, nama kategori wajib",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errorKategori\\\":1},\\\"Nama kategori wajib diisi.\\\"]\"",
+      "ms": 216
+    },
+    {
+      "id": "KS-13",
+      "module": "Kas",
+      "test": "Kategori",
+      "type": "Positif",
+      "testCase": "Tambah kategori kas valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambahKategori",
+        "nama \"Kategori Blackbox\"",
+        "jenis pemasukan"
+      ],
+      "expected": "Kategori tersimpan",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"successKategori\\\":1},true]\"",
+      "ms": 351
+    },
+    {
+      "id": "KS-14",
+      "module": "Kas",
+      "test": "Kategori",
+      "type": "Negatif",
+      "testCase": "Hapus kategori yang masih dipakai transaksi",
+      "pre": "Kategori hasil KS-13 dipakai satu transaksi",
+      "steps": [
+        "Buat transaksi dengan kategori tsb",
+        "POST hapusKategori id tsb"
+      ],
+      "expected": "Ditolak, kategori masih digunakan",
+      "status": "Pass",
+      "evidence": "id=15 200 \"[{\\\"errorHapusKategori\\\":1},\\\"Kategori tidak dapat dihapus karena masih digunakan dalam catatan transaksi Kas RW.\\\"]\"",
+      "ms": 464
+    },
+    {
+      "id": "KS-15",
+      "module": "Kas",
+      "test": "Kategori",
+      "type": "Negatif",
+      "testCase": "Hapus kategori dengan ID tidak valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST hapusKategori id=0"
+      ],
+      "expected": "Ditolak ID tidak valid",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errorHapusKategori\\\":1},\\\"ID kategori tidak valid.\\\"]\"",
+      "ms": 233
+    },
+    {
+      "id": "KS-16",
+      "module": "Kas",
+      "test": "Setoran RT",
+      "type": "Negatif",
+      "testCase": "Catat setoran RT dengan periode salah format",
+      "pre": "Login admin",
+      "steps": [
+        "POST catatSetoranRt",
+        "periode 2026/11"
+      ],
+      "expected": "Ditolak format YYYY-MM",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errorSetoran\\\":1},\\\"Periode iuran wajib diisi dengan format YYYY-MM (misal: 2026-10).\\\"]\"",
+      "ms": 242
+    },
+    {
+      "id": "KS-17",
+      "module": "Kas",
+      "test": "Setoran RT",
+      "type": "Negatif",
+      "testCase": "Catat setoran RT dengan jumlah KK 0",
+      "pre": "Login admin",
+      "steps": [
+        "POST catatSetoranRt",
+        "jumlahKkDisetor 0"
+      ],
+      "expected": "Ditolak, minimal 1",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errorSetoran\\\":1},\\\"Jumlah KK yang disetor harus berupa angka positif minimal 1.\\\"]\"",
+      "ms": 236
+    },
+    {
+      "id": "KS-18",
+      "module": "Kas",
+      "test": "Kas RW",
+      "type": "Negatif",
+      "testCase": "Batalkan transaksi kas dengan ID tidak ada",
+      "pre": "Login admin",
+      "steps": [
+        "POST batalkanKasRw",
+        "transaksiId 99999"
+      ],
+      "expected": "Ditolak, transaksi tidak ditemukan",
+      "status": "Fail",
+      "evidence": "200 \"[{\\\"successBatalRw\\\":1},true]\"",
+      "ms": 220
+    },
+    {
+      "id": "I-01",
+      "module": "Iuran",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka halaman iuran",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /iuran"
+      ],
+      "expected": "Halaman iuran tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 503
+    },
+    {
+      "id": "I-02",
+      "module": "Iuran",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RT membuka halaman iuran",
+      "pre": "Login pengurus RT",
+      "steps": [
+        "Buka /iuran"
+      ],
+      "expected": "Halaman iuran scoped RT tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 389
+    },
+    {
+      "id": "I-03",
+      "module": "Iuran",
+      "test": "Akses",
+      "type": "Negatif",
+      "testCase": "Warga membuka modul iuran staf",
+      "pre": "Login warga",
+      "steps": [
+        "Buka /iuran"
+      ],
+      "expected": "Dialihkan ke /portal",
+      "status": "Pass",
+      "evidence": "HTTP 302 -> /portal",
+      "ms": 239
+    },
+    {
+      "id": "I-04",
+      "module": "Iuran",
+      "test": "Jenis Iuran",
+      "type": "Negatif",
+      "testCase": "Tambah jenis iuran tanpa nama",
+      "pre": "Login admin",
+      "steps": [
+        "POST /iuran/jenis?/tambah",
+        "nama kosong",
+        "nominal 50000"
+      ],
+      "expected": "Ditolak, nama wajib diisi",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1},{\\\"nama\\\":2},[3],\\\"Nama wajib diisi\\\"]\"",
+      "ms": 285
+    },
+    {
+      "id": "I-05",
+      "module": "Iuran",
+      "test": "Jenis Iuran",
+      "type": "Negatif",
+      "testCase": "Tambah jenis iuran dengan nominal 0",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah jenis",
+        "nama valid",
+        "nominal 0"
+      ],
+      "expected": "Ditolak, nominal harus > 0",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1},{\\\"nominal\\\":2},[3],\\\"Nominal harus lebih dari 0\\\"]\"",
+      "ms": 223
+    },
+    {
+      "id": "I-06",
+      "module": "Iuran",
+      "test": "Jenis Iuran",
+      "type": "Negatif",
+      "testCase": "Tambah jenis iuran dengan porsi RW negatif",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah jenis",
+        "porsiRw -10"
+      ],
+      "expected": "Ditolak, porsi tidak boleh negatif",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1},{\\\"porsiRw\\\":2},[3],\\\"Porsi RW tidak boleh negatif\\\"]\"",
+      "ms": 243
+    },
+    {
+      "id": "I-07",
+      "module": "Iuran",
+      "test": "Jenis Iuran",
+      "type": "Negatif",
+      "testCase": "Tambah jenis iuran dengan periode tidak valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah jenis",
+        "periode harian"
+      ],
+      "expected": "Ditolak, enum periode",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1},{\\\"periode\\\":2},[3],\\\"Invalid option: expected one of \\\\\\\"bulanan\\\\\\\"|\\\\\\\"tahunan\\\\\\\"|\\\\\\\"insidental\\\\\\\"\\\"]\"",
+      "ms": 265
+    },
+    {
+      "id": "I-08",
+      "module": "Iuran",
+      "test": "Jenis Iuran",
+      "type": "Positif",
+      "testCase": "Tambah jenis iuran valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah jenis",
+        "nama unik",
+        "nominal 25000",
+        "periode bulanan"
+      ],
+      "expected": "Jenis iuran tersimpan",
+      "status": "Pass",
+      "evidence": "200 \"{\\\"type\\\":\\\"redirect\\\",\\\"status\\\":303,\\\"location\\\":\\\"/iuran/jenis\\\"}\"",
+      "ms": 361
+    },
+    {
+      "id": "I-09",
+      "module": "Iuran",
+      "test": "Jenis Iuran",
+      "type": "Negatif",
+      "testCase": "Hapus jenis iuran yang sudah dipakai tagihan",
+      "pre": "Jenis id 1 punya tagihan",
+      "steps": [
+        "POST /iuran/jenis?/hapus id=1"
+      ],
+      "expected": "Ditolak, jenis masih digunakan",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Jenis ini sudah dipakai tagihan. Nonaktifkan saja agar riwayat tetap utuh.\\\"]\"",
+      "ms": 431
+    },
+    {
+      "id": "I-10",
+      "module": "Iuran",
+      "test": "Jenis Iuran",
+      "type": "Negatif",
+      "testCase": "Pengurus RT mengubah jenis iuran milik RW",
+      "pre": "Jenis id 1 scope RW global",
+      "steps": [
+        "Login pengurus RT",
+        "POST /iuran/jenis?/ubah id=1"
+      ],
+      "expected": "Ditolak 403, bukan milik RT",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Anda hanya boleh mengubah jenis iuran milik RT sendiri.\\\"]\"",
+      "ms": 233
+    },
+    {
+      "id": "I-11",
+      "module": "Iuran",
+      "test": "Generate Tagihan",
+      "type": "Negatif",
+      "testCase": "Generate tagihan dengan format periode salah",
+      "pre": "Login admin",
+      "steps": [
+        "POST /iuran/generate",
+        "periode 2026-1"
+      ],
+      "expected": "Ditolak, format YYYY-MM",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1},{\\\"periode\\\":2},[3],\\\"Periode harus format YYYY-MM\\\"]\"",
+      "ms": 239
+    },
+    {
+      "id": "I-12",
+      "module": "Iuran",
+      "test": "Generate Tagihan",
+      "type": "Negatif",
+      "testCase": "Pengurus RT menagih RT lain",
+      "pre": "Login pengurus RT 01",
+      "steps": [
+        "POST generate",
+        "rtId 2"
+      ],
+      "expected": "Ditolak 403, hanya RT tugas",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Anda hanya bisa menagih RT tugas Anda.\\\"]\"",
+      "ms": 230
+    },
+    {
+      "id": "I-13",
+      "module": "Iuran",
+      "test": "Generate Tagihan",
+      "type": "Positif",
+      "testCase": "Generate tagihan periode baru",
+      "pre": "Login admin",
+      "steps": [
+        "POST generate",
+        "periode 2027-03",
+        "jenis id 1"
+      ],
+      "expected": "Tagihan dibuat untuk KK aktif",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"sukses\\\":1},{\\\"periode\\\":2,\\\"rtTarget\\\":3,\\\"jumlahKkAktif\\\":4,\\\"jumlahJenis\\\":5,\\\"dibuat\\\":4,\\\"dilewati\\\":6,\\\"totalNominal\\\":7,\\\"totalPorsiRw\\\":6},\\\"2027-0",
+      "ms": 448
+    },
+    {
+      "id": "I-14",
+      "module": "Iuran",
+      "test": "Generate Tagihan",
+      "type": "Negatif",
+      "testCase": "Generate tagihan tanpa memilih jenis",
+      "pre": "Login admin",
+      "steps": [
+        "POST generate",
+        "periode 2027-05",
+        "jenis kosong"
+      ],
+      "expected": "Ditolak, pilih minimal satu jenis",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Pilih minimal satu jenis iuran atau satu paket.\\\"]\"",
+      "ms": 223
+    },
+    {
+      "id": "I-15",
+      "module": "Iuran",
+      "test": "Pembayaran",
+      "type": "Negatif",
+      "testCase": "Catat pembayaran tagihan dengan jumlah 0",
+      "pre": "Tagihan id 2 belum bayar",
+      "steps": [
+        "Buka /iuran/2/bayar",
+        "Jumlah 0",
+        "Simpan"
+      ],
+      "expected": "Ditolak, jumlah harus > 0",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1},{\\\"jumlah\\\":2},[3],\\\"Jumlah harus lebih dari 0\\\"]\"",
+      "ms": 243
+    },
+    {
+      "id": "I-16",
+      "module": "Iuran",
+      "test": "Pembayaran",
+      "type": "Negatif",
+      "testCase": "Catat pembayaran melebihi sisa tagihan",
+      "pre": "Tagihan id 2 nominal 50000",
+      "steps": [
+        "Buka /iuran/2/bayar",
+        "Jumlah 999999",
+        "Simpan"
+      ],
+      "expected": "Ditolak, jumlah melebihi sisa",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Jumlah melebihi sisa tagihan (50000).\\\"]\"",
+      "ms": 216
+    },
+    {
+      "id": "I-17",
+      "module": "Iuran",
+      "test": "Pembayaran",
+      "type": "Negatif",
+      "testCase": "Catat pembayaran dengan metode tidak valid",
+      "pre": "Tagihan id 2",
+      "steps": [
+        "POST bayar",
+        "metodeBayar=kripto"
+      ],
+      "expected": "Ditolak, enum metode",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1},{\\\"metodeBayar\\\":2},[3],\\\"Invalid option: expected one of \\\\\\\"qris\\\\\\\"|\\\\\\\"tunai\\\\\\\"|\\\\\\\"transfer\\\\\\\"\\\"]\"",
+      "ms": 249
+    },
+    {
+      "id": "I-18",
+      "module": "Iuran",
+      "test": "Pembayaran",
+      "type": "Positif",
+      "testCase": "Catat pembayaran tagihan valid",
+      "pre": "Tagihan id 2 belum bayar",
+      "steps": [
+        "Buka /iuran/2/bayar",
+        "Jumlah 50000",
+        "Metode tunai",
+        "Simpan"
+      ],
+      "expected": "Pembayaran tercatat, status lunas",
+      "status": "Pass",
+      "evidence": "200 \"{\\\"type\\\":\\\"redirect\\\",\\\"status\\\":303,\\\"location\\\":\\\"/iuran\\\"}\"",
+      "ms": 643
+    },
+    {
+      "id": "I-19",
+      "module": "Iuran",
+      "test": "Pembayaran",
+      "type": "Negatif",
+      "testCase": "Catat pembayaran untuk tagihan tidak ada",
+      "pre": "ID 99999 tidak ada",
+      "steps": [
+        "POST /iuran/99999/bayar"
+      ],
+      "expected": "Ditolak 404",
+      "status": "Fail",
+      "evidence": "500 \"{\\\"type\\\":\\\"error\\\",\\\"error\\\":{\\\"message\\\":\\\"Internal Error\\\"}}\"",
+      "ms": 240
+    },
+    {
+      "id": "I-20",
+      "module": "Iuran",
+      "test": "Rekap",
+      "type": "Positif",
+      "testCase": "Membuka rekap iuran",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /iuran/rekap"
+      ],
+      "expected": "Rekap tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 276
+    },
+    {
+      "id": "I-21",
+      "module": "Iuran",
+      "test": "Konfirmasi",
+      "type": "Negatif",
+      "testCase": "Tolak konfirmasi dengan alasan > 300 karakter",
+      "pre": "Konfirmasi id tidak ada tetap validasi alasan",
+      "steps": [
+        "POST /iuran/konfirmasi?/tolak",
+        "alasan 301 char"
+      ],
+      "expected": "Ditolak, alasan terlalu panjang",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Alasan penolakan tidak valid.\\\"]\"",
+      "ms": 193
+    },
+    {
+      "id": "I-22",
+      "module": "Iuran",
+      "test": "Konfirmasi",
+      "type": "Negatif",
+      "testCase": "Terima konfirmasi yang tidak ada",
+      "pre": "ID 99999 tidak ada",
+      "steps": [
+        "POST /iuran/konfirmasi?/terima id=99999"
+      ],
+      "expected": "Ditolak, konfirmasi tidak ditemukan",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Konfirmasi tidak ditemukan.\\\"]\"",
+      "ms": 195
+    },
+    {
+      "id": "I-23",
+      "module": "Iuran",
+      "test": "Setoran",
+      "type": "Negatif",
+      "testCase": "Setoran RT dengan periode salah format",
+      "pre": "Login admin",
+      "steps": [
+        "POST /iuran/setoran?/setor",
+        "periode 2026/11"
+      ],
+      "expected": "Ditolak format YYYY-MM",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Periode harus format YYYY-MM\\\"]\"",
+      "ms": 193
+    },
+    {
+      "id": "I-24",
+      "module": "Iuran",
+      "test": "Setoran",
+      "type": "Positif",
+      "testCase": "Setoran RT valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST setor",
+        "RT 01 periode 2026-11",
+        "tanggal valid"
+      ],
+      "expected": "Setoran tercatat",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Belum ada porsi RW yang bisa disetor untuk periode ini.\\\"]\"",
+      "ms": 206
+    },
+    {
+      "id": "I-25",
+      "module": "Iuran",
+      "test": "Setoran",
+      "type": "Negatif",
+      "testCase": "Batalkan setoran dengan ID tidak ada",
+      "pre": "Login admin",
+      "steps": [
+        "POST /iuran/setoran?/batalkan",
+        "id 99999"
+      ],
+      "expected": "Ditolak, setoran tidak ditemukan",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Setoran tidak ditemukan.\\\"]\"",
+      "ms": 191
+    },
+    {
+      "id": "P-01",
+      "module": "Pengumuman",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka daftar pengumuman",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /pengumuman"
+      ],
+      "expected": "Daftar pengumuman tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 260
+    },
+    {
+      "id": "P-02",
+      "module": "Pengumuman",
+      "test": "Akses",
+      "type": "Negatif",
+      "testCase": "Warga membuka modul pengumuman staf",
+      "pre": "Login warga",
+      "steps": [
+        "Buka /pengumuman"
+      ],
+      "expected": "Dialihkan ke /portal",
+      "status": "Pass",
+      "evidence": "HTTP 302 -> /portal",
+      "ms": 188
+    },
+    {
+      "id": "P-03",
+      "module": "Pengumuman",
+      "test": "Tambah",
+      "type": "Negatif",
+      "testCase": "Buat pengumuman tanpa judul & isi",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /pengumuman/tambah",
+        "Kosongkan judul & isi",
+        "Simpan"
+      ],
+      "expected": "Ditolak, judul & isi wajib",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1,\\\"values\\\":6},{\\\"judul\\\":2,\\\"isi\\\":4},[3],\\\"Judul wajib diisi\\\",[5],\\\"Isi wajib diisi\\\",{\\\"judul\\\":7,\\\"isi\\\":7,\\\"kategori\\\":8,\\\"tanggalMulai\\\":-",
+      "ms": 224
+    },
+    {
+      "id": "P-04",
+      "module": "Pengumuman",
+      "test": "Tambah",
+      "type": "Negatif",
+      "testCase": "Buat pengumuman dengan tanggal selesai event sebelum mulai",
+      "pre": "Login admin",
+      "steps": [
+        "Isi judul & isi",
+        "Mulai event 2026-12-10",
+        "Selesai event 2026-12-01",
+        "Simpan"
+      ],
+      "expected": "Ditolak, tanggal selesai tidak boleh sebelum mulai",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1,\\\"values\\\":4},{\\\"tanggalSelesaiEvent\\\":2},[3],\\\"Tanggal selesai event tidak boleh sebelum tanggal mulai event\\\",{\\\"judul\\\":5,\\\"isi\\\":6,\\\"kategori\\\":7,\\\"tanggalMulai\\\":-1,\\\"tanggalSeles",
+      "ms": 227
+    },
+    {
+      "id": "P-05",
+      "module": "Pengumuman",
+      "test": "Tambah",
+      "type": "Negatif",
+      "testCase": "Buat pengumuman dengan kategori tidak valid",
+      "pre": "Login admin",
+      "steps": [
+        "Isi judul & isi",
+        "kategori=gosip",
+        "Simpan"
+      ],
+      "expected": "Ditolak, enum kategori",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1,\\\"values\\\":4},{\\\"kategori\\\":2},[3],\\\"Invalid option: expected one of \\\\\\\"umum\\\\\\\"|\\\\\\\"kegiatan\\\\\\\"|\\\\\\\"keuangan\\\\\\\"|\\\\\\\"darurat\\\\\\\"\\\",{\\\"judul\\\":5,\\\"isi\\\":6,\\\"kateg",
+      "ms": 241
+    },
+    {
+      "id": "P-06",
+      "module": "Pengumuman",
+      "test": "Tambah",
+      "type": "Negatif",
+      "testCase": "Buat pengumuman dengan tanggal selesai event tanpa tanggal mulai",
+      "pre": "Login admin",
+      "steps": [
+        "Isi judul & isi",
+        "Hanya isi tanggal selesai event",
+        "Simpan"
+      ],
+      "expected": "Ditolak, tanggal mulai wajib",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1,\\\"values\\\":4},{\\\"tanggalMulaiEvent\\\":2},[3],\\\"Tanggal mulai event wajib diisi jika tanggal selesai event diisi\\\",{\\\"judul\\\":5,\\\"isi\\\":6,\\\"kategori\\\":7,\\\"tanggalMulai\\\":-1,\\\"tanggalSele",
+      "ms": 225
+    },
+    {
+      "id": "P-07",
+      "module": "Pengumuman",
+      "test": "Tambah",
+      "type": "Positif",
+      "testCase": "Buat pengumuman valid dan tampilkan",
+      "pre": "Login admin",
+      "steps": [
+        "Isi judul unik",
+        "Isi isi pengumuman",
+        "kategori umum",
+        "Centang tampilkan",
+        "Simpan"
+      ],
+      "expected": "Pengumuman tersimpan dan notifikasi disiarkan",
+      "status": "Pass",
+      "evidence": "200 \"{\\\"type\\\":\\\"redirect\\\",\\\"status\\\":303,\\\"location\\\":\\\"/pengumuman\\\"}\"; row=1",
+      "ms": 565
+    },
+    {
+      "id": "P-08",
+      "module": "Pengumuman",
+      "test": "Edit",
+      "type": "Negatif",
+      "testCase": "Edit pengumuman dengan tanggal selesai event sebelum mulai",
+      "pre": "Pengumuman hasil P-07 ada",
+      "steps": [
+        "Buka edit",
+        "Ubah tanggal event tidak valid",
+        "Simpan"
+      ],
+      "expected": "Ditolak validasi tanggal",
+      "status": "Pass",
+      "evidence": "id=1 200 \"[{\\\"errors\\\":1,\\\"values\\\":4},{\\\"tanggalSelesaiEvent\\\":2},[3],\\\"Tanggal selesai event tidak boleh sebelum tanggal mulai event\\\",{\\\"judul\\\":5,\\\"isi\\\":6,\\\"kategori\\\":7,\\\"tanggalMulai",
+      "ms": 232
+    },
+    {
+      "id": "P-09",
+      "module": "Pengumuman",
+      "test": "Edit",
+      "type": "Positif",
+      "testCase": "Edit pengumuman dengan data valid",
+      "pre": "Pengumuman hasil P-07 ada",
+      "steps": [
+        "Buka edit",
+        "Ubah judul",
+        "Simpan"
+      ],
+      "expected": "Perubahan tersimpan",
+      "status": "Pass",
+      "evidence": "id=1 200 \"{\\\"type\\\":\\\"redirect\\\",\\\"status\\\":303,\\\"location\\\":\\\"/pengumuman\\\"}\"",
+      "ms": 363
+    },
+    {
+      "id": "P-10",
+      "module": "Pengumuman",
+      "test": "Toggle",
+      "type": "Positif",
+      "testCase": "Sembunyikan/tampilkan pengumuman",
+      "pre": "Pengumuman ada",
+      "steps": [
+        "Klik toggle visibilitas"
+      ],
+      "expected": "Status tampil berubah",
+      "status": "Pass",
+      "evidence": "id=1 200 \"{\\\"type\\\":\\\"redirect\\\",\\\"status\\\":303,\\\"location\\\":\\\"/pengumuman\\\"}\"",
+      "ms": 358
+    },
+    {
+      "id": "P-11",
+      "module": "Pengumuman",
+      "test": "Otorisasi",
+      "type": "Negatif",
+      "testCase": "Pengurus RT menghapus pengumuman milik RW",
+      "pre": "Pengumuman RW (rtId null) ada",
+      "steps": [
+        "Login pengurus RT",
+        "POST hapus id pengumuman RW"
+      ],
+      "expected": "Ditolak 403, hanya pengumuman RT sendiri",
+      "status": "Pass",
+      "evidence": "id=2 200 \"[{\\\"error\\\":1},\\\"Anda hanya boleh mengubah pengumuman RT sendiri.\\\"]\"",
+      "ms": 764
+    },
+    {
+      "id": "P-12",
+      "module": "Pengumuman",
+      "test": "Hapus",
+      "type": "Positif",
+      "testCase": "Hapus pengumuman milik sendiri",
+      "pre": "Pengumuman hasil P-07 ada",
+      "steps": [
+        "Klik hapus"
+      ],
+      "expected": "Pengumuman terhapus",
+      "status": "Pass",
+      "evidence": "id=1 200, remaining=0",
+      "ms": 414
+    },
+    {
+      "id": "P-13",
+      "module": "Pengumuman",
+      "test": "Hapus",
+      "type": "Negatif",
+      "testCase": "Hapus pengumuman dengan ID tidak valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST hapus id=0"
+      ],
+      "expected": "Ditolak ID tidak valid",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"ID pengumuman tidak valid.\\\"]\"",
+      "ms": 246
+    },
+    {
+      "id": "S-01",
+      "module": "Surat",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka daftar surat",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /surat"
+      ],
+      "expected": "Daftar surat tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 274
+    },
+    {
+      "id": "S-02",
+      "module": "Surat",
+      "test": "Akses",
+      "type": "Negatif",
+      "testCase": "Warga membuka modul surat staf",
+      "pre": "Login warga",
+      "steps": [
+        "Buka /surat"
+      ],
+      "expected": "Dialihkan ke /portal",
+      "status": "Pass",
+      "evidence": "HTTP 302 -> /portal",
+      "ms": 222
+    },
+    {
+      "id": "S-03",
+      "module": "Surat",
+      "test": "Ajukan",
+      "type": "Negatif",
+      "testCase": "Ajukan surat dengan jenis tidak valid",
+      "pre": "Login warga",
+      "steps": [
+        "Buka /portal/surat/ajukan",
+        "jenis=surat-sakti",
+        "keperluan valid",
+        "pilih TTD RT"
+      ],
+      "expected": "Ditolak, jenis surat tidak valid",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1},{\\\"jenis\\\":2},[3],\\\"Pilih jenis surat yang valid\\\"]\"",
+      "ms": 239
+    },
+    {
+      "id": "S-04",
+      "module": "Surat",
+      "test": "Ajukan",
+      "type": "Negatif",
+      "testCase": "Ajukan surat dengan keperluan kurang dari 5 karakter",
+      "pre": "Login warga",
+      "steps": [
+        "Buka ajukan surat",
+        "keperluan \"abc\"",
+        "jenis skck",
+        "pilih TTD RT"
+      ],
+      "expected": "Ditolak, minimal 5 karakter",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1},{\\\"keperluan\\\":2},[3],\\\"Keperluan harus diisi minimal 5 karakter\\\"]\"",
+      "ms": 452
+    },
+    {
+      "id": "S-05",
+      "module": "Surat",
+      "test": "Ajukan",
+      "type": "Negatif",
+      "testCase": "Ajukan surat tanpa memilih pihak penanda tangan",
+      "pre": "Login warga",
+      "steps": [
+        "Buka ajukan surat",
+        "jenis skck",
+        "keperluan valid",
+        "tidak centang RT/RW"
+      ],
+      "expected": "Ditolak, pilih minimal satu pihak",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"errors\\\":1},{\\\"butuhTtdRt\\\":2},[3],\\\"Pilih minimal satu pihak yang perlu menandatangani surat.\\\"]\"",
+      "ms": 199
+    },
+    {
+      "id": "S-06",
+      "module": "Surat",
+      "test": "Ajukan",
+      "type": "Positif",
+      "testCase": "Ajukan surat valid dengan TTD RT",
+      "pre": "Login warga",
+      "steps": [
+        "Buka ajukan surat",
+        "jenis skck",
+        "keperluan valid",
+        "centang TTD RT",
+        "Kirim"
+      ],
+      "expected": "Surat tersimpan status diajukan",
+      "status": "Pass",
+      "evidence": "200 \"{\\\"type\\\":\\\"redirect\\\",\\\"status\\\":303,\\\"location\\\":\\\"/portal#surat\\\"}\"; row={\"id\":6,\"status\":\"diajukan\"}",
+      "ms": 371
+    },
+    {
+      "id": "S-07",
+      "module": "Surat",
+      "test": "Tanda Tangan",
+      "type": "Positif",
+      "testCase": "Pengurus RT menandatangani surat RT-nya",
+      "pre": "Surat S-06 butuh TTD RT",
+      "steps": [
+        "Login pengurus RT",
+        "Buka surat",
+        "Klik tandatangani"
+      ],
+      "expected": "Surat terbit (jika TTD lengkap)",
+      "status": "Pass",
+      "evidence": "id=6 200 \"[{\\\"success\\\":1,\\\"nomorSurat\\\":2,\\\"status\\\":3},true,\\\"01/06/November/2026/00002\\\",\\\"terbit\\\"]\"; status=terbit",
+      "ms": 466
+    },
+    {
+      "id": "S-08",
+      "module": "Surat",
+      "test": "Tanda Tangan",
+      "type": "Negatif",
+      "testCase": "Pengurus RW menandatangani surat yang tidak meminta TTD RW",
+      "pre": "Surat id 3 hanya butuh TTD RT",
+      "steps": [
+        "Login admin",
+        "POST tandatangani surat id 3"
+      ],
+      "expected": "Ditolak 403, surat tidak meminta TTD RW",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Surat ini tidak meminta tanda tangan RW.\\\"]\"",
+      "ms": 238
+    },
+    {
+      "id": "S-09",
+      "module": "Surat",
+      "test": "Tolak",
+      "type": "Negatif",
+      "testCase": "Pengurus RW menolak surat yang tidak meminta TTD RW",
+      "pre": "Surat id 3 hanya butuh TTD RT",
+      "steps": [
+        "Login admin",
+        "POST tolak surat id 3"
+      ],
+      "expected": "Ditolak 403",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Surat ini tidak meminta tanda tangan RW.\\\"]\"",
+      "ms": 250
+    },
+    {
+      "id": "S-10",
+      "module": "Surat",
+      "test": "Tolak",
+      "type": "Positif",
+      "testCase": "Pengurus RT menolak surat RT-nya",
+      "pre": "Surat id 3 diajukan, butuh TTD RT",
+      "steps": [
+        "Login pengurus RT",
+        "POST tolak surat id 3",
+        "isi alasan"
+      ],
+      "expected": "Surat berstatus ditolak",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"success\\\":1},true]\"; status=ditolak",
+      "ms": 527
+    },
+    {
+      "id": "S-11",
+      "module": "Surat",
+      "test": "Tolak",
+      "type": "Negatif",
+      "testCase": "Menolak surat yang sudah terbit",
+      "pre": "Surat id 1 status terbit",
+      "steps": [
+        "Login pengurus RT",
+        "POST tolak surat id 1"
+      ],
+      "expected": "Ditolak, surat terbit tidak bisa diubah",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Surat yang sudah terbit atau ditolak tidak bisa diubah lagi.\\\"]\"",
+      "ms": 230
+    },
+    {
+      "id": "S-12",
+      "module": "Surat",
+      "test": "Cetak",
+      "type": "Positif",
+      "testCase": "Cetak surat yang sudah terbit",
+      "pre": "Surat id 1 terbit",
+      "steps": [
+        "Buka /surat/1/cetak"
+      ],
+      "expected": "Dialihkan ke halaman cetak portal dan halaman cetak tampil",
+      "status": "Pass",
+      "evidence": "staff 302 -> /portal/surat/1/cetak; portal 200",
+      "ms": 459
+    },
+    {
+      "id": "S-13",
+      "module": "Surat",
+      "test": "Detail",
+      "type": "Negatif",
+      "testCase": "Warga membuka surat milik warga lain lewat portal",
+      "pre": "Surat id 3 milik warga 1; akun warga baru tertaut warga 3",
+      "steps": [
+        "Buat akun warga tertaut warga 3",
+        "Login akun itu",
+        "Buka /portal/surat/3"
+      ],
+      "expected": "404, bukan pemilik surat",
+      "status": "Pass",
+      "evidence": "surat=404",
+      "ms": 985
+    },
+    {
+      "id": "R-01",
+      "module": "Pengaturan",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka /pengaturan/pengguna",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /pengaturan/pengguna"
+      ],
+      "expected": "Halaman tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 339
+    },
+    {
+      "id": "R-02",
+      "module": "Pengaturan",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka /pengaturan/rt",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /pengaturan/rt"
+      ],
+      "expected": "Halaman tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 211
+    },
+    {
+      "id": "R-03",
+      "module": "Pengaturan",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka /pengaturan/pengurus",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /pengaturan/pengurus"
+      ],
+      "expected": "Halaman tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 220
+    },
+    {
+      "id": "R-04",
+      "module": "Pengaturan",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka /pengaturan/landing",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /pengaturan/landing"
+      ],
+      "expected": "Halaman tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 235
+    },
+    {
+      "id": "R-05",
+      "module": "Pengaturan",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Pengurus RW membuka /pengaturan/ttd",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /pengaturan/ttd"
+      ],
+      "expected": "Halaman tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 211
+    },
+    {
+      "id": "R-06",
+      "module": "Pengaturan",
+      "test": "Otorisasi",
+      "type": "Negatif",
+      "testCase": "Pengurus RT membuka /pengaturan/pengguna",
+      "pre": "Login pengurus RT",
+      "steps": [
+        "Buka /pengaturan/pengguna"
+      ],
+      "expected": "Ditolak 403, area Pengaturan hanya admin",
+      "status": "Pass",
+      "evidence": "HTTP 403",
+      "ms": 179
+    },
+    {
+      "id": "R-07",
+      "module": "Pengaturan",
+      "test": "Otorisasi",
+      "type": "Negatif",
+      "testCase": "Pengurus RT membuka /pengaturan/rt",
+      "pre": "Login pengurus RT",
+      "steps": [
+        "Buka /pengaturan/rt"
+      ],
+      "expected": "Ditolak 403, area Pengaturan hanya admin",
+      "status": "Pass",
+      "evidence": "HTTP 403",
+      "ms": 175
+    },
+    {
+      "id": "R-08",
+      "module": "Pengaturan",
+      "test": "Otorisasi",
+      "type": "Negatif",
+      "testCase": "Pengurus RT membuka /pengaturan/pengurus",
+      "pre": "Login pengurus RT",
+      "steps": [
+        "Buka /pengaturan/pengurus"
+      ],
+      "expected": "Ditolak 403, area Pengaturan hanya admin",
+      "status": "Pass",
+      "evidence": "HTTP 403",
+      "ms": 183
+    },
+    {
+      "id": "R-09",
+      "module": "Pengaturan",
+      "test": "Otorisasi",
+      "type": "Negatif",
+      "testCase": "Warga membuka area Pengaturan",
+      "pre": "Login warga",
+      "steps": [
+        "Buka /pengaturan/rt"
+      ],
+      "expected": "Akses ditolak (403) atau dialihkan ke /portal",
+      "status": "Pass",
+      "evidence": "HTTP 403 -> null",
+      "ms": 199
+    },
+    {
+      "id": "R-10",
+      "module": "Pengaturan",
+      "test": "Otorisasi",
+      "type": "Negatif",
+      "testCase": "Tanpa login membuka area Pengaturan",
+      "pre": "Belum punya sesi",
+      "steps": [
+        "Buka /pengaturan/pengguna"
+      ],
+      "expected": "Akses ditolak (403) atau dialihkan ke /login",
+      "status": "Pass",
+      "evidence": "HTTP 403 -> null",
+      "ms": 3
+    },
+    {
+      "id": "R-11",
+      "module": "Pengaturan",
+      "test": "Pengguna",
+      "type": "Negatif",
+      "testCase": "Buat akun dengan email tidak valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah",
+        "email \"abc\"",
+        "password valid",
+        "name valid",
+        "role warga"
+      ],
+      "expected": "Ditolak, email tidak valid",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Email tidak valid\\\"]\"",
+      "ms": 206
+    },
+    {
+      "id": "R-12",
+      "module": "Pengaturan",
+      "test": "Pengguna",
+      "type": "Negatif",
+      "testCase": "Buat akun dengan password kurang dari 8 karakter",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah",
+        "password 123"
+      ],
+      "expected": "Ditolak, minimal 8 karakter",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Kata sandi minimal 8 karakter\\\"]\"",
+      "ms": 216
+    },
+    {
+      "id": "R-13",
+      "module": "Pengaturan",
+      "test": "Pengguna",
+      "type": "Negatif",
+      "testCase": "Buat akun dengan nama kosong",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah",
+        "name kosong"
+      ],
+      "expected": "Ditolak, nama wajib",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Nama wajib diisi\\\"]\"",
+      "ms": 222
+    },
+    {
+      "id": "R-14",
+      "module": "Pengaturan",
+      "test": "Pengguna",
+      "type": "Negatif",
+      "testCase": "Buat akun dengan slug role tidak valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah",
+        "role \"admin super\""
+      ],
+      "expected": "Ditolak, format role tidak valid",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Format role tidak valid\\\"]\"",
+      "ms": 311
+    },
+    {
+      "id": "R-15",
+      "module": "Pengaturan",
+      "test": "Pengguna",
+      "type": "Positif",
+      "testCase": "Buat akun pengurus baru valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah",
+        "email unik",
+        "password valid",
+        "name valid",
+        "role pengurus_rw"
+      ],
+      "expected": "Akun berhasil dibuat",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"sukses\\\":1},\\\"Akun user80116@test.id berhasil dibuat.\\\"]\"",
+      "ms": 549
+    },
+    {
+      "id": "R-16",
+      "module": "Pengaturan",
+      "test": "RT",
+      "type": "Negatif",
+      "testCase": "Tambah RT dengan nomor 0",
+      "pre": "Login admin",
+      "steps": [
+        "POST /pengaturan/rt?/tambah",
+        "nomor 0"
+      ],
+      "expected": "Ditolak, minimal 1",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Nomor RT minimal 1\\\"]\"",
+      "ms": 263
+    },
+    {
+      "id": "R-17",
+      "module": "Pengaturan",
+      "test": "RT",
+      "type": "Negatif",
+      "testCase": "Tambah RT dengan nomor 100",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah RT",
+        "nomor 100"
+      ],
+      "expected": "Ditolak, maksimal 99",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Nomor RT maksimal 99\\\"]\"",
+      "ms": 213
+    },
+    {
+      "id": "R-18",
+      "module": "Pengaturan",
+      "test": "RT",
+      "type": "Negatif",
+      "testCase": "Tambah RT dengan nomor yang sudah ada",
+      "pre": "RT 01 sudah ada",
+      "steps": [
+        "POST tambah RT",
+        "nomor 1"
+      ],
+      "expected": "Ditolak, RT sudah ada",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"RT 01 sudah ada.\\\"]\"",
+      "ms": 216
+    },
+    {
+      "id": "R-19",
+      "module": "Pengaturan",
+      "test": "RT",
+      "type": "Positif",
+      "testCase": "Tambah RT baru valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah RT",
+        "nomor 88"
+      ],
+      "expected": "RT baru dibuat",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"sukses\\\":1},\\\"RT 88 ditambahkan.\\\"]\"",
+      "ms": 368
+    },
+    {
+      "id": "R-20",
+      "module": "Pengaturan",
+      "test": "RT",
+      "type": "Negatif",
+      "testCase": "Hapus RT yang masih punya KK",
+      "pre": "RT id 1 punya KK",
+      "steps": [
+        "POST hapus RT id=1"
+      ],
+      "expected": "Ditolak, RT masih dipakai",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"RT ini masih punya data KK. Pindahkan atau hapus KK-nya lebih dulu.\\\"]\"",
+      "ms": 222
+    },
+    {
+      "id": "R-21",
+      "module": "Pengaturan",
+      "test": "Pengurus",
+      "type": "Negatif",
+      "testCase": "Tambah pengurus tanpa nama",
+      "pre": "Login admin",
+      "steps": [
+        "POST /pengaturan/pengurus?/tambah",
+        "nama kosong"
+      ],
+      "expected": "Ditolak, nama wajib",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Nama wajib diisi\\\"]\"",
+      "ms": 208
+    },
+    {
+      "id": "R-22",
+      "module": "Pengaturan",
+      "test": "Pengurus",
+      "type": "Positif",
+      "testCase": "Tambah pengurus valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambah pengurus",
+        "jabatan Ketua",
+        "nama valid",
+        "RT 01"
+      ],
+      "expected": "Pengurus tersimpan",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"sukses\\\":1},\\\"Pengurus Pengurus 80116 ditambahkan.\\\"]\"",
+      "ms": 422
+    },
+    {
+      "id": "R-23",
+      "module": "Pengaturan",
+      "test": "Landing",
+      "type": "Negatif",
+      "testCase": "Simpan landing dengan background berbahaya",
+      "pre": "Login admin",
+      "steps": [
+        "POST /pengaturan/landing?/simpan",
+        "heroBackground javascript:alert(1)"
+      ],
+      "expected": "Ditolak, hanya hex/upload",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Gunakan warna hex (#0f172a) atau unggah gambar.\\\"]\"",
+      "ms": 186
+    },
+    {
+      "id": "R-24",
+      "module": "Pengaturan",
+      "test": "Landing",
+      "type": "Positif",
+      "testCase": "Simpan landing dengan warna hex valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST simpan",
+        "heroBackground #0f172a"
+      ],
+      "expected": "Pengaturan landing tersimpan",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"sukses\\\":1},\\\"Pengaturan landing disimpan.\\\"]\"",
+      "ms": 369
+    },
+    {
+      "id": "R-25",
+      "module": "Pengaturan",
+      "test": "Peran",
+      "type": "Positif",
+      "testCase": "/pengaturan/peran dialihkan ke pengguna",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /pengaturan/peran"
+      ],
+      "expected": "Redirect 301 ke /pengaturan/pengguna",
+      "status": "Pass",
+      "evidence": "HTTP 301 -> /pengaturan/pengguna",
+      "ms": 249
+    },
+    {
+      "id": "R-26",
+      "module": "Pengaturan",
+      "test": "Peran",
+      "type": "Negatif",
+      "testCase": "Tambah peran dengan slug tidak valid",
+      "pre": "Login admin",
+      "steps": [
+        "POST tambahPeran",
+        "nama \"Peran Baru!\""
+      ],
+      "expected": "Ditolak, slug tidak valid",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Slug peran tidak valid.\\\"]\"",
+      "ms": 213
+    },
+    {
+      "id": "PT-01",
+      "module": "Portal Warga",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Warga membuka portal",
+      "pre": "Login warga",
+      "steps": [
+        "Buka /portal"
+      ],
+      "expected": "Portal tampil (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 255
+    },
+    {
+      "id": "PT-02",
+      "module": "Portal Warga",
+      "test": "Akses",
+      "type": "Positif",
+      "testCase": "Staff membuka portal sebagai preview",
+      "pre": "Login admin",
+      "steps": [
+        "Buka /portal"
+      ],
+      "expected": "Portal tampil (200), tidak dialihkan",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 222
+    },
+    {
+      "id": "PT-03",
+      "module": "Portal Warga",
+      "test": "Notifikasi",
+      "type": "Negatif",
+      "testCase": "Ambil notifikasi tanpa login",
+      "pre": "Belum punya sesi",
+      "steps": [
+        "GET /api/notifikasi"
+      ],
+      "expected": "Ditolak 401",
+      "status": "Pass",
+      "evidence": "HTTP 401",
+      "ms": 8
+    },
+    {
+      "id": "PT-04",
+      "module": "Portal Warga",
+      "test": "Notifikasi",
+      "type": "Positif",
+      "testCase": "Ambil notifikasi sebagai warga",
+      "pre": "Login warga",
+      "steps": [
+        "GET /api/notifikasi"
+      ],
+      "expected": "Daftar notifikasi + unreadCount (200)",
+      "status": "Pass",
+      "evidence": "HTTP 200 items=7",
+      "ms": 181
+    },
+    {
+      "id": "PT-05",
+      "module": "Portal Warga",
+      "test": "Notifikasi",
+      "type": "Negatif",
+      "testCase": "Tandai notifikasi milik user lain",
+      "pre": "Login warga, id 99999",
+      "steps": [
+        "POST /api/notifikasi id=99999"
+      ],
+      "expected": "Tidak mengubah notifikasi orang lain (200, aman)",
+      "status": "Pass",
+      "evidence": "HTTP 200",
+      "ms": 325
+    },
+    {
+      "id": "PT-06",
+      "module": "Portal Warga",
+      "test": "Pembaruan Data",
+      "type": "Negatif",
+      "testCase": "Ajukan pembaruan dengan format tanggal salah",
+      "pre": "Login warga",
+      "steps": [
+        "Buka /portal/perbaruan",
+        "tanggalLahir 2020/01/01",
+        "Kirim"
+      ],
+      "expected": "Ditolak 422 format YYYY-MM-DD",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Data tidak valid: tanggalLahir: Format tanggal: YYYY-MM-DD\\\"]\"",
+      "ms": 456
+    },
+    {
+      "id": "PT-07",
+      "module": "Portal Warga",
+      "test": "Pembaruan Data",
+      "type": "Negatif",
+      "testCase": "Ajukan pembaruan tanpa mengubah data",
+      "pre": "Login warga",
+      "steps": [
+        "Buka /portal/perbaruan",
+        "Kosongkan semua field",
+        "Kirim"
+      ],
+      "expected": "Ditolak, tidak ada data diubah",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Tidak ada data yang diubah.\\\"]\"",
+      "ms": 285
+    },
+    {
+      "id": "PT-08",
+      "module": "Portal Warga",
+      "test": "Pembaruan Data",
+      "type": "Positif",
+      "testCase": "Ajukan pembaruan data warga valid",
+      "pre": "Login warga, tidak ada permintaan aktif",
+      "steps": [
+        "Buka /portal/perbaruan",
+        "Ubah pekerjaan",
+        "Kirim"
+      ],
+      "expected": "Permintaan dibuat status diajukan",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"success\\\":1},true]\"",
+      "ms": 345
+    },
+    {
+      "id": "PT-09",
+      "module": "Portal Warga",
+      "test": "Pembaruan Data",
+      "type": "Negatif",
+      "testCase": "Ajukan pembaruan kedua saat masih ada yang aktif",
+      "pre": "Sudah ada permintaan aktif dari PT-08",
+      "steps": [
+        "Kirim permintaan baru"
+      ],
+      "expected": "Ditolak 409, tunggu permintaan selesai",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Masih ada permintaan pembaruan yang sedang diproses. Tunggu hingga selesai sebelum mengajukan yang baru.\\\"]\"",
+      "ms": 238
+    },
+    {
+      "id": "PT-10",
+      "module": "Portal Warga",
+      "test": "Konfirmasi Bayar",
+      "type": "Negatif",
+      "testCase": "Konfirmasi tagihan milik KK lain",
+      "pre": "Tagihan id 2 milik KK 2",
+      "steps": [
+        "POST /portal/iuran?/ajukan",
+        "tagihanId 2",
+        "jumlah 1000"
+      ],
+      "expected": "Ditolak 403, bukan milik KK Anda",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Tagihan bukan milik KK Anda.\\\"]\"",
+      "ms": 254
+    },
+    {
+      "id": "PT-11",
+      "module": "Portal Warga",
+      "test": "Konfirmasi Bayar",
+      "type": "Negatif",
+      "testCase": "Konfirmasi tagihan yang sudah lunas",
+      "pre": "Tagihan id 1 lunas",
+      "steps": [
+        "POST ajukan",
+        "tagihanId 1",
+        "jumlah 1000"
+      ],
+      "expected": "Ditolak, tagihan sudah lunas",
+      "status": "Fail",
+      "evidence": "200 \"[{\\\"sukses\\\":1},\\\"Konfirmasi terkirim. Bendahara akan memverifikasi pembayaran Anda.\\\"]\"",
+      "ms": 401
+    },
+    {
+      "id": "PT-12",
+      "module": "Portal Warga",
+      "test": "Konfirmasi Bayar",
+      "type": "Negatif",
+      "testCase": "Konfirmasi jumlah melebihi sisa tagihan",
+      "pre": "Tagihan id 9 nominal 50000",
+      "steps": [
+        "POST ajukan",
+        "jumlah 999999"
+      ],
+      "expected": "Ditolak, melebihi sisa",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Jumlah melebihi sisa tagihan (Rp50.000).\\\"]\"",
+      "ms": 219
+    },
+    {
+      "id": "PT-13",
+      "module": "Portal Warga",
+      "test": "Konfirmasi Bayar",
+      "type": "Negatif",
+      "testCase": "Konfirmasi dengan jumlah 0",
+      "pre": "Tagihan id 9",
+      "steps": [
+        "POST ajukan",
+        "jumlah 0"
+      ],
+      "expected": "Ditolak, jumlah harus > 0",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Jumlah harus lebih dari 0\\\"]\"",
+      "ms": 207
+    },
+    {
+      "id": "PT-14",
+      "module": "Portal Warga",
+      "test": "Konfirmasi Bayar",
+      "type": "Positif",
+      "testCase": "Ajukan konfirmasi pembayaran valid",
+      "pre": "Tagihan id 9 milik KK 1",
+      "steps": [
+        "POST ajukan",
+        "jumlah 1000",
+        "metode tunai"
+      ],
+      "expected": "Konfirmasi tersimpan status menunggu",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"sukses\\\":1},\\\"Konfirmasi terkirim. Bendahara akan memverifikasi pembayaran Anda.\\\"]\"; row={\"id\":2,\"status\":\"menunggu\"}",
+      "ms": 345
+    },
+    {
+      "id": "PT-15",
+      "module": "Portal Warga",
+      "test": "Konfirmasi Bayar",
+      "type": "Negatif",
+      "testCase": "Ajukan konfirmasi ganda saat masih menunggu",
+      "pre": "Konfirmasi PT-14 masih menunggu",
+      "steps": [
+        "POST ajukan lagi tagihan 9"
+      ],
+      "expected": "Ditolak, sudah ada konfirmasi menunggu",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"error\\\":1},\\\"Sudah ada konfirmasi yang menunggu diproses pengurus.\\\"]\"",
+      "ms": 364
+    },
+    {
+      "id": "PT-16",
+      "module": "Portal Warga",
+      "test": "Konfirmasi Bayar",
+      "type": "Positif",
+      "testCase": "Batalkan konfirmasi milik sendiri",
+      "pre": "Konfirmasi PT-14 menunggu",
+      "steps": [
+        "POST /portal/iuran?/batalkan",
+        "id konfirmasi"
+      ],
+      "expected": "Konfirmasi dibatalkan",
+      "status": "Pass",
+      "evidence": "id=2 200, remaining=0",
+      "ms": 384
+    },
+    {
+      "id": "PT-17",
+      "module": "Portal Warga",
+      "test": "Konfirmasi Bayar",
+      "type": "Positif",
+      "testCase": "Ajukan ulang konfirmasi setelah dibatalkan",
+      "pre": "Tagihan 9 belum lunas",
+      "steps": [
+        "POST ajukan jumlah 1000"
+      ],
+      "expected": "Konfirmasi baru dibuat",
+      "status": "Pass",
+      "evidence": "200 \"[{\\\"sukses\\\":1},\\\"Konfirmasi terkirim. Bendahara akan memverifikasi pembayaran Anda.\\\"]\"",
+      "ms": 359
+    },
+    {
+      "id": "M-01",
+      "module": "Midtrans",
+      "test": "Charge Iuran",
+      "type": "Negatif",
+      "testCase": "Charge iuran tanpa login",
+      "pre": "Belum punya sesi",
+      "steps": [
+        "POST /api/midtrans/charge-iuran"
+      ],
+      "expected": "Ditolak 401",
+      "status": "Pass",
+      "evidence": "HTTP 401",
+      "ms": 9
+    },
+    {
+      "id": "M-02",
+      "module": "Midtrans",
+      "test": "Charge Iuran",
+      "type": "Negatif",
+      "testCase": "Charge iuran dengan tagihanId tidak valid",
+      "pre": "Login warga",
+      "steps": [
+        "POST charge-iuran tagihanId 0"
+      ],
+      "expected": "Ditolak 400 tagihan tidak valid",
+      "status": "Pass",
+      "evidence": "HTTP 400 {}",
+      "ms": 253
+    },
+    {
+      "id": "M-03",
+      "module": "Midtrans",
+      "test": "Charge Iuran",
+      "type": "Negatif",
+      "testCase": "Charge iuran tagihan milik KK lain",
+      "pre": "Tagihan id 13 milik KK 2",
+      "steps": [
+        "Login warga KK 1",
+        "POST charge-iuran tagihanId 13"
+      ],
+      "expected": "Ditolak 403",
+      "status": "Pass",
+      "evidence": "HTTP 403 {}",
+      "ms": 183
+    },
+    {
+      "id": "M-04",
+      "module": "Midtrans",
+      "test": "Charge Kas RT",
+      "type": "Negatif",
+      "testCase": "Warga mencatat Kas RT via API Midtrans",
+      "pre": "Login warga",
+      "steps": [
+        "POST /api/midtrans/charge-kas-rt"
+      ],
+      "expected": "Ditolak 403 hanya pengurus",
+      "status": "Pass",
+      "evidence": "HTTP 403",
+      "ms": 183
+    },
+    {
+      "id": "M-05",
+      "module": "Midtrans",
+      "test": "Charge Kas RT",
+      "type": "Negatif",
+      "testCase": "Charge Kas RT tanpa login",
+      "pre": "Belum punya sesi",
+      "steps": [
+        "POST /api/midtrans/charge-kas-rt"
+      ],
+      "expected": "Ditolak 401",
+      "status": "Pass",
+      "evidence": "HTTP 401",
+      "ms": 3
+    },
+    {
+      "id": "M-06",
+      "module": "Midtrans",
+      "test": "Webhook",
+      "type": "Negatif",
+      "testCase": "Webhook tanpa order_id",
+      "pre": "Endpoint publik",
+      "steps": [
+        "POST /api/midtrans/notification",
+        "body kosong"
+      ],
+      "expected": "Ditolak 400 order id missing",
+      "status": "Pass",
+      "evidence": "HTTP 400",
+      "ms": 33
+    },
+    {
+      "id": "M-07",
+      "module": "Midtrans",
+      "test": "Webhook",
+      "type": "Negatif",
+      "testCase": "Webhook dengan signature tidak valid",
+      "pre": "Order id sembarang",
+      "steps": [
+        "POST notification",
+        "signature_key palsu"
+      ],
+      "expected": "Ditolak 401/403, tidak memproses pembayaran",
+      "status": "Pass",
+      "evidence": "HTTP 403",
+      "ms": 4
+    },
+    {
+      "id": "M-08",
+      "module": "Midtrans",
+      "test": "Finish Iuran",
+      "type": "Negatif",
+      "testCase": "Sinkronisasi transaksi tanpa login",
+      "pre": "Belum punya sesi",
+      "steps": [
+        "POST /api/midtrans/finish-iuran"
+      ],
+      "expected": "Ditolak 401",
+      "status": "Pass",
+      "evidence": "HTTP 401",
+      "ms": 7
+    },
+    {
+      "id": "M-09",
+      "module": "Midtrans",
+      "test": "Finish Iuran",
+      "type": "Negatif",
+      "testCase": "Sinkronisasi tanpa orderId",
+      "pre": "Login warga",
+      "steps": [
+        "POST finish-iuran body kosong"
+      ],
+      "expected": "Ditolak 400 order id wajib",
+      "status": "Pass",
+      "evidence": "HTTP 400",
+      "ms": 216
+    },
+    {
+      "id": "M-10",
+      "module": "Midtrans",
+      "test": "Finish Iuran",
+      "type": "Negatif",
+      "testCase": "Sinkronisasi orderId tidak dikenal",
+      "pre": "Order id tidak ada",
+      "steps": [
+        "POST finish-iuran orderId acak"
+      ],
+      "expected": "Ditolak 404 transaksi tidak ditemukan",
+      "status": "Pass",
+      "evidence": "HTTP 404",
+      "ms": 176
+    },
+    {
+      "id": "M-11",
+      "module": "Iuran",
+      "test": "Konfirmasi",
+      "type": "Positif",
+      "testCase": "Terima konfirmasi pembayaran warga",
+      "pre": "Konfirmasi PT-17 menunggu",
+      "steps": [
+        "Login admin",
+        "Buka konfirmasi",
+        "Terima"
+      ],
+      "expected": "Pembayaran tercatat, konfirmasi diterima",
+      "status": "Pass",
+      "evidence": "id=3 200 \"[{\\\"sukses\\\":1},\\\"Konfirmasi pembayaran berhasil disetujui.\\\"]\"; status=diterima",
+      "ms": 725
+    },
+    {
+      "id": "M-12",
+      "module": "Iuran",
+      "test": "Konfirmasi",
+      "type": "Positif",
+      "testCase": "Tolak konfirmasi pembayaran warga dengan alasan",
+      "pre": "Buat konfirmasi baru pada tagihan 10",
+      "steps": [
+        "Login warga",
+        "Ajukan konfirmasi tagihan 10",
+        "Login admin",
+        "Tolak dengan alasan"
+      ],
+      "expected": "Konfirmasi berstatus ditolak",
+      "status": "Pass",
+      "evidence": "id=4 200 \"[{\\\"sukses\\\":1},\\\"Konfirmasi pembayaran ditolak.\\\"]\"; status=ditolak",
+      "ms": 670
+    }
+  ]
+}
